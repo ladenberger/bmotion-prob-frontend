@@ -1,3 +1,3 @@
-define(['prob-ui'], function(prob) {
+define(['prob.standalone'], function(prob) {
     return prob;
 });

@@ -1,6 +1,6 @@
-define(function () {
+define(['module', 'jquery'], function (module) {
 
-    return {
+    var defaultConfig = {
         socket: {
             protocol: document.location.protocol,
             host: document.location.hostname,
@@ -9,6 +9,8 @@ define(function () {
         model: "",
         script: "",
         tool: "BAnimation"
-    }
+    };
+
+    return $.extend(true, defaultConfig, module.config());
 
 });

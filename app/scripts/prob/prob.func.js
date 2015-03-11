@@ -1,6 +1,6 @@
-define(['bmotion-func', 'jquery', 'tooltipster'], function (bms) {
+define(['bmotion.socket', 'bmotion.func', 'jquery', 'tooltipster'], function (socket, bms) {
 
-    bms.socket.on('checkObserver', function (trigger) {
+    socket.on('checkObserver', function (trigger) {
         checkObserver({
             trigger: trigger
         });
@@ -41,7 +41,7 @@ define(['bmotion-func', 'jquery', 'tooltipster'], function (bms) {
         });
 
         // Execute formula observer at once (performance boost)
-        bms.socket.emit("observe", {data: {formulas: formulaObservers, stateId: settings.stateId}}, function (data) {
+        socket.emit("observe", {data: {formulas: formulaObservers, stateId: settings.stateId}}, function (data) {
             $.each(formulaObservers, function (i, v) {
                 v.caller.call(this, data[i], formulaElements[i]);
             });
@@ -52,7 +52,7 @@ define(['bmotion-func', 'jquery', 'tooltipster'], function (bms) {
 
     };
 
-    bms.socket.on('applyTransformers', function (data) {
+    socket.on('applyTransformers', function (data) {
         var d1 = JSON.parse(data);
         var i1 = 0;
         for (; i1 < d1.length; i1++) {
@@ -100,12 +100,12 @@ define(['bmotion-func', 'jquery', 'tooltipster'], function (bms) {
     };
 
     var executeEvent = function (options, origin) {
-        var settings = normalize($.extend({
+        var settings = bms.normalize($.extend({
             events: [],
             callback: function () {
             }
         }, options), ["callback"], origin);
-        bms.socket.emit("executeEvent", {data: normalize(settings, ["callback"], origin)}, function (data) {
+        socket.emit("executeEvent", {data: bms.normalize(settings, ["callback"], origin)}, function (data) {
             origin !== undefined ? settings.callback.call(this, origin, data) : settings.callback.call(this, data)
         });
         return settings
@@ -128,7 +128,7 @@ define(['bmotion-func', 'jquery', 'tooltipster'], function (bms) {
     };
 
     var observePredicate = function (options, origin) {
-        var settings = normalize($.extend({
+        var settings = bms.normalize($.extend({
             predicate: "",
             true: [],
             false: [],
@@ -137,7 +137,7 @@ define(['bmotion-func', 'jquery', 'tooltipster'], function (bms) {
             }
         }, options), ["callback", "false", "true"], origin);
         addObserver("predicate", settings, function () {
-            bms.socket.emit("eval", {data: {formula: settings.predicate}}, function (data) {
+            socket.emit("eval", {data: {formula: settings.predicate}}, function (data) {
                 if (data.value === "TRUE") {
                     observePredicateHandler(settings.true, $(origin), data.value)
                 } else if (data.value === "FALSE") {
@@ -150,7 +150,7 @@ define(['bmotion-func', 'jquery', 'tooltipster'], function (bms) {
 
     var observeCSPTrace = function (options, origin) {
 
-        var settings = normalize($.extend({
+        var settings = bms.normalize($.extend({
             observers: [],
             selector: "",
             cause: "AnimationChanged"
@@ -166,7 +166,7 @@ define(['bmotion-func', 'jquery', 'tooltipster'], function (bms) {
             });
 
             addObserver("csp-event", settings, function () {
-                bms.socket.emit("observeCSPTrace", {data: settings}, function (data) {
+                socket.emit("observeCSPTrace", {data: settings}, function (data) {
                     var scope = angular.element(element).scope();
                     scope.$apply(function () {
                         scope.setOrder(data.order);
@@ -180,7 +180,7 @@ define(['bmotion-func', 'jquery', 'tooltipster'], function (bms) {
     };
 
     var observeRefinement = function (options, origin) {
-        var settings = normalize($.extend({
+        var settings = bms.normalize($.extend({
             refinements: [],
             cause: "ModelChanged",
             enable: function () {
@@ -189,7 +189,7 @@ define(['bmotion-func', 'jquery', 'tooltipster'], function (bms) {
             }
         }, options), ["enable", "disable"], origin);
         addObserver("refinement", settings, function () {
-            bms.socket.emit("observeRefinement", {data: settings}, function (data) {
+            socket.emit("observeRefinement", {data: settings}, function (data) {
                 $.each(settings.refinements, function (i, v) {
                     if ($.inArray(v, data.refinements) > -1) {
                         origin !== undefined ? settings.enable.call(this, $(origin), data) : settings.enable.call(this, data)
@@ -202,22 +202,22 @@ define(['bmotion-func', 'jquery', 'tooltipster'], function (bms) {
     };
 
     var observeMethod = function (options, origin) {
-        var settings = normalize($.extend({
+        var settings = bms.normalize($.extend({
             name: "",
             cause: "AnimationChanged",
             trigger: function () {
             }
         }, options), ["trigger"], origin);
         addObserver("method", settings, function () {
-            bms.socket.emit("callMethod", {data: settings}, function (data) {
+            socket.emit("callMethod", {data: settings}, function (data) {
                 origin !== undefined ? settings.trigger.call(this, $(origin), data) : settings.trigger.call(this, data)
             });
         }, origin);
         return settings
     };
 
-    var observeFormulas = function (options, origin) {
-        var settings = normalize($.extend({
+    var observeFormula = function (options, origin) {
+        var settings = bms.normalize($.extend({
             formulas: [],
             cause: "AnimationChanged",
             trigger: function () {
@@ -230,7 +230,7 @@ define(['bmotion-func', 'jquery', 'tooltipster'], function (bms) {
 
     var observe = function (what, options, origin) {
         if (what === "formula") {
-            observeFormulas(options, origin)
+            observeFormula(options, origin)
         }
         if (what === "method") {
             observeMethod(options, origin)
@@ -287,8 +287,8 @@ define(['bmotion-func', 'jquery', 'tooltipster'], function (bms) {
                     interactive: true,
                     functionBefore: function (origin, continueTooltip) {
                         continueTooltip();
-                        bms.socket.emit('initTooltip', {
-                            data: normalize(settings, ["callback"], origin)
+                        socket.emit('initTooltip', {
+                            data: bms.normalize(settings, ["callback"], origin)
                         }, function (data) {
                             var container = $('<ul></ul>');
                             $.each(data.events, function (i, v) {
@@ -319,13 +319,13 @@ define(['bmotion-func', 'jquery', 'tooltipster'], function (bms) {
         }
     }(jQuery));
 
-    return $.extend({
+    return {
         executeEvent: executeEvent,
-        observeFormulas: observeFormulas,
+        observeFormula: observeFormula,
         observeMethod: observeMethod,
         observe: observe,
         addObserver: addObserver,
         checkObserver: checkObserver
-    }, bms);
+    }
 
 });

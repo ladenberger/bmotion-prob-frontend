@@ -17,30 +17,31 @@
         "jquery-ui": "vendor/jquery-ui/jquery-ui.min",
         "xeditable": "vendor/angular-xeditable/dist/js/xeditable.min",
         "cytoscape": "vendor/cytoscape/dist/cytoscape.min",
-        "bmotion-ui": "bmotion/bmotion-ui",
-        "bmotion-func": "bmotion/bmotion-func",
-        "prob-ui": "prob/prob-ui",
-        "prob-func": "prob/prob-func",
-        "bmotion-config": "bmotion/bmotion-config"
+        "bmotion.config": "bmotion/bmotion.config",
+        "bmotion.socket": "bmotion/bmotion.socket",
+        "bmotion.main": "bmotion/bmotion.main",
+        "bmotion.func": "bmotion/bmotion.func",
+        "prob.main": "prob/prob.main",
+        "prob.standalone": "prob/prob.standalone",
+        "prob.graph": "prob/prob.graph",
+        "prob.func": "prob/prob.func",
+        "prob.api": "prob/prob.api"
     },
     shim: {
+        "angular": {"exports": "angular"},
+        "angularAMD": ["angular"],
+        "angular-route": ["angular"],
+        "socketio": {"exports": "io"},
+        "jquery": {"exports": "$"},
         "jquery-ui": ["jquery"],
-        "tooltipster": ["jquery"],
         "bootstrap": ["jquery"],
-        "prob-ui": {
-            exports: "bmotion",
-            deps: ["prob-func", "bmotion-ui", "angularAMD", "jquery.cookie", "jquery-ui", "cytoscape"]
-        },
-        'prob-func': ["bmotion-func", "tooltipster"],
-        "bmotion-func": ["bmotion-config", "jquery", "socketio"],
+        "tooltipster": ["jquery"],
         "cytoscape": {
             exports: "cy",
             deps: ["jquery"]
         },
-        "jquery": {"exports": "$"},
-        "angular": {"exports": "angular"},
-        "angularAMD": ["angular"],
-        "angular-route": ["angular"],
-        "socketio": {"exports": "io"}
+        "prob.api": {
+            exports: "bmotion"
+        }
     }
 });

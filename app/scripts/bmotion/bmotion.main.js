@@ -2,7 +2,7 @@
  * General BMotion Studio module
  *
  */
-define(['bmotion-func', 'bmotion-config', 'angular-route', "bootstrap"], function (bms, config) {
+define(['bmotion.socket', 'bmotion.config', 'angular-route'], function (socket, config) {
 
         var getChanges = function (prev, now) {
             var changes = {}, prop, pc;
@@ -22,12 +22,12 @@ define(['bmotion-func', 'bmotion-config', 'angular-route', "bootstrap"], functio
             return false; // false when unchanged
         };
 
-        return angular.module('bmsModule', ['ngRoute'])
+        return angular.module('bms.main', ['ngRoute'])
             .factory('ws', ['$rootScope', function ($rootScope) {
                 'use strict';
                 return {
                     emit: function (event, data, callback) {
-                        bms.socket.emit(event, data, function () {
+                        socket.emit(event, data, function () {
                             var args = arguments;
                             $rootScope.$apply(function () {
                                 if (callback) {
@@ -37,7 +37,7 @@ define(['bmotion-func', 'bmotion-config', 'angular-route', "bootstrap"], functio
                         });
                     },
                     on: function (event, callback) {
-                        bms.socket.on(event, function () {
+                        socket.on(event, function () {
                             var args = arguments;
                             $rootScope.$apply(function () {
                                 callback.apply(null, args);
@@ -60,60 +60,6 @@ define(['bmotion-func', 'bmotion-config', 'angular-route', "bootstrap"], functio
                 });
                 return defer.promise;
             }])
-            .directive('bmsApp', ['initSession', '$compile', function (initSession, $compile) {
-                return {
-                    priority: 1,
-                    controller: ['$scope', function ($scope) {
-                        $scope.modal = {
-                            state: 'hide',
-                            label: 'Loading visualisation ...',
-                            setLabel: function (label) {
-                                $scope.modal.label = label
-                            },
-                            show: function () {
-                                $scope.modal.state = 'show'
-                            },
-                            hide: function () {
-                                $scope.modal.state = 'hide'
-                            }
-                        }
-                    }],
-                    link: function ($scope, element) {
-
-                        var loadingModal1 = angular.element('<bms-loading-modal></bms-loading-modal>');
-                        element.find("body").append($compile(loadingModal1)($scope));
-
-                        $scope.modal.show();
-                        $scope.modal.setLabel("Loading visualisation ...");
-
-                        initSession.then(function () {
-                            $scope.modal.hide()
-                        })
-
-                    }
-                }
-            }])
-            .directive('bmsLoadingModal', function () {
-                return {
-                    restrict: 'E',
-                    replace: true,
-                    template: '<div class="modal" id="loadingModal" tabindex="-1" role="dialog" aria-labelledby="loadingModalLabel" aria-hidden="true">'
-                    + '<div class="modal-dialog modal-vertical-centered">'
-                    + '<div class="modal-content">'
-                    + '<div class="modal-header">'
-                    + '<button type="button" class="close" data-dismiss="modal"><span aria-hidden="true">&times;</span><span class="sr-only">Close</span></button>'
-                    + '<h4 class="modal-title" id="loadingModalText">{{modal.label}}</h4></div>'
-                    + '<div class="modal-body">'
-                    + '<p class="bmotion-img-logo"></p>'
-                    + '<p class="bmotion-img-loader"></p>'
-                    + '</div></div></div></div>',
-                    link: function ($scope, element) {
-                        $scope.$watch('modal.state', function (nv) {
-                            $(element).modal(nv)
-                        })
-                    }
-                }
-            })
             .directive('bmsVisualisation', ['$compile', function ($compile) {
                 return {
                     controller: ['$scope', function ($scope) {
