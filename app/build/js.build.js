@@ -24,6 +24,7 @@
         "prob.main": "prob/prob.main",
         "prob.standalone": "prob/prob.standalone",
         "prob.graph": "prob/prob.graph",
+        "prob.observers": "prob/prob.observers",
         "prob.func": "prob/prob.func",
         "prob.api": "prob/prob.api"
     },
@@ -32,6 +33,7 @@
         "angularAMD": ["angular"],
         "angular-route": ["angular"],
         "socketio": {"exports": "io"},
+        "xeditable": ["angular"],
         "jquery": {"exports": "$"},
         "jquery-ui": ["jquery"],
         "bootstrap": ["jquery"],

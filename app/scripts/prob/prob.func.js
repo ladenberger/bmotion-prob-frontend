@@ -19,9 +19,11 @@ define(['bmotion.socket', 'bmotion.func', 'jquery', 'tooltipster'], function (so
         var formulaObservers = {};
         var formulaElements = {};
         var elementsWithObservers = settings.parent.find('[data-hasobserver]');
+
         elementsWithObservers.each(function (i, ele) {
 
             var observers = $(ele).data('observer')[settings.trigger];
+
             for (var property in observers) {
                 if (observers.hasOwnProperty(property)) {
                     if (property !== 'formula') {
@@ -41,12 +43,14 @@ define(['bmotion.socket', 'bmotion.func', 'jquery', 'tooltipster'], function (so
         });
 
         // Execute formula observer at once (performance boost)
-        socket.emit("observe", {data: {formulas: formulaObservers, stateId: settings.stateId}}, function (data) {
-            $.each(formulaObservers, function (i, v) {
-                v.caller.call(this, data[i], formulaElements[i]);
+        if (formulaObservers.length > 0) {
+            socket.emit("observe", {data: {formulas: formulaObservers, stateId: settings.stateId}}, function (data) {
+                $.each(formulaObservers, function (i, v) {
+                    v.caller.call(this, data[i], formulaElements[i]);
+                });
+                deferred.resolve();
             });
-            deferred.resolve();
-        });
+        }
 
         return deferred.promise();
 
@@ -156,26 +160,27 @@ define(['bmotion.socket', 'bmotion.func', 'jquery', 'tooltipster'], function (so
             cause: "AnimationChanged"
         }, options), [], origin);
 
-        var element = origin !== undefined ? origin : $(settings.selector);
-        if (element !== undefined) {
+        //var element = origin !== undefined ? origin : $(settings.selector);
+        //if (element !== undefined) {
 
-            $(element).attr("bms-visualisation", "");
-            var $injector = angular.injector(['ng', 'bmsModule']);
-            $injector.invoke(function ($rootScope, $compile) {
-                $compile(element)($rootScope);
+        /*$(element).attr("bms-visualisation", "");
+         var $injector = angular.injector(['ng', 'bms.main']);
+         $injector.invoke(function ($rootScope, $compile) {
+         $compile(element)($rootScope);
+         });*/
+
+        addObserver("csp-event", settings, function () {
+            socket.emit("observeCSPTrace", {data: settings}, function (data) {
+                console.log(data);
+                /*var scope = angular.element(element).scope();
+                 scope.$apply(function () {
+                 scope.setOrder(data.order);
+                 scope.setValues(data.values);
+                 });*/
             });
+        }, origin);
 
-            addObserver("csp-event", settings, function () {
-                socket.emit("observeCSPTrace", {data: settings}, function (data) {
-                    var scope = angular.element(element).scope();
-                    scope.$apply(function () {
-                        scope.setOrder(data.order);
-                        scope.setValues(data.values);
-                    });
-                });
-            }, origin);
-
-        }
+        //}
 
     };
 

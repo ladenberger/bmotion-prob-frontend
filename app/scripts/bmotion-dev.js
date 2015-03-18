@@ -20,6 +20,7 @@ require.config({
         "prob.standalone": "prob/prob.standalone",
         "prob.graph":  "prob/prob.graph",
         "prob.func": "prob/prob.func",
+        "prob.observers": "prob/prob.observers",
         "prob.api": "prob/prob.api"
     },
     shim: {
@@ -30,6 +31,7 @@ require.config({
         "jquery": {"exports": "$"},
         "jquery-ui": ["jquery"],
         "bootstrap": ["jquery"],
+        "xeditable": ["angular"],
         "tooltipster": ["jquery"],
         "cytoscape": {
             exports: "cy",
@@ -37,7 +39,8 @@ require.config({
         },
         "prob.api": {
             exports: "bmotion"
-        }
+        },
+        "prob.graph": ['prob.api', 'angular', 'jquery', 'xeditable', 'cytoscape']
     }
 });
 define(['prob.standalone'], function(prob) {

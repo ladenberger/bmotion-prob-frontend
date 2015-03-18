@@ -2,10 +2,10 @@
  * BMotion Studio for ProB Graph Module
  *
  */
-define(['prob.api', 'jquery', 'xeditable', 'cytoscape'], function (prob) {
+define(['prob.api', 'angular', 'jquery', 'xeditable', 'cytoscape'], function (prob) {
 
     return angular.module('prob.graph', ['xeditable', 'bms.main'])
-        .factory('bmsRenderingService', function () {
+        .factory('bmsRenderingService', ['$q', function ($q) {
 
             var renderingService = {
 
@@ -97,13 +97,53 @@ define(['prob.api', 'jquery', 'xeditable', 'cytoscape'], function (prob) {
                         deferred.resolve('<style type="text/css">\n<![CDATA[\n' + styles + '\n]]>\n</style>');
                     });
                     return deferred.promise();
+                },
+                loadImage: function (node, html) {
+
+                    var deferred = $q.defer();
+
+                    var image = new Image(),
+                        canvas = document.createElement('canvas'),
+                        context;
+
+                    if (html !== undefined) {
+
+                        var svgElement = $(html);
+                        image.crossOrigin = "anonymous";
+                        canvas.width = svgElement.attr("width") === undefined ? 100 : svgElement.attr("width");
+                        canvas.height = svgElement.attr("height") === undefined ? 100 : svgElement.attr("height");
+                        context = canvas.getContext("2d");
+
+                        image.onload = function () {
+                            if (context) {
+                                context.drawImage(this, 0, 0, this.width, this.height);
+                                var croppedCanvas = renderingService.removeBlanks(context, canvas, this.width, this.height);
+                                var uri = croppedCanvas.toDataURL('image/png');
+                                node.data['svg'] = uri;
+                                node.data['width'] = croppedCanvas.width + 30;
+                                node.data['height'] = croppedCanvas.height;
+                                deferred.resolve();
+                            } else {
+                                // TODO: Report error if browser is to old!
+                            }
+                        };
+                        image.src = 'data:image/svg+xml;base64,' + window.btoa(html);
+                    } else {
+                        node.data['svg'] = 'data:image/svg+xml;base64,';
+                        node.data['width'] = 50;
+                        node.data['height'] = 50;
+                        deferred.resolve();
+                    }
+
+                    return deferred.promise;
+
                 }
 
             };
 
             return renderingService;
 
-        })
+        }])
         .factory('bmsDiagramElementProjectionGraph', ['$q', 'ws', 'bmsRenderingService', function ($q, ws, bmsRenderingService) {
 
             var _loadImage2 = function (property, felements, mcanvas, mcontext, v, styleTag) {
@@ -397,99 +437,8 @@ define(['prob.api', 'jquery', 'xeditable', 'cytoscape'], function (prob) {
         }])
         .factory('bmsDiagramTraceGraph', ['$q', 'ws', 'bmsRenderingService', function ($q, ws, bmsRenderingService) {
 
-            var cache = {};
-
-            var _loadImage2 = function (v, html, width, height) {
-
-                var deferred = $.Deferred();
-
-                var image = new Image(),
-                    canvas = document.createElement('canvas'),
-                    context;
-
-                image.crossOrigin = "anonymous";
-                canvas.width = width;
-                canvas.height = height;
-                context = canvas.getContext("2d");
-
-                image.onload = function () {
-                    if (context) {
-                        context.drawImage(this, 0, 0, this.width, this.height);
-                        var croppedCanvas = bmsRenderingService.removeBlanks(context, canvas, this.width, this.height);
-                        var uri = croppedCanvas.toDataURL('image/png');
-                        v.data['svg'] = uri;
-                        v.data['width'] = croppedCanvas.width + 30;
-                        v.data['height'] = croppedCanvas.height;
-                        cache[v.data['id']] = {
-                            svg: uri,
-                            width: croppedCanvas.width + 30,
-                            height: croppedCanvas.height
-                        };
-                        deferred.resolve();
-                    } else {
-                        // TODO: Report error if browser is to old!
-                    }
-                };
-                image.src = 'data:image/svg+xml;base64,' + window.btoa(html);
-
-                return deferred.promise();
-
-            };
-
-            var _loadImage = function (v, element, width, height) {
-
-                var deferred = $.Deferred();
-
-                if (v.data.id !== 'root' && v.data.id !== '0') {
-                    prob.checkObserver({
-                        parent: element,
-                        stateId: v.data.id
-                    }).done(function () {
-                        _loadImage2(v, element.html(), width, height).done(function () {
-                            deferred.resolve();
-                        });
-                    });
-                } else {
-                    var clonedElement = element.clone();
-                    clonedElement.find('svg').attr("width", "50").attr("height", "50");
-                    clonedElement.find('svg').empty();
-                    _loadImage2(v, clonedElement.html(), 50, 50).done(function () {
-                        deferred.resolve();
-                    });
-                }
-
-                return deferred.promise();
-
-            };
-
             return {
-                getCurrentData: function (element) {
-                    var deferred = $q.defer();
-                    // TODO: Replace with new websocket
-                    // Gets the current trace ...
-                    ws.emit('createTraceDiagram', {}, function (data) {
-                        bmsRenderingService.getStyles().done(function (css) {
-                            var svgElement = $(element).clone(true);
-                            svgElement.prepend($(css));
-                            var loaders = [];
-                            var wrapper = $('<div>').append(svgElement);
-                            $.each(data.nodes, function (i, v) {
-                                var d = cache[v.data['id']];
-                                if (d === undefined) {
-                                    loaders.push(_loadImage(v, wrapper, svgElement.attr("width"), svgElement.attr("height")));
-                                } else {
-                                    v.data['svg'] = d.svg;
-                                    v.data['width'] = d.width;
-                                    v.data['height'] = d.height;
-                                }
-                            });
-                            $.when.apply(null, loaders).done(function () {
-                                deferred.resolve(data);
-                            });
-                        });
-                    });
-                    return deferred.promise;
-                },
+
                 build: function (container, data) {
                     var deferred = $q.defer();
                     $(function () { // on dom ready
@@ -553,32 +502,80 @@ define(['prob.api', 'jquery', 'xeditable', 'cytoscape'], function (prob) {
             };
 
         }])
-        .directive('bmsDiagramTraceView', ['bmsDiagramTraceGraph', 'ws', function (bmsDiagramTraceGraph, ws) {
+        .directive('bmsDiagramTraceView', ['bmsScreenshotService', '$filter', 'bmsVisualisationService', 'bmsDiagramTraceGraph', 'ws', '$compile', 'bmsRenderingService', '$q', function (bmsScreenshotService, $filter, bmsVisualisationService, bmsDiagramTraceGraph, ws, $compile, bmsRenderingService, $q) {
             return {
                 replace: false,
-                scope: true,
                 template: '<div style="height:100%;width:100%;">'
+                + '<div>'
+                + '<a href="#" editable-select="elements.selected" onshow="loadVisElements()" e-ng-options="s.value as s.text for s in elements.data">'
+                + '{{ showStatus() }}'
+                + '</a>'
+                + '</div>'
                 + '<div class="trace-diagram-graph" style="height:100%;width:100%;"></div>'
                     //+ '<div class="trace-diagram-navigator"
                     // style="height:100%;width:20%;position:absolute;bottom:0;right:0;"></div>'
                 + '</div>',
-                link: function ($scope, $element, attrs) {
-                    var svgElement = attrs["bmsSvg"];
-                    // TODO: Replace with new websocket
-                    // Listens on a trace change ...
-                    ws.on('checkObserver', function (trigger) {
-                        if (trigger === 'AnimationChanged') {
-                            bmsDiagramTraceGraph.getCurrentData(svgElement).then(function (data) {
-                                $scope.load(data);
+                controller: ['$scope', function ($scope) {
+
+                    $scope.elements = {
+                        data: [],
+                        selected: undefined
+                    };
+
+                    $scope.loadVisElements = function () {
+                        var data = [];
+                        var vis = bmsVisualisationService.getVisualisations();
+                        for (p in vis) {
+                            data.push({
+                                value: data.length + 1,
+                                text: p
                             });
                         }
-                    });
+                        $scope.elements.data = data;
+                    };
+
+                    $scope.showStatus = function () {
+                        var selected = $filter('filter')($scope.elements.data, {value: $scope.elements.selected});
+                        return ($scope.elements.selected && selected.length) ? selected[0].text : 'Not set';
+                    };
+
+                }],
+                link: function ($scope, $element, attrs) {
+
                     $scope.init = function () {
-                        bmsDiagramTraceGraph.getCurrentData(svgElement).then(function (data) {
-                            bmsDiagramTraceGraph.build($element, data).then(function (cy) {
-                                $scope.cy = cy;
+
+                        if ($scope.elements.selected !== undefined) {
+
+                            ws.emit('createTraceDiagram', {}, function (data) {
+
+                                var promises = [];
+
+                                angular.forEach(data.nodes, function (n) {
+                                    if (n.data.id !== 'root') {
+                                        promises.push(bmsScreenshotService.makeScreenshot($scope.showStatus(), n.data.id));
+                                    }
+                                });
+
+                                var stateHtmlMap = {};
+                                $q.all(promises).then(function (s) {
+                                    angular.forEach(s, function (v) {
+                                        stateHtmlMap[v.stateid] = v.html;
+                                    });
+                                    var loaders = [];
+                                    $.each(data.nodes, function (i, v) {
+                                        loaders.push(bmsRenderingService.loadImage(v, stateHtmlMap[v.data.id]));
+                                    });
+                                    $q.all(loaders).then(function () {
+                                        bmsDiagramTraceGraph.build($element, data).then(function (cy) {
+                                            $scope.cy = cy;
+                                        });
+                                    });
+                                });
+
                             });
-                        });
+
+                        }
+
                     };
                     $scope.load = function (data) {
                         if ($scope.cy) {
@@ -589,10 +586,10 @@ define(['prob.api', 'jquery', 'xeditable', 'cytoscape'], function (prob) {
                         if ($scope.cy) {
                             $scope.cy.load($scope.cy.elements().jsons())
                         }
-                        /*if (graphEle) {
-                         graphEle.cytoscapeNavigator('resize');
-                         }*/
                     };
+                    $scope.$watch('elements.selected', function () {
+                        $scope.init();
+                    });
                     $scope.$on('initDiagram', function () {
                         $scope.init();
                     });

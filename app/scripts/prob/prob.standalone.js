@@ -45,7 +45,7 @@ define(['prob.main', 'angularAMD', 'bmotion.config', 'prob.graph', 'bootstrap', 
                             '<div bms-dialog type="GroovyConsoleSession"><div prob-view></div></div>' +
                             '<div bms-dialog type="ModelCheckingUI"><div prob-view></div></div>' +
                             '<div bms-dialog type="ElementProjection"><div ng-controller="bmsDiagramCtrl" bms-diagram-element-projection-view style="width:100%;height:100%;"></div></div>' +
-                            '<div bms-dialog type="TraceDiagram"><div ng-controller="bmsDiagramCtrl" bms-diagram-trace-view data-bms-svg="svg" style="width:100%;height:100%;"></div></div></div>' +
+                            '<div bms-dialog type="TraceDiagram"><div ng-controller="bmsDiagramCtrl" bms-diagram-trace-view style="width:100%;height:100%;"></div></div></div>' +
                             '</div>');
                             element.find("body").append($compile(probViews)($scope))
                         }
