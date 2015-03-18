@@ -116,22 +116,34 @@ define(['prob.api', 'angular', 'jquery', 'xeditable', 'cytoscape'], function (pr
             }
         }])
         .service('formula', ['ws', '$q', function (ws, $q) {
-            return {
+
+            var formulaObserver = {
+                getFormulas: function (observer) {
+                    return observer.data.formulas;
+                },
+                apply: function (observer, element, result) {
+                    var defer = $q.defer();
+                    var elements = $(element).find(observer.data.selector);
+                    elements.each(function (i, el) {
+                        observer.data.trigger.call(this, $(el), result);
+                    });
+                    defer.resolve();
+                    defer.promise;
+                },
                 check: function (observers, element, stateid) {
                     var defer = $q.defer();
                     ws.emit("observe", {data: {formulas: observers, stateId: stateid}}, function (data) {
                         $.each(observers, function (i, o) {
-                            var el = $(element).find(o.data.selector);
-                            var result = data[i];
-                            el.each(function (i2, v) {
-                                o.data.trigger.call(this, $(v), result);
-                            });
+                            formulaObserver.apply(o, element, data[i]);
                         });
                         defer.resolve();
                     });
                     return defer.promise;
                 }
-            }
+            };
+
+            return formulaObserver;
+
         }])
         .service('refinement', ['ws', '$q', 'bmsObserverService', function (ws, $q, bmsObserverService) {
 
@@ -174,11 +186,11 @@ define(['prob.api', 'angular', 'jquery', 'xeditable', 'cytoscape'], function (pr
         }])
         .service('predicate', ['ws', '$q', 'bmsObserverService', function (ws, $q, bmsObserverService) {
 
-            var observePredicateHandler = function (tf, element, data) {
+            var observePredicateHelper = function (tf, element, selector) {
                 if (Object.prototype.toString.call(tf) === '[object Object]') {
                     return tf;
                 } else if (isFunction(tf)) {
-                    var el = $(element).find(data.selector);
+                    var el = $(element).find(selector);
                     el.each(function (i, v) {
                         tf.call(this, $(v))
                     });
@@ -186,11 +198,10 @@ define(['prob.api', 'angular', 'jquery', 'xeditable', 'cytoscape'], function (pr
                 }
             };
 
-            return {
-                check: function (observer, element, stateid) {
+            var predicateObserver = {
 
+                apply: function (observer, element, result) {
                     var defer = $q.defer();
-
                     var settings = $.extend({
                         predicate: "",
                         true: [],
@@ -199,28 +210,32 @@ define(['prob.api', 'angular', 'jquery', 'xeditable', 'cytoscape'], function (pr
                         callback: function () {
                         }
                     }, observer.data);
-
-                    ws.emit("eval", {data: {formula: settings.predicate, stateid: stateid}}, function (result) {
-                        var rr;
-                        if (result.value === "TRUE") {
-                            rr = observePredicateHandler(settings.true, element, settings)
-                        } else if (result.value === "FALSE") {
-                            rr = observePredicateHandler(settings.false, element, settings)
-                        }
-                        var obj = {};
-                        if (rr) {
-                            var bmsids = bmsObserverService.getBmsIds(settings.selector, element);
-                            angular.forEach(bmsids, function (id) {
-                                obj[id] = rr;
-                            });
-                        }
-                        defer.resolve(obj);
-                    });
-
+                    var rr = {};
+                    if (result === "TRUE") {
+                        rr = observePredicateHelper(settings.true, element, settings.selector)
+                    } else if (result === "FALSE") {
+                        rr = observePredicateHelper(settings.false, element, settings.selector)
+                    }
+                    var obj = {};
+                    if (rr) {
+                        var bmsids = bmsObserverService.getBmsIds(settings.selector, element);
+                        angular.forEach(bmsids, function (id) {
+                            obj[id] = rr;
+                        });
+                    }
+                    defer.resolve(obj);
                     return defer.promise;
-
+                },
+                check: function (observer, element, stateid) {
+                    var defer = $q.defer();
+                    ws.emit("eval", {data: {formula: observer.predicate, stateid: stateid}}, function (result) {
+                        defer.resolve(predicateObserver.apply(observer, element, result.value));
+                    });
+                    return defer.promise;
                 }
-            }
+            };
+
+            return predicateObserver;
 
         }])
         .service('executeEvent', ['ws', '$q', function (ws, $q) {

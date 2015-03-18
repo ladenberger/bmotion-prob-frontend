@@ -155,7 +155,7 @@ define(['prob.api', 'bmotion.main', 'prob.observers', 'jquery', 'tooltipster'], 
 
                     }
 
-                }
+                };
 
                 return bmsScreenshotService;
 
