@@ -420,8 +420,13 @@ define(['prob.api', 'angular', 'jquery', 'xeditable', 'cytoscape'], function (pr
                 scope: true,
                 template: '<div style="width:100%;height:100%;">'
                 + '<div>'
-                + '<a href="#" editable-select="elements.selected" onshow="loadVisElements()" e-ng-options="s.value as s.text for s in elements.data">'
-                + '{{ showStatus() }}'
+                + '<span>Visualisation: </span><a href="#" editable-select="visualisationSelection.selected" onshow="loadVisualisations()" e-ng-options="s.value as s.text for s in visualisationSelection.data">'
+                + '{{ showVisualisationSelection() }}'
+                + '</a>'
+                + '</div>'
+                + '<div>'
+                + '<span>Element: </span><a href="#" editable-select="elementSelection.selected" onshow="loadElements()" e-ng-options="s.value as s.text for s in elementSelection.data">'
+                + '{{ showElementSelection() }}'
                 + '</a>'
                 + '</div>'
                 + '<div class="projection-diagram-graph" style="height:100%;width:100%;"></div>'
@@ -432,7 +437,12 @@ define(['prob.api', 'angular', 'jquery', 'xeditable', 'cytoscape'], function (pr
 
                     $scope.visualisationName = "liftVisualisation";
 
-                    $scope.elements = {
+                    $scope.visualisationSelection = {
+                        data: [],
+                        selected: undefined
+                    };
+
+                    $scope.elementSelection = {
                         observerBmsIdMap: {},
                         style: undefined,
                         template: undefined,
@@ -440,77 +450,110 @@ define(['prob.api', 'angular', 'jquery', 'xeditable', 'cytoscape'], function (pr
                         selected: undefined
                     };
 
-                    $scope.loadVisElements = function () {
+                    $scope.showElementSelection = function () {
+                        var selected = $filter('filter')($scope.elementSelection.data, {value: $scope.elementSelection.selected});
+                        return ($scope.elementSelection.selected && selected.length) ? selected[0].text : 'Not set';
+                    };
 
+                    $scope.showVisualisationSelection = function () {
+                        var selected = $filter('filter')($scope.visualisationSelection.data, {value: $scope.visualisationSelection.selected});
+                        return ($scope.visualisationSelection.selected && selected.length) ? selected[0].text : 'Not set';
+                    };
+
+                    $scope.loadVisualisations = function () {
                         var data = [];
-
-                        var observerBmsIdMap = {};
-
-                        var vis = bmsVisualisationService.getVisualisation($scope.visualisationName);
-                        var template = vis.template;
-                        var style = vis.style;
-                        var observers = bmsObserverService.getObservers(vis.observers);
-
-                        $http.get(template, {cache: $templateCache}).success(function (tplContent) {
-                            var element = $(tplContent);
-                            // Give all elements an internal id
-                            var count = 0;
-                            element.find("*").each(function (i, v) {
-                                $(v).attr("data-bms-id", "bms" + count);
-                                count++;
+                        var vis = bmsVisualisationService.getVisualisations();
+                        for (p in vis) {
+                            data.push({
+                                value: data.length + 1,
+                                text: p
                             });
-                            angular.forEach(observers, function (o) {
-                                var oelement = element.find(o.data.selector);
-                                oelement.each(function (i, e) {
+                        }
+                        $scope.visualisationSelection.data = data;
+                    };
 
-                                    var ele = $(e);
-                                    var bmsid = ele.attr("data-bms-id");
-                                    if (observerBmsIdMap[bmsid] === undefined) {
-                                        observerBmsIdMap[bmsid] = [];
-                                        var id = ele.attr("id");
-                                        data.push({
-                                            value: data.length + 1,
-                                            text: id == undefined ? bmsid : id,
-                                            bmsid: bmsid
-                                        });
-                                    }
-                                    observerBmsIdMap[bmsid].push(o);
+                    $scope.loadElements = function () {
 
+                        var selectedVisualisation = $scope.getSelectedVisualisation();
+
+                        if (selectedVisualisation) {
+
+                            var data = [];
+                            var observerBmsIdMap = {};
+
+                            var vis = bmsVisualisationService.getVisualisation(selectedVisualisation.text);
+                            var template = vis.template;
+                            var style = vis.style;
+                            var observers = bmsObserverService.getObservers(vis.observers);
+
+                            $http.get(template, {cache: $templateCache}).success(function (tplContent) {
+                                var element = $(tplContent);
+                                // Give all elements an internal id
+                                var count = 0;
+                                element.find("*").each(function (i, v) {
+                                    $(v).attr("data-bms-id", "bms" + count);
+                                    count++;
                                 });
+                                angular.forEach(observers, function (o) {
+                                    var oelement = element.find(o.data.selector);
+                                    oelement.each(function (i, e) {
+
+                                        var ele = $(e);
+                                        var bmsid = ele.attr("data-bms-id");
+                                        if (observerBmsIdMap[bmsid] === undefined) {
+                                            observerBmsIdMap[bmsid] = [];
+                                            var id = ele.attr("id");
+                                            data.push({
+                                                value: data.length + 1,
+                                                text: id == undefined ? bmsid : id,
+                                                bmsid: bmsid
+                                            });
+                                        }
+                                        observerBmsIdMap[bmsid].push(o);
+
+                                    });
+                                });
+                                $scope.elementSelection.template = $('<div>').html(element).html();
+                                $scope.elementSelection.style = style;
+                                $scope.elementSelection.data = data;
+                                $scope.elementSelection.observerBmsIdMap = observerBmsIdMap;
                             });
-                            $scope.elements.template = $('<div>').html(element).html();
-                            $scope.elements.style = style;
-                            $scope.elements.data = data;
-                            $scope.elements.observerBmsIdMap = observerBmsIdMap;
-                        });
+
+                        }
 
                     };
 
                     $scope.getSelectedElement = function () {
-                        var selected = $filter('filter')($scope.elements.data, {value: $scope.elements.selected});
+                        var selected = $filter('filter')($scope.elementSelection.data, {value: $scope.elementSelection.selected});
                         return selected[0];
                     };
 
-                    $scope.showStatus = function () {
-                        var selected = $filter('filter')($scope.elements.data, {value: $scope.elements.selected});
-                        return ($scope.elements.selected && selected.length) ? selected[0].text : 'Not set';
+                    $scope.getSelectedVisualisation = function () {
+                        var selected = $filter('filter')($scope.visualisationSelection.data, {value: $scope.visualisationSelection.selected});
+                        return selected[0];
                     };
+
+                    $scope.$watch('elementSelection.selected', function (newValue) {
+                        if (newValue) {
+                            $scope.init();
+                        }
+                    });
 
                     $scope.init = function () {
 
                         var selected = $scope.getSelectedElement();
 
-                        if (selected !== undefined) {
+                        if (selected) {
 
-                            var observers = $scope.elements.observerBmsIdMap[selected.bmsid];
+                            var observers = $scope.elementSelection.observerBmsIdMap[selected.bmsid];
 
                             // Collect observers of children
-                            var jElement = $($scope.elements.template).find('[data-bms-id=' + selected.bmsid + ']');
+                            var jElement = $($scope.elementSelection.template).find('[data-bms-id=' + selected.bmsid + ']');
                             var jChildren = jElement.children();
                             if (jChildren.length > 0) {
                                 jChildren.each(function (i, v) {
                                     var childBmsId = $(v).attr('data-bms-id');
-                                    var childData = $scope.elements.observerBmsIdMap[childBmsId];
+                                    var childData = $scope.elementSelection.observerBmsIdMap[childBmsId];
                                     if (childData) {
                                         observers = observers.concat(childData);
                                     }
@@ -545,7 +588,7 @@ define(['prob.api', 'angular', 'jquery', 'xeditable', 'cytoscape'], function (pr
                                 angular.forEach(data.nodes, function (node) {
                                     var results = node.data.results;
                                     if (node.data.id !== '1' && node.data.id !== '2') {
-                                        promises.push(makeElementScreenshot($scope.elements, selected.bmsid, observers, results));
+                                        promises.push(makeElementScreenshot($scope.elementSelection, selected.bmsid, observers, results));
                                     } else {
                                         promises.push(makeEmptyScreenshot());
                                     }
@@ -584,9 +627,6 @@ define(['prob.api', 'angular', 'jquery', 'xeditable', 'cytoscape'], function (pr
                          }*/
                     };
 
-                    $scope.$watch('elements.selected', function () {
-                        $scope.init();
-                    });
                     $scope.$on('initDiagram', function () {
                         $scope.init();
                     });
@@ -678,7 +718,7 @@ define(['prob.api', 'angular', 'jquery', 'xeditable', 'cytoscape'], function (pr
                 replace: false,
                 template: '<div style="height:100%;width:100%;">'
                 + '<div>'
-                + '<a href="#" editable-select="elements.selected" onshow="loadVisElements()" e-ng-options="s.value as s.text for s in elements.data">'
+                + '<span>Visualisation: </span><a href="#" editable-select="elements.selected" onshow="loadVisElements()" e-ng-options="s.value as s.text for s in elements.data">'
                 + '{{ showStatus() }}'
                 + '</a>'
                 + '</div>'
