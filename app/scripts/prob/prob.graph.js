@@ -358,22 +358,20 @@ define(['prob.api', 'angular', 'jquery', 'xeditable', 'cytoscape'], function (pr
         }])
         .directive('bmsDiagramElementProjectionView', ['bmsObserverService', 'bmsRenderingService', 'bmsScreenshotService', 'bmsVisualisationService', 'bmsDiagramElementProjectionGraph', 'ws', '$injector', '$http', '$q', '$templateCache', '$filter', function (bmsObserverService, bmsRenderingService, bmsScreenshotService, bmsVisualisationService, bmsDiagramElementProjectionGraph, ws, $injector, $http, $q, $templateCache, $filter) {
 
-            var makeElementScreenshot = function (html, screenbmsid, observers, results) {
+            var makeElementScreenshot = function (data, screenbmsid, observers, results) {
 
                 var defer = $q.defer();
 
                 var promises = [];
 
-                var contents = $(html);
+                var contents = $(data.template);
 
                 angular.forEach(observers, function (o) {
                     var observerInstance = $injector.get(o.type, "");
                     if (observerInstance) {
-                        var fresult = [];
-                        angular.forEach(o.count, function (i) {
-                            fresult.push(results[i]);
-                        });
-                        promises.push(observerInstance.apply(o, contents, fresult));
+                        promises.push(observerInstance.apply(o, contents, o['count'].map(function (pos) {
+                            return results[pos];
+                        })));
                     }
                 });
 
@@ -396,9 +394,14 @@ define(['prob.api', 'angular', 'jquery', 'xeditable', 'cytoscape'], function (pr
 
                     var screenEle = contents.find('[data-bms-id=' + screenbmsid + ']');
                     var svgWrapper = $('<svg xmlns="http://www.w3.org/2000/svg" style="background-color:white" xmlns:xlink="http://www.w3.org/1999/xlink" style="background-color:white" width="1000" height="1000">').html(screenEle);
-                    var divWrapper = $('<div>').html(svgWrapper);
 
-                    defer.resolve(divWrapper.html());
+                    bmsScreenshotService.getStyle(data.style).then(function (css) {
+                        if (css !== undefined) {
+                            svgWrapper.prepend(css);
+                        }
+                        var divWrapper = $('<div>').html(svgWrapper);
+                        defer.resolve(divWrapper.html());
+                    });
 
                 });
 
@@ -431,6 +434,7 @@ define(['prob.api', 'angular', 'jquery', 'xeditable', 'cytoscape'], function (pr
 
                     $scope.elements = {
                         observerBmsIdMap: {},
+                        style: undefined,
                         template: undefined,
                         data: [],
                         selected: undefined
@@ -444,6 +448,7 @@ define(['prob.api', 'angular', 'jquery', 'xeditable', 'cytoscape'], function (pr
 
                         var vis = bmsVisualisationService.getVisualisation($scope.visualisationName);
                         var template = vis.template;
+                        var style = vis.style;
                         var observers = bmsObserverService.getObservers(vis.observers);
 
                         $http.get(template, {cache: $templateCache}).success(function (tplContent) {
@@ -458,13 +463,14 @@ define(['prob.api', 'angular', 'jquery', 'xeditable', 'cytoscape'], function (pr
                                 var oelement = element.find(o.data.selector);
                                 oelement.each(function (i, e) {
 
-                                    var bmsid = $(e).attr("data-bms-id");
+                                    var ele = $(e);
+                                    var bmsid = ele.attr("data-bms-id");
                                     if (observerBmsIdMap[bmsid] === undefined) {
                                         observerBmsIdMap[bmsid] = [];
-                                        var id = $(e).attr("id");
+                                        var id = ele.attr("id");
                                         data.push({
                                             value: data.length + 1,
-                                            text: id == undefined ? "?" : id,
+                                            text: id == undefined ? bmsid : id,
                                             bmsid: bmsid
                                         });
                                     }
@@ -473,6 +479,7 @@ define(['prob.api', 'angular', 'jquery', 'xeditable', 'cytoscape'], function (pr
                                 });
                             });
                             $scope.elements.template = $('<div>').html(element).html();
+                            $scope.elements.style = style;
                             $scope.elements.data = data;
                             $scope.elements.observerBmsIdMap = observerBmsIdMap;
                         });
@@ -495,22 +502,36 @@ define(['prob.api', 'angular', 'jquery', 'xeditable', 'cytoscape'], function (pr
 
                         if (selected !== undefined) {
 
-                            // (1) Collect formulas
-                            var formulas = [];
                             var observers = $scope.elements.observerBmsIdMap[selected.bmsid];
-                            var counter = 0;
+
+                            // Collect observers of children
+                            var jElement = $($scope.elements.template).find('[data-bms-id=' + selected.bmsid + ']');
+                            var jChildren = jElement.children();
+                            if (jChildren.length > 0) {
+                                jChildren.each(function (i, v) {
+                                    var childBmsId = $(v).attr('data-bms-id');
+                                    var childData = $scope.elements.observerBmsIdMap[childBmsId];
+                                    if (childData) {
+                                        observers = observers.concat(childData);
+                                    }
+                                });
+                            }
+
+                            // (1) Collect formulas of observers
+                            var formulas = [];
                             angular.forEach(observers, function (o) {
+                                o['count'] = [];
                                 var observerInstance = $injector.get(o.type, "");
                                 if (observerInstance) {
-                                    if (o['count'] === undefined) {
-                                        o['count'] = [];
-                                    }
                                     var ff = observerInstance.getFormulas(o);
-                                    angular.forEach(ff, function () {
-                                        o['count'].push(counter);
-                                        counter++;
+                                    angular.forEach(ff, function (formula) {
+                                        var index = formulas.indexOf(formula);
+                                        if (index === -1) {
+                                            formulas.push(formula);
+                                            index = formulas.indexOf(formula);
+                                        }
+                                        o['count'].push(index);
                                     });
-                                    formulas = formulas.concat(ff);
                                 }
                             });
 
@@ -524,7 +545,7 @@ define(['prob.api', 'angular', 'jquery', 'xeditable', 'cytoscape'], function (pr
                                 angular.forEach(data.nodes, function (node) {
                                     var results = node.data.results;
                                     if (node.data.id !== '1' && node.data.id !== '2') {
-                                        promises.push(makeElementScreenshot($scope.elements.template, selected.bmsid, observers, results));
+                                        promises.push(makeElementScreenshot($scope.elements, selected.bmsid, observers, results));
                                     } else {
                                         promises.push(makeEmptyScreenshot());
                                     }
