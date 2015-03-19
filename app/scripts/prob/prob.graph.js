@@ -365,6 +365,7 @@ define(['prob.api', 'angular', 'jquery', 'xeditable', 'cytoscape'], function (pr
                 var promises = [];
 
                 var contents = $(data.template);
+                var style = data.style;
 
                 angular.forEach(observers, function (o) {
                     var observerInstance = $injector.get(o.type, "");
@@ -395,7 +396,7 @@ define(['prob.api', 'angular', 'jquery', 'xeditable', 'cytoscape'], function (pr
                     var screenEle = contents.find('[data-bms-id=' + screenbmsid + ']');
                     var svgWrapper = $('<svg xmlns="http://www.w3.org/2000/svg" style="background-color:white" xmlns:xlink="http://www.w3.org/1999/xlink" style="background-color:white" width="1000" height="1000">').html(screenEle);
 
-                    bmsScreenshotService.getStyle(data.style).then(function (css) {
+                    bmsScreenshotService.getStyle(style).then(function (css) {
                         if (css !== undefined) {
                             svgWrapper.prepend(css);
                         }
