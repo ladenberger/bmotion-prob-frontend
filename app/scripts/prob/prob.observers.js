@@ -23,14 +23,20 @@ define(['prob.api', 'angular', 'jquery', 'xeditable', 'cytoscape'], function (pr
                     events[name].push(e);
                 },
                 addObservers: function (name, obs) {
-                    if (observers[name] === undefined && obs) {
+                    if (observers[name] === undefined) {
+                        observers[name] = [];
+                    }
+                    if (obs) {
                         $.each(obs, function (i, v) {
                             observerService.addObserver(name, v)
                         });
                     }
                 },
                 addEvents: function (name, evts) {
-                    if (events[name] === undefined && evts) {
+                    if (events[name] === undefined) {
+                        events[name] = [];
+                    }
+                    if (evts) {
                         $.each(evts, function (i, v) {
                             observerService.addEvent(name, v)
                         });

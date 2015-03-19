@@ -354,10 +354,22 @@ define(['prob.api', 'bmotion.main', 'prob.observers', 'jquery', 'tooltipster'], 
             }]);
 
         prob.registerObservers = function (name, elements) {
-            var injector = angular.element(document).injector(); // assuming `ng-app` is on the document
+            var injector = angular.element(document).injector();
             var bmsObserverService = injector.get('bmsObserverService');
             bmsObserverService.addObservers(name, elements.observers);
             bmsObserverService.addEvents(name, elements.events);
+        };
+
+        prob.registerObserver = function (name, observer) {
+            var injector = angular.element(document).injector();
+            var bmsObserverService = injector.get('bmsObserverService');
+            bmsObserverService.addObserver(name, observer);
+        };
+
+        prob.registerEvent = function (name, event) {
+            var injector = angular.element(document).injector();
+            var bmsObserverService = injector.get('bmsObserverService');
+            bmsObserverService.addEvent(name, event);
         };
 
         return module;
