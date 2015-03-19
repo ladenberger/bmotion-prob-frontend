@@ -64,7 +64,7 @@ define(['prob.api', 'angular', 'jquery', 'xeditable', 'cytoscape'], function (pr
                         cropLeft = scanX(true),
                         cropRight = scanX(false),
                         cropWidth = cropRight - cropLeft,
-                        cropHeight = cropBottom - cropTop;
+                        cropHeight = cropBottom - cropTop + 2;
 
                     var $croppedCanvas = $("<canvas>").attr({width: cropWidth, height: cropHeight});
                     $croppedCanvas[0].getContext("2d").drawImage(canvas,
