@@ -15,6 +15,10 @@
     "tooltipster": "3.3.0",
     "jquery.cookie": "1.4.1",
     "cytoscape": "2.3.9",
-    "angular-xeditable": "0.1.8"
+    "cytoscape-css-renderer": "latest",
+    "angular-xeditable": "0.1.8",
+    "joint": "latest",
+    "underscore": "latest",
+    "lodash": "latest"
   }
 }

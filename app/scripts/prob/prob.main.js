@@ -163,11 +163,12 @@ define(['prob.api', 'bmotion.main', 'prob.observers', 'jquery', 'tooltipster'], 
             .factory('bmsVisualisationService', function () {
                 var visualisations = {};
                 return {
-                    addVisualisation: function (name, observers, template, style) {
+                    addVisualisation: function (name, observers, template, style, uuid) {
                         visualisations[name] = {
                             observers: observers,
                             template: template,
-                            style: style
+                            style: style,
+                            uuid: uuid
                         }
                     },
                     getVisualisations: function () {
@@ -220,7 +221,10 @@ define(['prob.api', 'bmotion.main', 'prob.observers', 'jquery', 'tooltipster'], 
                         $scope.visualisationName = attrs["bmsName"];
                         $scope.style = attrs["bmsStyle"];
 
-                        bmsVisualisationService.addVisualisation($scope.visualisationName, $scope.observerName, $scope.templateName, $scope.style);
+                        var uuid = guid();
+                        $element.attr("data-bms-id", uuid);
+
+                        bmsVisualisationService.addVisualisation($scope.visualisationName, $scope.observerName, $scope.templateName, $scope.style, uuid);
 
                         // Load and evaluate observers and events
                         $.getScript($scope.observerName + ".js")
@@ -255,6 +259,7 @@ define(['prob.api', 'bmotion.main', 'prob.observers', 'jquery', 'tooltipster'], 
                                         if ($scope.observers && stateid) {
 
                                             var formulaObservers = {};
+                                            var predicateObservers = {};
                                             var promises = [];
 
                                             $.each($scope.observers, function (i, o) {
@@ -262,6 +267,9 @@ define(['prob.api', 'bmotion.main', 'prob.observers', 'jquery', 'tooltipster'], 
                                                 if (o.type === 'formula') {
                                                     var id = guid();
                                                     formulaObservers[id] = o;
+                                                } else if (o.type === 'predicate') {
+                                                    var id = guid();
+                                                    predicateObservers[id] = o;
                                                 } else {
                                                     var observerInstance = $injector.get(o.type, "");
                                                     if (observerInstance) {
@@ -271,11 +279,21 @@ define(['prob.api', 'bmotion.main', 'prob.observers', 'jquery', 'tooltipster'], 
 
                                             });
 
+                                            var start = new Date().getTime();
+                                            var container = $(contents).parent();
+
                                             // Special case for formula observers
                                             if (!$.isEmptyObject(formulaObservers)) {
                                                 // Execute formula observer at once (performance boost)
                                                 var observerInstance = $injector.get("formula", "");
-                                                promises.push(observerInstance.check(formulaObservers, contents, stateid));
+                                                promises.push(observerInstance.check(formulaObservers, container, stateid));
+                                            }
+
+                                            // Special case for predicate observers
+                                            if (!$.isEmptyObject(predicateObservers)) {
+                                                // Execute predicate observer at once (performance boost)
+                                                var observerInstance = $injector.get("predicate", "");
+                                                promises.push(observerInstance.check(predicateObservers, container, stateid));
                                             }
 
                                             // Collect values from observers
@@ -291,6 +309,7 @@ define(['prob.api', 'bmotion.main', 'prob.observers', 'jquery', 'tooltipster'], 
                                                 $scope.values = fvalues;
 
                                                 var changed = false;
+
                                                 for (bmsid in fvalues) {
                                                     var nattrs = fvalues[bmsid];
                                                     for (a in nattrs) {
@@ -318,6 +337,10 @@ define(['prob.api', 'bmotion.main', 'prob.observers', 'jquery', 'tooltipster'], 
                                                 if (fn !== undefined) {
                                                     fn.call(this, stateid, contents.html());
                                                 }
+
+                                                var end = new Date().getTime();
+                                                var time = end - start;
+                                                console.log('MAIN EXECUTION TIME: ' + time);
 
                                             });
 

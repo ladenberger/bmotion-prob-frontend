@@ -3,6 +3,8 @@
 @import url("../scripts/vendor/angular-xeditable/dist/css/xeditable.css");
 @import url("../scripts/vendor/tooltipster/css/tooltipster.css");
 @import url("../scripts/vendor/tooltipster/css/themes/tooltipster-shadow.css");
+@import url("../scripts/vendor/cytoscape.js-navigator/cytoscape.js-navigator.css");
+/*@import url("../scripts/vendor/joint/dist/joint.css");*/
 @import url("prob.css");
 
 * {

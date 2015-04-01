@@ -2,7 +2,7 @@
  * BMotion Studio for ProB Graph Module
  *
  */
-define(['prob.api', 'angular', 'jquery', 'xeditable', 'cytoscape'], function (prob) {
+define(['prob.api', 'angular', 'jquery', 'xeditable', 'cytoscape', 'cytoscape.navigator'], function (prob) {
 
     return angular.module('prob.graph', ['xeditable', 'bms.main'])
         .factory('bmsRenderingService', ['$q', function ($q) {
@@ -63,7 +63,7 @@ define(['prob.api', 'angular', 'jquery', 'xeditable', 'cytoscape'], function (pr
                         cropBottom = scanY(false),
                         cropLeft = scanX(true),
                         cropRight = scanX(false),
-                        cropWidth = cropRight - cropLeft,
+                        cropWidth = cropRight - cropLeft + 2,
                         cropHeight = cropBottom - cropTop + 2;
 
                     var $croppedCanvas = $("<canvas>").attr({width: cropWidth, height: cropHeight});
@@ -137,167 +137,220 @@ define(['prob.api', 'angular', 'jquery', 'xeditable', 'cytoscape'], function (pr
 
                     return deferred.promise;
 
+                },
+                loadHtml: function (node, html) {
+
+                    var deferred = $q.defer();
+
+                    if (html !== undefined) {
+                        var svgElement = $(html);
+                        var width = svgElement.attr("width") === undefined ? 100 : svgElement.attr("width");
+                        var height = svgElement.attr("height") === undefined ? 100 : svgElement.attr("height");
+                        node.data['html'] = html;
+                        node.data['width'] = width;
+                        node.data['height'] = height;
+                        deferred.resolve();
+                    } else {
+                        node.data['html'] = '';
+                        node.data['width'] = 50;
+                        node.data['height'] = 50;
+                        deferred.resolve();
+                    }
+
+                    return deferred.promise;
+
                 }
+                /*,
+                 loadHtml: function (node, html) {
+
+                 var deferred = $q.defer();
+
+                 if (html !== undefined) {
+                 var svgElement = $(html);
+                 var width = svgElement.attr("width") === undefined ? 100 : svgElement.attr("width");
+                 var height = svgElement.attr("height") === undefined ? 100 : svgElement.attr("height");
+                 node.data['html'] = html;
+                 node.data['width'] = width;
+                 node.data['height'] = height;
+                 deferred.resolve();
+                 } else {
+                 node.data['html'] = '';
+                 node.data['width'] = 50;
+                 node.data['height'] = 50;
+                 deferred.resolve();
+                 }
+
+                 return deferred.promise;
+
+                 }*/
 
             };
 
             return renderingService;
 
         }])
-        .factory('bmsDiagramElementProjectionGraph', ['$q', 'ws', 'bmsRenderingService', function ($q, ws, bmsRenderingService) {
+        .factory('bmsDiagramElementProjectionGraph', ['$q', function ($q) {
 
-            var _loadImage2 = function (property, felements, mcanvas, mcontext, v, styleTag) {
+            /*var _loadImage2 = function (property, felements, mcanvas, mcontext, v, styleTag) {
 
-                var deferred = $.Deferred();
+             var deferred = $.Deferred();
 
-                // Prepare data
-                var ele = felements[property].clone;
-                var type = felements[property].type;
-                var ffval = [];
+             // Prepare data
+             var ele = felements[property].clone;
+             var type = felements[property].type;
+             var ffval = [];
 
-                $.each(felements[property].count, function (i2, v2) {
-                    var trans = v.data.translated;
-                    var res = v.data.results;
-                    var fres = felements[property].translate ? trans[v2] : res[v2];
-                    if (fres !== undefined) {
-                        ffval.push(fres);
-                    }
-                });
+             $.each(felements[property].count, function (i2, v2) {
+             var trans = v.data.translated;
+             var res = v.data.results;
+             var fres = felements[property].translate ? trans[v2] : res[v2];
+             if (fres !== undefined) {
+             ffval.push(fres);
+             }
+             });
 
-                var image = new Image(),
-                    canvas = document.createElement('canvas'),
-                    context;
-                image.crossOrigin = "anonymous";
+             var image = new Image(),
+             canvas = document.createElement('canvas'),
+             context;
+             image.crossOrigin = "anonymous";
 
-                // Build image
-                // TODO: Get correct initial width and height
-                canvas.width = 1000;
-                canvas.height = 1000;
-                context = canvas.getContext("2d");
+             // Build image
+             // TODO: Get correct initial width and height
+             canvas.width = 1000;
+             canvas.height = 1000;
+             context = canvas.getContext("2d");
 
-                image.onload = function () {
-                    if (context) {
-                        context.drawImage(this, 0, 0, this.width, this.height);
-                        var croppedCanvas = bmsRenderingService.removeBlanks(context, canvas, this.width, this.height);
-                        v.data["canvas"].push(croppedCanvas);
-                        deferred.resolve();
-                    } else {
-                        // alert('Get a real browser!');
-                    }
-                };
+             image.onload = function () {
+             if (context) {
+             context.drawImage(this, 0, 0, this.width, this.height);
+             var croppedCanvas = bmsRenderingService.removeBlanks(context, canvas, this.width, this.height);
+             v.data["canvas"].push(croppedCanvas);
+             deferred.resolve();
+             } else {
+             // alert('Get a real browser!');
+             }
+             };
 
-                if (ffval.length > 0) {
+             if (ffval.length > 0) {
 
-                    // Trigger trigger function that modifies element according to the attached observer
-                    var formulaObservers = ele.data("observer")["AnimationChanged"];
-                    $.each(formulaObservers["formula"], function (i, v) {
-                        v.observer.trigger.call(this, ele, ffval);
-                    });
-                    if (ele.prop("tagName") === 'image') {
-                        image.src = ele.attr('xlink:href');
-                    } else {
-                        var html = $('<div>').append(ele);
-                        if (type === 'svg') {
-                            image.src = 'data:image/svg+xml;base64,' + window.btoa('<svg xmlns="http://www.w3.org/2000/svg" style="background-color:white" xmlns:xlink="http://www.w3.org/1999/xlink" width="1000" height="1000">\n' + styleTag + '\n' + html.html() + '</svg>');
-                        }
-                    }
-                } else {
-                    image.src = 'data:image/svg+xml;base64,' + window.btoa('<svg xmlns="http://www.w3.org/2000/svg" style="background-color:white" xmlns:xlink="http://www.w3.org/1999/xlink"></svg>');
-                }
-                return deferred.promise();
+             // Trigger trigger function that modifies element according to the attached observer
+             var formulaObservers = ele.data("observer")["AnimationChanged"];
+             $.each(formulaObservers["formula"], function (i, v) {
+             v.observer.trigger.call(this, ele, ffval);
+             });
+             if (ele.prop("tagName") === 'image') {
+             image.src = ele.attr('xlink:href');
+             } else {
+             var html = $('<div>').append(ele);
+             if (type === 'svg') {
+             image.src = 'data:image/svg+xml;base64,' + window.btoa('<svg xmlns="http://www.w3.org/2000/svg" style="background-color:white" xmlns:xlink="http://www.w3.org/1999/xlink" width="1000" height="1000">\n' + styleTag + '\n' + html.html() + '</svg>');
+             }
+             }
+             } else {
+             image.src = 'data:image/svg+xml;base64,' + window.btoa('<svg xmlns="http://www.w3.org/2000/svg" style="background-color:white" xmlns:xlink="http://www.w3.org/1999/xlink"></svg>');
+             }
+             return deferred.promise();
 
-            };
+             };*/
 
-            var _loadImage = function (v, felements, styleTag) {
+            /*var _loadImage = function (v, felements, styleTag) {
 
-                var deferred = $.Deferred();
+             var deferred = $.Deferred();
 
-                // Set default width and height of node
-                v.data['width'] = 0;
-                v.data['height'] = 0;
+             // Set default width and height of node
+             v.data['width'] = 0;
+             v.data['height'] = 0;
 
-                // Create a new image for the node
-                var mcanvas = document.createElement('canvas'),
-                    mcontext = mcanvas.getContext("2d");
+             // Create a new image for the node
+             var mcanvas = document.createElement('canvas'),
+             mcontext = mcanvas.getContext("2d");
 
-                v.data["canvas"] = [];
+             v.data["canvas"] = [];
 
-                var loaders = [];
-                for (var property in felements) {
-                    loaders.push(_loadImage2(property, felements, mcanvas, mcontext, v, styleTag));
-                }
+             var loaders = [];
+             for (var property in felements) {
+             loaders.push(_loadImage2(property, felements, mcanvas, mcontext, v, styleTag));
+             }
 
-                $.when.apply(null, loaders).done(function () {
+             $.when.apply(null, loaders).done(function () {
 
-                    var fwidth = 0;
-                    var fheight = 0;
-                    var yoffset = 0;
-                    $.each(v.data.canvas, function (i, v) {
-                        fwidth = fwidth < v.width ? v.width : fwidth;
-                        fheight = v.height + fheight + 15;
-                    });
-                    mcanvas.width = fwidth;
-                    mcanvas.height = fheight;
-                    $.each(v.data.canvas, function (i, v) {
-                        mcontext.drawImage(v, 0, yoffset);
-                        yoffset = v.height + yoffset + 15;
-                    });
-                    v.data['width'] = fwidth + 30;
-                    v.data['height'] = yoffset + 15;
-                    v.data['svg'] = mcanvas.toDataURL('image/png');
-                    deferred.resolve();
+             var fwidth = 0;
+             var fheight = 0;
+             var yoffset = 0;
+             $.each(v.data.canvas, function (i, v) {
+             fwidth = fwidth < v.width ? v.width : fwidth;
+             fheight = v.height + fheight + 15;
+             });
+             mcanvas.width = fwidth;
+             mcanvas.height = fheight;
+             $.each(v.data.canvas, function (i, v) {
+             mcontext.drawImage(v, 0, yoffset);
+             yoffset = v.height + yoffset + 15;
+             });
+             v.data['width'] = fwidth + 30;
+             v.data['height'] = yoffset + 15;
+             v.data['svg'] = mcanvas.toDataURL('image/png');
+             deferred.resolve();
 
-                });
+             });
 
-                return deferred.promise();
+             return deferred.promise();
 
-            };
+             };*/
 
             return {
-                getCurrentData: function (elements) {
-                    var deferred = $q.defer();
-                    var felements = {};
-                    var formulas = [];
-                    var count = 0;
-                    $.each(elements, function (i, v) {
-                        var el = $(v);
-                        felements[v] = {
-                            count: [],
-                            clone: el.data('clone'),
-                            type: el.parents('svg').length ? 'svg' : 'html',
-                            translate: el.data('translate')
-                        };
-                        $.each($(v).data("formulas"), function () {
-                            felements[v]['count'].push(count);
-                            count++;
-                        });
-                        formulas = formulas.concat($(v).data("formulas"));
-                    });
-                    // TODO: Replace with new websocket
-                    // Gets nodes and edges according to observers ...
-                    ws.emit('createCustomTransitionDiagram', {
-                        data: {expressions: formulas}
-                    }, function (data) {
-                        bmsRenderingService.getStyles().done(function (css) {
-                            var loaders = [];
-                            $.each(data.nodes, function (i, v) {
-                                loaders.push(_loadImage(v, felements, css));
-                            });
-                            $.when.apply(null, loaders).done(function () {
-                                deferred.resolve(data);
-                            });
-                        });
-                    });
-                    return deferred.promise;
-                },
+                /*getCurrentData: function (elements) {
+                 var deferred = $q.defer();
+                 var felements = {};
+                 var formulas = [];
+                 var count = 0;
+                 $.each(elements, function (i, v) {
+                 var el = $(v);
+                 felements[v] = {
+                 count: [],
+                 clone: el.data('clone'),
+                 type: el.parents('svg').length ? 'svg' : 'html',
+                 translate: el.data('translate')
+                 };
+                 $.each($(v).data("formulas"), function () {
+                 felements[v]['count'].push(count);
+                 count++;
+                 });
+                 formulas = formulas.concat($(v).data("formulas"));
+                 });
+                 // TODO: Replace with new websocket
+                 // Gets nodes and edges according to observers ...
+                 ws.emit('createCustomTransitionDiagram', {
+                 data: {expressions: formulas}
+                 }, function (data) {
+                 bmsRenderingService.getStyles().done(function (css) {
+                 var loaders = [];
+                 $.each(data.nodes, function (i, v) {
+                 loaders.push(_loadImage(v, felements, css));
+                 });
+                 $.when.apply(null, loaders).done(function () {
+                 deferred.resolve(data);
+                 });
+                 });
+                 });
+                 return deferred.promise;
+                 },*/
                 build: function (container, data) {
                     var deferred = $q.defer();
                     $(function () { // on dom ready
-                        var graphEle = $(container).find(".projection-diagram-graph");
-                        //var navigatorEle = containerEle.find(".trace-diagram-navigator");
+                        var containerEle = $(container);
+                        var graphEle = containerEle.find(".projection-diagram-graph");
+                        var navigatorEle = containerEle.find(".projection-diagramnavigator");
                         graphEle.cytoscape({
+                            zoomingEnabled: true,
+                            userZoomingEnabled: true,
+                            panningEnabled: true,
+                            userPanningEnabled: true,
                             ready: function () {
-                                deferred.resolve(this);
+                                graphEle.cyNavigator({
+                                    container: navigatorEle
+                                });
+                                deferred.resolve({cy: this, navigator: graphEle});
                             },
                             style: cytoscape.stylesheet()
                                 .selector('node')
@@ -345,11 +398,6 @@ define(['prob.api', 'angular', 'jquery', 'xeditable', 'cytoscape'], function (pr
                                 edges: data.edges
                             }
                         });
-                        /*.cy(function () {
-                         graphEle.cyNavigator({
-                         container: navigatorEle
-                         });
-                         });*/
                     }); // on dom ready
                     return deferred.promise;
                 }
@@ -358,7 +406,7 @@ define(['prob.api', 'angular', 'jquery', 'xeditable', 'cytoscape'], function (pr
         }])
         .directive('bmsDiagramElementProjectionView', ['bmsObserverService', 'bmsRenderingService', 'bmsScreenshotService', 'bmsVisualisationService', 'bmsDiagramElementProjectionGraph', 'ws', '$injector', '$http', '$q', '$templateCache', '$filter', function (bmsObserverService, bmsRenderingService, bmsScreenshotService, bmsVisualisationService, bmsDiagramElementProjectionGraph, ws, $injector, $http, $q, $templateCache, $filter) {
 
-            var makeElementScreenshot = function (data, screenbmsid, observers, results) {
+            var makeElementScreenshot = function ($element, data, screenbmsid, observers, results) {
 
                 var defer = $q.defer();
 
@@ -430,13 +478,10 @@ define(['prob.api', 'angular', 'jquery', 'xeditable', 'cytoscape'], function (pr
                 + '{{ showElementSelection() }}'
                 + '</a>'
                 + '</div>'
-                + '<div class="projection-diagram-graph" style="height:100%;width:100%;"></div>'
-                    //+ '<div class="projection-diagramnavigator"
-                    // style="height:100%;width:20%;position:absolute;bottom:0;right:0;"></div>'
+                + '<div class="projection-diagram-graph" style="height:100%;width:80%;float:left;"></div>'
+                + '<div class="projection-diagramnavigator" style="float:left;height:100%;width:20%;position:relative;bottom:0;right:0;"></div>'
                 + '</div>',
                 link: function ($scope, $element) {
-
-                    $scope.visualisationName = "liftVisualisation";
 
                     $scope.visualisationSelection = {
                         data: [],
@@ -488,13 +533,16 @@ define(['prob.api', 'angular', 'jquery', 'xeditable', 'cytoscape'], function (pr
                             var observers = bmsObserverService.getObservers(vis.observers);
 
                             $http.get(template, {cache: $templateCache}).success(function (tplContent) {
+
                                 var element = $(tplContent);
+
                                 // Give all elements an internal id
                                 var count = 0;
                                 element.find("*").each(function (i, v) {
                                     $(v).attr("data-bms-id", "bms" + count);
                                     count++;
                                 });
+
                                 angular.forEach(observers, function (o) {
                                     var oelement = element.find(o.data.selector);
                                     oelement.each(function (i, e) {
@@ -514,6 +562,7 @@ define(['prob.api', 'angular', 'jquery', 'xeditable', 'cytoscape'], function (pr
 
                                     });
                                 });
+
                                 $scope.elementSelection.template = $('<div>').html(element).html();
                                 $scope.elementSelection.style = style;
                                 $scope.elementSelection.data = data;
@@ -529,6 +578,11 @@ define(['prob.api', 'angular', 'jquery', 'xeditable', 'cytoscape'], function (pr
                         return selected[0];
                     };
 
+                    $scope.getElement = function (id) {
+                        var selected = $filter('filter')($scope.elementSelection.data, {value: id});
+                        return selected[0];
+                    };
+
                     $scope.getSelectedVisualisation = function () {
                         var selected = $filter('filter')($scope.visualisationSelection.data, {value: $scope.visualisationSelection.selected});
                         return selected[0];
@@ -536,20 +590,22 @@ define(['prob.api', 'angular', 'jquery', 'xeditable', 'cytoscape'], function (pr
 
                     $scope.$watch('elementSelection.selected', function (newValue) {
                         if (newValue) {
-                            $scope.init();
+                            $scope.getData($scope.getElement(newValue)['bmsid']).then(function (data) {
+                                $scope.loadData(data);
+                            });
                         }
                     });
 
-                    $scope.init = function () {
+                    $scope.getData = function (id) {
 
-                        var selected = $scope.getSelectedElement();
+                        var defer = $q.defer();
 
-                        if (selected) {
+                        if (id) {
 
-                            var observers = $scope.elementSelection.observerBmsIdMap[selected.bmsid];
+                            var observers = $scope.elementSelection.observerBmsIdMap[id];
 
                             // Collect observers of children
-                            var jElement = $($scope.elementSelection.template).find('[data-bms-id=' + selected.bmsid + ']');
+                            var jElement = $($scope.elementSelection.template).find('[data-bms-id=' + id + ']');
                             var jChildren = jElement.children();
                             if (jChildren.length > 0) {
                                 jChildren.each(function (i, v) {
@@ -589,7 +645,7 @@ define(['prob.api', 'angular', 'jquery', 'xeditable', 'cytoscape'], function (pr
                                 angular.forEach(data.nodes, function (node) {
                                     var results = node.data.results;
                                     if (node.data.id !== '1' && node.data.id !== '2') {
-                                        promises.push(makeElementScreenshot($scope.elementSelection, selected.bmsid, observers, results));
+                                        promises.push(makeElementScreenshot($element, $scope.elementSelection, id, observers, results));
                                     } else {
                                         promises.push(makeEmptyScreenshot());
                                     }
@@ -602,37 +658,50 @@ define(['prob.api', 'angular', 'jquery', 'xeditable', 'cytoscape'], function (pr
                                         loaders.push(bmsRenderingService.loadImage(v, screens[i]));
                                     });
                                     $q.all(loaders).then(function () {
-                                        bmsDiagramElementProjectionGraph.build($element, data).then(function (cy) {
-                                            $scope.cy = cy;
-                                        });
+                                        defer.resolve(data);
                                     });
 
                                 });
 
                             });
 
+                        } else {
+                            defer.resolve();
                         }
 
+                        return defer.promise;
+
                     };
-                    $scope.load = function (data) {
-                        if ($scope.cy) {
-                            $scope.cy.load(data);
+
+                    $scope.loadData = function (data) {
+                        if (data) {
+                            if (!$scope.cy) {
+                                bmsDiagramElementProjectionGraph.build($element, data).then(function (result) {
+                                    $scope.cy = result.cy;
+                                    $scope.navigator = result.navigator;
+                                });
+                            } else {
+                                $scope.cy.load(data);
+                                $scope.refreshNavigator();
+                            }
                         }
                     };
-                    $scope.refresh = function () {
+
+                    $scope.refreshDiagram = function () {
                         if ($scope.cy) {
                             $scope.cy.load($scope.cy.elements().jsons())
                         }
-                        /*if (graphEle) {
-                         graphEle.cytoscapeNavigator('resize');
-                         }*/
+                        $scope.refreshNavigator();
                     };
 
-                    $scope.$on('initDiagram', function () {
-                        $scope.init();
-                    });
+                    $scope.refreshNavigator = function () {
+                        if ($scope.navigator) {
+                            $scope.navigator.cytoscapeNavigator('resize');
+                        }
+                    };
+
                     $scope.$on('refreshDiagram', function () {
-                        $scope.refresh();
+                        $scope.refreshDiagram();
                     });
 
                 }
@@ -644,7 +713,7 @@ define(['prob.api', 'angular', 'jquery', 'xeditable', 'cytoscape'], function (pr
                 $scope.$broadcast('initDiagram');
             });
             $scope.$on('resizeStop', function () {
-                $scope.refresh();
+                $scope.$broadcast('refreshDiagram');
             });
         }])
         .factory('bmsDiagramTraceGraph', ['$q', 'ws', 'bmsRenderingService', function ($q, ws, bmsRenderingService) {
@@ -654,11 +723,15 @@ define(['prob.api', 'angular', 'jquery', 'xeditable', 'cytoscape'], function (pr
                 build: function (container, data) {
                     var deferred = $q.defer();
                     $(function () { // on dom ready
-                        var graphEle = $(container).find(".trace-diagram-graph");
-                        //var navigatorEle = containerEle.find(".trace-diagram-navigator");
+                        var containerEle = $(container);
+                        var graphEle = containerEle.find(".trace-diagram-graph");
+                        var navigatorEle = containerEle.find(".trace-diagram-navigator");
                         graphEle.cytoscape({
                             ready: function () {
-                                deferred.resolve(this);
+                                graphEle.cyNavigator({
+                                    container: navigatorEle
+                                });
+                                deferred.resolve({cy: this, navigator: graphEle});
                             },
                             style: cytoscape.stylesheet()
                                 .selector('node')
@@ -703,11 +776,6 @@ define(['prob.api', 'angular', 'jquery', 'xeditable', 'cytoscape'], function (pr
                                 edges: data.edges
                             }
                         });
-                        /*.cy(function () {
-                         graphEle.cyNavigator({
-                         container: navigatorEle
-                         });
-                         });*/
                     }); // on dom ready
                     return deferred.promise;
                 }
@@ -719,17 +787,16 @@ define(['prob.api', 'angular', 'jquery', 'xeditable', 'cytoscape'], function (pr
                 replace: false,
                 template: '<div style="height:100%;width:100%;">'
                 + '<div>'
-                + '<span>Visualisation: </span><a href="#" editable-select="elements.selected" onshow="loadVisElements()" e-ng-options="s.value as s.text for s in elements.data">'
+                + '<span>Visualisation: </span><a href="#" editable-select="elementSelection.selected" onshow="loadVisElements()" e-ng-options="s.value as s.text for s in elementSelection.data">'
                 + '{{ showStatus() }}'
                 + '</a>'
                 + '</div>'
-                + '<div class="trace-diagram-graph" style="height:100%;width:100%;"></div>'
-                    //+ '<div class="trace-diagram-navigator"
-                    // style="height:100%;width:20%;position:absolute;bottom:0;right:0;"></div>'
+                + '<div class="trace-diagram-graph" style="height:100%;width:80%;float:left;"></div>'
+                + '<div class="trace-diagram-navigator" style="float:left;height:100%;width:20%;position:relative;bottom:0;right:0;"></div>'
                 + '</div>',
                 controller: ['$scope', function ($scope) {
 
-                    $scope.elements = {
+                    $scope.elementSelection = {
                         data: [],
                         selected: undefined
                     };
@@ -743,70 +810,89 @@ define(['prob.api', 'angular', 'jquery', 'xeditable', 'cytoscape'], function (pr
                                 text: p
                             });
                         }
-                        $scope.elements.data = data;
+                        $scope.elementSelection.data = data;
                     };
 
                     $scope.showStatus = function () {
-                        var selected = $filter('filter')($scope.elements.data, {value: $scope.elements.selected});
-                        return ($scope.elements.selected && selected.length) ? selected[0].text : 'Not set';
+                        var selected = $filter('filter')($scope.elementSelection.data, {value: $scope.elementSelection.selected});
+                        return ($scope.elementSelection.selected && selected.length) ? selected[0].text : 'Not set';
                     };
 
                 }],
                 link: function ($scope, $element, attrs) {
 
-                    $scope.init = function () {
+                    $scope.$watch('elementSelection.selected', function (newValue) {
+                        if (newValue) {
+                            $scope.getData().then(function (data) {
+                                $scope.loadData(data);
+                            });
+                        }
+                    });
 
-                        if ($scope.elements.selected !== undefined) {
+                    $scope.getData = function () {
 
-                            ws.emit('createTraceDiagram', {}, function (data) {
+                        var defer = $q.defer();
 
-                                var promises = [];
+                        ws.emit('createTraceDiagram', {}, function (data) {
 
-                                angular.forEach(data.nodes, function (n) {
-                                    if (n.data.id !== 'root') {
-                                        promises.push(bmsScreenshotService.makeScreenshot($scope.showStatus(), n.data.id));
-                                    }
-                                });
+                            var promises = [];
 
-                                var stateHtmlMap = {};
-                                $q.all(promises).then(function (s) {
-                                    angular.forEach(s, function (v) {
-                                        stateHtmlMap[v.stateid] = v.html;
-                                    });
-                                    var loaders = [];
-                                    $.each(data.nodes, function (i, v) {
-                                        loaders.push(bmsRenderingService.loadImage(v, stateHtmlMap[v.data.id]));
-                                    });
-                                    $q.all(loaders).then(function () {
-                                        bmsDiagramTraceGraph.build($element, data).then(function (cy) {
-                                            $scope.cy = cy;
-                                        });
-                                    });
-                                });
-
+                            angular.forEach(data.nodes, function (n) {
+                                if (n.data.id !== 'root') {
+                                    promises.push(bmsScreenshotService.makeScreenshot($scope.showStatus(), n.data.id));
+                                }
                             });
 
-                        }
+                            var stateHtmlMap = {};
+                            $q.all(promises).then(function (s) {
+                                angular.forEach(s, function (v) {
+                                    stateHtmlMap[v.stateid] = v.html;
+                                });
+                                var loaders = [];
+                                $.each(data.nodes, function (i, v) {
+                                    //loaders.push(bmsRenderingService.loadHtml(v, stateHtmlMap[v.data.id]));
+                                    loaders.push(bmsRenderingService.loadImage(v, stateHtmlMap[v.data.id]));
+                                });
+                                $q.all(loaders).then(function () {
+                                    defer.resolve(data);
+                                });
+                            });
+
+                        });
+
+                        return defer.promise;
 
                     };
-                    $scope.load = function (data) {
-                        if ($scope.cy) {
-                            $scope.cy.load(data);
+
+                    $scope.loadData = function (data) {
+                        if (data) {
+                            if (!$scope.cy) {
+                                bmsDiagramTraceGraph.build($element, data).then(function (result) {
+                                    $scope.cy = result.cy;
+                                    $scope.navigator = result.navigator;
+                                });
+                            } else {
+                                $scope.cy.load(data);
+                                $scope.refreshNavigator();
+                            }
                         }
                     };
-                    $scope.refresh = function () {
+
+                    $scope.refreshDiagram = function () {
                         if ($scope.cy) {
                             $scope.cy.load($scope.cy.elements().jsons())
                         }
+                        $scope.refreshNavigator();
                     };
-                    $scope.$watch('elements.selected', function () {
-                        $scope.init();
-                    });
-                    $scope.$on('initDiagram', function () {
-                        $scope.init();
-                    });
+
+                    $scope.refreshNavigator = function () {
+                        if ($scope.navigator) {
+                            $scope.navigator.cytoscapeNavigator('resize');
+                        }
+                    };
+
                     $scope.$on('refreshDiagram', function () {
-                        $scope.refresh();
+                        $scope.refreshDiagram();
                     });
 
                 }

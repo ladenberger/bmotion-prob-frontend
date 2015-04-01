@@ -4,10 +4,16 @@
  */
 define(['prob.api', 'angular', 'jquery', 'xeditable', 'cytoscape'], function (prob) {
 
+    function isFunction(functionToCheck) {
+        var getType = {};
+        return functionToCheck && getType.toString.call(functionToCheck) === '[object Function]';
+    }
+
     return angular.module('prob.observers', ['bms.main'])
         .service('bmsObserverService', function () {
             var observers = {};
             var events = {};
+            var bmsidCache = {};
             var observerService = {
                 addObserver: function (name, o) {
                     if (observers[name] === undefined) {
@@ -55,9 +61,17 @@ define(['prob.api', 'angular', 'jquery', 'xeditable', 'cytoscape'], function (pr
                     return events;
                 },
                 getBmsIds: function (selector, element) {
-                    return $(element).find(selector).map(function () {
-                        return $(this).attr("data-bms-id");
-                    });
+                    var bmsid = element.attr("data-bms-id");
+                    if (bmsidCache[bmsid] === undefined) {
+                        bmsidCache[bmsid] = {};
+                    }
+                    if (bmsidCache[bmsid][selector] === undefined) {
+                        var bmsids = $(element).find(selector).map(function () {
+                            return $(this).attr("data-bms-id");
+                        });
+                        bmsidCache[bmsid][selector] = bmsids;
+                    }
+                    return bmsidCache[bmsid][selector];
                 }
             };
             return observerService;
@@ -121,7 +135,7 @@ define(['prob.api', 'angular', 'jquery', 'xeditable', 'cytoscape'], function (pr
                 }
             }
         }])
-        .service('formula', ['ws', '$q', function (ws, $q) {
+        .service('formula', ['ws', '$q', 'bmsObserverService', function (ws, $q, bmsObserverService) {
 
             var formulaObserver = {
                 getFormulas: function (observer) {
@@ -129,20 +143,58 @@ define(['prob.api', 'angular', 'jquery', 'xeditable', 'cytoscape'], function (pr
                 },
                 apply: function (observer, element, result) {
                     var defer = $q.defer();
-                    var elements = $(element).find(observer.data.selector);
-                    elements.each(function (i, el) {
-                        observer.data.trigger.call(this, $(el), result);
-                    });
-                    defer.resolve();
-                    defer.promise;
+                    if (observer.data.trigger !== undefined) {
+                        var elements = element.find(observer.data.selector);
+                        elements.each(function (i, el) {
+                            observer.data.trigger.call(this, $(el), result);
+                        });
+                        defer.resolve();
+                    } else if (observer.data.getChanges !== undefined) {
+                        var obj = {};
+                        var rr = observer.data.getChanges.call(this, result);
+                        if (rr) {
+                            var bmsids = bmsObserverService.getBmsIds(observer.data.selector, element);
+                            angular.forEach(bmsids, function (id) {
+                                obj[id] = rr;
+                            });
+                        }
+                        defer.resolve(obj);
+                    } else {
+                        defer.resolve();
+                    }
+                    return defer.promise;
                 },
                 check: function (observers, element, stateid) {
                     var defer = $q.defer();
-                    ws.emit("observe", {data: {formulas: observers, stateId: stateid}}, function (data) {
-                        $.each(observers, function (i, o) {
-                            formulaObserver.apply(o, element, data[i]);
+                    var oo = {};
+                    angular.forEach(observers, function (o) {
+                        angular.forEach(o.data.formulas, function (f) {
+                            oo[f] = {};
+                            // TODO: handle translate property ...
                         });
-                        defer.resolve();
+                    });
+                    ws.emit("observe", {data: {observers: oo, stateId: stateid}}, function (data) {
+
+                        var promises = [];
+
+                        $.each(observers, function (i, o) {
+                            var ff = [];
+                            angular.forEach(o.data.formulas, function (f) {
+                                ff.push(data[f] ? data[f].result : null);
+                            });
+                            promises.push(formulaObserver.apply(o, element, ff));
+                        });
+
+                        var fvalues = {};
+                        $q.all(promises).then(function (data) {
+                            angular.forEach(data, function (value) {
+                                if (value !== undefined) {
+                                    $.extend(true, fvalues, value);
+                                }
+                            });
+                            defer.resolve(fvalues);
+                        });
+
                     });
                     return defer.promise;
                 }
@@ -196,7 +248,7 @@ define(['prob.api', 'angular', 'jquery', 'xeditable', 'cytoscape'], function (pr
                 if (Object.prototype.toString.call(tf) === '[object Object]') {
                     return tf;
                 } else if (isFunction(tf)) {
-                    var el = $(element).find(selector);
+                    var el = element.find(selector);
                     el.each(function (i, v) {
                         tf.call(this, $(v))
                     });
@@ -210,8 +262,8 @@ define(['prob.api', 'angular', 'jquery', 'xeditable', 'cytoscape'], function (pr
                     var defer = $q.defer();
                     var settings = $.extend({
                         predicate: "",
-                        true: [],
-                        false: [],
+                        true: {},
+                        false: {},
                         cause: "AnimationChanged",
                         callback: function () {
                         }
@@ -232,10 +284,37 @@ define(['prob.api', 'angular', 'jquery', 'xeditable', 'cytoscape'], function (pr
                     defer.resolve(obj);
                     return defer.promise;
                 },
-                check: function (observer, element, stateid) {
+                check: function (observers, element, stateid) {
                     var defer = $q.defer();
-                    ws.emit("eval", {data: {formula: observer.predicate, stateid: stateid}}, function (result) {
-                        defer.resolve(predicateObserver.apply(observer, element, result.value));
+                    var oo = {};
+                    $.each(observers, function (i, o) {
+                        oo[o.data.predicate] = {};
+                    });
+                    var promises = [];
+                    var startWebsocket = new Date().getTime();
+                    ws.emit("observe", {data: {observers: oo, stateId: stateid}}, function (data) {
+                        var end = new Date().getTime();
+                        var time = end - startWebsocket;
+                        console.log('WEBSOCKET: ' + time);
+                        var startPredicate = new Date().getTime();
+                        angular.forEach(observers, function (o) {
+                            var r = data[o.data.predicate];
+                            if (r) {
+                                promises.push(predicateObserver.apply(o, element, r.result));
+                            }
+                        });
+                        var endPredicate = new Date().getTime();
+                        var time = endPredicate - startPredicate;
+                        console.log('PREDICATE OBSERVER: ' + time);
+                        var fvalues = {};
+                        $q.all(promises).then(function (data) {
+                            angular.forEach(data, function (value) {
+                                if (value !== undefined) {
+                                    $.extend(true, fvalues, value);
+                                }
+                            });
+                            defer.resolve(fvalues);
+                        });
                     });
                     return defer.promise;
                 }

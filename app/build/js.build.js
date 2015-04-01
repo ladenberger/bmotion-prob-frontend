@@ -17,6 +17,7 @@
         "jquery-ui": "vendor/jquery-ui/jquery-ui.min",
         "xeditable": "vendor/angular-xeditable/dist/js/xeditable.min",
         "cytoscape": "vendor/cytoscape/dist/cytoscape.min",
+        "cytoscape.navigator": "vendor/cytoscape.js-navigator/cytoscape.js-navigator",
         "bmotion.config": "bmotion/bmotion.config",
         "bmotion.socket": "bmotion/bmotion.socket",
         "bmotion.main": "bmotion/bmotion.main",
@@ -42,6 +43,7 @@
             exports: "cy",
             deps: ["jquery"]
         },
+        "cytoscape.navigator": ["cytoscape"],
         "prob.api": {
             exports: "bmotion"
         }
