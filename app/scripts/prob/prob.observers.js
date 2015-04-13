@@ -2,7 +2,7 @@
  * BMotion Studio for ProB Observer Module
  *
  */
-define(['prob.api', 'angular', 'jquery', 'xeditable', 'cytoscape'], function (prob) {
+define(['prob.api', 'angular', 'jquery', 'xeditable', 'qtip'], function (prob) {
 
     function isFunction(functionToCheck) {
         var getType = {};
@@ -66,7 +66,7 @@ define(['prob.api', 'angular', 'jquery', 'xeditable', 'cytoscape'], function (pr
                         bmsidCache[bmsid] = {};
                     }
                     if (bmsidCache[bmsid][selector] === undefined) {
-                        var bmsids = $(element).find(selector).map(function () {
+                        var bmsids = $(element).contents().find(selector).map(function () {
                             return $(this).attr("data-bms-id");
                         });
                         bmsidCache[bmsid][selector] = bmsids;
@@ -90,6 +90,7 @@ define(['prob.api', 'angular', 'jquery', 'xeditable', 'cytoscape'], function (pr
 
             return {
                 check: function (observer, element, stateid) {
+
                     var defer = $q.defer();
                     ws.emit("observeCSPTrace", {
                         data: {
@@ -141,19 +142,17 @@ define(['prob.api', 'angular', 'jquery', 'xeditable', 'cytoscape'], function (pr
                 getFormulas: function (observer) {
                     return observer.data.formulas;
                 },
-                apply: function (observer, element, result) {
+                apply: function (observer, container, result) {
                     var defer = $q.defer();
                     if (observer.data.trigger !== undefined) {
-                        var elements = element.find(observer.data.selector);
-                        elements.each(function (i, el) {
-                            observer.data.trigger.call(this, $(el), result);
-                        });
+                        var element = container.contents().find("[data-bms-id=" + observer.bmsid + "]");
+                        observer.data.trigger.call(this, $(element), result);
                         defer.resolve();
                     } else if (observer.data.getChanges !== undefined) {
                         var obj = {};
                         var rr = observer.data.getChanges.call(this, result);
                         if (rr) {
-                            var bmsids = bmsObserverService.getBmsIds(observer.data.selector, element);
+                            var bmsids = bmsObserverService.getBmsIds(observer.data.selector, container);
                             angular.forEach(bmsids, function (id) {
                                 obj[id] = rr;
                             });
@@ -210,30 +209,25 @@ define(['prob.api', 'angular', 'jquery', 'xeditable', 'cytoscape'], function (pr
 
                     var defer = $q.defer();
 
-                    var settings = $.extend({
-                        refinements: [],
-                        cause: "ModelChanged",
-                        enable: [],
-                        disable: []
-                    }, observer.data);
+                    ws.emit("observeRefinement", {data: observer.data}, function (data) {
 
-                    ws.emit("observeRefinement", {data: settings}, function (data) {
                         var obj = {};
                         var rr;
-                        $.each(settings.refinements, function (i, v) {
+
+                        $.each(observer.data.refinements, function (i, v) {
                             if ($.inArray(v, data.refinements) > -1) {
-                                rr = settings.enable;
+                                rr = observer.data.enable;
                             } else {
-                                rr = settings.disable;
+                                rr = observer.data.disable;
                             }
                         });
+
                         if (rr) {
-                            var bmsids = bmsObserverService.getBmsIds(settings.selector, element);
-                            angular.forEach(bmsids, function (id) {
-                                obj[id] = rr;
-                            });
+                            obj[observer.bmsid] = rr
                         }
+
                         defer.resolve(obj);
+
                     });
 
 
@@ -244,11 +238,11 @@ define(['prob.api', 'angular', 'jquery', 'xeditable', 'cytoscape'], function (pr
         }])
         .service('predicate', ['ws', '$q', 'bmsObserverService', function (ws, $q, bmsObserverService) {
 
-            var observePredicateHelper = function (tf, element, selector) {
+            var observePredicateHelper = function (tf, element, observer) {
                 if (Object.prototype.toString.call(tf) === '[object Object]') {
                     return tf;
                 } else if (isFunction(tf)) {
-                    var el = element.find(selector);
+                    var el = observer.element ? $(observer.element) : element.find(observer.data.selector);
                     el.each(function (i, v) {
                         tf.call(this, $(v))
                     });
@@ -258,25 +252,20 @@ define(['prob.api', 'angular', 'jquery', 'xeditable', 'cytoscape'], function (pr
 
             var predicateObserver = {
 
+                getFormulas: function (observer) {
+                    return [observer.data.predicate];
+                },
                 apply: function (observer, element, result) {
                     var defer = $q.defer();
-                    var settings = $.extend({
-                        predicate: "",
-                        true: {},
-                        false: {},
-                        cause: "AnimationChanged",
-                        callback: function () {
-                        }
-                    }, observer.data);
                     var rr = {};
                     if (result === "TRUE") {
-                        rr = observePredicateHelper(settings.true, element, settings.selector)
+                        rr = observePredicateHelper(observer.data.true, element, observer);
                     } else if (result === "FALSE") {
-                        rr = observePredicateHelper(settings.false, element, settings.selector)
+                        rr = observePredicateHelper(observer.data.false, element, observer);
                     }
                     var obj = {};
                     if (rr) {
-                        var bmsids = bmsObserverService.getBmsIds(settings.selector, element);
+                        var bmsids = bmsObserverService.getBmsIds(observer.data.selector, element);
                         angular.forEach(bmsids, function (id) {
                             obj[id] = rr;
                         });
@@ -291,21 +280,21 @@ define(['prob.api', 'angular', 'jquery', 'xeditable', 'cytoscape'], function (pr
                         oo[o.data.predicate] = {};
                     });
                     var promises = [];
-                    var startWebsocket = new Date().getTime();
+                    //var startWebsocket = new Date().getTime();
                     ws.emit("observe", {data: {observers: oo, stateId: stateid}}, function (data) {
-                        var end = new Date().getTime();
-                        var time = end - startWebsocket;
-                        console.log('WEBSOCKET: ' + time);
-                        var startPredicate = new Date().getTime();
+                        //var end = new Date().getTime();
+                        //var time = end - startWebsocket;
+                        //console.log('WEBSOCKET: ' + time);
+                        //var startPredicate = new Date().getTime();
                         angular.forEach(observers, function (o) {
                             var r = data[o.data.predicate];
                             if (r) {
                                 promises.push(predicateObserver.apply(o, element, r.result));
                             }
                         });
-                        var endPredicate = new Date().getTime();
-                        var time = endPredicate - startPredicate;
-                        console.log('PREDICATE OBSERVER: ' + time);
+                        //var endPredicate = new Date().getTime();
+                        //var time = endPredicate - startPredicate;
+                        //console.log('PREDICATE OBSERVER: ' + time);
                         var fvalues = {};
                         $q.all(promises).then(function (data) {
                             angular.forEach(data, function (value) {
@@ -325,20 +314,46 @@ define(['prob.api', 'angular', 'jquery', 'xeditable', 'cytoscape'], function (pr
         }])
         .service('executeEvent', ['ws', '$q', function (ws, $q) {
 
-            var executeEvent = function (data, origin) {
-                var settings = prob.normalize($.extend({
-                    events: [],
-                    callback: function () {
-                    }
-                }, data), ["callback"], origin);
-                ws.emit("executeEvent", {data: settings}, function (result) {
-                    settings.callback.call(this, result)
-                });
-                return settings
-            };
 
-            return {
+            var ev = {
 
+                executeEvent: function (data, origin) {
+                    var settings = prob.normalize($.extend({
+                        events: [],
+                        callback: function () {
+                        }
+                    }, data), ["callback"], origin);
+                    ws.emit("executeEvent", {data: settings}, function (result) {
+                        settings.callback.call(this, result)
+                    });
+                    return settings
+                },
+                getTooltipContent: function (data, origin, api) {
+                    var defer = $q.defer();
+                    ws.emit('initTooltip', {
+                        data: prob.normalize(data, ["callback"], origin)
+                    }, function (data) {
+                        var container = $('<ul></ul>');
+                        $.each(data.events, function (i, v) {
+                            var spanClass = v.canExecute ? 'glyphicon glyphicon-ok-circle' : 'glyphicon glyphicon-remove-circle'
+                            var span = $('<span aria-hidden="true"></span>').addClass(spanClass);
+                            var link = $('<span> ' + v.name + '(' + v.predicate + ')</span>');
+                            if (v.canExecute) {
+                                link = $('<a href="#"> ' + v.name + '(' + v.predicate + ')</a>').click(function () {
+                                    ev.executeEvent({
+                                        events: [{name: v.name, predicate: v.predicate}],
+                                        callback: function () {
+                                            api.hide();
+                                        }
+                                    })
+                                });
+                            }
+                            container.append($('<li></li>').addClass(v.canExecute ? 'enabled' : 'disabled').append(span, link))
+                        });
+                        defer.resolve(container);
+                    });
+                    return defer.promise;
+                },
                 setup: function (event, element) {
 
                     var defer = $q.defer();
@@ -350,49 +365,37 @@ define(['prob.api', 'angular', 'jquery', 'xeditable', 'cytoscape'], function (pr
                         }
                     }, event.data);
 
-                    var el = $(element).find(settings.selector);
+                    var el = event.element ? $(event.element) : $(element).find(settings.selector);
                     el.each(function (i2, v) {
                         var e = $(v);
-                        e.click(function (e) {
-                            executeEvent(settings, $(e.target))
+                        e.click(function (event) {
+                            $(e).qtip('hide');
+                            ev.executeEvent(settings, $(event.target));
                         }).css('cursor', 'pointer');
                         if (settings.tooltip) {
-                            e.tooltipster({
-                                position: "top-left",
-                                animation: "fade",
-                                hideOnClick: true,
-                                updateAnimation: false,
-                                offsetY: 15,
-                                delay: 500,
-                                content: 'Loading...',
-                                theme: 'tooltipster-shadow',
-                                interactive: true,
-                                functionBefore: function (origin, continueTooltip) {
-                                    continueTooltip();
-                                    ws.emit('initTooltip', {
-                                        data: prob.normalize(settings, ["callback"], origin)
-                                    }, function (data) {
-                                        var container = $('<ul></ul>');
-                                        $.each(data.events, function (i, v) {
-                                            var spanClass = v.canExecute ? 'glyphicon glyphicon-ok-circle' : 'glyphicon glyphicon-remove-circle'
-                                            var span = $('<span aria-hidden="true"></span>').addClass(spanClass);
-                                            var link = $('<span> ' + v.name + '(' + v.predicate + ')</span>');
-                                            if (v.canExecute) {
-                                                link = $('<a href="#"> ' + v.name + '(' + v.predicate + ')</a>').click(function () {
-                                                    executeEvent({
-                                                        events: [{name: v.name, predicate: v.predicate}],
-                                                        callback: function () {
-                                                            // Update tooltip
-                                                            origin.tooltipster('hide');
-                                                            origin.tooltipster('show')
-                                                        }
-                                                    })
-                                                });
-                                            }
-                                            container.append($('<li></li>').addClass(v.canExecute ? 'enabled' : 'disabled').append(span, link))
+                            e.qtip({ // Grab some elements to apply the tooltip to
+                                content: {
+                                    text: function (event, api) {
+                                        return ev.getTooltipContent(settings, event.target, api).then(function (container) {
+                                            return container;
                                         });
-                                        origin.tooltipster('content', container)
-                                    });
+                                    }
+                                },
+                                position: {
+                                    my: 'bottom left',
+                                    at: 'top right',
+                                    effect: false
+                                },
+                                show: {
+                                    delay: 600
+                                },
+                                hide: {
+                                    fixed: true,
+                                    delay: 300
+
+                                },
+                                style: {
+                                    classes: 'qtip-light qtip-bootstrap'
                                 }
                             });
                         }
@@ -400,7 +403,10 @@ define(['prob.api', 'angular', 'jquery', 'xeditable', 'cytoscape'], function (pr
                     });
                     return defer.promise;
                 }
-            }
+            };
+
+            return ev;
+
         }]);
 
 });

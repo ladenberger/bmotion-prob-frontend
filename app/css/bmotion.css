@@ -4,8 +4,14 @@
 @import url("../scripts/vendor/tooltipster/css/tooltipster.css");
 @import url("../scripts/vendor/tooltipster/css/themes/tooltipster-shadow.css");
 @import url("../scripts/vendor/cytoscape.js-navigator/cytoscape.js-navigator.css");
+@import url("../scripts/vendor/qtip2/jquery.qtip.min.css");
 /*@import url("../scripts/vendor/joint/dist/joint.css");*/
 @import url("prob.css");
+
+html, body
+{
+    height: 100%;
+}
 
 * {
     margin: 0;

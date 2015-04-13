@@ -21,34 +21,18 @@ define(['prob.api', 'bmotion.main', 'prob.observers', 'jquery', 'tooltipster'], 
             .config(['$controllerProvider', function ($controllerProvider) {
                 module.registerCtrl = $controllerProvider.register;
             }])
-            .run(["$rootScope", 'editableOptions', function ($rootScope, editableOptions) {
-
-                $rootScope.getFormulaElements = function () {
-                    return [];
+            .factory('loadModel', ['$q', 'ws', function ($q, ws) {
+                return {
+                    load: function (data) {
+                        var defer = $q.defer();
+                        ws.emit('loadModel', {data: data}, function (r) {
+                            defer.resolve(r)
+                        });
+                        return defer.promise;
+                    }
                 };
-
-                /*$rootScope.formulaElements = [];
-                 $rootScope.loadElements = function () {
-                 $rootScope.formulaElements = [];
-                 $('[data-hasobserver]').each(function (i, v) {
-                 var el = $(v);
-                 var observer = el.data("observer")["AnimationChanged"];
-                 if (observer["formula"]) {
-                 if (el.parents('svg').length) {
-                 var id = $(v).attr("id");
-                 if (id !== undefined) {
-                 $rootScope.formulaElements.push({
-                 value: $rootScope.formulaElements.length + 1,
-                 text: '#' + id
-                 })
-                 }
-                 }
-                 }
-                 });
-                 };
-                 $rootScope.getFormulaElements = function () {
-                 return $rootScope.formulaElements;
-                 };*/
+            }])
+            .run(["$rootScope", 'editableOptions', function ($rootScope, editableOptions) {
                 editableOptions.theme = 'bs3'; // bootstrap3 theme. Can be also 'bs2', 'default'
             }])
             .factory('bmsScreenshotService', ['bmsVisualisationService', 'bmsObserverService', '$http', '$templateCache', '$injector', '$q', function (bmsVisualisationService, bmsObserverService, $http, $templateCache, $injector, $q) {
@@ -163,13 +147,8 @@ define(['prob.api', 'bmotion.main', 'prob.observers', 'jquery', 'tooltipster'], 
             .factory('bmsVisualisationService', function () {
                 var visualisations = {};
                 return {
-                    addVisualisation: function (name, observers, template, style, uuid) {
-                        visualisations[name] = {
-                            observers: observers,
-                            template: template,
-                            style: style,
-                            uuid: uuid
-                        }
+                    addVisualisation: function (name, data) {
+                        visualisations[name] = data;
                     },
                     getVisualisations: function () {
                         return visualisations;
@@ -179,198 +158,161 @@ define(['prob.api', 'bmotion.main', 'prob.observers', 'jquery', 'tooltipster'], 
                     }
                 }
             })
-            .factory('initProB', ['$q', 'ws', 'initSession', function ($q, ws, initSession) {
-                var defer = $q.defer();
-                initSession.then(function (standalone) {
-                    ws.emit('initProB', "", function (data) {
-                        data.standalone = standalone;
-                        defer.resolve(data);
-                    });
-                });
-                return defer.promise;
-            }])
-            .directive('bmsVisualisationView', ['bmsVisualisationService', '$compile', 'bmsObserverService', '$http', '$templateCache', '$injector', '$timeout', 'ws', '$q', function (bmsVisualisationService, $compile, bmsObserverService, $http, $templateCache, $injector, $timeout, ws, $q) {
+            .directive('bmsVisualisationView', ['bmsVisualisationService', '$compile', 'bmsObserverService', '$http', 'loadModel', 'ws', '$injector', '$q', function (bmsVisualisationService, $compile, bmsObserverService, $http, loadModel, ws, $injector, $q) {
                 return {
                     replace: false,
                     scope: true,
+                    template: '<iframe src="" frameBorder="0" style="width:100%;height:100%"></iframe>',
                     controller: ['$scope', function ($scope) {
 
-                        $scope.observers = [];
-                        $scope.events = [];
-                        $scope.attrs = {};
-
-                        $scope.getValues = function (bmsid) {
-                            return $scope.values[bmsid];
-                        };
-
-                        $scope.getValue = function (bmsid, attr, defaultValue) {
-                            var returnValue = defaultValue === 'undefined' ? undefined : defaultValue;
-                            var ele = $scope.values[bmsid];
-                            if (ele) {
-                                returnValue = ele[attr] === undefined ? returnValue : ele[attr];
+                        ws.on('checkObserver', function (data) {
+                            if (data.stateid !== undefined) {
+                                $scope.setStateId(data.stateid);
                             }
-                            return returnValue;
-                        };
+                        });
 
                     }],
                     link: function ($scope, $element, attrs) {
 
-                        // Save observers and events in current scope
-                        $scope.observerName = attrs["bmsObservers"];
-                        $scope.templateName = attrs["bmsTemplate"];
-                        $scope.visualisationName = attrs["bmsName"];
-                        $scope.style = attrs["bmsStyle"];
+                        console.log("Init visualisation view ...");
 
+                        var iframe = $element.contents();
                         var uuid = guid();
-                        $element.attr("data-bms-id", uuid);
+                        iframe.attr("data-bms-id", uuid);
 
-                        bmsVisualisationService.addVisualisation($scope.visualisationName, $scope.observerName, $scope.templateName, $scope.style, uuid);
+                        $scope.visualisation = attrs["bmsVisualisationView"];
 
-                        // Load and evaluate observers and events
-                        $.getScript($scope.observerName + ".js")
-                            .done(function () {
+                        $scope.addObserver = function (type, data, element) {
+                            var shouldAdd = true;
+                            if (data.refinement) {
+                                if ($.inArray(data.refinement, $scope.refinements) == -1) {
+                                    shouldAdd = false;
+                                }
+                            }
+                            if (shouldAdd) {
+                                var felement = element ? element : iframe.contents().find(data.selector);
+                                felement.each(function (i, e) {
+                                    bmsObserverService.addObserver($scope.visualisation, {
+                                        type: type,
+                                        data: data,
+                                        bmsid: $(e).attr("data-bms-id"),
+                                        element: e
+                                    });
+                                });
+                            }
+                        };
 
-                                $scope.observers = bmsObserverService.getObservers($scope.observerName);
-                                $scope.events = bmsObserverService.getEvents($scope.observerName);
+                        $scope.addEvent = function (type, data, element) {
+                            var shouldAdd = true;
+                            if (data.refinement) {
+                                if ($.inArray(data.refinement, $scope.refinements) == -1) {
+                                    shouldAdd = false;
+                                }
+                            }
+                            if (shouldAdd) {
+                                if (element) {
+                                    data.selector = element.selector;
+                                }
+                                var event = {
+                                    type: type,
+                                    data: data,
+                                    element: element
+                                };
+                                bmsObserverService.addEvent($scope.visualisation, event);
+                                var instance = $injector.get(type, "");
+                                if (instance) {
+                                    instance.setup(event, iframe);
+                                }
+                            }
+                        };
 
-                                // Load template
-                                $http.get($scope.templateName, {cache: $templateCache}).success(function (tplContent) {
+                        $http.get($scope.visualisation + '/bmotion.json').success(function (data) {
 
-                                    var contents = angular.element(tplContent);
+                            $scope.template = data.template;
+                            $scope.model = data.model;
+                            $scope.tool = data.tool;
+                            $scope.name = data.name;
+                            $scope.projection = data.projection; // TODO: Check if SVG element
+
+                            loadModel.load({
+                                model: $scope.model,
+                                tool: $scope.tool,
+                                visualisation: $scope.visualisation
+                            }).then(function (r) {
+                                $scope.refinements = r.refinements;
+                                var jiframe = $(iframe);
+                                jiframe.attr('src', $scope.visualisation + '/' + $scope.template);
+                                jiframe.load(function () {
                                     // Give all elements an internal id
                                     var count = 0;
-                                    $(contents).find("*").each(function (i, v) {
+                                    $(this).contents().find('body').find("*").each(function (i, v) {
                                         $(v).attr("data-bms-id", "bms" + count);
                                         count++;
                                     });
+                                    data.uuid = uuid;
+                                    data.iframe = jiframe;
+                                    $scope.iframe = jiframe;
+                                    bmsVisualisationService.addVisualisation($scope.visualisation, data);
+                                });
+                            });
 
-                                    // Setup events
-                                    if ($scope.events) {
-                                        $.each($scope.events, function (i, e) {
-                                            var instance = $injector.get(e.type, "");
-                                            if (instance) {
-                                                instance.setup(e, contents);
-                                            }
-                                        });
-                                    }
+                        });
 
-                                    $scope.setStateId = function (stateid, fn) {
+                        $scope.setStateId = function (stateid) {
 
-                                        if ($scope.observers && stateid) {
+                            var observers = bmsObserverService.getObservers($scope.visualisation);
 
-                                            var formulaObservers = {};
-                                            var predicateObservers = {};
-                                            var promises = [];
+                            if (observers && stateid) {
 
-                                            $.each($scope.observers, function (i, o) {
+                                var formulaObservers = {};
+                                var predicateObservers = {};
+                                var promises = [];
 
-                                                if (o.type === 'formula') {
-                                                    var id = guid();
-                                                    formulaObservers[id] = o;
-                                                } else if (o.type === 'predicate') {
-                                                    var id = guid();
-                                                    predicateObservers[id] = o;
-                                                } else {
-                                                    var observerInstance = $injector.get(o.type, "");
-                                                    if (observerInstance) {
-                                                        promises.push(observerInstance.check(o, contents, stateid));
-                                                    }
-                                                }
-
-                                            });
-
-                                            var start = new Date().getTime();
-                                            var container = $(contents).parent();
-
-                                            // Special case for formula observers
-                                            if (!$.isEmptyObject(formulaObservers)) {
-                                                // Execute formula observer at once (performance boost)
-                                                var observerInstance = $injector.get("formula", "");
-                                                promises.push(observerInstance.check(formulaObservers, container, stateid));
-                                            }
-
-                                            // Special case for predicate observers
-                                            if (!$.isEmptyObject(predicateObservers)) {
-                                                // Execute predicate observer at once (performance boost)
-                                                var observerInstance = $injector.get("predicate", "");
-                                                promises.push(observerInstance.check(predicateObservers, container, stateid));
-                                            }
-
-                                            // Collect values from observers
-                                            $q.all(promises).then(function (data) {
-
-                                                var fvalues = {};
-                                                angular.forEach(data, function (value) {
-                                                    if (value !== undefined) {
-                                                        $.extend(true, fvalues, value);
-                                                    }
-                                                });
-
-                                                $scope.values = fvalues;
-
-                                                var changed = false;
-
-                                                for (bmsid in fvalues) {
-                                                    var nattrs = fvalues[bmsid];
-                                                    for (a in nattrs) {
-                                                        if ($scope.attrs[bmsid] === undefined) {
-                                                            $scope.attrs[bmsid] = [];
-                                                        }
-                                                        if ($.inArray(a, $scope.attrs[bmsid])) {
-                                                            var orgElement = $(contents).find('[data-bms-id=' + bmsid + ']');
-                                                            var attrDefault = $(orgElement).attr(a);
-                                                            // Special case for class attributes
-                                                            if (a === "class" && attrDefault === undefined) {
-                                                                attrDefault = ""
-                                                            }
-                                                            $(orgElement).attr("ng-attr-" + a,
-                                                                "{{getValue('" + bmsid + "','" + a + "','" + attrDefault + "')}}");
-                                                            $scope.attrs[bmsid].push(a);
-                                                            changed = true;
-                                                        }
-                                                    }
-                                                }
-                                                if (changed) {
-                                                    $compile(contents.contents())($scope);
-                                                }
-
-                                                if (fn !== undefined) {
-                                                    fn.call(this, stateid, contents.html());
-                                                }
-
-                                                var end = new Date().getTime();
-                                                var time = end - start;
-                                                console.log('MAIN EXECUTION TIME: ' + time);
-
-                                            });
-
-                                        }
-
-                                    };
-
-                                    $($element).html($compile(contents)($scope));
-
-                                    if (attrs['bmsStateid'] !== undefined) {
-                                        $scope.setStateId(attrs['bmsStateid']);
+                                $.each(observers, function (i, o) {
+                                    var id = guid();
+                                    if (o.type === 'formula') {
+                                        formulaObservers[id] = o;
+                                    } else if (o.type === 'predicate') {
+                                        predicateObservers[id] = o;
                                     } else {
-                                        ws.on('checkObserver', function (data) {
-                                            if (data.stateid !== undefined) {
-                                                $scope.setStateId(data.stateid);
-                                            }
-                                        });
-                                        ws.emit("refresh");
+                                        var observerInstance = $injector.get(o.type, "");
+                                        if (observerInstance) {
+                                            promises.push(observerInstance.check(o, $scope.iframe, stateid));
+                                        }
                                     }
+                                });
+
+                                // Special case for formula observers
+                                if (!$.isEmptyObject(formulaObservers)) {
+                                    // Execute formula observer at once (performance boost)
+                                    var observerInstance = $injector.get("formula", "");
+                                    promises.push(observerInstance.check(formulaObservers, $scope.iframe, stateid));
+                                }
+
+                                // Special case for predicate observers
+                                if (!$.isEmptyObject(predicateObservers)) {
+                                    // Execute predicate observer at once (performance boost)
+                                    var observerInstance = $injector.get("predicate", "");
+                                    promises.push(observerInstance.check(predicateObservers, $scope.iframe, stateid));
+                                }
+
+                                // Collect values from observers
+                                $q.all(promises).then(function (data) {
+
+                                    var fvalues = {};
+                                    angular.forEach(data, function (value) {
+                                        if (value !== undefined) {
+                                            $.extend(true, fvalues, value);
+                                        }
+                                    });
+
+                                    $scope.$broadcast('changeValues', fvalues);
 
                                 });
 
-                            })
-                            .fail(function () {
-                            });
+                            }
 
-                        // In case of SVG we could also inline the styles ...
-                        if ($scope.style) {
-                            $("head").append($("<link rel='stylesheet' type='text/css' href='" + $scope.style + "' data-bms-style>"));
-                        }
+                        };
 
                     }
                 }

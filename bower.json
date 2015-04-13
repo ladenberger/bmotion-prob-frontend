@@ -19,6 +19,7 @@
     "angular-xeditable": "0.1.8",
     "joint": "latest",
     "underscore": "latest",
-    "lodash": "latest"
+    "lodash": "latest",
+    "qtip2": "latest"
   }
 }

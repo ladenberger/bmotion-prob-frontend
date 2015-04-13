@@ -55,6 +55,14 @@ define(['prob.main', 'angularAMD', 'bmotion.config', 'prob.graph', 'bootstrap', 
                 }
             }
         }])
+        .factory('initProB', ['$q', 'ws', function ($q, ws) {
+            var defer = $q.defer();
+            ws.emit('initProB', "", function (data) {
+                data.standalone = true;
+                defer.resolve(data);
+            });
+            return defer.promise;
+        }])
         .directive('bmsLoadingModal', function () {
             return {
                 restrict: 'E',

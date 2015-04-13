@@ -20,9 +20,10 @@ require.config({
         "prob.main": "prob/prob.main",
         "prob.standalone": "prob/prob.standalone",
         "prob.graph": "prob/prob.graph",
-        "prob.func": "prob/prob.func",
+        "prob.jquery": "prob/prob.jquery",
         "prob.observers": "prob/prob.observers",
-        "prob.api": "prob/prob.api"
+        "prob.api": "prob/prob.api",
+        "qtip": "vendor/qtip2/jquery.qtip"
         /*,"geometry": "vendor/joint/src/geometry",
          "vectorizer": "vendor/joint/src/vectorizer",
          "lodash": "vendor/lodash/lodash",
@@ -41,6 +42,7 @@ require.config({
         "bootstrap": ["jquery"],
         "xeditable": ["angular"],
         "tooltipster": ["jquery"],
+        "qtip": ["jquery"],
         "cytoscape": {
             exports: "cy",
             deps: ["jquery"]
