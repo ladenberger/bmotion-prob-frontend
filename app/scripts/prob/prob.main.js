@@ -39,11 +39,11 @@ define(['prob.api', 'bmotion.main', 'prob.observers', 'jquery', 'tooltipster'], 
 
                 var bmsScreenshotService = {
 
-                    getStyle: function (path) {
+                    getStyle: function (vis, style) {
                         var defer = $q.defer();
-                        if (path !== undefined) {
-                            $http.get(path, {cache: $templateCache}).success(function (style) {
-                                defer.resolve('<style type="text/css">\n<![CDATA[\n' + style + '\n]]>\n</style>');
+                        if (style) {
+                            $http.get(vis + "/" + style, {cache: $templateCache}).success(function (css) {
+                                defer.resolve('<style type="text/css">\n<![CDATA[\n' + css + '\n]]>\n</style>');
                             });
                         } else {
                             defer.resolve();
@@ -226,6 +226,7 @@ define(['prob.api', 'bmotion.main', 'prob.observers', 'jquery', 'tooltipster'], 
                             }
                         };
 
+                        // Get properties from configuration file
                         $http.get($scope.visualisation + '/bmotion.json').success(function (data) {
 
                             $scope.template = data.template;
@@ -286,14 +287,14 @@ define(['prob.api', 'bmotion.main', 'prob.observers', 'jquery', 'tooltipster'], 
                                 if (!$.isEmptyObject(formulaObservers)) {
                                     // Execute formula observer at once (performance boost)
                                     var observerInstance = $injector.get("formula", "");
-                                    promises.push(observerInstance.check(formulaObservers, $scope.iframe, stateid));
+                                    promises.push(observerInstance.check(formulaObservers, $scope.iframe.contents(), stateid));
                                 }
 
                                 // Special case for predicate observers
                                 if (!$.isEmptyObject(predicateObservers)) {
                                     // Execute predicate observer at once (performance boost)
                                     var observerInstance = $injector.get("predicate", "");
-                                    promises.push(observerInstance.check(predicateObservers, $scope.iframe, stateid));
+                                    promises.push(observerInstance.check(predicateObservers, $scope.iframe.contents(), stateid));
                                 }
 
                                 // Collect values from observers

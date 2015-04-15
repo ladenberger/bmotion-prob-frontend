@@ -281,7 +281,7 @@ define(['prob.api', 'angular', 'jquery', 'xeditable', 'cytoscape', 'cytoscape.na
 
                 var promises = [];
                 angular.forEach(bmsids, function (id) {
-                    promises.push(makeElementScreenshot(id, bmsIdData[id]['container'].clone(), observers, results, css, visName));
+                    promises.push(makeElementScreenshot(id, bmsIdData[id]['container'].clone(true), observers, results, css, visName));
                 });
                 $q.all(promises).then(function (data) {
                     defer.resolve(data);
@@ -425,7 +425,7 @@ define(['prob.api', 'angular', 'jquery', 'xeditable', 'cytoscape', 'cytoscape.na
                                 data.push({
                                     value: data.length + 1,
                                     text: i,
-                                    projection: v.projection
+                                    data: v
                                 });
                             }
                         });
@@ -447,7 +447,7 @@ define(['prob.api', 'angular', 'jquery', 'xeditable', 'cytoscape', 'cytoscape.na
 
                             // Clone SVG elements
                             var clonedElements = {};
-                            angular.forEach(selectedVisualisation.projection.elements, function (v) {
+                            angular.forEach(selectedVisualisation.data.projection.elements, function (v) {
                                 var projectionElement = iframe.contents().find(v);
                                 clonedElements[v] = projectionElement.clone(true);
                             });
@@ -475,7 +475,6 @@ define(['prob.api', 'angular', 'jquery', 'xeditable', 'cytoscape', 'cytoscape.na
                             });
 
                             $scope.elementSelection.data = data;
-                            $scope.elementSelection.style = selectedVisualisation.projection.style;
                             $scope.elementSelection.bmsIdData = bmsIdData;
 
                         }
@@ -521,9 +520,9 @@ define(['prob.api', 'angular', 'jquery', 'xeditable', 'cytoscape', 'cytoscape.na
                                 if (jChildren.length > 0) {
                                     jChildren.each(function (i, ele) {
                                         var childBmsId = $(ele).attr('data-bms-id');
-                                        var childData = $scope.elementSelection.bmsIdData[childBmsId]['observers'];
+                                        var childData = $scope.elementSelection.bmsIdData[childBmsId];
                                         if (childData) {
-                                            allObserver = allObserver.concat(childData);
+                                            allObserver = allObserver.concat(childData['observers']);
                                         }
                                     });
                                 }
@@ -554,15 +553,17 @@ define(['prob.api', 'angular', 'jquery', 'xeditable', 'cytoscape', 'cytoscape.na
 
                                 var promises = [];
 
-                                var visName = $scope.getSelectedVisualisation().text;
+                                var vis = $scope.getSelectedVisualisation();
+                                var visName = vis.text;
 
                                 // Get CSS data for HTML
-                                bmsScreenshotService.getStyle(visName + "/" + $scope.elementSelection.style).then(function (css) {
+
+                                bmsScreenshotService.getStyle(visName, vis.data.projection.style).then(function (css) {
 
                                     // Get HTML data
                                     angular.forEach(data.nodes, function (node) {
                                         var results = node.data.results;
-                                        if (node.data.id !== '1') {
+                                        if (node.data.id !== '1' && node.data.labels[0] !== '<< undefined >>') {
                                             promises.push(makeElementScreenshots(bmsids, $scope.elementSelection.bmsIdData, allObserver, results, css, visName));
                                         } else {
                                             promises.push(makeEmptyScreenshot());

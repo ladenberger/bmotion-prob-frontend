@@ -51,22 +51,13 @@ define(['prob.api', 'angular', 'jquery', 'xeditable', 'qtip'], function (prob) {
                 getObservers: function (name) {
                     return observers[name];
                 },
-                getEvents: function (name) {
-                    return events[name];
-                },
-                getAllObservers: function () {
-                    return observers;
-                },
-                getAllEvents: function () {
-                    return events;
-                },
                 getBmsIds: function (selector, element) {
                     var bmsid = element.attr("data-bms-id");
                     if (bmsidCache[bmsid] === undefined) {
                         bmsidCache[bmsid] = {};
                     }
                     if (bmsidCache[bmsid][selector] === undefined) {
-                        var bmsids = $(element).contents().find(selector).map(function () {
+                        var bmsids = $(element).find(selector).map(function () {
                             return $(this).attr("data-bms-id");
                         });
                         bmsidCache[bmsid][selector] = bmsids;
@@ -145,7 +136,7 @@ define(['prob.api', 'angular', 'jquery', 'xeditable', 'qtip'], function (prob) {
                 apply: function (observer, container, result) {
                     var defer = $q.defer();
                     if (observer.data.trigger !== undefined) {
-                        var element = container.contents().find("[data-bms-id=" + observer.bmsid + "]");
+                        var element = container.find("[data-bms-id=" + observer.bmsid + "]");
                         observer.data.trigger.call(this, $(element), result);
                         defer.resolve();
                     } else if (observer.data.getChanges !== undefined) {
@@ -258,17 +249,14 @@ define(['prob.api', 'angular', 'jquery', 'xeditable', 'qtip'], function (prob) {
                 apply: function (observer, element, result) {
                     var defer = $q.defer();
                     var rr = {};
-                    if (result === "TRUE") {
+                    if (result[0] === "TRUE") {
                         rr = observePredicateHelper(observer.data.true, element, observer);
-                    } else if (result === "FALSE") {
+                    } else if (result[0] === "FALSE") {
                         rr = observePredicateHelper(observer.data.false, element, observer);
                     }
                     var obj = {};
                     if (rr) {
-                        var bmsids = bmsObserverService.getBmsIds(observer.data.selector, element);
-                        angular.forEach(bmsids, function (id) {
-                            obj[id] = rr;
-                        });
+                        obj[observer.bmsid] = rr;
                     }
                     defer.resolve(obj);
                     return defer.promise;
@@ -289,7 +277,7 @@ define(['prob.api', 'angular', 'jquery', 'xeditable', 'qtip'], function (prob) {
                         angular.forEach(observers, function (o) {
                             var r = data[o.data.predicate];
                             if (r) {
-                                promises.push(predicateObserver.apply(o, element, r.result));
+                                promises.push(predicateObserver.apply(o, element, [r.result]));
                             }
                         });
                         //var endPredicate = new Date().getTime();
