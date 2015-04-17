@@ -161,11 +161,11 @@ define(['prob.api', 'angular', 'jquery', 'xeditable', 'cytoscape', 'cytoscape.na
                     });
                     return defer.promise;
                 },
-                getVisualizationSnapshotAsSvg: function (template, visualization, stateid, css) {
+                getVisualizationSnapshotAsSvg: function (template, view, stateid, css) {
 
                     var defer = $q.defer();
 
-                    var container = visualization.container.clone(true);
+                    var container = view.container.clone(true);
                     var observers = template.observers;
                     var name = template.name;
 
@@ -214,10 +214,10 @@ define(['prob.api', 'angular', 'jquery', 'xeditable', 'cytoscape', 'cytoscape.na
                     return defer.promise;
 
                 },
-                getVisualizationSnapshotAsDataUrl: function (template, visualization, stateid, css) {
+                getVisualizationSnapshotAsDataUrl: function (template, view, stateid, css) {
 
                     var defer = $q.defer();
-                    renderingService.getVisualizationSnapshotAsSvg(template, visualization, stateid, css).then(function (svg) {
+                    renderingService.getVisualizationSnapshotAsSvg(template, view, stateid, css).then(function (svg) {
                         renderingService.getImageCanvasForSvg(svg).then(function (canvas) {
                             defer.resolve({
                                 dataUrl: canvas.toDataURL('image/png'),
@@ -410,8 +410,8 @@ define(['prob.api', 'angular', 'jquery', 'xeditable', 'cytoscape', 'cytoscape.na
                 scope: true,
                 template: '<div style="width:100%;height:100%;">'
                 + '<div style="float:left">'
-                + '<a href="#" editable-select="templateSelection.selected" buttons="no" onshow="loadTemplates()" e-ng-options="s.value as s.name for s in templateSelection.data">'
-                + '{{ showTemplateSelection() }}'
+                + '<a href="#" editable-select="visualisationSelection.selected" buttons="no" onshow="loadVisualisations()" e-ng-options="s.value as s.name for s in visualisationSelection.data">'
+                + '{{ showVisualisationSelection() }}'
                 + '</a>'
                 + '<a style="margin-left:10px" href="#" editable-select="elementSelection.selected" e-multiple onshow="loadElements()" e-ng-options="s.value as s.text for s in elementSelection.data">'
                 + '{{ showElementSelection() }}'
@@ -423,7 +423,7 @@ define(['prob.api', 'angular', 'jquery', 'xeditable', 'cytoscape', 'cytoscape.na
                 + '</div>',
                 controller: ['$scope', function ($scope) {
 
-                    $scope.templateSelection = {
+                    $scope.visualisationSelection = {
                         data: [],
                         selected: undefined
                     };
@@ -453,47 +453,47 @@ define(['prob.api', 'angular', 'jquery', 'xeditable', 'cytoscape', 'cytoscape.na
                         return selected.length ? selected.join(', ') : 'Graphical Element';
                     };
 
-                    $scope.showTemplateSelection = function () {
-                        var selected = $scope.getTemplateSelection();
-                        return selected ? selected.name : 'Template';
+                    $scope.showVisualisationSelection = function () {
+                        var selected = $scope.getVisualisationSelection();
+                        return selected ? selected.name : 'Visualisation';
                     };
 
-                    $scope.getTemplateSelection = function () {
-                        var selected = $filter('filter')($scope.templateSelection.data, {value: $scope.templateSelection.selected});
+                    $scope.getVisualisationSelection = function () {
+                        var selected = $filter('filter')($scope.visualisationSelection.data, {value: $scope.visualisationSelection.selected});
                         return selected[0];
                     };
 
-                    $scope.loadTemplates = function () {
+                    $scope.loadVisualisations = function () {
                         var data = [];
                         angular.forEach(bmsVisualisationService.getVisualisations(), function (v, i) {
-                            if (v.visualization) {
+                            if (v.view) {
                                 data.push({
                                     value: data.length + 1,
                                     name: i,
-                                    container: v.iframe,
+                                    container: v.container,
                                     observers: bmsObserverService.getObservers(i),
                                     data: v
                                 });
                             }
                         });
-                        $scope.templateSelection.data = data;
+                        $scope.visualisationSelection.data = data;
                     };
 
                     $scope.loadElements = function () {
 
-                        var selectedTemplate = $scope.getTemplateSelection();
+                        var selectedVisualisation = $scope.getVisualisationSelection();
 
-                        if (selectedTemplate) {
+                        if (selectedVisualisation) {
 
                             var data = [];
                             var bmsIdDataMap = {};
 
-                            var container = selectedTemplate.container;
-                            var observers = selectedTemplate.observers;
+                            var container = selectedVisualisation.container;
+                            var observers = selectedVisualisation.observers;
 
                             // Clone SVG elements
                             var clonedElements = {};
-                            angular.forEach(selectedTemplate.data.visualization.elements, function (v) {
+                            angular.forEach(selectedVisualisation.data.view.elements, function (v) {
                                 var projectionElement = container.contents().find(v);
                                 clonedElements[v] = projectionElement.clone(true);
                             });
@@ -536,7 +536,7 @@ define(['prob.api', 'angular', 'jquery', 'xeditable', 'cytoscape', 'cytoscape.na
                                     elements.push($scope.elementSelection.bmsIdDataMap[s.bmsid]);
                                 }
                             });
-                            $scope.getData(elements, $scope.getTemplateSelection()).then(function (data) {
+                            $scope.getData(elements, $scope.getVisualisationSelection()).then(function (data) {
                                 $scope.loadData(data);
                             });
                         }
@@ -595,7 +595,7 @@ define(['prob.api', 'angular', 'jquery', 'xeditable', 'cytoscape', 'cytoscape.na
 
                                 // Get CSS data for HTML
 
-                                bmsScreenshotService.getStyle(template.name, template.data.visualization.style).then(function (css) {
+                                bmsScreenshotService.getStyle(template.name, template.data.view.style).then(function (css) {
 
                                     // Get HTML data
                                     angular.forEach(data.nodes, function (node) {
@@ -745,11 +745,11 @@ define(['prob.api', 'angular', 'jquery', 'xeditable', 'cytoscape', 'cytoscape.na
                 replace: false,
                 template: '<div style="height:100%;width:100%;">'
                 + '<div style="float:left">'
-                + '<a href="#" editable-select="templateSelection.selected" buttons="no" onshow="loadTemplates()" e-ng-options="s.value as s.name for s in templateSelection.data">'
-                + '{{ showTemplateSelection() }}'
+                + '<a href="#" editable-select="visualisationSelection.selected" buttons="no" onshow="loadVisualisations()" e-ng-options="s.value as s.name for s in visualisationSelection.data">'
+                + '{{ showVisualisationSelection() }}'
                 + '</a>'
-                + '<a style="margin-left:10px" href="#" editable-select="elementSelection.selected" onshow="loadElements()" e-ng-options="s.value as s.text for s in elementSelection.data">'
-                + '{{ showElementSelection() }}'
+                + '<a style="margin-left:10px" href="#" editable-select="viewSelection.selected" onshow="loadViews()" e-ng-options="s.value as s.text for s in viewSelection.data">'
+                + '{{ showViewSelection() }}'
                 + '</a>'
                 + '</div>'
                 + '<div style="float:right"><button type="button" class="btn btn-default btn-xs" ng-click="export()"><span class="glyphicon glyphicon-export"></span></button></div>'
@@ -758,50 +758,50 @@ define(['prob.api', 'angular', 'jquery', 'xeditable', 'cytoscape', 'cytoscape.na
                 + '</div>',
                 controller: ['$scope', function ($scope) {
 
-                    $scope.templateSelection = {
+                    $scope.visualisationSelection = {
                         data: [],
                         selected: undefined
                     };
 
-                    $scope.elementSelection = {
+                    $scope.viewSelection = {
                         data: [],
                         selected: undefined
                     };
 
-                    $scope.getTemplateSelection = function () {
-                        var selected = $filter('filter')($scope.templateSelection.data, {value: $scope.templateSelection.selected});
+                    $scope.getVisualisationSelection = function () {
+                        var selected = $filter('filter')($scope.visualisationSelection.data, {value: $scope.visualisationSelection.selected});
                         return selected[0];
                     };
 
-                    $scope.showTemplateSelection = function () {
-                        var selected = $scope.getTemplateSelection();
-                        return selected ? selected.name : 'Template';
+                    $scope.showVisualisationSelection = function () {
+                        var selected = $scope.getVisualisationSelection();
+                        return selected ? selected.name : 'Visualisation';
                     };
 
-                    $scope.loadTemplates = function () {
+                    $scope.loadVisualisations = function () {
                         var data = [];
                         angular.forEach(bmsVisualisationService.getVisualisations(), function (v, i) {
-                            if (v.visualization) {
+                            if (v.view) {
                                 data.push({
                                     value: data.length + 1,
                                     name: i,
                                     observers: bmsObserverService.getObservers(i),
-                                    container: v.iframe,
+                                    container: v.container,
                                     data: v
                                 });
                             }
                         });
-                        $scope.templateSelection.data = data;
+                        $scope.visualisationSelection.data = data;
                     };
 
-                    $scope.loadElements = function () {
+                    $scope.loadViews = function () {
 
-                        var selectedVisualisation = $scope.getTemplateSelection();
+                        var selectedVisualisation = $scope.getVisualisationSelection();
                         if (selectedVisualisation) {
                             var data = [];
-                            var visualization = selectedVisualisation.data.visualization;
-                            if (visualization) {
-                                angular.forEach(visualization.elements, function (e) {
+                            var view = selectedVisualisation.data.view;
+                            if (view) {
+                                angular.forEach(view.elements, function (e) {
                                     data.push({
                                         value: data.length + 1,
                                         text: e,
@@ -809,30 +809,30 @@ define(['prob.api', 'angular', 'jquery', 'xeditable', 'cytoscape', 'cytoscape.na
                                     });
                                 });
                             }
-                            $scope.elementSelection.data = data;
+                            $scope.viewSelection.data = data;
                         }
 
                     };
 
-                    $scope.getSelectedElement = function () {
-                        var selected = $filter('filter')($scope.elementSelection.data, {value: $scope.elementSelection.selected});
+                    $scope.getSelectedView = function () {
+                        var selected = $filter('filter')($scope.viewSelection.data, {value: $scope.viewSelection.selected});
                         return selected[0];
                     };
 
-                    $scope.showElementSelection = function () {
-                        var selected = $scope.getSelectedElement();
-                        return selected ? selected.text : 'Visualization';
+                    $scope.showViewSelection = function () {
+                        var selected = $scope.getSelectedView();
+                        return selected ? selected.text : 'View';
                     };
 
-                    $scope.$watch('elementSelection.selected', function (newValue) {
+                    $scope.$watch('viewSelection.selected', function (newValue) {
                         if (newValue) {
-                            $scope.getData($scope.getTemplateSelection(), $scope.getSelectedElement()).then(function (data) {
+                            $scope.getData($scope.getVisualisationSelection(), $scope.getSelectedView()).then(function (data) {
                                 $scope.loadData(data);
                             });
                         }
                     });
 
-                    $scope.getData = function (template, visualization) {
+                    $scope.getData = function (visualisation, view) {
 
                         var defer = $q.defer();
 
@@ -840,11 +840,11 @@ define(['prob.api', 'angular', 'jquery', 'xeditable', 'cytoscape', 'cytoscape.na
 
                             var promises = [];
 
-                            bmsScreenshotService.getStyle(template.name, template.data.visualization.style).then(function (css) {
+                            bmsScreenshotService.getStyle(visualisation.name, visualisation.data.view.style).then(function (css) {
 
                                 angular.forEach(data.nodes, function (n) {
                                     if (n.data.id !== 'root') {
-                                        promises.push(bmsRenderingService.getVisualizationSnapshotAsDataUrl(template, visualization, n.data.id, css));
+                                        promises.push(bmsRenderingService.getVisualizationSnapshotAsDataUrl(visualisation, view, n.data.id, css));
                                     } else {
                                         promises.push(bmsRenderingService.getEmptySnapshotDataUrl());
                                     }
@@ -877,6 +877,15 @@ define(['prob.api', 'angular', 'jquery', 'xeditable', 'cytoscape', 'cytoscape.na
                     $scope.refreshNavigator = function () {
                         if ($scope.navigator) {
                             $scope.navigator.cytoscapeNavigator('resize');
+                        }
+                    };
+
+                    $scope.export = function () {
+                        if ($scope.cy) {
+                            window.open($scope.cy.png({
+                                full: true,
+                                scale: 2
+                            }));
                         }
                     };
 

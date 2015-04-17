@@ -39,104 +39,16 @@ define(['prob.api', 'bmotion.main', 'prob.observers', 'jquery', 'tooltipster'], 
 
                 var bmsScreenshotService = {
 
-                    getStyle: function (vis, style) {
+                    getStyle: function (template, style) {
                         var defer = $q.defer();
                         if (style) {
-                            $http.get(vis + "/" + style, {cache: $templateCache}).success(function (css) {
+                            $http.get(template + "/" + style, {cache: $templateCache}).success(function (css) {
                                 defer.resolve('<style type="text/css">\n<![CDATA[\n' + css + '\n]]>\n</style>');
                             });
                         } else {
                             defer.resolve();
                         }
                         return defer.promise;
-                    },
-                    makeScreenshot: function (visualisationName, stateid) {
-
-                        var defer = $q.defer();
-
-                        var selected = bmsVisualisationService.getVisualisation(visualisationName);
-                        var observerName = selected.observers;
-                        var templateName = selected.template;
-                        var styleName = selected.style;
-
-                        // Load and evaluate observers and events
-                        var observers = bmsObserverService.getObservers(observerName);
-
-                        // Load template
-                        $http.get(templateName, {cache: $templateCache}).success(function (tplContent) {
-
-                            var contents = angular.element(tplContent);
-
-                            // Give all elements an internal id
-                            var count = 0;
-                            $(contents).find("*").each(function (i, v) {
-                                $(v).attr("data-bms-id", "bms" + count);
-                                count++;
-                            });
-
-                            if (observers && stateid) {
-
-                                var formulaObservers = {};
-                                var promises = [];
-
-                                $.each(observers, function (i, o) {
-
-                                    if (o.type === 'formula') {
-                                        var id = guid();
-                                        formulaObservers[id] = o;
-                                    } else {
-                                        var observerInstance = $injector.get(o.type, "");
-                                        if (observerInstance) {
-                                            promises.push(observerInstance.check(o, contents, stateid));
-                                        }
-                                    }
-
-                                });
-
-                                // Special case for formula observers
-                                if (!$.isEmptyObject(formulaObservers)) {
-                                    // Execute formula observer at once (performance boost)
-                                    var observerInstance = $injector.get("formula", "");
-                                    promises.push(observerInstance.check(formulaObservers, contents, stateid));
-                                }
-
-                                // Collect values from observers
-                                $q.all(promises).then(function (data) {
-
-                                    var fvalues = {};
-                                    angular.forEach(data, function (value) {
-                                        if (value !== undefined) {
-                                            $.extend(true, fvalues, value);
-                                        }
-                                    });
-
-                                    for (bmsid in fvalues) {
-                                        var nattrs = fvalues[bmsid];
-                                        for (a in nattrs) {
-                                            var orgElement = $(contents).find('[data-bms-id=' + bmsid + ']');
-                                            $(orgElement).attr(a, nattrs[a]);
-                                        }
-                                    }
-
-                                    bmsScreenshotService.getStyle(styleName).then(function (style) {
-                                        if (style !== undefined) {
-                                            contents.prepend(style);
-                                        }
-                                        var wrapper = $('<div>').append(contents);
-                                        defer.resolve({
-                                            stateid: stateid,
-                                            html: wrapper.html()
-                                        });
-                                    });
-
-                                });
-
-                            }
-
-                        });
-
-                        return defer.promise;
-
                     }
 
                 };
@@ -233,7 +145,7 @@ define(['prob.api', 'bmotion.main', 'prob.observers', 'jquery', 'tooltipster'], 
                             $scope.model = data.model;
                             $scope.tool = data.tool;
                             $scope.name = data.name;
-                            $scope.visualization = data.visualization; // TODO: Check if SVG element
+                            $scope.view = data.view; // TODO: Check if SVG element
 
                             loadModel.load({
                                 model: $scope.model,
@@ -251,8 +163,8 @@ define(['prob.api', 'bmotion.main', 'prob.observers', 'jquery', 'tooltipster'], 
                                         count++;
                                     });
                                     data.uuid = uuid;
-                                    data.iframe = jiframe;
-                                    $scope.iframe = jiframe;
+                                    data.container = jiframe;
+                                    $scope.container = jiframe;
                                     bmsVisualisationService.addVisualisation($scope.visualisation, data);
                                 });
                             });
@@ -266,7 +178,7 @@ define(['prob.api', 'bmotion.main', 'prob.observers', 'jquery', 'tooltipster'], 
                             if (observers && stateid) {
 
                                 // Collect values from observers
-                                bmsObserverService.checkObservers(observers, $scope.iframe.contents(), stateid).then(function (data) {
+                                bmsObserverService.checkObservers(observers, $scope.container.contents(), stateid).then(function (data) {
                                     var fvalues = {};
                                     angular.forEach(data, function (value) {
                                         if (value !== undefined) {
