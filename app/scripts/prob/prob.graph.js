@@ -5,7 +5,7 @@
 define(['prob.api', 'angular', 'jquery', 'xeditable', 'cytoscape', 'cytoscape.navigator'], function (prob) {
 
     return angular.module('prob.graph', ['xeditable', 'bms.main'])
-        .factory('bmsRenderingService', ['$q', '$injector', function ($q, $injector) {
+        .factory('bmsRenderingService', ['$q', '$injector', 'bmsObserverService', function ($q, $injector, bmsObserverService) {
 
             var renderingService = {
                 removeBlanks: function (context, canvas, imgWidth, imgHeight) {
@@ -161,6 +161,74 @@ define(['prob.api', 'angular', 'jquery', 'xeditable', 'cytoscape', 'cytoscape.na
                     });
                     return defer.promise;
                 },
+                getVisualizationSnapshotAsSvg: function (template, visualization, stateid, css) {
+
+                    var defer = $q.defer();
+
+                    var container = visualization.container.clone(true);
+                    var observers = template.observers;
+                    var name = template.name;
+
+                    bmsObserverService.checkObservers(observers, container, stateid).then(function (data) {
+
+                        // Collect attributes and values
+                        var fvalues = {};
+                        angular.forEach(data, function (value) {
+                            if (value !== undefined) {
+                                $.extend(true, fvalues, value);
+                            }
+                        });
+                        // Set attribute and values
+                        for (bid in fvalues) {
+                            var nattrs = fvalues[bid];
+                            for (a in nattrs) {
+                                var orgElement = container.find('[data-bms-id=' + bid + ']');
+                                $(orgElement).attr(a, nattrs[a]);
+                            }
+                        }
+
+                        // Replace image paths with embedded images
+                        var imgConvert = [];
+                        container.find("image").each(function (i, e) {
+                            var src = $(e).attr("xlink:href");
+                            imgConvert.push(function () {
+                                var defer = $q.defer();
+                                renderingService.convertImgToBase64(name + "/" + src, function (dataUrl) {
+                                    $(e).attr("xlink:href", dataUrl);
+                                    defer.resolve();
+                                });
+                                return defer.promise;
+                            }());
+                        });
+
+                        $q.all(imgConvert).then(function () {
+                            if (css !== undefined) {
+                                container.prepend(css);
+                            }
+                            var divWrapper = $('<div>').html(container);
+                            defer.resolve(divWrapper.html());
+                        });
+
+                    });
+
+                    return defer.promise;
+
+                },
+                getVisualizationSnapshotAsDataUrl: function (template, visualization, stateid, css) {
+
+                    var defer = $q.defer();
+                    renderingService.getVisualizationSnapshotAsSvg(template, visualization, stateid, css).then(function (svg) {
+                        renderingService.getImageCanvasForSvg(svg).then(function (canvas) {
+                            defer.resolve({
+                                dataUrl: canvas.toDataURL('image/png'),
+                                width: canvas.width,
+                                height: canvas.height
+                            });
+                        });
+                    });
+                    return defer.promise;
+
+                },
                 getElementSnapshotAsDataUrl: function (element, results, css, vis) {
                     var defer = $q.defer();
                     renderingService.getElementSnapshotAsSvg(element, results, css, vis).then(function (svg) {
@@ -257,7 +325,6 @@ define(['prob.api', 'angular', 'jquery', 'xeditable', 'cytoscape', 'cytoscape.na
                     return defer.promise;
 
                 }
-
             };
 
             return renderingService;
@@ -343,8 +410,8 @@ define(['prob.api', 'angular', 'jquery', 'xeditable', 'cytoscape', 'cytoscape.na
                 scope: true,
                 template: '<div style="width:100%;height:100%;">'
                 + '<div style="float:left">'
-                + '<a href="#" editable-select="visualisationSelection.selected" buttons="no" onshow="loadVisualisations()" e-ng-options="s.value as s.text for s in visualisationSelection.data">'
-                + '{{ showVisualisationSelection() }}'
+                + '<a href="#" editable-select="templateSelection.selected" buttons="no" onshow="loadTemplates()" e-ng-options="s.value as s.name for s in templateSelection.data">'
+                + '{{ showTemplateSelection() }}'
                 + '</a>'
                 + '<a style="margin-left:10px" href="#" editable-select="elementSelection.selected" e-multiple onshow="loadElements()" e-ng-options="s.value as s.text for s in elementSelection.data">'
                 + '{{ showElementSelection() }}'
@@ -354,9 +421,9 @@ define(['prob.api', 'angular', 'jquery', 'xeditable', 'cytoscape', 'cytoscape.na
                 + '<div class="projection-diagram-graph" style="height:100%;width:80%;float:left;"></div>'
                 + '<div class="projection-diagramnavigator" style="float:left;height:100%;width:20%;position:relative;bottom:0;right:0;"></div>'
                 + '</div>',
-                link: function ($scope, $element) {
+                controller: ['$scope', function ($scope) {
 
-                    $scope.visualisationSelection = {
+                    $scope.templateSelection = {
                         data: [],
                         selected: undefined
                     };
@@ -386,49 +453,55 @@ define(['prob.api', 'angular', 'jquery', 'xeditable', 'cytoscape', 'cytoscape.na
                         return selected.length ? selected.join(', ') : 'Graphical Element';
                     };
 
-                    $scope.showVisualisationSelection = function () {
-                        var selected = $filter('filter')($scope.visualisationSelection.data, {value: $scope.visualisationSelection.selected});
-                        return ($scope.visualisationSelection.selected && selected.length) ? selected[0].text : 'Visualization';
+                    $scope.showTemplateSelection = function () {
+                        var selected = $scope.getTemplateSelection();
+                        return selected ? selected.name : 'Template';
                     };
 
-                    $scope.loadVisualisations = function () {
+                    $scope.getTemplateSelection = function () {
+                        var selected = $filter('filter')($scope.templateSelection.data, {value: $scope.templateSelection.selected});
+                        return selected[0];
+                    };
+
+                    $scope.loadTemplates = function () {
                         var data = [];
                         angular.forEach(bmsVisualisationService.getVisualisations(), function (v, i) {
-                            if (v.projection) {
+                            if (v.visualization) {
                                 data.push({
                                     value: data.length + 1,
-                                    text: i,
+                                    name: i,
+                                    container: v.iframe,
+                                    observers: bmsObserverService.getObservers(i),
                                     data: v
                                 });
                             }
                         });
-                        $scope.visualisationSelection.data = data;
+                        $scope.templateSelection.data = data;
                     };
 
                     $scope.loadElements = function () {
 
-                        var selectedVisualisation = $scope.getSelectedVisualisation();
+                        var selectedTemplate = $scope.getTemplateSelection();
 
-                        if (selectedVisualisation) {
+                        if (selectedTemplate) {
 
                             var data = [];
                             var bmsIdDataMap = {};
 
-                            var visData = bmsVisualisationService.getVisualisation(selectedVisualisation.text);
-                            var observers = bmsObserverService.getObservers(selectedVisualisation.text);
-                            var iframe = visData.iframe;
+                            var container = selectedTemplate.container;
+                            var observers = selectedTemplate.observers;
 
                             // Clone SVG elements
                             var clonedElements = {};
-                            angular.forEach(selectedVisualisation.data.projection.elements, function (v) {
-                                var projectionElement = iframe.contents().find(v);
+                            angular.forEach(selectedTemplate.data.visualization.elements, function (v) {
+                                var projectionElement = container.contents().find(v);
                                 clonedElements[v] = projectionElement.clone(true);
                             });
 
                             // Collect elements
                             angular.forEach(observers, function (o) {
                                 if (o.type === "formula" || o.type === "predicate") {
-                                    var ele = iframe.contents().find('[data-bms-id=' + o.bmsid + ']');
+                                    var ele = container.contents().find('[data-bms-id=' + o.bmsid + ']');
                                     if (bmsIdDataMap[o.bmsid] === undefined) {
                                         var id = ele.attr("id");
                                         var svgParent = ele.closest("svg");
@@ -455,11 +528,6 @@ define(['prob.api', 'angular', 'jquery', 'xeditable', 'cytoscape', 'cytoscape.na
 
                     };
 
-                    $scope.getSelectedVisualisation = function () {
-                        var selected = $filter('filter')($scope.visualisationSelection.data, {value: $scope.visualisationSelection.selected});
-                        return selected[0];
-                    };
-
                     $scope.$watch('elementSelection.selected', function (newValue) {
                         if (newValue) {
                             var elements = [];
@@ -468,28 +536,26 @@ define(['prob.api', 'angular', 'jquery', 'xeditable', 'cytoscape', 'cytoscape.na
                                     elements.push($scope.elementSelection.bmsIdDataMap[s.bmsid]);
                                 }
                             });
-                            $scope.getData(elements).then(function (data) {
+                            $scope.getData(elements, $scope.getTemplateSelection()).then(function (data) {
                                 $scope.loadData(data);
                             });
                         }
                     });
 
-                    $scope.getData = function (elements) {
+                    $scope.getData = function (elements, template) {
 
                         var defer = $q.defer();
 
                         if (elements.length > 0) {
 
-                            var selectedVisualisation = $scope.getSelectedVisualisation();
-                            var visData = bmsVisualisationService.getVisualisation(selectedVisualisation.text);
-                            var iframe = visData.iframe;
+                            var container = template.container;
 
                             // (1) Collect observers
                             var allObserver = [];
                             angular.forEach(elements, function (v) {
                                 allObserver = allObserver.concat(v.observers);
                                 // Collect observer also from children
-                                var jElement = iframe.contents().find('[data-bms-id=' + v.bmsid + ']');
+                                var jElement = container.contents().find('[data-bms-id=' + v.bmsid + ']');
                                 var jChildren = jElement.children();
                                 if (jChildren.length > 0) {
                                     jChildren.each(function (i, ele) {
@@ -527,24 +593,20 @@ define(['prob.api', 'angular', 'jquery', 'xeditable', 'cytoscape', 'cytoscape.na
 
                                 var promises = [];
 
-                                var vis = $scope.getSelectedVisualisation();
-                                var visName = vis.text;
-
                                 // Get CSS data for HTML
 
-                                bmsScreenshotService.getStyle(visName, vis.data.projection.style).then(function (css) {
+                                bmsScreenshotService.getStyle(template.name, template.data.visualization.style).then(function (css) {
 
                                     // Get HTML data
                                     angular.forEach(data.nodes, function (node) {
                                         var results = node.data.results;
                                         if (node.data.id !== '1' && node.data.labels[0] !== '<< undefined >>') {
-                                            promises.push(bmsRenderingService.getElementSnapshotAsDataUrl(elements, results, css, visName));
+                                            promises.push(bmsRenderingService.getElementSnapshotAsDataUrl(elements, results, css, template.name));
                                         } else {
                                             promises.push(bmsRenderingService.getEmptySnapshotDataUrl());
                                         }
                                     });
 
-                                    // Convert to images
                                     $q.all(promises).then(function (screens) {
                                         angular.forEach(data.nodes, function (n, i) {
                                             n.data.svg = screens[i].dataUrl;
@@ -566,20 +628,6 @@ define(['prob.api', 'angular', 'jquery', 'xeditable', 'cytoscape', 'cytoscape.na
 
                     };
 
-                    $scope.loadData = function (data) {
-                        if (data) {
-                            if (!$scope.cy) {
-                                bmsDiagramElementProjectionGraph.build($element, data).then(function (result) {
-                                    $scope.cy = result.cy;
-                                    $scope.navigator = result.navigator;
-                                });
-                            } else {
-                                $scope.cy.load(data);
-                                $scope.refreshNavigator();
-                            }
-                        }
-                    };
-
                     $scope.refreshDiagram = function () {
                         if ($scope.cy) {
                             $scope.cy.load($scope.cy.elements().jsons())
@@ -596,6 +644,23 @@ define(['prob.api', 'angular', 'jquery', 'xeditable', 'cytoscape', 'cytoscape.na
                     $scope.$on('refreshDiagram', function () {
                         $scope.refreshDiagram();
                     });
+
+                }],
+                link: function ($scope, $element) {
+
+                    $scope.loadData = function (data) {
+                        if (data) {
+                            if (!$scope.cy) {
+                                bmsDiagramElementProjectionGraph.build($element, data).then(function (result) {
+                                    $scope.cy = result.cy;
+                                    $scope.navigator = result.navigator;
+                                });
+                            } else {
+                                $scope.cy.load(data);
+                                $scope.refreshNavigator();
+                            }
+                        }
+                    };
 
                 }
             }
@@ -675,54 +740,99 @@ define(['prob.api', 'angular', 'jquery', 'xeditable', 'cytoscape', 'cytoscape.na
             };
 
         }])
-        .directive('bmsDiagramTraceView', ['bmsScreenshotService', '$filter', 'bmsVisualisationService', 'bmsDiagramTraceGraph', 'ws', '$compile', 'bmsRenderingService', '$q', function (bmsScreenshotService, $filter, bmsVisualisationService, bmsDiagramTraceGraph, ws, $compile, bmsRenderingService, $q) {
+        .directive('bmsDiagramTraceView', ['bmsScreenshotService', 'bmsObserverService', '$filter', 'bmsVisualisationService', 'bmsDiagramTraceGraph', 'ws', '$compile', 'bmsRenderingService', '$q', function (bmsScreenshotService, bmsObserverService, $filter, bmsVisualisationService, bmsDiagramTraceGraph, ws, $compile, bmsRenderingService, $q) {
             return {
                 replace: false,
                 template: '<div style="height:100%;width:100%;">'
-                + '<div>'
-                + '<span>Visualisation: </span><a href="#" editable-select="elementSelection.selected" buttons="no" onshow="loadVisElements()" e-ng-options="s.value as s.text for s in elementSelection.data">'
-                + '{{ showStatus() }}'
+                + '<div style="float:left">'
+                + '<a href="#" editable-select="templateSelection.selected" buttons="no" onshow="loadTemplates()" e-ng-options="s.value as s.name for s in templateSelection.data">'
+                + '{{ showTemplateSelection() }}'
+                + '</a>'
+                + '<a style="margin-left:10px" href="#" editable-select="elementSelection.selected" onshow="loadElements()" e-ng-options="s.value as s.text for s in elementSelection.data">'
+                + '{{ showElementSelection() }}'
                 + '</a>'
                 + '</div>'
+                + '<div style="float:right"><button type="button" class="btn btn-default btn-xs" ng-click="export()"><span class="glyphicon glyphicon-export"></span></button></div>'
                 + '<div class="trace-diagram-graph" style="height:100%;width:80%;float:left;"></div>'
                 + '<div class="trace-diagram-navigator" style="float:left;height:100%;width:20%;position:relative;bottom:0;right:0;"></div>'
                 + '</div>',
                 controller: ['$scope', function ($scope) {
+
+                    $scope.templateSelection = {
+                        data: [],
+                        selected: undefined
+                    };
 
                     $scope.elementSelection = {
                         data: [],
                         selected: undefined
                     };
 
-                    $scope.loadVisElements = function () {
+                    $scope.getTemplateSelection = function () {
+                        var selected = $filter('filter')($scope.templateSelection.data, {value: $scope.templateSelection.selected});
+                        return selected[0];
+                    };
+
+                    $scope.showTemplateSelection = function () {
+                        var selected = $scope.getTemplateSelection();
+                        return selected ? selected.name : 'Template';
+                    };
+
+                    $scope.loadTemplates = function () {
                         var data = [];
-                        var vis = bmsVisualisationService.getVisualisations();
-                        for (p in vis) {
-                            data.push({
-                                value: data.length + 1,
-                                text: p
-                            });
+                        angular.forEach(bmsVisualisationService.getVisualisations(), function (v, i) {
+                            if (v.visualization) {
+                                data.push({
+                                    value: data.length + 1,
+                                    name: i,
+                                    observers: bmsObserverService.getObservers(i),
+                                    container: v.iframe,
+                                    data: v
+                                });
+                            }
+                        });
+                        $scope.templateSelection.data = data;
+                    };
+
+                    $scope.loadElements = function () {
+
+                        var selectedVisualisation = $scope.getTemplateSelection();
+                        if (selectedVisualisation) {
+                            var data = [];
+                            var visualization = selectedVisualisation.data.visualization;
+                            if (visualization) {
+                                angular.forEach(visualization.elements, function (e) {
+                                    data.push({
+                                        value: data.length + 1,
+                                        text: e,
+                                        container: selectedVisualisation.container.contents().find(e)
+                                    });
+                                });
+                            }
+                            $scope.elementSelection.data = data;
                         }
-                        $scope.elementSelection.data = data;
+
                     };
 
-                    $scope.showStatus = function () {
+                    $scope.getSelectedElement = function () {
                         var selected = $filter('filter')($scope.elementSelection.data, {value: $scope.elementSelection.selected});
-                        return ($scope.elementSelection.selected && selected.length) ? selected[0].text : 'Not set';
+                        return selected[0];
                     };
 
-                }],
-                link: function ($scope, $element, attrs) {
+                    $scope.showElementSelection = function () {
+                        var selected = $scope.getSelectedElement();
+                        return selected ? selected.text : 'Visualization';
+                    };
 
                     $scope.$watch('elementSelection.selected', function (newValue) {
                         if (newValue) {
-                            $scope.getData().then(function (data) {
+                            $scope.getData($scope.getTemplateSelection(), $scope.getSelectedElement()).then(function (data) {
                                 $scope.loadData(data);
                             });
                         }
                     });
 
-                    $scope.getData = function () {
+                    $scope.getData = function (template, visualization) {
 
                         var defer = $q.defer();
 
@@ -730,45 +840,31 @@ define(['prob.api', 'angular', 'jquery', 'xeditable', 'cytoscape', 'cytoscape.na
 
                             var promises = [];
 
-                            angular.forEach(data.nodes, function (n) {
-                                if (n.data.id !== 'root') {
-                                    promises.push(bmsScreenshotService.makeScreenshot($scope.showStatus(), n.data.id));
-                                }
-                            });
+                            bmsScreenshotService.getStyle(template.name, template.data.visualization.style).then(function (css) {
 
-                            var stateHtmlMap = {};
-                            $q.all(promises).then(function (s) {
-                                angular.forEach(s, function (v) {
-                                    stateHtmlMap[v.stateid] = v.html;
+                                angular.forEach(data.nodes, function (n) {
+                                    if (n.data.id !== 'root') {
+                                        promises.push(bmsRenderingService.getVisualizationSnapshotAsDataUrl(template, visualization, n.data.id, css));
+                                    } else {
+                                        promises.push(bmsRenderingService.getEmptySnapshotDataUrl());
+                                    }
                                 });
-                                var loaders = [];
-                                $.each(data.nodes, function (i, v) {
-                                    //loaders.push(bmsRenderingService.loadHtml(v, stateHtmlMap[v.data.id]));
-                                    loaders.push(bmsRenderingService.loadImage(v, stateHtmlMap[v.data.id]));
-                                });
-                                $q.all(loaders).then(function () {
+
+                                $q.all(promises).then(function (screens) {
+                                    angular.forEach(data.nodes, function (n, i) {
+                                        n.data.svg = screens[i].dataUrl;
+                                        n.data.height = screens[i].height + 15;
+                                        n.data.width = screens[i].width + 30;
+                                    });
                                     defer.resolve(data);
                                 });
+
                             });
 
                         });
 
                         return defer.promise;
 
-                    };
-
-                    $scope.loadData = function (data) {
-                        if (data) {
-                            if (!$scope.cy) {
-                                bmsDiagramTraceGraph.build($element, data).then(function (result) {
-                                    $scope.cy = result.cy;
-                                    $scope.navigator = result.navigator;
-                                });
-                            } else {
-                                $scope.cy.load(data);
-                                $scope.refreshNavigator();
-                            }
-                        }
                     };
 
                     $scope.refreshDiagram = function () {
@@ -787,6 +883,23 @@ define(['prob.api', 'angular', 'jquery', 'xeditable', 'cytoscape', 'cytoscape.na
                     $scope.$on('refreshDiagram', function () {
                         $scope.refreshDiagram();
                     });
+
+                }],
+                link: function ($scope, $element, attrs) {
+
+                    $scope.loadData = function (data) {
+                        if (data) {
+                            if (!$scope.cy) {
+                                bmsDiagramTraceGraph.build($element, data).then(function (result) {
+                                    $scope.cy = result.cy;
+                                    $scope.navigator = result.navigator;
+                                });
+                            } else {
+                                $scope.cy.load(data);
+                                $scope.refreshNavigator();
+                            }
+                        }
+                    };
 
                 }
             }

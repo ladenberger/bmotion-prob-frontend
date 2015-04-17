@@ -233,7 +233,7 @@ define(['prob.api', 'bmotion.main', 'prob.observers', 'jquery', 'tooltipster'], 
                             $scope.model = data.model;
                             $scope.tool = data.tool;
                             $scope.name = data.name;
-                            $scope.projection = data.projection; // TODO: Check if SVG element
+                            $scope.visualization = data.visualization; // TODO: Check if SVG element
 
                             loadModel.load({
                                 model: $scope.model,
@@ -265,50 +265,15 @@ define(['prob.api', 'bmotion.main', 'prob.observers', 'jquery', 'tooltipster'], 
 
                             if (observers && stateid) {
 
-                                var formulaObservers = {};
-                                var predicateObservers = {};
-                                var promises = [];
-
-                                $.each(observers, function (i, o) {
-                                    var id = guid();
-                                    if (o.type === 'formula') {
-                                        formulaObservers[id] = o;
-                                    } else if (o.type === 'predicate') {
-                                        predicateObservers[id] = o;
-                                    } else {
-                                        var observerInstance = $injector.get(o.type, "");
-                                        if (observerInstance) {
-                                            promises.push(observerInstance.check(o, $scope.iframe, stateid));
-                                        }
-                                    }
-                                });
-
-                                // Special case for formula observers
-                                if (!$.isEmptyObject(formulaObservers)) {
-                                    // Execute formula observer at once (performance boost)
-                                    var observerInstance = $injector.get("formula", "");
-                                    promises.push(observerInstance.check(formulaObservers, $scope.iframe.contents(), stateid));
-                                }
-
-                                // Special case for predicate observers
-                                if (!$.isEmptyObject(predicateObservers)) {
-                                    // Execute predicate observer at once (performance boost)
-                                    var observerInstance = $injector.get("predicate", "");
-                                    promises.push(observerInstance.check(predicateObservers, $scope.iframe.contents(), stateid));
-                                }
-
                                 // Collect values from observers
-                                $q.all(promises).then(function (data) {
-
+                                bmsObserverService.checkObservers(observers, $scope.iframe.contents(), stateid).then(function (data) {
                                     var fvalues = {};
                                     angular.forEach(data, function (value) {
                                         if (value !== undefined) {
                                             $.extend(true, fvalues, value);
                                         }
                                     });
-
                                     $scope.$broadcast('changeValues', fvalues);
-
                                 });
 
                             }

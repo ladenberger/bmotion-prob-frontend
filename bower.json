@@ -12,14 +12,9 @@
     "angular-route": "1.3.x",
     "socket.io-client": "1.3.x",
     "jquery-ui": "1.11.3",
-    "tooltipster": "3.3.0",
     "jquery.cookie": "1.4.1",
     "cytoscape": "2.3.9",
-    "cytoscape-css-renderer": "latest",
     "angular-xeditable": "0.1.8",
-    "joint": "latest",
-    "underscore": "latest",
-    "lodash": "latest",
     "qtip2": "latest"
   }
 }

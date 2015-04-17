@@ -9,8 +9,21 @@ define(['prob.api', 'angular', 'jquery', 'xeditable', 'qtip'], function (prob) {
         return functionToCheck && getType.toString.call(functionToCheck) === '[object Function]';
     }
 
+    var guid = (function () {
+        function s4() {
+            return Math.floor((1 + Math.random()) * 0x10000)
+                .toString(16)
+                .substring(1);
+        }
+
+        return function () {
+            return s4() + s4() + '-' + s4() + '-' + s4() + '-' +
+                s4() + '-' + s4() + s4() + s4();
+        };
+    })();
+
     return angular.module('prob.observers', ['bms.main'])
-        .service('bmsObserverService', function () {
+        .service('bmsObserverService', ['$q', '$injector', function ($q, $injector) {
             var observers = {};
             var events = {};
             var bmsidCache = {};
@@ -63,10 +76,53 @@ define(['prob.api', 'angular', 'jquery', 'xeditable', 'qtip'], function (prob) {
                         bmsidCache[bmsid][selector] = bmsids;
                     }
                     return bmsidCache[bmsid][selector];
+                },
+                checkObservers: function (observers, container, stateid) {
+
+                    var defer = $q.defer();
+
+                    var formulaObservers = {};
+                    var predicateObservers = {};
+                    var promises = [];
+
+                    angular.forEach(observers, function (o) {
+                        var id = guid();
+                        if (o.type === 'formula') {
+                            formulaObservers[id] = o;
+                        } else if (o.type === 'predicate') {
+                            predicateObservers[id] = o;
+                        } else {
+                            var observerInstance = $injector.get(o.type, "");
+                            if (observerInstance) {
+                                promises.push(observerInstance.check(o, container, stateid));
+                            }
+                        }
+                    });
+
+                    // Special case for formula observers
+                    if (!$.isEmptyObject(formulaObservers)) {
+                        // Execute formula observer at once (performance boost)
+                        var observerInstance = $injector.get("formula", "");
+                        promises.push(observerInstance.check(formulaObservers, container, stateid));
+                    }
+
+                    // Special case for predicate observers
+                    if (!$.isEmptyObject(predicateObservers)) {
+                        // Execute predicate observer at once (performance boost)
+                        var observerInstance = $injector.get("predicate", "");
+                        promises.push(observerInstance.check(predicateObservers, container, stateid));
+                    }
+
+                    $q.all(promises).then(function (data) {
+                        defer.resolve(data);
+                    });
+
+                    return defer.promise;
+
                 }
             };
             return observerService;
-        })
+        }])
         .service('csp-event', ['ws', '$q', 'bmsObserverService', function (ws, $q, bmsObserverService) {
 
             var replaceParameter = function (str, para) {
