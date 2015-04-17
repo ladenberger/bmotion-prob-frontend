@@ -17,6 +17,15 @@ define(['prob.api', 'bmotion.main', 'prob.observers', 'jquery', 'tooltipster'], 
             };
         })();
 
+        function isEmpty(map) {
+            for (var key in map) {
+                if (map.hasOwnProperty(key)) {
+                    return false;
+                }
+            }
+            return true;
+        }
+
         var module = angular.module('prob.main', ['bms.main', 'prob.observers'])
             .config(['$controllerProvider', function ($controllerProvider) {
                 module.registerCtrl = $controllerProvider.register;
@@ -104,13 +113,20 @@ define(['prob.api', 'bmotion.main', 'prob.observers', 'jquery', 'tooltipster'], 
                             if (shouldAdd) {
                                 var felement = element ? element : iframe.contents().find(data.selector);
                                 felement.each(function (i, e) {
-                                    bmsObserverService.addObserver($scope.visualisation, {
+                                    var observer = {
                                         type: type,
                                         data: data,
                                         bmsid: $(e).attr("data-bms-id"),
                                         element: e
+                                    };
+                                    bmsObserverService.addObserver($scope.visualisation, observer);
+                                    bmsObserverService.checkObserver(observer, $scope.container.contents(), $scope.stateid).then(function (data) {
+                                        if (!isEmpty(data)) {
+                                            $scope.$broadcast('setValue', data);
+                                        }
                                     });
                                 });
+
                             }
                         };
 
@@ -153,6 +169,7 @@ define(['prob.api', 'bmotion.main', 'prob.observers', 'jquery', 'tooltipster'], 
                                 visualisation: $scope.visualisation
                             }).then(function (r) {
                                 $scope.refinements = r.refinements;
+                                $scope.stateid = r.stateid;
                                 var jiframe = $(iframe);
                                 jiframe.attr('src', $scope.visualisation + '/' + $scope.template);
                                 jiframe.load(function () {
@@ -185,7 +202,9 @@ define(['prob.api', 'bmotion.main', 'prob.observers', 'jquery', 'tooltipster'], 
                                             $.extend(true, fvalues, value);
                                         }
                                     });
-                                    $scope.$broadcast('changeValues', fvalues);
+                                    if (!isEmpty(fvalues)) {
+                                        $scope.$broadcast('changeValues', fvalues);
+                                    }
                                 });
 
                             }

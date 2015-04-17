@@ -77,20 +77,29 @@ define(['prob.api', 'angular', 'jquery', 'xeditable', 'qtip'], function (prob) {
                     }
                     return bmsidCache[bmsid][selector];
                 },
+                checkObserver: function (observer, container, stateid) {
+                    var defer = $q.defer();
+                    var observerInstance = $injector.get(observer.type, "");
+                    if (observerInstance) {
+                        observerInstance.check(observer, container, stateid).then(function (data) {
+                            defer.resolve(data);
+                        });
+                    }
+                    return defer.promise;
+                },
                 checkObservers: function (observers, container, stateid) {
 
                     var defer = $q.defer();
 
-                    var formulaObservers = {};
-                    var predicateObservers = {};
+                    var formulaObservers = [];
+                    var predicateObservers = [];
                     var promises = [];
 
                     angular.forEach(observers, function (o) {
-                        var id = guid();
                         if (o.type === 'formula') {
-                            formulaObservers[id] = o;
+                            formulaObservers.push(o);
                         } else if (o.type === 'predicate') {
-                            predicateObservers[id] = o;
+                            predicateObservers.push(o);
                         } else {
                             var observerInstance = $injector.get(o.type, "");
                             if (observerInstance) {
@@ -210,39 +219,69 @@ define(['prob.api', 'angular', 'jquery', 'xeditable', 'qtip'], function (prob) {
                     }
                     return defer.promise;
                 },
-                check: function (observers, element, stateid) {
+                check: function (observer, element, stateid) {
+
                     var defer = $q.defer();
-                    var oo = {};
-                    angular.forEach(observers, function (o) {
-                        angular.forEach(o.data.formulas, function (f) {
+
+                    if (Object.prototype.toString.call(observer) === '[object Array]') {
+
+                        var oo = {};
+                        angular.forEach(observer, function (o) {
+                            angular.forEach(o.data.formulas, function (f) {
+                                oo[f] = {};
+                                // TODO: handle translate property ...
+                            });
+                        });
+                        ws.emit("observe", {data: {observers: oo, stateId: stateid}}, function (data) {
+                            var promises = [];
+                            $.each(observer, function (i, o) {
+                                var ff = [];
+                                angular.forEach(o.data.formulas, function (f) {
+                                    ff.push(data[f] ? data[f].result : null);
+                                });
+                                promises.push(formulaObserver.apply(o, element, ff));
+                            });
+                            var fvalues = {};
+                            $q.all(promises).then(function (data) {
+                                angular.forEach(data, function (value) {
+                                    if (value !== undefined) {
+                                        $.extend(true, fvalues, value);
+                                    }
+                                });
+                                defer.resolve(fvalues);
+                            });
+                        });
+
+                    } else {
+
+                        var oo = {};
+                        angular.forEach(observer.data.formulas, function (f) {
                             oo[f] = {};
                             // TODO: handle translate property ...
                         });
-                    });
-                    ws.emit("observe", {data: {observers: oo, stateId: stateid}}, function (data) {
 
-                        var promises = [];
+                        ws.emit("observe", {data: {observers: oo, stateId: stateid}}, function (res) {
 
-                        $.each(observers, function (i, o) {
                             var ff = [];
-                            angular.forEach(o.data.formulas, function (f) {
-                                ff.push(data[f] ? data[f].result : null);
+                            angular.forEach(observer.data.formulas, function (f) {
+                                ff.push(res[f] ? res[f].result : null);
                             });
-                            promises.push(formulaObserver.apply(o, element, ff));
+                            formulaObserver.apply(observer, element, ff).then(function (data) {
+                                var fvalues = {};
+                                angular.forEach(data, function (value) {
+                                    if (value !== undefined) {
+                                        $.extend(true, fvalues, value);
+                                    }
+                                });
+                                defer.resolve(fvalues);
+                            });
+
                         });
 
-                        var fvalues = {};
-                        $q.all(promises).then(function (data) {
-                            angular.forEach(data, function (value) {
-                                if (value !== undefined) {
-                                    $.extend(true, fvalues, value);
-                                }
-                            });
-                            defer.resolve(fvalues);
-                        });
+                    }
 
-                    });
                     return defer.promise;
+
                 }
             };
 

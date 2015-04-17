@@ -69,10 +69,11 @@ require.config({
          lodash: {
          exports: '_'
          },*/
+        "prob.vis": ["prob.jquery"],
+        "prob.graph": ['prob.api', 'angular', 'jquery', 'xeditable', 'cytoscape', 'cytoscape.navigator'],
         "prob.api": {
             exports: "bmotion"
-        },
-        "prob.graph": ['prob.api', 'angular', 'jquery', 'xeditable', 'cytoscape']
+        }
     },
     map: {
         "*": {

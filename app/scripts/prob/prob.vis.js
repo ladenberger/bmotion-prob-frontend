@@ -36,6 +36,11 @@ define(['angularAMD', 'prob.jquery'], function (angularAMD) {
                         return returnValue;
                     };
 
+                    $parentScope.$on('setValue', function (e, value) {
+                        $scope.values = $.extend(true, $scope.values, value);
+                        $scope.$apply();
+                    });
+
                     $parentScope.$on('changeValues', function (e, values) {
                         $scope.values = values;
                         $scope.$apply();
@@ -72,8 +77,7 @@ define(['angularAMD', 'prob.jquery'], function (angularAMD) {
                             $compile($element.contents())($scope);
                         }
 
-                    });
-
+                    }, true);
                 }
             }
         }]);
