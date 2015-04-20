@@ -467,7 +467,8 @@ define(['prob.api', 'angular', 'jquery', 'xeditable', 'qtip'], function (prob) {
                                 position: {
                                     my: 'bottom left',
                                     at: 'top right',
-                                    effect: false
+                                    effect: false,
+                                    viewport: $(window)
                                 },
                                 show: {
                                     delay: 600
