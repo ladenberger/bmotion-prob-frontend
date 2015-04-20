@@ -229,9 +229,9 @@ define(['prob.api', 'angular', 'jquery', 'xeditable', 'cytoscape', 'cytoscape.na
                     return defer.promise;
 
                 },
-                getElementSnapshotAsDataUrl: function (element, results, css, vis) {
+                getElementSnapshotAsDataUrl: function (element, results, data, css, vis) {
                     var defer = $q.defer();
-                    renderingService.getElementSnapshotAsSvg(element, results, css, vis).then(function (svg) {
+                    renderingService.getElementSnapshotAsSvg(element, results, data, css, vis).then(function (svg) {
                         renderingService.getImageCanvasForSvg(svg).then(function (canvas) {
                             defer.resolve({
                                 dataUrl: canvas.toDataURL('image/png'),
@@ -242,7 +242,7 @@ define(['prob.api', 'angular', 'jquery', 'xeditable', 'cytoscape', 'cytoscape.na
                     });
                     return defer.promise;
                 },
-                getElementSnapshotAsSvg: function (element, results, css, vis) {
+                getElementSnapshotAsSvg: function (element, results, data, css, vis) {
 
                     var defer = $q.defer();
 
@@ -250,7 +250,7 @@ define(['prob.api', 'angular', 'jquery', 'xeditable', 'cytoscape', 'cytoscape.na
 
                         var promises = [];
                         angular.forEach(element, function (ele) {
-                            promises.push(renderingService.getElementSnapshotAsSvg(ele, results, css, vis));
+                            promises.push(renderingService.getElementSnapshotAsSvg(ele, results, data, css, vis));
                         });
                         $q.all(promises).then(function (data) {
                             defer.resolve(data);
@@ -260,9 +260,18 @@ define(['prob.api', 'angular', 'jquery', 'xeditable', 'cytoscape', 'cytoscape.na
 
                         var container = element.container.clone(true);
 
+                        // Collect all observers
+                        var allObserver = element.observers;
+                        angular.forEach(element.children, function (c) {
+                            var child = data[c];
+                            if (child) {
+                                allObserver = allObserver.concat(child.observers);
+                            }
+                        });
+
                         // Prepare observers
                         var promises = [];
-                        angular.forEach(element.observers, function (o) {
+                        angular.forEach(allObserver, function (o) {
                             var observerInstance = $injector.get(o.type, "");
                             if (observerInstance) {
                                 promises.push(observerInstance.apply(o, container, o['count'].map(function (pos) {
@@ -409,6 +418,7 @@ define(['prob.api', 'angular', 'jquery', 'xeditable', 'cytoscape', 'cytoscape.na
                 replace: false,
                 scope: true,
                 template: '<div style="width:100%;height:100%;">'
+                + '<div>'
                 + '<div style="float:left">'
                 + '<a href="#" editable-select="visualisationSelection.selected" buttons="no" onshow="loadVisualisations()" e-ng-options="s.value as s.name for s in visualisationSelection.data">'
                 + '{{ showVisualisationSelection() }}'
@@ -418,6 +428,8 @@ define(['prob.api', 'angular', 'jquery', 'xeditable', 'cytoscape', 'cytoscape.na
                 + '</a>'
                 + '</div>'
                 + '<div style="float:right"><button type="button" class="btn btn-default btn-xs" ng-click="export()"><span class="glyphicon glyphicon-export"></span></button></div>'
+                + '</div><br/>'
+                + '<div style="width:100%;height:100%;">'
                 + '<div class="projection-diagram-graph" style="height:100%;width:80%;float:left;"></div>'
                 + '<div class="projection-diagramnavigator" style="float:left;height:100%;width:20%;position:relative;bottom:0;right:0;"></div>'
                 + '</div>',
@@ -503,19 +515,28 @@ define(['prob.api', 'angular', 'jquery', 'xeditable', 'cytoscape', 'cytoscape.na
                                 if (o.type === "formula" || o.type === "predicate") {
                                     var ele = container.contents().find('[data-bms-id=' + o.bmsid + ']');
                                     if (bmsIdDataMap[o.bmsid] === undefined) {
+
                                         var id = ele.attr("id");
                                         var svgParent = ele.closest("svg");
                                         var svgId = svgParent.attr("id");
                                         bmsIdDataMap[o.bmsid] = {
                                             container: clonedElements["#" + svgId],
                                             observers: [],
+                                            children: [],
                                             bmsid: o.bmsid
                                         };
+                                        var eleChildren = ele.children();
+                                        if (eleChildren.length > 0) {
+                                            eleChildren.each(function (i, ele) {
+                                                bmsIdDataMap[o.bmsid].children.push($(ele).attr('data-bms-id'));
+                                            });
+                                        }
                                         data.push({
                                             value: data.length + 1,
                                             text: id == undefined ? o.bmsid : id,
                                             bmsid: o.bmsid
                                         });
+
                                     }
                                     bmsIdDataMap[o.bmsid]['observers'].push(o);
                                 }
@@ -553,19 +574,16 @@ define(['prob.api', 'angular', 'jquery', 'xeditable', 'cytoscape', 'cytoscape.na
                             // (1) Collect observers
                             var allObserver = [];
                             angular.forEach(elements, function (v) {
+
                                 allObserver = allObserver.concat(v.observers);
                                 // Collect observer also from children
-                                var jElement = container.contents().find('[data-bms-id=' + v.bmsid + ']');
-                                var jChildren = jElement.children();
-                                if (jChildren.length > 0) {
-                                    jChildren.each(function (i, ele) {
-                                        var childBmsId = $(ele).attr('data-bms-id');
-                                        var childData = $scope.elementSelection.bmsIdDataMap[childBmsId];
-                                        if (childData) {
-                                            allObserver = allObserver.concat(childData.observers);
-                                        }
-                                    });
-                                }
+                                angular.forEach(v.children, function (c) {
+                                    var childData = $scope.elementSelection.bmsIdDataMap[c];
+                                    if (childData) {
+                                        allObserver = allObserver.concat(childData.observers);
+                                    }
+                                });
+
                             });
 
                             // (2) Collect formulas of observers
@@ -601,7 +619,7 @@ define(['prob.api', 'angular', 'jquery', 'xeditable', 'cytoscape', 'cytoscape.na
                                     angular.forEach(data.nodes, function (node) {
                                         var results = node.data.results;
                                         if (node.data.id !== '1' && node.data.labels[0] !== '<< undefined >>') {
-                                            promises.push(bmsRenderingService.getElementSnapshotAsDataUrl(elements, results, css, template.name));
+                                            promises.push(bmsRenderingService.getElementSnapshotAsDataUrl(elements, results, $scope.elementSelection.bmsIdDataMap, css, template.name));
                                         } else {
                                             promises.push(bmsRenderingService.getEmptySnapshotDataUrl());
                                         }
@@ -744,7 +762,7 @@ define(['prob.api', 'angular', 'jquery', 'xeditable', 'cytoscape', 'cytoscape.na
             return {
                 replace: false,
                 template: '<div style="height:100%;width:100%;">'
-                + '<div style="float:left">'
+                + '<div>'
                 + '<a href="#" editable-select="visualisationSelection.selected" buttons="no" onshow="loadVisualisations()" e-ng-options="s.value as s.name for s in visualisationSelection.data">'
                 + '{{ showVisualisationSelection() }}'
                 + '</a>'
@@ -752,10 +770,8 @@ define(['prob.api', 'angular', 'jquery', 'xeditable', 'cytoscape', 'cytoscape.na
                 + '{{ showViewSelection() }}'
                 + '</a>'
                 + '</div>'
-                + '<div style="float:right"><button type="button" class="btn btn-default btn-xs" ng-click="export()"><span class="glyphicon glyphicon-export"></span></button></div>'
                 + '<div class="trace-diagram-graph" style="height:100%;width:80%;float:left;"></div>'
-                + '<div class="trace-diagram-navigator" style="float:left;height:100%;width:20%;position:relative;bottom:0;right:0;"></div>'
-                + '</div>',
+                + '<div class="trace-diagram-navigator" style="float:left;height:100%;width:20%;position:relative;bottom:0;right:0;"></div>',
                 controller: ['$scope', function ($scope) {
 
                     $scope.visualisationSelection = {
