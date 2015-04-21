@@ -1,86 +1,63 @@
-require.config({
-    baseUrl: "/bms/app/scripts",
+requirejs.config({
+    baseUrl: "../../app/scripts",
     paths: {
         "jquery": "vendor/jquery/dist/jquery.min",
         "angular": "vendor/angular/angular.min",
         "angular-route": "vendor/angular-route/angular-route.min",
+        "ui-bootstrap": "vendor/angular-bootstrap/ui-bootstrap",
+        "ui-bootstrap-tpls": "vendor/angular-bootstrap/ui-bootstrap-tpls",
         "angularAMD": "vendor/angularAMD/angularAMD.min",
         "socketio": "vendor/socket.io-client/socket.io",
         "bootstrap": "vendor/bootstrap/dist/js/bootstrap.min",
         "jquery.cookie": "vendor/jquery.cookie/jquery.cookie",
-        "tooltipster": "vendor/tooltipster/js/jquery.tooltipster.min",
         "jquery-ui": "vendor/jquery-ui/jquery-ui.min",
         "xeditable": "vendor/angular-xeditable/dist/js/xeditable.min",
         "cytoscape": "vendor/cytoscape/dist/cytoscape",
         "cytoscape.navigator": "vendor/cytoscape.js-navigator/cytoscape.js-navigator",
-        "bmotion.config": "bmotion/bmotion.config",
-        "bmotion.socket": "bmotion/bmotion.socket",
-        "bmotion.main": "bmotion/bmotion.main",
+        "bms.common": "bmotion/bms.common",
         "bmotion.func": "bmotion/bmotion.func",
-        "prob.main": "prob/prob.main",
+        "prob.ui": "prob/prob.ui",
+        "prob.iframe": "prob/prob.iframe",
         "prob.standalone": "prob/prob.standalone",
         "prob.graph": "prob/prob.graph",
         "prob.jquery": "prob/prob.jquery",
         "prob.observers": "prob/prob.observers",
         "prob.api": "prob/prob.api",
         "qtip": "vendor/qtip2/jquery.qtip"
-        /*,"geometry": "vendor/joint/src/geometry",
-         "vectorizer": "vendor/joint/src/vectorizer",
-         "lodash": "vendor/lodash/lodash",
-         "backbone": "vendor/joint/lib/backbone",
-         "joint": "vendor/joint/dist/joint.clean",
-         "joint.layout.DirectedGraph": "vendor/joint/plugins/layout/DirectedGraph/joint.layout.DirectedGraph",
-         "dagre": "vendor/joint/plugins/layout/DirectedGraph/lib/dagre"*/
     },
     shim: {
         "angular": {"exports": "angular"},
         "angularAMD": ["angular"],
         "angular-route": ["angular"],
+        "ui-bootstrap-tpls": ["ui-bootstrap"],
+        "ui-bootstrap": ["angular"],
         "socketio": {"exports": "io"},
         "jquery": {"exports": "$"},
         "jquery-ui": ["jquery"],
         "bootstrap": ["jquery"],
         "xeditable": ["angular"],
-        "tooltipster": ["jquery"],
         "qtip": ["jquery"],
         "cytoscape": {
             exports: "cy",
             deps: ["jquery"]
         },
         "cytoscape.navigator": ["cytoscape"],
-        /*backbone: {
-         //These script dependencies should be loaded before loading backbone.js.
-         deps: ['lodash', 'jquery'],
-         //Once loaded, use the global 'Backbone' as the module value.
-         exports: 'Backbone'
-         },
-         "joint.layout.DirectedGraph": ["joint", "dagre"],
-         joint: {
-         deps: ['geometry', 'vectorizer', 'jquery', 'lodash', 'backbone'],
-         exports: 'joint',
-         init: function(geometry, vectorizer) {
-         // JointJS must export geometry and vectorizer otheriwse
-         // they won't be exported due to the AMD nature of those libs and
-         // so JointJS would be missing them.
-         this.g = geometry;
-         this.V = vectorizer;
-         }
-         },
-         lodash: {
-         exports: '_'
-         },*/
-        "prob.vis": ["prob.jquery"],
+        "prob.standalone": ['prob.graph', 'prob.ui', 'prob.iframe', 'prob.jquery'],
         "prob.graph": ['prob.api', 'angular', 'jquery', 'xeditable', 'cytoscape', 'cytoscape.navigator'],
         "prob.api": {
             exports: "bmotion"
         }
-    },
-    map: {
-        "*": {
-            "underscore": "lodash"
-        }
     }
 });
 define(['prob.standalone'], function (prob) {
+    // Load native UI library
+    var gui = require('nw.gui'); //or global.window.nwDispatcher.requireNwGui() (see https://github.com/rogerwang/node-webkit/issues/707)
+    // Get the current window
+    var win = gui.Window.get();
+    win.on('close', function () {
+        this.hide(); // Pretend to be closed already
+        console.log("We're closing...");
+        this.close(true);
+    });
     return prob;
 });

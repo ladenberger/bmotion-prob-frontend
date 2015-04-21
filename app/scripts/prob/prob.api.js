@@ -1,4 +1,8 @@
-define(['bmotion.func', 'prob.jquery'], function (bms, prob) {
+/**
+ * BMotion Studio for ProB API Module
+ *
+ */
+define(['bmotion.func', 'jquery'], function (bms) {
     var bmotion = window.bmotion || (window.bmotion = {});
-    return $.extend(bmotion, bms, prob);
+    return $.extend(bmotion, bms);
 });

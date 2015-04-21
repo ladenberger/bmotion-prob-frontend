@@ -2,10 +2,10 @@
  * BMotion Studio for ProB jQuery Module
  *
  */
-define(['bmotion.func', 'jquery'], function (bms) {
+define(['prob.api'], function (prob) {
 
     var observePredicate = function (options, origin) {
-        var settings = bms.normalize($.extend({
+        var settings = prob.normalize($.extend({
             predicate: "",
             true: [],
             false: [],
@@ -14,23 +14,23 @@ define(['bmotion.func', 'jquery'], function (bms) {
             }
         }, options), ["callback", "false", "true"], origin);
         var injector = angular.element(document).injector();
-        var bmsObserverService = injector.get('bmsObserverService');
+        var bmsObserverService = injector.get('bmsJqueryService');
         bmsObserverService.addObserver('predicate', settings, origin);
     };
 
     var observeCSPTrace = function (options, origin) {
-        var settings = bms.normalize($.extend({
+        var settings = prob.normalize($.extend({
             observers: [],
             selector: "",
             cause: "AnimationChanged"
         }, options), [], origin);
         var injector = angular.element(document).injector();
-        var bmsObserverService = injector.get('bmsObserverService');
+        var bmsObserverService = injector.get('bmsJqueryService');
         bmsObserverService.addObserver('csp-event', settings, origin);
     };
 
     var observeRefinement = function (options, origin) {
-        var settings = bms.normalize($.extend({
+        var settings = prob.normalize($.extend({
             refinements: [],
             cause: "ModelChanged",
             enable: function () {
@@ -39,12 +39,12 @@ define(['bmotion.func', 'jquery'], function (bms) {
             }
         }, options), ["enable", "disable"], origin);
         var injector = angular.element(document).injector();
-        var bmsObserverService = injector.get('bmsObserverService');
+        var bmsObserverService = injector.get('bmsJqueryService');
         bmsObserverService.addObserver('refinement', settings, origin);
     };
 
     /*var observeMethod = function (options, origin) {
-     var settings = bms.normalize($.extend({
+     var settings = prob.normalize($.extend({
      name: "",
      cause: "AnimationChanged",
      trigger: function () {
@@ -59,14 +59,14 @@ define(['bmotion.func', 'jquery'], function (bms) {
      };*/
 
     var observeFormula = function (options, origin) {
-        var settings = bms.normalize($.extend({
+        var settings = prob.normalize($.extend({
             formulas: [],
             cause: "AnimationChanged",
             trigger: function () {
             }
         }, options), ["trigger"], origin);
         var injector = angular.element(document).injector();
-        var bmsObserverService = injector.get('bmsObserverService');
+        var bmsObserverService = injector.get('bmsJqueryService');
         bmsObserverService.addObserver('formula', settings, origin);
     };
 
@@ -101,7 +101,7 @@ define(['bmotion.func', 'jquery'], function (bms) {
         $.fn.executeEvent = function (options) {
             var element = this;
             var injector = angular.element(document).injector();
-            var bmsObserverService = injector.get('bmsObserverService');
+            var bmsObserverService = injector.get('bmsJqueryService');
             bmsObserverService.addEvent('executeEvent', options, element);
         };
 

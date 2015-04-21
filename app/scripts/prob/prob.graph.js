@@ -2,12 +2,23 @@
  * BMotion Studio for ProB Graph Module
  *
  */
-define(['prob.api', 'angular', 'jquery', 'xeditable', 'cytoscape', 'cytoscape.navigator'], function (prob) {
+define(['prob.api', 'bms.common', 'prob.observers', 'xeditable', 'cytoscape', 'cytoscape.navigator'], function (prob) {
 
-    return angular.module('prob.graph', ['xeditable', 'bms.main'])
+    return angular.module('prob.graph', ['xeditable', 'bms.common', 'prob.observers'])
         .factory('bmsRenderingService', ['$q', '$injector', 'bmsObserverService', function ($q, $injector, bmsObserverService) {
 
             var renderingService = {
+                getStyle: function (template, style) {
+                    var defer = $q.defer();
+                    if (style) {
+                        $http.get(template + "/" + style, {cache: $templateCache}).success(function (css) {
+                            defer.resolve('<style type="text/css">\n<![CDATA[\n' + css + '\n]]>\n</style>');
+                        });
+                    } else {
+                        defer.resolve();
+                    }
+                    return defer.promise;
+                },
                 removeBlanks: function (context, canvas, imgWidth, imgHeight) {
 
                     var imageData = context.getImageData(0, 0, imgWidth, imgHeight),
@@ -167,9 +178,10 @@ define(['prob.api', 'angular', 'jquery', 'xeditable', 'cytoscape', 'cytoscape.na
 
                     var container = view.container.clone(true);
                     var observers = template.observers;
+                    var traceId = template.data.traceId;
                     var name = template.name;
 
-                    bmsObserverService.checkObservers(observers, container, stateid).then(function (data) {
+                    bmsObserverService.checkObservers(observers, container, stateid, traceId).then(function (data) {
 
                         // Collect attributes and values
                         var fvalues = {};
@@ -412,7 +424,7 @@ define(['prob.api', 'angular', 'jquery', 'xeditable', 'cytoscape', 'cytoscape.na
             };
 
         }])
-        .directive('bmsDiagramElementProjectionView', ['bmsObserverService', 'bmsRenderingService', 'bmsScreenshotService', 'bmsVisualisationService', 'bmsDiagramElementProjectionGraph', 'ws', '$injector', '$http', '$q', '$templateCache', '$filter', function (bmsObserverService, bmsRenderingService, bmsScreenshotService, bmsVisualisationService, bmsDiagramElementProjectionGraph, ws, $injector, $http, $q, $templateCache, $filter) {
+        .directive('bmsDiagramElementProjectionView', ['bmsObserverService', 'bmsRenderingService', 'bmsVisualisationService', 'bmsDiagramElementProjectionGraph', 'ws', '$injector', '$http', '$q', '$templateCache', '$filter', function (bmsObserverService, bmsRenderingService, bmsVisualisationService, bmsDiagramElementProjectionGraph, ws, $injector, $http, $q, $templateCache, $filter) {
 
             return {
                 replace: false,
@@ -481,7 +493,7 @@ define(['prob.api', 'angular', 'jquery', 'xeditable', 'cytoscape', 'cytoscape.na
                             if (v.view) {
                                 data.push({
                                     value: data.length + 1,
-                                    name: i,
+                                    name: v.name + ' (' + i + ')',
                                     container: v.container,
                                     observers: bmsObserverService.getObservers(i),
                                     data: v
@@ -606,14 +618,13 @@ define(['prob.api', 'angular', 'jquery', 'xeditable', 'cytoscape', 'cytoscape.na
 
                             // (3) Send formulas to ProB and receive diagram data
                             ws.emit('createCustomTransitionDiagram', {
-                                data: {expressions: formulas}
+                                data: {expressions: formulas, traceId: template.data.traceId}
                             }, function (data) {
 
                                 var promises = [];
 
                                 // Get CSS data for HTML
-
-                                bmsScreenshotService.getStyle(template.name, template.data.view.style).then(function (css) {
+                                bmsRenderingService.getStyle(template.name, template.data.view.style).then(function (css) {
 
                                     // Get HTML data
                                     angular.forEach(data.nodes, function (node) {
@@ -758,7 +769,7 @@ define(['prob.api', 'angular', 'jquery', 'xeditable', 'cytoscape', 'cytoscape.na
             };
 
         }])
-        .directive('bmsDiagramTraceView', ['bmsScreenshotService', 'bmsObserverService', '$filter', 'bmsVisualisationService', 'bmsDiagramTraceGraph', 'ws', '$compile', 'bmsRenderingService', '$q', function (bmsScreenshotService, bmsObserverService, $filter, bmsVisualisationService, bmsDiagramTraceGraph, ws, $compile, bmsRenderingService, $q) {
+        .directive('bmsDiagramTraceView', ['bmsObserverService', '$filter', 'bmsVisualisationService', 'bmsDiagramTraceGraph', 'ws', '$compile', 'bmsRenderingService', '$q', function (bmsObserverService, $filter, bmsVisualisationService, bmsDiagramTraceGraph, ws, $compile, bmsRenderingService, $q) {
             return {
                 replace: false,
                 template: '<div style="height:100%;width:100%;">'
@@ -800,7 +811,7 @@ define(['prob.api', 'angular', 'jquery', 'xeditable', 'cytoscape', 'cytoscape.na
                             if (v.view) {
                                 data.push({
                                     value: data.length + 1,
-                                    name: i,
+                                    name: v.name + ' (' + i + ')',
                                     observers: bmsObserverService.getObservers(i),
                                     container: v.container,
                                     data: v
@@ -852,11 +863,11 @@ define(['prob.api', 'angular', 'jquery', 'xeditable', 'cytoscape', 'cytoscape.na
 
                         var defer = $q.defer();
 
-                        ws.emit('createTraceDiagram', {}, function (data) {
+                        ws.emit('createTraceDiagram', {data: {traceId: visualisation.data.traceId}}, function (data) {
 
                             var promises = [];
 
-                            bmsScreenshotService.getStyle(visualisation.name, visualisation.data.view.style).then(function (css) {
+                            bmsRenderingService.getStyle(visualisation.name, visualisation.data.view.style).then(function (css) {
 
                                 angular.forEach(data.nodes, function (n) {
                                     if (n.data.id !== 'root') {

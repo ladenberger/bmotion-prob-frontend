@@ -1,10 +1,14 @@
-define(['angularAMD', 'prob.jquery'], function (angularAMD) {
+/**
+ * BMotion Studio for ProB Visualization Module
+ *
+ */
+define(['angularAMD', 'angular', 'prob.jquery'], function (angularAMD) {
 
-    var module = angular.module('prob.vis', [])
+    var module = angular.module('prob.vis.integrated', [])
         .factory('$parentScope', function ($window) {
             return $window.parent.angular.element($window.frameElement).scope();
         })
-        .service('bmsObserverService', function ($parentScope) {
+        .service('bmsJqueryService', function ($parentScope) {
             var observerService = {
                 addObserver: function (type, data, element) {
                     $parentScope.addObserver(type, data, element);
@@ -17,7 +21,6 @@ define(['angularAMD', 'prob.jquery'], function (angularAMD) {
         })
         .directive('bmsVisualisation', ['$compile', '$parentScope', function ($compile, $parentScope) {
             return {
-                replace: false,
                 scope: true,
                 controller: ['$scope', function ($scope) {
 
@@ -49,10 +52,15 @@ define(['angularAMD', 'prob.jquery'], function (angularAMD) {
                 }],
                 link: function ($scope, $element) {
 
+                    // Give all elements an internal id
+                    var count = 0;
+                    $(document).find('body').find("*").each(function (i, v) {
+                        $(v).attr("data-bms-id", "bms" + count);
+                        count++;
+                    });
+
                     $scope.$watch('values', function () {
-
                         var changed = false;
-
                         for (bmsid in $scope.values) {
                             var nattrs = $scope.values[bmsid];
                             for (var a in nattrs) {
@@ -76,8 +84,8 @@ define(['angularAMD', 'prob.jquery'], function (angularAMD) {
                         if (changed) {
                             $compile($element.contents())($scope);
                         }
-
                     }, true);
+
                 }
             }
         }]);

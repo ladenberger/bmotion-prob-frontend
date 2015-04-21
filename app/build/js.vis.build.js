@@ -1,5 +1,10 @@
-requirejs.config({
-    baseUrl: "../../app/scripts",
+({
+    baseUrl: "../scripts",
+    name: "bmotion-standalone-dev",
+    out: "../../dist/bmotion.js",
+    //optimize: "closure",
+    removeCombined: true,
+    findNestedDependencies: true,
     paths: {
         "jquery": "vendor/jquery/dist/jquery.min",
         "angular": "vendor/angular/angular.min",
@@ -18,6 +23,4 @@ requirejs.config({
             exports: "bmotion"
         }
     }
-});
-define(['prob.vis'], function () {
 });
