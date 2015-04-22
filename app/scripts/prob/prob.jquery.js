@@ -94,15 +94,20 @@ define(['prob.api'], function (prob) {
     (function ($) {
 
         $.fn.observe = function (what, options) {
-            observe(what, options, this);
+            var ele = this;
+            setTimeout(function () {
+                observe(what, options, ele);
+            }, 0);
             return this
         };
 
         $.fn.executeEvent = function (options) {
             var element = this;
-            var injector = angular.element(document).injector();
-            var bmsObserverService = injector.get('bmsJqueryService');
-            bmsObserverService.addEvent('executeEvent', options, element);
+            setTimeout(function () {
+                var injector = angular.element(document).injector();
+                var bmsObserverService = injector.get('bmsJqueryService');
+                bmsObserverService.addEvent('executeEvent', options, element);
+            }, 0);
         };
 
     }(jQuery));

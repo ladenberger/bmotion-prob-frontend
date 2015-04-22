@@ -14,7 +14,7 @@ define(['socketio', 'angular-route'], function (io) {
                         if (path === null) {
                             if (main.mode === 'ModeIntegrated') {
                                 ws.emit('getWorkspacePath', "", function (data) {
-                                    var p = data.workspace + template;
+                                    var p = data.workspace + "/" + template;
                                     var filename = p.replace(/^.*[\\\/]/, '');
                                     path = p.replace(filename, '');
                                     defer.resolve(path);
@@ -89,7 +89,7 @@ define(['socketio', 'angular-route'], function (io) {
                     }
                 };
             }])
-            .factory('bmsVisualisationService', function () {
+            .factory('bmsVisualisationService', [function () {
                 var visualisations = {};
                 return {
                     addVisualisation: function (name, data) {
@@ -102,8 +102,8 @@ define(['socketio', 'angular-route'], function (io) {
                         return visualisations[name];
                     }
                 }
-            })
-            .factory('bmsUIService', function ($rootScope) {
+            }])
+            .factory('bmsUIService', ['$rootScope', function ($rootScope) {
 
                 return {
                     startLoading: function () {
@@ -120,7 +120,7 @@ define(['socketio', 'angular-route'], function (io) {
                     }
                 }
 
-            });
+            }]);
 
     }
 );

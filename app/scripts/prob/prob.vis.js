@@ -5,10 +5,10 @@
 define(['angularAMD', 'angular', 'prob.jquery'], function (angularAMD) {
 
     var module = angular.module('prob.vis.integrated', [])
-        .factory('$parentScope', function ($window) {
+        .factory('$parentScope', ['$window', function ($window) {
             return $window.parent.angular.element($window.frameElement).scope();
-        })
-        .service('bmsJqueryService', function ($parentScope) {
+        }])
+        .service('bmsJqueryService', ['$parentScope', function ($parentScope) {
             var observerService = {
                 addObserver: function (type, data, element) {
                     $parentScope.addObserver(type, data, element);
@@ -18,7 +18,7 @@ define(['angularAMD', 'angular', 'prob.jquery'], function (angularAMD) {
                 }
             };
             return observerService;
-        })
+        }])
         .directive('bmsVisualisation', ['$compile', '$parentScope', function ($compile, $parentScope) {
             return {
                 scope: true,

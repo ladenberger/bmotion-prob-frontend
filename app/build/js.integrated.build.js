@@ -1,5 +1,10 @@
-requirejs.config({
-    baseUrl: "../../app/scripts",
+({
+    baseUrl: "../scripts",
+    name: "bmotion.integrated",
+    out: "../../dist/bmotion.integrated.js",
+    //optimize: "closure",
+    removeCombined: true,
+    findNestedDependencies: true,
     paths: {
         "jquery": "vendor/jquery/dist/jquery.min",
         "angular": "vendor/angular/angular.min",
@@ -38,7 +43,4 @@ requirejs.config({
             exports: "bmotion"
         }
     }
-});
-define(['prob.integrated'], function (prob) {
-    return prob;
 });

@@ -1,7 +1,7 @@
 ({
     baseUrl: "../scripts",
-    name: "bmotion-standalone-dev",
-    out: "../../dist/bmotion.js",
+    name: "bmotion.vis",
+    out: "../../dist/bmotion.vis.js",
     //optimize: "closure",
     removeCombined: true,
     findNestedDependencies: true,

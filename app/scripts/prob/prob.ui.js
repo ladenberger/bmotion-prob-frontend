@@ -75,7 +75,7 @@ define(['bmotion.func', 'bootstrap', 'jquery.cookie', 'jquery-ui', 'ui-bootstrap
         }])
         .controller('bmsTabsChildCtrl', ['$scope', function ($scope) {
         }])
-        .controller('bmsLoadingModalCtrl', function ($scope, $modal) {
+        .controller('bmsLoadingModalCtrl', ['$scope', '$modal', function ($scope, $modal) {
 
             var modalInstance = null;
 
@@ -100,14 +100,14 @@ define(['bmotion.func', 'bootstrap', 'jquery.cookie', 'jquery-ui', 'ui-bootstrap
                 $scope.close();
             });
 
-        })
-        .controller('bmsLoadingModalInstanceCtrl', function ($scope, $modalInstance) {
+        }])
+        .controller('bmsLoadingModalInstanceCtrl', ['$scope', '$modalInstance', function ($scope, $modalInstance) {
 
             $scope.close = function () {
                 $modalInstance.close();
             };
 
-        })
+        }])
         .directive('bmsNavigation', ['ws', 'bmsUIService', '$rootScope', 'bmsVisualisationService', function (ws, bmsUIService, $rootScope, bmsVisualisationService) {
             return {
                 controller: ['$scope', function ($scope) {
