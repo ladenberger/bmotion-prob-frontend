@@ -5,7 +5,7 @@
 define(['prob.api', 'bms.common', 'prob.observers'], function (prob) {
 
     var module = angular.module('prob.iframe', ['bms.common', 'prob.observers'])
-        .directive('bmsVisualisationView', ['$rootScope', 'bmsVisualisationService', '$compile', 'bmsObserverService', '$http', 'loadModel', 'ws', '$injector', 'bmsUIService', function ($rootScope, bmsVisualisationService, $compile, bmsObserverService, $http, loadModel, ws, $injector, bmsUIService) {
+        .directive('bmsVisualisationView', ['bmsMainService', '$rootScope', 'bmsVisualisationService', '$compile', 'bmsObserverService', '$http', 'loadModel', 'ws', '$injector', 'bmsUIService', function (bmsMainService, $rootScope, bmsVisualisationService, $compile, bmsObserverService, $http, loadModel, ws, $injector, bmsUIService) {
             return {
                 replace: false,
                 scope: true,
@@ -23,43 +23,46 @@ define(['prob.api', 'bms.common', 'prob.observers'], function (prob) {
                         if (template) {
 
                             bmsUIService.startLoading();
-                            var filename = template.replace(/^.*[\\\/]/, '');
-                            var folder = template.replace(filename, '');
+                            bmsMainService.getFullPath(template).then(function (path) {
 
-                            // Get properties from configuration file
-                            $http.get(template).success(function (data) {
+                                // Get properties from configuration file
+                                $http.get(template).success(function (data) {
 
-                                if (data.model && data.tool) {
+                                    if (data.model && data.tool) {
 
-                                    // Load model
-                                    loadModel.load({
-                                        model: data.model,
-                                        tool: data.tool,
-                                        path: folder
-                                    }).then(function (r) {
-                                        $scope.refinements = r.refinements;
-                                        $scope.stateid = r.stateid;
-                                        $scope.traceId = r.traceId;
-                                        data.traceId = r.traceId;
-                                        var jiframe = $(iframe);
-                                        jiframe.attr('src', folder + data.template);
-                                        jiframe.load(function () {
-                                            $rootScope.currentVisualisation = $scope.id;
-                                            data.uuid = $scope.id;
-                                            data.container = jiframe;
-                                            $scope.container = jiframe;
-                                            bmsVisualisationService.addVisualisation($scope.id, data);
-                                            bmsUIService.setProBViewTraceId($scope.traceId);
-                                            ws.on('checkObserver', function (data) {
-                                                if (data.stateid !== undefined && $scope.traceId == data.traceId) {
-                                                    $scope.setStateId(data.stateid);
-                                                }
+                                        // Load model
+                                        loadModel.load({
+                                            model: data.model,
+                                            tool: data.tool,
+                                            path: path
+                                        }).then(function (r) {
+                                            $scope.refinements = r.refinements;
+                                            $scope.stateid = r.stateid;
+                                            $scope.traceId = r.traceId;
+                                            data.traceId = r.traceId;
+                                            var jiframe = $(iframe);
+
+                                            var filename = template.replace(/^.*[\\\/]/, '');
+                                            jiframe.attr('src', template.replace(filename, '') + data.template);
+                                            jiframe.load(function () {
+                                                $rootScope.currentVisualisation = $scope.id;
+                                                data.uuid = $scope.id;
+                                                data.container = jiframe;
+                                                $scope.container = jiframe;
+                                                bmsVisualisationService.addVisualisation($scope.id, data);
+                                                bmsUIService.setProBViewTraceId($scope.traceId);
+                                                ws.on('checkObserver', function (data) {
+                                                    if (data.stateid !== undefined && $scope.traceId == data.traceId) {
+                                                        $scope.setStateId(data.stateid);
+                                                    }
+                                                });
+                                                bmsUIService.endLoading();
                                             });
-                                            bmsUIService.endLoading();
                                         });
-                                    });
 
-                                }
+                                    }
+
+                                });
 
                             });
 

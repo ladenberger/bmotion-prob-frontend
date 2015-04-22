@@ -50,14 +50,7 @@ requirejs.config({
     }
 });
 define(['prob.standalone'], function (prob) {
-    // Load native UI library
-    var gui = require('nw.gui'); //or global.window.nwDispatcher.requireNwGui() (see https://github.com/rogerwang/node-webkit/issues/707)
-    // Get the current window
-    var win = gui.Window.get();
-    win.on('close', function () {
-        this.hide(); // Pretend to be closed already
-        console.log("We're closing...");
-        this.close(true);
-    });
+
     return prob;
+
 });

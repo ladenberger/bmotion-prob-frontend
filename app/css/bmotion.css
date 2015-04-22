@@ -40,6 +40,27 @@ html, body {
     height: 100%;
 }
 
-.bmsTabs .tab-pane, .bmsTabs .tab-content, .bmsTabs .tabset, .bmsTabs .tab {
+.bmsTabs .tab-pane, .bmsTabs .tab-content, .bmsTabs .tabset {
     height: 100%;
 }
+
+.bmsTabContent, .bmsTabContent div {
+    height: 100%;
+}
+
+.tabOpenContainer {
+    height: 100%;
+    width: 100%;
+}
+
+.tabOpenContent {
+    border: 2px dashed lightgray;
+    margin: 100px auto;
+    text-align: center;
+    height: 300px;
+    width: 500px;
+    padding-top: 135px;
+    cursor: pointer;
+}
+
+

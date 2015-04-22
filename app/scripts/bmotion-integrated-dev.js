@@ -1,5 +1,5 @@
-require.config({
-    baseUrl: "/bms/app/scripts",
+requirejs.config({
+    baseUrl: "../../app/scripts",
     paths: {
         "jquery": "vendor/jquery/dist/jquery.min",
         "angular": "vendor/angular/angular.min",

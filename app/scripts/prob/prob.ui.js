@@ -8,7 +8,9 @@ define(['bmotion.func', 'bootstrap', 'jquery.cookie', 'jquery-ui', 'ui-bootstrap
         .run(["$rootScope", 'editableOptions', 'initProB', function ($rootScope, editableOptions, initProB) {
             editableOptions.theme = 'bs3'; // bootstrap3 theme. Can be also 'bs2', 'default'
             initProB.then(function (data) {
-                $rootScope.port = data.port;
+                if (data) {
+                    $rootScope.port = data.port;
+                }
             })
         }])
         .factory('fileDialogService', ['$q', function ($q) {
@@ -43,7 +45,13 @@ define(['bmotion.func', 'bootstrap', 'jquery.cookie', 'jquery-ui', 'ui-bootstrap
                 });
             };
 
-            var addNewWorkspace = function () {
+            $scope.workspaces = [];
+
+            $scope.addWorkspace = function () {
+                setAllInactive();
+            };
+
+            $scope.openFileDialog = function () {
                 fileDialogService.open().then(function (template) {
                     $http.get(template).success(function (data) {
                         $scope.workspaces.push({
@@ -54,13 +62,6 @@ define(['bmotion.func', 'bootstrap', 'jquery.cookie', 'jquery-ui', 'ui-bootstrap
                         });
                     });
                 });
-            };
-
-            $scope.workspaces = [];
-
-            $scope.addWorkspace = function () {
-                setAllInactive();
-                addNewWorkspace();
             };
 
             $scope.selectWorkspace = function (id) {
