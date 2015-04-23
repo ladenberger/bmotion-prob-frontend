@@ -48,6 +48,7 @@ define(['prob.api', 'bms.common', 'prob.observers'], function (prob) {
                                                 $rootScope.currentVisualisation = $scope.id;
                                                 data.uuid = $scope.id;
                                                 data.container = jiframe;
+                                                data.path = path;
                                                 $scope.container = jiframe;
                                                 bmsVisualisationService.addVisualisation($scope.id, data);
                                                 bmsUIService.setProBViewTraceId($scope.traceId);

@@ -5,13 +5,13 @@
 define(['prob.api', 'bms.common', 'prob.observers', 'xeditable', 'cytoscape', 'cytoscape.navigator'], function (prob) {
 
     return angular.module('prob.graph', ['xeditable', 'bms.common', 'prob.observers'])
-        .factory('bmsRenderingService', ['$q', '$injector', 'bmsObserverService', function ($q, $injector, bmsObserverService) {
+        .factory('bmsRenderingService', ['$q', '$injector', 'bmsObserverService', '$http', '$templateCache', function ($q, $injector, bmsObserverService, $http, $templateCache) {
 
             var renderingService = {
-                getStyle: function (template, style) {
+                getStyle: function (path, style) {
                     var defer = $q.defer();
                     if (style) {
-                        $http.get(template + "/" + style, {cache: $templateCache}).success(function (css) {
+                        $http.get(path + "/" + style, {cache: $templateCache}).success(function (css) {
                             defer.resolve('<style type="text/css">\n<![CDATA[\n' + css + '\n]]>\n</style>');
                         });
                     } else {
@@ -179,7 +179,7 @@ define(['prob.api', 'bms.common', 'prob.observers', 'xeditable', 'cytoscape', 'c
                     var container = view.container.clone(true);
                     var observers = template.observers;
                     var traceId = template.data.traceId;
-                    var name = template.name;
+                    var path = template.data.path;
 
                     bmsObserverService.checkObservers(observers, container, stateid, traceId).then(function (data) {
 
@@ -205,7 +205,7 @@ define(['prob.api', 'bms.common', 'prob.observers', 'xeditable', 'cytoscape', 'c
                             var src = $(e).attr("xlink:href");
                             imgConvert.push(function () {
                                 var defer = $q.defer();
-                                renderingService.convertImgToBase64(name + "/" + src, function (dataUrl) {
+                                renderingService.convertImgToBase64(path + "/" + src, function (dataUrl) {
                                     $(e).attr("xlink:href", dataUrl);
                                     defer.resolve();
                                 });
@@ -241,9 +241,9 @@ define(['prob.api', 'bms.common', 'prob.observers', 'xeditable', 'cytoscape', 'c
                     return defer.promise;
 
                 },
-                getElementSnapshotAsDataUrl: function (element, results, data, css, vis) {
+                getElementSnapshotAsDataUrl: function (element, results, data, css, path) {
                     var defer = $q.defer();
-                    renderingService.getElementSnapshotAsSvg(element, results, data, css, vis).then(function (svg) {
+                    renderingService.getElementSnapshotAsSvg(element, results, data, css, path).then(function (svg) {
                         renderingService.getImageCanvasForSvg(svg).then(function (canvas) {
                             defer.resolve({
                                 dataUrl: canvas.toDataURL('image/png'),
@@ -254,7 +254,7 @@ define(['prob.api', 'bms.common', 'prob.observers', 'xeditable', 'cytoscape', 'c
                     });
                     return defer.promise;
                 },
-                getElementSnapshotAsSvg: function (element, results, data, css, vis) {
+                getElementSnapshotAsSvg: function (element, results, data, css, path) {
 
                     var defer = $q.defer();
 
@@ -262,7 +262,7 @@ define(['prob.api', 'bms.common', 'prob.observers', 'xeditable', 'cytoscape', 'c
 
                         var promises = [];
                         angular.forEach(element, function (ele) {
-                            promises.push(renderingService.getElementSnapshotAsSvg(ele, results, data, css, vis));
+                            promises.push(renderingService.getElementSnapshotAsSvg(ele, results, data, css, path));
                         });
                         $q.all(promises).then(function (data) {
                             defer.resolve(data);
@@ -321,7 +321,7 @@ define(['prob.api', 'bms.common', 'prob.observers', 'xeditable', 'cytoscape', 'c
                                 var src = $(e).attr("xlink:href");
                                 imgConvert.push(function () {
                                     var defer = $q.defer();
-                                    renderingService.convertImgToBase64(vis + "/" + src, function (dataUrl) {
+                                    renderingService.convertImgToBase64(path + "/" + src, function (dataUrl) {
                                         $(e).attr("xlink:href", dataUrl);
                                         defer.resolve();
                                     });
@@ -624,13 +624,13 @@ define(['prob.api', 'bms.common', 'prob.observers', 'xeditable', 'cytoscape', 'c
                                 var promises = [];
 
                                 // Get CSS data for HTML
-                                bmsRenderingService.getStyle(template.name, template.data.view.style).then(function (css) {
+                                bmsRenderingService.getStyle(template.data.path, template.data.view.style).then(function (css) {
 
                                     // Get HTML data
                                     angular.forEach(data.nodes, function (node) {
                                         var results = node.data.results;
                                         if (node.data.id !== '1' && node.data.labels[0] !== '<< undefined >>') {
-                                            promises.push(bmsRenderingService.getElementSnapshotAsDataUrl(elements, results, $scope.elementSelection.bmsIdDataMap, css, template.name));
+                                            promises.push(bmsRenderingService.getElementSnapshotAsDataUrl(elements, results, $scope.elementSelection.bmsIdDataMap, css, template.data.path));
                                         } else {
                                             promises.push(bmsRenderingService.getEmptySnapshotDataUrl());
                                         }

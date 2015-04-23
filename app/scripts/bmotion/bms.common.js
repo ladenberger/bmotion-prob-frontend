@@ -6,25 +6,20 @@ define(['socketio', 'angular-route'], function (io) {
 
         return angular.module('bms.common', ['ngRoute'])
             .factory('bmsMainService', ['ws', '$q', function (ws, $q) {
-                var path = null;
                 var main = {
                     mode: "ModeStandalone",
                     getFullPath: function (template) {
                         var defer = $q.defer();
-                        if (path === null) {
-                            if (main.mode === 'ModeIntegrated') {
-                                ws.emit('getWorkspacePath', "", function (data) {
-                                    var p = data.workspace + "/" + template;
-                                    var filename = p.replace(/^.*[\\\/]/, '');
-                                    path = p.replace(filename, '');
-                                    defer.resolve(path);
-                                });
-                            } else {
-                                var filename = template.replace(/^.*[\\\/]/, '');
-                                path = template.replace(filename, '');
+                        if (main.mode === 'ModeIntegrated') {
+                            ws.emit('getWorkspacePath', "", function (data) {
+                                var p = data.workspace + "/" + template;
+                                var filename = p.replace(/^.*[\\\/]/, '');
+                                path = p.replace(filename, '');
                                 defer.resolve(path);
-                            }
+                            });
                         } else {
+                            var filename = template.replace(/^.*[\\\/]/, '');
+                            path = template.replace(filename, '');
                             defer.resolve(path);
                         }
                         return defer.promise;
