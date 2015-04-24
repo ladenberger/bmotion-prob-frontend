@@ -60,6 +60,7 @@ define(['angularAMD', 'angular', 'prob.jquery'], function (angularAMD) {
                     });
 
                     $scope.$watch('values', function () {
+
                         var changed = false;
                         for (bmsid in $scope.values) {
                             var nattrs = $scope.values[bmsid];

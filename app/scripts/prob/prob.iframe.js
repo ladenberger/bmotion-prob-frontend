@@ -40,6 +40,7 @@ define(['prob.api', 'bms.common', 'prob.observers'], function (prob) {
                                             $scope.stateid = r.stateid;
                                             $scope.traceId = r.traceId;
                                             data.traceId = r.traceId;
+                                            data.refinements = r.refinements;
                                             var jiframe = $(iframe);
 
                                             var filename = template.replace(/^.*[\\\/]/, '');
@@ -100,11 +101,13 @@ define(['prob.api', 'bms.common', 'prob.observers'], function (prob) {
                                     element: e
                                 };
                                 bmsObserverService.addObserver($scope.id, observer);
-                                bmsObserverService.checkObserver(observer, $scope.container.contents(), $scope.stateid, $scope.traceId).then(function (data) {
-                                    if (!prob.isEmpty(data)) {
-                                        $scope.$broadcast('setValue', data);
-                                    }
-                                });
+                                if ($scope.stateid !== 'root') {
+                                    bmsObserverService.checkObserver(observer, $scope.container.contents(), $scope.stateid, $scope.traceId, $scope.id).then(function (data) {
+                                        if (!prob.isEmpty(data)) {
+                                            $scope.$broadcast('setValue', data);
+                                        }
+                                    });
+                                }
                             });
                         }
                     };
@@ -141,7 +144,7 @@ define(['prob.api', 'bms.common', 'prob.observers'], function (prob) {
 
                             $scope.stateid = stateid;
                             // Collect values from observers
-                            bmsObserverService.checkObservers(observers, $scope.container.contents(), stateid, $scope.traceId).then(function (data) {
+                            bmsObserverService.checkObservers(observers, $scope.container.contents(), stateid, $scope.traceId, $scope.id).then(function (data) {
                                 var fvalues = {};
                                 angular.forEach(data, function (value) {
                                     if (value !== undefined) {

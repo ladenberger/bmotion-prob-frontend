@@ -59,17 +59,17 @@ define(['prob.api', 'angular', 'xeditable', 'qtip'], function (prob) {
                     }
                     return bmsidCache[bmsid][selector];
                 },
-                checkObserver: function (observer, container, stateid, traceId) {
+                checkObserver: function (observer, container, stateid, traceId, visId) {
                     var defer = $q.defer();
                     var observerInstance = $injector.get(observer.type, "");
                     if (observerInstance) {
-                        observerInstance.check(observer, container, stateid, traceId).then(function (data) {
+                        observerInstance.check(observer, container, stateid, traceId, visId).then(function (data) {
                             defer.resolve(data);
                         });
                     }
                     return defer.promise;
                 },
-                checkObservers: function (observers, container, stateid, traceId) {
+                checkObservers: function (observers, container, stateid, traceId, visId) {
 
                     var defer = $q.defer();
 
@@ -85,7 +85,7 @@ define(['prob.api', 'angular', 'xeditable', 'qtip'], function (prob) {
                         } else {
                             var observerInstance = $injector.get(o.type, "");
                             if (observerInstance) {
-                                promises.push(observerInstance.check(o, container, stateid, traceId));
+                                promises.push(observerInstance.check(o, container, stateid, traceId, visId));
                             }
                         }
                     });
@@ -94,14 +94,14 @@ define(['prob.api', 'angular', 'xeditable', 'qtip'], function (prob) {
                     if (!$.isEmptyObject(formulaObservers)) {
                         // Execute formula observer at once (performance boost)
                         var observerInstance = $injector.get("formula", "");
-                        promises.push(observerInstance.check(formulaObservers, container, stateid, traceId));
+                        promises.push(observerInstance.check(formulaObservers, container, stateid, traceId, visId));
                     }
 
                     // Special case for predicate observers
                     if (!$.isEmptyObject(predicateObservers)) {
                         // Execute predicate observer at once (performance boost)
                         var observerInstance = $injector.get("predicate", "");
-                        promises.push(observerInstance.check(predicateObservers, container, stateid, traceId));
+                        promises.push(observerInstance.check(predicateObservers, container, stateid, traceId, visId));
                     }
 
                     $q.all(promises).then(function (data) {
@@ -127,13 +127,14 @@ define(['prob.api', 'angular', 'xeditable', 'qtip'], function (prob) {
             };
 
             return {
-                check: function (observer, element, stateid) {
+                check: function (observer, container, stateid, traceid) {
 
                     var defer = $q.defer();
                     ws.emit("observeCSPTrace", {
                         data: {
                             observers: observer.data.observers,
-                            stateid: stateid
+                            stateid: stateid,
+                            traceId: traceid
                         }
                     }, function (result) {
 
@@ -152,7 +153,7 @@ define(['prob.api', 'angular', 'xeditable', 'qtip'], function (prob) {
                                         var selector = replaceParameter(a.selector, t.parameter);
                                         var attr = replaceParameter(a.attr, t.parameter);
                                         var value = replaceParameter(a.value, t.parameter);
-                                        var bmsids = bmsObserverService.getBmsIds(selector, element);
+                                        var bmsids = bmsObserverService.getBmsIds(selector, $(observer.element));
                                         angular.forEach(bmsids, function (id) {
                                             if (fmap[id] === undefined) {
                                                 fmap[id] = {};
@@ -276,20 +277,23 @@ define(['prob.api', 'angular', 'xeditable', 'qtip'], function (prob) {
             return formulaObserver;
 
         }])
-        .service('refinement', ['ws', '$q', 'bmsObserverService', function (ws, $q, bmsObserverService) {
+        .service('refinement', ['ws', '$q', 'bmsVisualisationService', function (ws, $q, bmsVisualisationService) {
 
             return {
-                check: function (observer, element, stateid) {
+                check: function (observer, element, stateId, traceId, visId) {
 
                     var defer = $q.defer();
 
-                    ws.emit("observeRefinement", {data: observer.data}, function (data) {
+                    //TODO: Check refinement observer only once!
+                    var vis = bmsVisualisationService.getVisualisation(visId);
+                    var refinements = vis.refinements;
 
+                    if (refinements) {
                         var obj = {};
                         var rr;
 
                         $.each(observer.data.refinements, function (i, v) {
-                            if ($.inArray(v, data.refinements) > -1) {
+                            if ($.inArray(v, refinements) > -1) {
                                 rr = observer.data.enable;
                             } else {
                                 rr = observer.data.disable;
@@ -301,11 +305,10 @@ define(['prob.api', 'angular', 'xeditable', 'qtip'], function (prob) {
                         }
 
                         defer.resolve(obj);
-
-                    });
-
+                    }
 
                     return defer.promise;
+
                 }
             }
 
@@ -344,7 +347,7 @@ define(['prob.api', 'angular', 'xeditable', 'qtip'], function (prob) {
                     defer.resolve(obj);
                     return defer.promise;
                 },
-                check: function (observers, element, stateid) {
+                check: function (observers, element, stateid, traceid) {
                     var defer = $q.defer();
                     var oo = {};
                     $.each(observers, function (i, o) {
@@ -352,7 +355,7 @@ define(['prob.api', 'angular', 'xeditable', 'qtip'], function (prob) {
                     });
                     var promises = [];
                     //var startWebsocket = new Date().getTime();
-                    ws.emit("observe", {data: {observers: oo, stateId: stateid}}, function (data) {
+                    ws.emit("observe", {data: {observers: oo, stateId: stateid, traceId: traceid}}, function (data) {
                         //var end = new Date().getTime();
                         //var time = end - startWebsocket;
                         //console.log('WEBSOCKET: ' + time);
@@ -405,13 +408,13 @@ define(['prob.api', 'angular', 'xeditable', 'qtip'], function (prob) {
                     ws.emit('initTooltip', {
                         data: prob.normalize(data, ["callback"], origin)
                     }, function (data) {
-                        var container = $('<ul></ul>');
+                        var container = $('<div class="qtiplinks"></div>');
+                        var ul = $('<ul style="display:table-cell;"></ul>');
                         $.each(data.events, function (i, v) {
-                            var spanClass = v.canExecute ? 'glyphicon glyphicon-ok-circle' : 'glyphicon glyphicon-remove-circle'
-                            var span = $('<span aria-hidden="true"></span>').addClass(spanClass);
-                            var link = $('<span> ' + v.name + '(' + v.predicate + ')</span>');
+                            var spanClass = v.canExecute ? 'glyphicon glyphicon-ok-circle' : 'glyphicon glyphicon-remove-circle';
+                            var link = $('<span aria-hidden="true"> ' + v.name + '(' + v.predicate + ')</span>').addClass(spanClass);
                             if (v.canExecute) {
-                                link = $('<a href="#"> ' + v.name + '(' + v.predicate + ')</a>').click(function () {
+                                link = $('<a href="#"> ' + v.name + '(' + v.predicate + ')</a>').addClass(spanClass).click(function () {
                                     ev.executeEvent({
                                         traceId: traceId,
                                         events: [{name: v.name, predicate: v.predicate}],
@@ -421,8 +424,9 @@ define(['prob.api', 'angular', 'xeditable', 'qtip'], function (prob) {
                                     })
                                 });
                             }
-                            container.append($('<li></li>').addClass(v.canExecute ? 'enabled' : 'disabled').append(span, link))
+                            ul.append($('<li></li>').addClass(v.canExecute ? 'enabled' : 'disabled').append(link));
                         });
+                        container.append(ul);
                         defer.resolve(container);
                     });
                     return defer.promise;
@@ -467,7 +471,6 @@ define(['prob.api', 'angular', 'xeditable', 'qtip'], function (prob) {
                                 hide: {
                                     fixed: true,
                                     delay: 300
-
                                 },
                                 style: {
                                     classes: 'qtip-light qtip-bootstrap'
