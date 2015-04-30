@@ -77,7 +77,7 @@ define(['bmotion.func', 'angular'], function (prob) {
                 }
             }
         }])
-        .directive('probView', ['bmsMainService', 'probMainService', '$q', function (bmsMainService, probMainService, $q) {
+        .directive('probView', ['bmsConfigService', 'probMainService', '$q', function (bmsConfigService, probMainService, $q) {
             return {
                 replace: true,
                 scope: true,
@@ -96,7 +96,7 @@ define(['bmotion.func', 'angular'], function (prob) {
                     var iframe = $(element).find("iframe");
 
                     $scope.setTraceId = function (traceId) {
-                        $q.all([bmsMainService.getConfig(), probMainService.getPort()]).then(function (data) {
+                        $q.all([bmsConfigService.getConfig(), probMainService.getPort()]).then(function (data) {
                             iframe.attr("src", 'http://' + data[0].prob.host + ':' + data[1].port + '/sessions/' + $scope.type + '/' + traceId);
                         });
                     };

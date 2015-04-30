@@ -5,8 +5,30 @@
 define(['socketio', 'angular-route'], function (io) {
 
         return angular.module('bms.common', ['ngRoute'])
-            .factory('bmsMainService', ['ws', '$q', '$http', function (ws, $q, $http) {
+            .factory('bmsConfigService', ['$q', '$http', function ($q, $http) {
                 var config = null;
+                var main = {
+                    getConfig: function () {
+                        var defer = $q.defer();
+                        if (config) {
+                            defer.resolve(config);
+                        } else {
+                            $http.get('bmotion.json').success(function (data) {
+                                config = $.extend({
+                                    socket: {
+                                        "host": "localhost",
+                                        "port": "19090"
+                                    }
+                                }, data, true);
+                                defer.resolve(config);
+                            });
+                        }
+                        return defer.promise;
+                    }
+                };
+                return main;
+            }])
+            .factory('bmsMainService', ['ws', '$q', '$http', function (ws, $q, $http) {
                 var main = {
                     mode: "ModeStandalone",
                     getFullPath: function (template) {
@@ -24,33 +46,20 @@ define(['socketio', 'angular-route'], function (io) {
                             defer.resolve(path);
                         }
                         return defer.promise;
-                    },
-                    getConfig: function () {
-                        var defer = $q.defer();
-                        if (config) {
-                            defer.resolve(config);
-                        } else {
-                            $http.get('bmotion.json').success(function (data) {
-                                config = data;
-                                defer.resolve(data);
-                            });
-                        }
-                        return defer.promise;
                     }
                 };
                 return main;
             }])
-            .factory('bmsSocketService', ['$http', '$q', '$rootScope', function ($http, $q, $rootScope) {
+            .factory('bmsSocketService', ['bmsConfigService', '$q', function (bmsConfigService, $q) {
                 'use strict';
                 var socket = null;
                 return {
                     socket: function () {
                         var defer = $q.defer();
                         if (socket === null) {
-                            $http.get('bmotion.json').success(function (data) {
-                                $rootScope.config = data;
+                            bmsConfigService.getConfig().then(function (config) {
                                 // TODO: Check if configuration file is correct!
-                                socket = io.connect('http://' + data.socket.host + ':' + data.socket.port);
+                                socket = io.connect('http://' + config.socket.host + ':' + config.socket.port);
                                 defer.resolve(socket);
                             });
                         } else {
