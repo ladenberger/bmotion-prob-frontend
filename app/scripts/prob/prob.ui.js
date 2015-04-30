@@ -270,7 +270,7 @@ define(['bmotion.func', 'bootstrap', 'jquery.cookie', 'jquery-ui', 'ui-bootstrap
                             $scope.$broadcast('close');
                         },
                         autoOpen: $scope.isOpen,
-                        width: 350,
+                        width: 500,
                         height: 400,
                         title: $scope.type
 

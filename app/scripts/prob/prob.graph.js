@@ -400,7 +400,7 @@ define(['prob.api', 'bms.common', 'prob.observers', 'xeditable', 'cytoscape', 'c
                                     'line-style': 'data(style)',
                                     'target-arrow-color': 'data(color)',
                                     'font-size': '11px',
-                                    'control-point-distance': 70
+                                    'control-point-distance': 100
                                 }),
                             layout: {
                                 name: 'cose',
@@ -409,7 +409,7 @@ define(['prob.api', 'bms.common', 'prob.observers', 'xeditable', 'cytoscape', 'c
                                 padding: 25,
                                 directed: true,
                                 roots: '#1',
-                                //nodeOverlap: 100, // Node repulsion (overlapping) multiplier
+                                nodeOverlap: 100, // Node repulsion (overlapping) multiplier
                                 nodeRepulsion: 3000000 // Node repulsion (non overlapping)
                                                        // multiplier
                             },
@@ -580,8 +580,6 @@ define(['prob.api', 'bms.common', 'prob.observers', 'xeditable', 'cytoscape', 'c
                         var defer = $q.defer();
 
                         if (elements.length > 0) {
-
-                            var container = template.container;
 
                             // (1) Collect observers
                             var allObserver = [];
