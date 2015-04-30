@@ -4,7 +4,7 @@
  */
 define(['bmotion.func', 'angular'], function (prob) {
 
-    var module = angular.module('prob.ui',[])
+    var module = angular.module('prob.ui', [])
         .directive('bmsNavigation', ['ws', 'bmsUIService', '$rootScope', 'bmsVisualisationService', function (ws, bmsUIService, $rootScope) {
             return {
                 controller: ['$scope', function ($scope) {
@@ -77,22 +77,39 @@ define(['bmotion.func', 'angular'], function (prob) {
                 }
             }
         }])
-        .directive('probView', function () {
+        .directive('probView', ['bmsMainService', 'probMainService', '$q', function (bmsMainService, probMainService, $q) {
             return {
                 replace: true,
                 scope: true,
                 template: '<div style="width:100%;height:100%"><iframe src="" frameBorder="0" style="width:100%;height:100%"></iframe></div>',
+                controller: ['$scope', function ($scope) {
+
+                    $scope.postpone = false;
+
+                    $scope.$on('setProBViewTraceId', function (evt, traceId) {
+                        $scope.traceId = traceId;
+                    });
+
+                }],
                 link: function ($scope, element) {
 
-                    $scope.traceId = null;
                     var iframe = $(element).find("iframe");
 
-                    $scope.open = function (traceId) {
-                        if (traceId && $scope.traceId != traceId) {
-                            iframe.attr("src", 'http://localhost:' + $scope.port + '/sessions/' + $scope.type + '/' + traceId);
-                            $scope.traceId = traceId;
-                        }
+                    $scope.setTraceId = function (traceId) {
+                        $q.all([bmsMainService.getConfig(), probMainService.getPort()]).then(function (data) {
+                            iframe.attr("src", 'http://' + data[0].prob.host + ':' + data[1].port + '/sessions/' + $scope.type + '/' + traceId);
+                        });
                     };
+
+                    $scope.$watch('traceId', function (newTraceId, oldTraceId) {
+                        if (newTraceId && newTraceId !== oldTraceId) {
+                            if ($scope.isOpen) {
+                                $scope.setTraceId(newTraceId);
+                            } else {
+                                $scope.postpone = true;
+                            }
+                        }
+                    });
 
                     $scope.$on('dragStart', function () {
                         iframe.hide();
@@ -109,17 +126,17 @@ define(['bmotion.func', 'angular'], function (prob) {
                     $scope.$on('resizeStop', function () {
                         iframe.show();
                     });
-                    $scope.$on('open', function (traceId) {
-                        $scope.open(traceId);
-                    });
-                    $scope.$on('setProBViewTraceId', function (evt, traceId) {
-                        if ($scope.isOpen) {
-                            $scope.open(traceId);
+
+                    $scope.$on('open', function () {
+                        if ($scope.postpone) {
+                            $scope.setTraceId($scope.traceId);
+                            $scope.postpone = false;
                         }
                     });
+
                 }
             }
-        })
+        }])
         .directive('bmsDialog', ['bmsDialogService', function (bmsDialogService) {
             return {
                 scope: true,

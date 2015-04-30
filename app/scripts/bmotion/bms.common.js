@@ -5,7 +5,8 @@
 define(['socketio', 'angular-route'], function (io) {
 
         return angular.module('bms.common', ['ngRoute'])
-            .factory('bmsMainService', ['ws', '$q', function (ws, $q) {
+            .factory('bmsMainService', ['ws', '$q', '$http', function (ws, $q, $http) {
+                var config = null;
                 var main = {
                     mode: "ModeStandalone",
                     getFullPath: function (template) {
@@ -23,11 +24,23 @@ define(['socketio', 'angular-route'], function (io) {
                             defer.resolve(path);
                         }
                         return defer.promise;
+                    },
+                    getConfig: function () {
+                        var defer = $q.defer();
+                        if (config) {
+                            defer.resolve(config);
+                        } else {
+                            $http.get('bmotion.json').success(function (data) {
+                                config = data;
+                                defer.resolve(data);
+                            });
+                        }
+                        return defer.promise;
                     }
                 };
                 return main;
             }])
-            .factory('bmsSocketService', ['$http', '$q', function ($http, $q) {
+            .factory('bmsSocketService', ['$http', '$q', '$rootScope', function ($http, $q, $rootScope) {
                 'use strict';
                 var socket = null;
                 return {
@@ -35,6 +48,7 @@ define(['socketio', 'angular-route'], function (io) {
                         var defer = $q.defer();
                         if (socket === null) {
                             $http.get('bmotion.json').success(function (data) {
+                                $rootScope.config = data;
                                 // TODO: Check if configuration file is correct!
                                 socket = io.connect('http://' + data.socket.host + ':' + data.socket.port);
                                 defer.resolve(socket);
