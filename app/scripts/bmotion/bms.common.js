@@ -10,7 +10,7 @@ define(['socketio', 'angular-route'], function (io) {
                     mode: "ModeStandalone",
                     getFullPath: function (template) {
                         var defer = $q.defer();
-                        if (main.mode === 'ModeIntegrated') {
+                        if (main.mode === 'ModeIntegrated' || main.mode === 'ModeOnline') {
                             ws.emit('getWorkspacePath', "", function (data) {
                                 var p = data.workspace + "/" + template;
                                 var filename = p.replace(/^.*[\\\/]/, '');
@@ -101,12 +101,6 @@ define(['socketio', 'angular-route'], function (io) {
             .factory('bmsUIService', ['$rootScope', function ($rootScope) {
 
                 return {
-                    startLoading: function () {
-                        $rootScope.$broadcast('startLoading');
-                    },
-                    endLoading: function () {
-                        $rootScope.$broadcast('endLoading');
-                    },
                     setProBViewTraceId: function (traceid) {
                         $rootScope.$broadcast('setProBViewTraceId', traceid);
                     },

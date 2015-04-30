@@ -2,9 +2,9 @@
  * BMotion Studio for ProB Graph Module
  *
  */
-define(['prob.api', 'bms.common', 'prob.observers', 'xeditable', 'cytoscape', 'cytoscape.navigator'], function (prob) {
+define(['prob.api', 'bms.common', 'prob.observers', 'xeditable', 'cytoscape', 'cytoscape.navigator', 'prob.modal'], function (prob) {
 
-    return angular.module('prob.graph', ['xeditable', 'bms.common', 'prob.observers'])
+    return angular.module('prob.graph', ['xeditable', 'bms.common', 'prob.observers', 'prob.modal'])
         .factory('bmsRenderingService', ['$q', '$injector', 'bmsObserverService', '$http', '$templateCache', function ($q, $injector, bmsObserverService, $http, $templateCache) {
 
             var renderingService = {
@@ -424,7 +424,7 @@ define(['prob.api', 'bms.common', 'prob.observers', 'xeditable', 'cytoscape', 'c
             };
 
         }])
-        .directive('bmsDiagramElementProjectionView', ['bmsObserverService', 'bmsRenderingService', 'bmsVisualisationService', 'bmsDiagramElementProjectionGraph', 'ws', '$injector', '$http', '$q', '$templateCache', '$filter', function (bmsObserverService, bmsRenderingService, bmsVisualisationService, bmsDiagramElementProjectionGraph, ws, $injector, $http, $q, $templateCache, $filter) {
+        .directive('bmsDiagramElementProjectionView', ['bmsObserverService', 'bmsRenderingService', 'bmsVisualisationService', 'bmsDiagramElementProjectionGraph', 'ws', '$injector', '$http', '$q', '$templateCache', '$filter', 'bmsModalService', function (bmsObserverService, bmsRenderingService, bmsVisualisationService, bmsDiagramElementProjectionGraph, ws, $injector, $http, $q, $templateCache, $filter, bmsModalService) {
 
             return {
                 replace: false,
@@ -562,15 +562,18 @@ define(['prob.api', 'bms.common', 'prob.observers', 'xeditable', 'cytoscape', 'c
                     };
 
                     $scope.$watch('elementSelection.selected', function (newValue) {
-                        if (newValue) {
+                        if (newValue && newValue.length > 0) {
                             var elements = [];
                             angular.forEach($scope.elementSelection.data, function (s) {
                                 if (newValue.indexOf(s.value) >= 0) {
                                     elements.push($scope.elementSelection.bmsIdDataMap[s.bmsid]);
                                 }
                             });
+                            bmsModalService.startLoading();
                             $scope.getData(elements, $scope.getVisualisationSelection()).then(function (data) {
-                                $scope.loadData(data);
+                                $scope.loadData(data).then(function () {
+                                    bmsModalService.endLoading();
+                                });
                             });
                         }
                     });
@@ -676,17 +679,23 @@ define(['prob.api', 'bms.common', 'prob.observers', 'xeditable', 'cytoscape', 'c
                 link: function ($scope, $element) {
 
                     $scope.loadData = function (data) {
+                        var defer = $q.defer();
                         if (data) {
                             if (!$scope.cy) {
                                 bmsDiagramElementProjectionGraph.build($element, data).then(function (result) {
                                     $scope.cy = result.cy;
                                     $scope.navigator = result.navigator;
+                                    defer.resolve();
                                 });
                             } else {
-                                $scope.cy.load(data);
+                                $scope.cy.load(data, function () {
+                                }, function () {
+                                    defer.resolve();
+                                });
                                 $scope.refreshNavigator();
                             }
                         }
+                        return defer.promise;
                     };
 
                 }
@@ -767,7 +776,7 @@ define(['prob.api', 'bms.common', 'prob.observers', 'xeditable', 'cytoscape', 'c
             };
 
         }])
-        .directive('bmsDiagramTraceView', ['bmsObserverService', '$filter', 'bmsVisualisationService', 'bmsDiagramTraceGraph', 'ws', '$compile', 'bmsRenderingService', '$q', function (bmsObserverService, $filter, bmsVisualisationService, bmsDiagramTraceGraph, ws, $compile, bmsRenderingService, $q) {
+        .directive('bmsDiagramTraceView', ['bmsObserverService', '$filter', 'bmsVisualisationService', 'bmsDiagramTraceGraph', 'ws', '$compile', 'bmsRenderingService', '$q', 'bmsModalService', function (bmsObserverService, $filter, bmsVisualisationService, bmsDiagramTraceGraph, ws, $compile, bmsRenderingService, $q, bmsModalService) {
             return {
                 replace: false,
                 template: '<div style="height:100%;width:100%;">'
@@ -851,8 +860,11 @@ define(['prob.api', 'bms.common', 'prob.observers', 'xeditable', 'cytoscape', 'c
 
                     $scope.$watch('viewSelection.selected', function (newValue) {
                         if (newValue) {
+                            bmsModalService.startLoading();
                             $scope.getData($scope.getVisualisationSelection(), $scope.getSelectedView()).then(function (data) {
-                                $scope.loadData(data);
+                                $scope.loadData(data).then(function() {
+                                    bmsModalService.endLoading();
+                                });
                             });
                         }
                     });
@@ -868,7 +880,7 @@ define(['prob.api', 'bms.common', 'prob.observers', 'xeditable', 'cytoscape', 'c
                             bmsRenderingService.getStyle(visualisation.name, visualisation.data.view.style).then(function (css) {
 
                                 angular.forEach(data.nodes, function (n) {
-                                    if (n.data.id !== 'root') {
+                                    if (n.data.id !== 'root' && n.data.id !== '0') {
                                         promises.push(bmsRenderingService.getVisualizationSnapshotAsDataUrl(visualisation, view, n.data.id, css));
                                     } else {
                                         promises.push(bmsRenderingService.getEmptySnapshotDataUrl());
@@ -919,20 +931,26 @@ define(['prob.api', 'bms.common', 'prob.observers', 'xeditable', 'cytoscape', 'c
                     });
 
                 }],
-                link: function ($scope, $element, attrs) {
+                link: function ($scope, $element) {
 
                     $scope.loadData = function (data) {
+                        var defer = $q.defer();
                         if (data) {
                             if (!$scope.cy) {
                                 bmsDiagramTraceGraph.build($element, data).then(function (result) {
                                     $scope.cy = result.cy;
                                     $scope.navigator = result.navigator;
+                                    defer.resolve();
                                 });
                             } else {
-                                $scope.cy.load(data);
+                                $scope.cy.load(data, function () {
+                                }, function () {
+                                    defer.resolve();
+                                });
                                 $scope.refreshNavigator();
                             }
                         }
+                        return defer.promise;
                     };
 
                 }

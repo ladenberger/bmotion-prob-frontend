@@ -2,10 +2,10 @@
  * BMotion Studio for ProB IFrame Module
  *
  */
-define(['prob.api', 'bms.common', 'prob.observers'], function (prob) {
+define(['prob.api', 'bms.common', 'prob.observers', 'prob.modal'], function (prob) {
 
-    var module = angular.module('prob.iframe', ['bms.common', 'prob.observers'])
-        .directive('bmsVisualisationView', ['bmsMainService', '$rootScope', 'bmsVisualisationService', '$compile', 'bmsObserverService', '$http', 'loadModel', 'ws', '$injector', 'bmsUIService', function (bmsMainService, $rootScope, bmsVisualisationService, $compile, bmsObserverService, $http, loadModel, ws, $injector, bmsUIService) {
+    var module = angular.module('prob.iframe', ['bms.common', 'prob.observers', 'prob.modal'])
+        .directive('bmsVisualisationView', ['bmsMainService', '$rootScope', 'bmsVisualisationService', '$compile', 'bmsObserverService', '$http', 'loadModel', 'ws', '$injector', 'bmsUIService', 'bmsModalService', function (bmsMainService, $rootScope, bmsVisualisationService, $compile, bmsObserverService, $http, loadModel, ws, $injector, bmsUIService, bmsModalService) {
             return {
                 replace: false,
                 scope: true,
@@ -22,7 +22,7 @@ define(['prob.api', 'bms.common', 'prob.observers'], function (prob) {
 
                         if (template) {
 
-                            bmsUIService.startLoading();
+                            bmsModalService.startLoading();
                             bmsMainService.getFullPath(template).then(function (path) {
 
                                 // Get properties from configuration file
@@ -58,7 +58,7 @@ define(['prob.api', 'bms.common', 'prob.observers'], function (prob) {
                                                         $scope.setStateId(data.stateid);
                                                     }
                                                 });
-                                                bmsUIService.endLoading();
+                                                bmsModalService.endLoading();
                                             });
                                         });
 

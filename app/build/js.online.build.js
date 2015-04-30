@@ -1,5 +1,10 @@
-requirejs.config({
-    baseUrl: "../../app/scripts",
+({
+    baseUrl: "../scripts",
+    name: "bmotion.online",
+    out: "../../dist/bmotion.online.js",
+    //optimize: "closure",
+    removeCombined: true,
+    findNestedDependencies: true,
     paths: {
         "jquery": "vendor/jquery/dist/jquery.min",
         "angular": "vendor/angular/angular.min",
@@ -24,6 +29,7 @@ requirejs.config({
         "prob.graph": "prob/prob.graph",
         "prob.jquery": "prob/prob.jquery",
         "prob.observers": "prob/prob.observers",
+        "prob.online": "prob/prob.online",
         "prob.api": "prob/prob.api",
         "qtip": "vendor/qtip2/jquery.qtip"
     },
@@ -44,13 +50,11 @@ requirejs.config({
             deps: ["jquery"]
         },
         "cytoscape.navigator": ["cytoscape"],
-        "prob.standalone": ['prob.graph', 'prob.ui', 'prob.iframe', 'prob.jquery'],
-        "prob.graph": ['prob.api', 'angular', 'jquery', 'xeditable', 'cytoscape', 'cytoscape.navigator'],
+        "prob.online": ['prob.graph', 'prob.ui', 'prob.iframe', 'prob.jquery', 'prob.modal'],
+        "prob.iframe": ['prob.modal'],
+        "prob.graph": ['prob.api', 'prob.modal', 'angular', 'jquery', 'xeditable', 'cytoscape', 'cytoscape.navigator'],
         "prob.api": {
             exports: "bmotion"
         }
     }
-});
-define(['prob.standalone'], function (prob) {
-    return prob;
 });
