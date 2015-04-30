@@ -1,0 +1,45 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<org.eventb.core.machineFile org.eventb.core.comment="now we add one door" org.eventb.core.configuration="org.eventb.core.fwd;de.prob.units.mchBase" org.eventb.texttools.text_lastmodified="1422979273315" org.eventb.texttools.text_representation="machine GearDoor1 // now we add one door&#10;refines Gear0  sees Gear Door&#10;&#10;variables gear door&#10;invariants @invd door ∈ DOOR_STATE&#10; @safety_inv1 gear=gear_moving ⇒  door=open&#10;events&#10;  event INITIALISATION extends INITIALISATION begin&#10;    @inid door ≔ closed&#10;  end&#10;&#10;  event env_start_retracting extends env_start_retracting&#10;    when @door_open door = open&#10;  end&#10;&#10;  event env_retract_gear extends env_retract_gear&#10;    when @door_open door = open&#10;  end&#10;&#10;  event env_start_extending extends env_start_extending&#10;    when @door_open door = open&#10;  end&#10;&#10;  event env_extend_gear extends env_extend_gear&#10;    when @door_open door = open&#10;  end&#10;&#10;  event env_start_open_door when @gd (door = closed ∨ door=door_moving) ∧ gear ≠ gear_moving  then&#10;    @ad door ≔ door_moving&#10;  end&#10;  event env_open_door when @gd door = door_moving ∧ gear ≠ gear_moving then&#10;    @ad door ≔ open&#10;  end&#10;  event env_start_close_door when @gd (door = open ∨ door = door_moving) ∧ gear ≠ gear_moving then&#10;    @ad door ≔ door_moving&#10;  end&#10;  event env_close_door when @gd door = door_moving ∧ gear ≠ gear_moving then&#10;    @ad door ≔ closed&#10;  end&#10;end&#10;" version="5">
+<org.eventb.core.refinesMachine name="_4Jo6UKu9EeS3EZaaLT3D1A" org.eventb.core.target="R0Gear"/>
+<org.eventb.core.seesContext name="_4Jo6Uau9EeS3EZaaLT3D1A" org.eventb.core.target="Gear"/>
+<org.eventb.core.seesContext name="_4Jo6Uqu9EeS3EZaaLT3D1A" org.eventb.core.target="Door"/>
+<org.eventb.core.variable name="_4Jo6U6u9EeS3EZaaLT3D1A" org.eventb.core.identifier="gear"/>
+<org.eventb.core.event name="_4Jo6VKu9EeS3EZaaLT3D1A" org.eventb.core.convergence="0" org.eventb.core.extended="true" org.eventb.core.label="INITIALISATION">
+<org.eventb.core.action name="_4JphYKu9EeS3EZaaLT3D1A" org.eventb.core.assignment="door ≔ closed" org.eventb.core.label="inid"/>
+</org.eventb.core.event>
+<org.eventb.core.event name="_4JphYau9EeS3EZaaLT3D1A" org.eventb.core.convergence="0" org.eventb.core.extended="true" org.eventb.core.label="env_start_retracting">
+<org.eventb.core.refinesEvent name="_4JphYqu9EeS3EZaaLT3D1A" org.eventb.core.target="env_start_retracting"/>
+<org.eventb.core.guard name="_4JphY6u9EeS3EZaaLT3D1A" org.eventb.core.label="door_open" org.eventb.core.predicate="door = open"/>
+</org.eventb.core.event>
+<org.eventb.core.event name="_4JphZKu9EeS3EZaaLT3D1A" org.eventb.core.convergence="0" org.eventb.core.extended="true" org.eventb.core.label="env_retract_gear">
+<org.eventb.core.refinesEvent name="_4JphZau9EeS3EZaaLT3D1A" org.eventb.core.target="env_retract_gear"/>
+<org.eventb.core.guard name="_4JphZqu9EeS3EZaaLT3D1A" org.eventb.core.label="door_open" org.eventb.core.predicate="door = open"/>
+</org.eventb.core.event>
+<org.eventb.core.event name="_4JphZ6u9EeS3EZaaLT3D1A" org.eventb.core.convergence="0" org.eventb.core.extended="true" org.eventb.core.label="env_start_extending">
+<org.eventb.core.refinesEvent name="_4JqIcKu9EeS3EZaaLT3D1A" org.eventb.core.target="env_start_extending"/>
+<org.eventb.core.guard name="_4JqIcau9EeS3EZaaLT3D1A" org.eventb.core.label="door_open" org.eventb.core.predicate="door = open"/>
+</org.eventb.core.event>
+<org.eventb.core.event name="_4JqIcqu9EeS3EZaaLT3D1A" org.eventb.core.convergence="0" org.eventb.core.extended="true" org.eventb.core.label="env_extend_gear">
+<org.eventb.core.refinesEvent name="_4JqIc6u9EeS3EZaaLT3D1A" org.eventb.core.target="env_extend_gear"/>
+<org.eventb.core.guard name="_4JqIdKu9EeS3EZaaLT3D1A" org.eventb.core.label="door_open" org.eventb.core.predicate="door = open"/>
+</org.eventb.core.event>
+<org.eventb.core.variable name="_4JqIdau9EeS3EZaaLT3D1A" org.eventb.core.identifier="door"/>
+<org.eventb.core.invariant name="_4JqIdqu9EeS3EZaaLT3D1A" org.eventb.core.label="invd" org.eventb.core.predicate="door ∈ DOOR_STATE"/>
+<org.eventb.core.event name="_4JqId6u9EeS3EZaaLT3D1A" org.eventb.core.convergence="0" org.eventb.core.extended="false" org.eventb.core.label="env_start_open_door">
+<org.eventb.core.guard name="_4JqvgKu9EeS3EZaaLT3D1A" org.eventb.core.label="gd" org.eventb.core.predicate="(door = closed ∨ door=door_moving) ∧ gear ≠ gear_moving"/>
+<org.eventb.core.action name="_4Jqvgau9EeS3EZaaLT3D1A" org.eventb.core.assignment="door ≔ door_moving" org.eventb.core.label="ad"/>
+</org.eventb.core.event>
+<org.eventb.core.event name="_4Jqvgqu9EeS3EZaaLT3D1A" org.eventb.core.convergence="0" org.eventb.core.extended="false" org.eventb.core.label="env_open_door">
+<org.eventb.core.guard name="_4Jqvg6u9EeS3EZaaLT3D1A" org.eventb.core.label="gd" org.eventb.core.predicate="door = door_moving ∧ gear ≠ gear_moving"/>
+<org.eventb.core.action name="_4JqvhKu9EeS3EZaaLT3D1A" org.eventb.core.assignment="door ≔ open" org.eventb.core.label="ad"/>
+</org.eventb.core.event>
+<org.eventb.core.event name="_4Jqvhau9EeS3EZaaLT3D1A" org.eventb.core.convergence="0" org.eventb.core.extended="false" org.eventb.core.label="env_start_close_door">
+<org.eventb.core.guard name="_4Jqvhqu9EeS3EZaaLT3D1A" org.eventb.core.label="gd" org.eventb.core.predicate="(door = open ∨ door = door_moving) ∧ gear ≠ gear_moving"/>
+<org.eventb.core.action name="_4JrWkKu9EeS3EZaaLT3D1A" org.eventb.core.assignment="door ≔ door_moving" org.eventb.core.label="ad"/>
+</org.eventb.core.event>
+<org.eventb.core.event name="_4JrWkau9EeS3EZaaLT3D1A" org.eventb.core.convergence="0" org.eventb.core.extended="false" org.eventb.core.label="env_close_door">
+<org.eventb.core.guard name="_4JrWkqu9EeS3EZaaLT3D1A" org.eventb.core.label="gd" org.eventb.core.predicate="door = door_moving ∧ gear ≠ gear_moving"/>
+<org.eventb.core.action name="_4JrWk6u9EeS3EZaaLT3D1A" org.eventb.core.assignment="door ≔ closed" org.eventb.core.label="ad"/>
+</org.eventb.core.event>
+<org.eventb.core.invariant name="_4JrWlKu9EeS3EZaaLT3D1A" org.eventb.core.label="safety_inv1" org.eventb.core.predicate="gear=gear_moving ⇒  door=open"/>
+</org.eventb.core.machineFile>

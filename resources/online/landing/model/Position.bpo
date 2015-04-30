@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<org.eventb.core.poFile org.eventb.core.poStamp="0">
+<org.eventb.core.poPredicateSet name="ABSHYP" org.eventb.core.poStamp="0">
+<org.eventb.core.poIdentifier name="POSITION" org.eventb.core.type="ℙ(POSITION)"/>
+<org.eventb.core.poIdentifier name="front" org.eventb.core.type="POSITION"/>
+<org.eventb.core.poIdentifier name="left" org.eventb.core.type="POSITION"/>
+<org.eventb.core.poIdentifier name="right" org.eventb.core.type="POSITION"/>
+</org.eventb.core.poPredicateSet>
+<org.eventb.core.poPredicateSet name="ALLHYP" org.eventb.core.parentSet="/LandingGearNew/Position.bpo|org.eventb.core.poFile#Position|org.eventb.core.poPredicateSet#ABSHYP" org.eventb.core.poStamp="0">
+<org.eventb.core.poPredicate name="PRD0" org.eventb.core.predicate="partition(POSITION,{front},{left},{right})" org.eventb.core.source="/LandingGearNew/Position.buc|org.eventb.core.contextFile#Position|org.eventb.core.axiom#_22FPdKu3EeS3EZaaLT3D1A"/>
+</org.eventb.core.poPredicateSet>
+</org.eventb.core.poFile>

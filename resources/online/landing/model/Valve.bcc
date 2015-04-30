@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<org.eventb.core.scContextFile org.eventb.core.accurate="true" org.eventb.core.configuration="org.eventb.core.fwd;de.prob.symbolic.ctxBase;de.prob.units.mchBase;org.animb.valuation.valBase">
+<org.eventb.core.scAxiom name="'" org.eventb.core.label="axm5" org.eventb.core.predicate="partition(VALVE_STATE,{valve_open},{valve_closed})" org.eventb.core.source="/LandingGearNew/Valve.buc|org.eventb.core.contextFile#Valve|org.eventb.core.axiom#_u7QWkqxqEeSwFfjtzWiM6w" org.eventb.core.theorem="false"/>
+<org.eventb.core.scAxiom name="(" org.eventb.core.label="axm6" org.eventb.core.predicate="partition(PLANE_STATE,{ground},{flight})" org.eventb.core.source="/LandingGearNew/Valve.buc|org.eventb.core.contextFile#Valve|org.eventb.core.axiom#_CmFoc7ELEeSHQ8Zbk_WwvQ" org.eventb.core.theorem="false"/>
+<org.eventb.core.scCarrierSet name="PLANE_STATE" org.eventb.core.source="/LandingGearNew/Valve.buc|org.eventb.core.contextFile#Valve|org.eventb.core.carrierSet#_CmFocLELEeSHQ8Zbk_WwvQ" org.eventb.core.type="ℙ(PLANE_STATE)"/>
+<org.eventb.core.scCarrierSet name="VALVE_STATE" org.eventb.core.source="/LandingGearNew/Valve.buc|org.eventb.core.contextFile#Valve|org.eventb.core.carrierSet#_u7PvgKxqEeSwFfjtzWiM6w" org.eventb.core.type="ℙ(VALVE_STATE)"/>
+<org.eventb.core.scConstant name="flight" org.eventb.core.source="/LandingGearNew/Valve.buc|org.eventb.core.contextFile#Valve|org.eventb.core.constant#_CmFocrELEeSHQ8Zbk_WwvQ" org.eventb.core.type="PLANE_STATE"/>
+<org.eventb.core.scConstant name="ground" org.eventb.core.source="/LandingGearNew/Valve.buc|org.eventb.core.contextFile#Valve|org.eventb.core.constant#_CmFocbELEeSHQ8Zbk_WwvQ" org.eventb.core.type="PLANE_STATE"/>
+<org.eventb.core.scConstant name="valve_closed" org.eventb.core.source="/LandingGearNew/Valve.buc|org.eventb.core.contextFile#Valve|org.eventb.core.constant#_u7QWkaxqEeSwFfjtzWiM6w" org.eventb.core.type="VALVE_STATE"/>
+<org.eventb.core.scConstant name="valve_open" org.eventb.core.source="/LandingGearNew/Valve.buc|org.eventb.core.contextFile#Valve|org.eventb.core.constant#_u7QWkKxqEeSwFfjtzWiM6w" org.eventb.core.type="VALVE_STATE"/>
+</org.eventb.core.scContextFile>

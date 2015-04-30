@@ -1,0 +1,12 @@
+{
+  "name": "BMotion Studio for ProB",
+  "main": "index.html",
+  "window": {
+    "icon": "bmsicon.png",
+    "toolbar": true,
+    "width": 1200,
+    "height": 800,
+    "min_width": 800,
+    "min_height": 600
+  }
+}

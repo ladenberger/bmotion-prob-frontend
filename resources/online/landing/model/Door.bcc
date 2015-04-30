@@ -1,0 +1,8 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<org.eventb.core.scContextFile org.eventb.core.accurate="true" org.eventb.core.configuration="org.eventb.core.fwd">
+<org.eventb.core.scAxiom name="'" org.eventb.core.label="axm1" org.eventb.core.predicate="partition(DOOR_STATE,{open},{closed},{door_moving})" org.eventb.core.source="/LandingGearNew/Door.buc|org.eventb.core.contextFile#Door|org.eventb.core.axiom#__EsXAKu0EeS3EZaaLT3D1A" org.eventb.core.theorem="false"/>
+<org.eventb.core.scCarrierSet name="DOOR_STATE" org.eventb.core.source="/LandingGearNew/Door.buc|org.eventb.core.contextFile#Door|org.eventb.core.carrierSet#__ErI4Ku0EeS3EZaaLT3D1A" org.eventb.core.type="ℙ(DOOR_STATE)"/>
+<org.eventb.core.scConstant name="closed" org.eventb.core.source="/LandingGearNew/Door.buc|org.eventb.core.contextFile#Door|org.eventb.core.constant#__Erv8Ku0EeS3EZaaLT3D1A" org.eventb.core.type="DOOR_STATE"/>
+<org.eventb.core.scConstant name="door_moving" org.eventb.core.source="/LandingGearNew/Door.buc|org.eventb.core.contextFile#Door|org.eventb.core.constant#__Erv8au0EeS3EZaaLT3D1A" org.eventb.core.type="DOOR_STATE"/>
+<org.eventb.core.scConstant name="open" org.eventb.core.source="/LandingGearNew/Door.buc|org.eventb.core.contextFile#Door|org.eventb.core.constant#__ErI4au0EeS3EZaaLT3D1A" org.eventb.core.type="DOOR_STATE"/>
+</org.eventb.core.scContextFile>

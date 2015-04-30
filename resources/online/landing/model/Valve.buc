@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<org.eventb.core.contextFile org.eventb.core.configuration="org.eventb.core.fwd;de.prob.symbolic.ctxBase;de.prob.units.mchBase;org.animb.valuation.valBase" org.eventb.texttools.text_lastmodified="1423562170471" org.eventb.texttools.text_representation="context Valve&#10;&#10;constants valve_open valve_closed ground flight&#10;&#10;sets  VALVE_STATE PLANE_STATE&#10;&#10;axioms&#10;  @axm5 partition(VALVE_STATE, {valve_open}, {valve_closed})&#10;  @axm6 partition(PLANE_STATE, {ground}, {flight})&#10;end&#10;" version="3">
+<org.eventb.core.carrierSet name="_u7PvgKxqEeSwFfjtzWiM6w" org.eventb.core.identifier="VALVE_STATE"/>
+<org.eventb.core.carrierSet name="_CmFocLELEeSHQ8Zbk_WwvQ" org.eventb.core.identifier="PLANE_STATE"/>
+<org.eventb.core.constant name="_u7QWkKxqEeSwFfjtzWiM6w" org.eventb.core.identifier="valve_open"/>
+<org.eventb.core.constant name="_u7QWkaxqEeSwFfjtzWiM6w" org.eventb.core.identifier="valve_closed"/>
+<org.eventb.core.constant name="_CmFocbELEeSHQ8Zbk_WwvQ" org.eventb.core.identifier="ground"/>
+<org.eventb.core.constant name="_CmFocrELEeSHQ8Zbk_WwvQ" org.eventb.core.identifier="flight"/>
+<org.eventb.core.axiom name="_u7QWkqxqEeSwFfjtzWiM6w" org.eventb.core.label="axm5" org.eventb.core.predicate="partition(VALVE_STATE, {valve_open}, {valve_closed})"/>
+<org.eventb.core.axiom name="_CmFoc7ELEeSHQ8Zbk_WwvQ" org.eventb.core.label="axm6" org.eventb.core.predicate="partition(PLANE_STATE, {ground}, {flight})"/>
+</org.eventb.core.contextFile>

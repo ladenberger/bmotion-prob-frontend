@@ -1,0 +1,14 @@
+.env {
+    float:left;
+}
+
+.buttons {
+    float:left;
+    padding:25px;
+    margin-top: 140px;
+}
+
+.buttons button {
+    width: 125px;
+    margin-top: 10px;
+}

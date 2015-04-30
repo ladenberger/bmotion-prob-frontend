@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<org.eventb.core.poFile org.eventb.core.poStamp="0">
+<org.eventb.core.poPredicateSet name="ABSHYP" org.eventb.core.poStamp="0">
+<org.eventb.core.poIdentifier name="LIGHT_STATE" org.eventb.core.type="ℙ(LIGHT_STATE)"/>
+<org.eventb.core.poIdentifier name="bool_to_light" org.eventb.core.type="ℙ(BOOL×LIGHT_STATE)"/>
+<org.eventb.core.poIdentifier name="off" org.eventb.core.type="LIGHT_STATE"/>
+<org.eventb.core.poIdentifier name="on" org.eventb.core.type="LIGHT_STATE"/>
+</org.eventb.core.poPredicateSet>
+<org.eventb.core.poPredicateSet name="ALLHYP" org.eventb.core.parentSet="/LandingGearNew/Lights.bpo|org.eventb.core.poFile#Lights|org.eventb.core.poPredicateSet#ABSHYP" org.eventb.core.poStamp="0">
+<org.eventb.core.poPredicate name="PRD0" org.eventb.core.predicate="partition(LIGHT_STATE,{on},{off})" org.eventb.core.source="/LandingGearNew/Lights.buc|org.eventb.core.contextFile#Lights|org.eventb.core.axiom#_WevMQ7FrEeSe-57zv9AtOw"/>
+<org.eventb.core.poPredicate name="PRD1" org.eventb.core.predicate="bool_to_light={TRUE ↦ on,FALSE ↦ off}" org.eventb.core.source="/LandingGearNew/Lights.buc|org.eventb.core.contextFile#Lights|org.eventb.core.axiom#_WevMRLFrEeSe-57zv9AtOw"/>
+</org.eventb.core.poPredicateSet>
+</org.eventb.core.poFile>

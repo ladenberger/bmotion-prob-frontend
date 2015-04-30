@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<org.eventb.core.contextFile org.eventb.core.configuration="org.eventb.core.fwd;de.prob.symbolic.ctxBase;de.prob.units.mchBase;org.animb.valuation.valBase" org.eventb.texttools.text_lastmodified="1423579181074" org.eventb.texttools.text_representation="context Switch&#10;&#10;constants switch_open switch_closed&#10;&#10;sets SWITCH_STATE&#10;&#10;axioms&#10;  @axm2 partition(SWITCH_STATE, {switch_open}, {switch_closed})&#10;end&#10;" version="3">
+<org.eventb.core.carrierSet name="_pXw3oLEyEeSBRd-3twLVDA" org.eventb.core.identifier="SWITCH_STATE"/>
+<org.eventb.core.constant name="_pXxesLEyEeSBRd-3twLVDA" org.eventb.core.identifier="switch_open"/>
+<org.eventb.core.constant name="_pXxesbEyEeSBRd-3twLVDA" org.eventb.core.identifier="switch_closed"/>
+<org.eventb.core.axiom name="_pXxesrEyEeSBRd-3twLVDA" org.eventb.core.label="axm2" org.eventb.core.predicate="partition(SWITCH_STATE, {switch_open}, {switch_closed})"/>
+</org.eventb.core.contextFile>

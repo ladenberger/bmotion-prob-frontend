@@ -1,0 +1,172 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<org.eventb.core.machineFile org.eventb.core.configuration="org.eventb.core.fwd" org.eventb.texttools.text_lastmodified="1423739453336" org.eventb.texttools.text_representation="machine R5GearsDoorsHandleValvesController refines R4GearsDoorsHandleValves  sees Gear Door Handle Position Valve&#10;&#10;variables open_EV close_EV retract_EV extend_EV valve_open_door valve_close_door valve_extend_gear valve_retract_gear gears doors handle&#10;          shock_absorber&#10;&#10;invariants&#10;  @open_EV open_EV ∈ BOOL&#10;  @close_EV close_EV ∈ BOOL&#10;  @retract_EV retract_EV ∈ BOOL&#10;  @extend_EV extend_EV ∈ BOOL&#10;  @R41 ¬(open_EV = TRUE ∧ close_EV = TRUE)&#10;  @ground shock_absorber ∈ PLANE_STATE&#10;  /*@ii shock_absorber = ground  ⇒  retract_EV = FALSE&#10;  @ii2 shock_absorber = ground ⇒  ran(gears)= {extended}*/&#10;/*&#10;  @glued1 door=closed ⇔ ran(doors)={closed}&#10;  @glued2 door=open ⇔ ran(doors)={open}&#10;  @glueg1 gear=extended ⇔ ran(gears)={extended}&#10;  @glueg2 gear=retracted ⇔ ran(gears)={retracted}&#10;&#10;      @valve_not_open valve_open_door(pos) = valve_closed&#10;      @countervalve_not_open ran(valve_close_door) = {valve_closed}&#10;  */&#10;&#10;events&#10;  event INITIALISATION extends INITIALISATION&#10;    then&#10;      @open_EV open_EV ≔ FALSE&#10;      @close_EV close_EV ≔ FALSE&#10;      @retract_EV retract_EV ≔  FALSE&#10;      @extend_EV extend_EV ≔ FALSE&#10;      @ongroundini shock_absorber ≔ ground&#10;  end&#10;&#10;  event begin_flying&#10;   where&#10;     @onground shock_absorber = ground&#10;   then&#10;     @setflight shock_absorber ≔ flight&#10;  end&#10;&#10;  event land_plane&#10;   where&#10;     @onground shock_absorber = flight&#10;   then&#10;     @setflight shock_absorber ≔ ground&#10;  end&#10;&#10;&#10;  event open_valve_door_open extends open_valve_door_open&#10;    where&#10;      @grd3 open_EV = TRUE&#10;  end&#10;&#10;  event close_valve_door_open extends close_valve_door_open&#10;    where&#10;      @grd3 open_EV = FALSE&#10;  end&#10;&#10;  event open_valve_door_close extends open_valve_door_close&#10;    where&#10;      @grd3 close_EV = TRUE&#10;  end&#10;&#10;  event close_valve_door_close extends close_valve_door_close&#10;    where&#10;      @grd2 close_EV = FALSE&#10;  end&#10;&#10;  event open_valve_retract_gear extends open_valve_retract_gear&#10;    where&#10;      @grd3 retract_EV = TRUE&#10;  end&#10;&#10;  event close_valve_retract_gear extends close_valve_retract_gear&#10;    where&#10;      @grd3 retract_EV = FALSE&#10;  end&#10;&#10;  event open_valve_extend_gear extends open_valve_extend_gear&#10;    where&#10;      @grd3 extend_EV = TRUE&#10;  end&#10;&#10;  event close_valve_extend_gear extends close_valve_extend_gear&#10;    where&#10;      @grd3 extend_EV = FALSE&#10;  end&#10;&#10;  event con_stimulate_open_door_valve&#10;    where&#10;      @grd1 open_EV = FALSE&#10;      @grd2 close_EV = FALSE&#10;      @grdh1 (handle=down ∧ ¬(ran(gears)={extended})) ∨ (handle=up ∧ ¬(ran(gears)={retracted}) ∧ ¬(ran(doors)={open} ∧ shock_absorber=ground))&#10;    then&#10;      @act1 open_EV ≔ TRUE&#10;  end&#10;&#10;  event con_stop_stimulate_open_door_valve&#10;    where&#10;      @grd1 open_EV = TRUE&#10;      @grd11 extend_EV = FALSE&#10;      @grd12 retract_EV = FALSE&#10;      @grdh1 (handle=down ∧ ran(gears)={extended}) ∨ (handle=up ∧ (ran(gears)={retracted} ∨ shock_absorber=ground) ∧ ran(doors)={open})&#10;    then&#10;      @act1 open_EV ≔ FALSE&#10;  end&#10;&#10;  event con_stimulate_close_door_valve&#10;    where&#10;      @grd2 close_EV = FALSE&#10;      @grd1 open_EV = FALSE&#10;      @grd11 extend_EV = FALSE&#10;      @grd12 retract_EV = FALSE&#10;      @grdh1 (handle=down ∧ ran(gears)={extended}) ∨ (handle=up ∧ (ran(gears)={retracted} ∨ shock_absorber=ground))&#10;      @grddoors ¬(ran(doors))={closed}&#10;    then&#10;      @act1 close_EV ≔ TRUE&#10;  end&#10;&#10;  event con_stop_stimulate_close_door_valve&#10;    where&#10;      @grd1 close_EV = TRUE&#10;      @grdh1 (handle=down ∧ (ran(gears)={extended}) ∧ ran(doors)={closed})&#10;           ∨ (handle=up   ∧((ran(gears)={retracted}) ∨ shock_absorber=ground) ∧ ran(doors)={closed})&#10;           //∨ (handle=down ∧ ¬(ran(gears)={extended})) ∨ (handle=up ∧ ¬(ran(gears)={retracted}) ∧ ¬(ran(doors)={closed} ∧ shock_absorber=ground))&#10;      //@grdh1 (handle=down ∧ ¬(ran(gears)={extended})) ∨ (handle=up ∧ (¬(ran(gears)={retracted}) ∨ (shock_absorber=ground ∧ ran(doors)={closed}))) ∨ ran(doors)={closed}&#10;    then&#10;      @act1 close_EV ≔ FALSE&#10;  end&#10;&#10;  event con_stimulate_retract_gear_valve&#10;    where&#10;      @grd1 retract_EV = FALSE&#10;      @grd2 extend_EV = FALSE&#10;      @grd3 open_EV = TRUE&#10;      @grdh1 handle=up ∧ ¬(ran(gears)={retracted})&#10;      @grdflight shock_absorber=flight&#10;      @grddoors ran(doors)={open}&#10;    then&#10;      @act1 retract_EV ≔ TRUE&#10;  end&#10;&#10;  event con_stop_stimulate_retract_gear_valve&#10;    where&#10;      @grd1 retract_EV = TRUE&#10;      @grdh1 (handle=down) ∨ (ran(gears)={retracted})&#10;    then&#10;      @act1 retract_EV ≔ FALSE&#10;  end&#10;&#10;  event con_stimulate_extend_gear_valve&#10;    where&#10;      @grd1 extend_EV = FALSE&#10;      @grd2 retract_EV = FALSE&#10;      @grd3 open_EV = TRUE&#10;      @grdh1 handle=down ∧ ¬(ran(gears)={extended})&#10;      @grddoors ran(doors)={open}&#10;    then&#10;      @act1 extend_EV ≔ TRUE&#10;  end&#10;&#10;  event con_stop_stimulate_extend_gear_valve&#10;    where&#10;      @grd2 extend_EV = TRUE&#10;      @grdh1 (handle=up) ∨ (ran(gears)={extended})&#10;    then&#10;      @act1 extend_EV ≔ FALSE&#10;  end&#10;&#10;  event env_start_retracting_first extends env_start_retracting_first&#10;  end&#10;&#10;  event env_retract_gear_skip extends env_retract_gear_skip&#10;  end&#10;&#10;  event env_retract_gear_last extends env_retract_gear_last&#10;  end&#10;&#10;  event env_start_extending extends env_start_extending&#10;  end&#10;&#10;  event env_extend_gear_last extends env_extend_gear_last&#10;  end&#10;&#10;  event env_extend_gear_skip extends env_extend_gear_skip&#10;  end&#10;&#10;  event env_start_open_door extends env_start_open_door&#10;  end&#10;&#10;  event env_open_door_last extends env_open_door_last&#10;  end&#10;&#10;  event env_open_door_skip extends env_open_door_skip&#10;  end&#10;&#10;  event env_start_close_door extends env_start_close_door&#10;  end&#10;&#10;  event env_close_door extends env_close_door&#10;    where&#10;      @hground (handle=up ∧ ran(gears)={extended} ⇒ shock_absorber=ground)&#10;  end&#10;&#10;  event env_close_door_skip extends env_close_door_skip&#10;    where&#10;      @hground (handle=up ∧ ran(gears)={extended} ⇒ shock_absorber=ground)&#10;  end&#10;&#10;  event toggle_handle_up extends toggle_handle_up&#10;  end&#10;&#10;  event toggle_handle_down extends toggle_handle_down&#10;  end&#10;end&#10;" version="5">
+<org.eventb.core.refinesMachine name="_z3SsEbKnEeSRt793QLaO5w" org.eventb.core.target="R4GearsDoorsHandleValves"/>
+<org.eventb.core.seesContext name="_z3T6MLKnEeSRt793QLaO5w" org.eventb.core.target="Gear"/>
+<org.eventb.core.seesContext name="_z3UhQLKnEeSRt793QLaO5w" org.eventb.core.target="Door"/>
+<org.eventb.core.seesContext name="_z3VIULKnEeSRt793QLaO5w" org.eventb.core.target="Handle"/>
+<org.eventb.core.seesContext name="_z3VIUbKnEeSRt793QLaO5w" org.eventb.core.target="Position"/>
+<org.eventb.core.seesContext name="_z3VvYLKnEeSRt793QLaO5w" org.eventb.core.target="Valve"/>
+<org.eventb.core.variable name="_pl72QLHREeSr4-dLiu2luw" org.eventb.core.identifier="open_EV"/>
+<org.eventb.core.variable name="_pl72QbHREeSr4-dLiu2luw" org.eventb.core.identifier="close_EV"/>
+<org.eventb.core.variable name="_pl72QrHREeSr4-dLiu2luw" org.eventb.core.identifier="retract_EV"/>
+<org.eventb.core.variable name="_pl72Q7HREeSr4-dLiu2luw" org.eventb.core.identifier="extend_EV"/>
+<org.eventb.core.variable name="_pl72RLHREeSr4-dLiu2luw" org.eventb.core.identifier="valve_open_door"/>
+<org.eventb.core.variable name="_pl72RbHREeSr4-dLiu2luw" org.eventb.core.identifier="valve_close_door"/>
+<org.eventb.core.variable name="_pl72RrHREeSr4-dLiu2luw" org.eventb.core.identifier="valve_extend_gear"/>
+<org.eventb.core.variable name="_pl72R7HREeSr4-dLiu2luw" org.eventb.core.identifier="valve_retract_gear"/>
+<org.eventb.core.variable name="_pl8dULHREeSr4-dLiu2luw" org.eventb.core.identifier="gears"/>
+<org.eventb.core.variable name="_pl8dUbHREeSr4-dLiu2luw" org.eventb.core.identifier="doors"/>
+<org.eventb.core.variable name="_pl8dUrHREeSr4-dLiu2luw" org.eventb.core.identifier="handle"/>
+<org.eventb.core.variable name="_pl8dU7HREeSr4-dLiu2luw" org.eventb.core.identifier="shock_absorber"/>
+<org.eventb.core.invariant name="_pl8dVLHREeSr4-dLiu2luw" org.eventb.core.label="open_EV" org.eventb.core.predicate="open_EV ∈ BOOL"/>
+<org.eventb.core.invariant name="_pl8dVbHREeSr4-dLiu2luw" org.eventb.core.label="close_EV" org.eventb.core.predicate="close_EV ∈ BOOL"/>
+<org.eventb.core.invariant name="_pl8dVrHREeSr4-dLiu2luw" org.eventb.core.label="retract_EV" org.eventb.core.predicate="retract_EV ∈ BOOL"/>
+<org.eventb.core.invariant name="_pl8dV7HREeSr4-dLiu2luw" org.eventb.core.label="extend_EV" org.eventb.core.predicate="extend_EV ∈ BOOL"/>
+<org.eventb.core.invariant name="_pl9EYLHREeSr4-dLiu2luw" org.eventb.core.label="R41" org.eventb.core.predicate="¬(open_EV = TRUE ∧ close_EV = TRUE)"/>
+<org.eventb.core.invariant name="_pl9EYbHREeSr4-dLiu2luw" org.eventb.core.comment="@ii shock_absorber = ground  ⇒  retract_EV = FALSE&#10;  @ii2 shock_absorber = ground ⇒  ran(gears)= {extended}&#10;&#10;  @glued1 door=closed ⇔ ran(doors)={closed}&#10;  @glued2 door=open ⇔ ran(doors)={open}&#10;  @glueg1 gear=extended ⇔ ran(gears)={extended}&#10;  @glueg2 gear=retracted ⇔ ran(gears)={retracted}&#10;&#10;      @valve_not_open valve_open_door(pos) = valve_closed&#10;      @countervalve_not_open ran(valve_close_door) = {valve_closed}&#10;  " org.eventb.core.label="ground" org.eventb.core.predicate="shock_absorber ∈ PLANE_STATE"/>
+<org.eventb.core.event name="_pl9EYrHREeSr4-dLiu2luw" org.eventb.core.convergence="0" org.eventb.core.extended="true" org.eventb.core.label="INITIALISATION">
+<org.eventb.core.action name="_pl9EY7HREeSr4-dLiu2luw" org.eventb.core.assignment="open_EV ≔ FALSE" org.eventb.core.label="open_EV"/>
+<org.eventb.core.action name="_pl9EZLHREeSr4-dLiu2luw" org.eventb.core.assignment="close_EV ≔ FALSE" org.eventb.core.label="close_EV"/>
+<org.eventb.core.action name="_pl9EZbHREeSr4-dLiu2luw" org.eventb.core.assignment="retract_EV ≔  FALSE" org.eventb.core.label="retract_EV"/>
+<org.eventb.core.action name="_pl9rcLHREeSr4-dLiu2luw" org.eventb.core.assignment="extend_EV ≔ FALSE" org.eventb.core.label="extend_EV"/>
+<org.eventb.core.action name="_pl9rcbHREeSr4-dLiu2luw" org.eventb.core.assignment="shock_absorber ≔ ground" org.eventb.core.label="ongroundini"/>
+</org.eventb.core.event>
+<org.eventb.core.event name="_pl9rcrHREeSr4-dLiu2luw" org.eventb.core.convergence="0" org.eventb.core.extended="false" org.eventb.core.label="begin_flying">
+<org.eventb.core.guard name="_pl9rc7HREeSr4-dLiu2luw" org.eventb.core.label="onground" org.eventb.core.predicate="shock_absorber = ground"/>
+<org.eventb.core.action name="_pl9rdLHREeSr4-dLiu2luw" org.eventb.core.assignment="shock_absorber ≔ flight" org.eventb.core.label="setflight"/>
+</org.eventb.core.event>
+<org.eventb.core.event name="_pl9rdbHREeSr4-dLiu2luw" org.eventb.core.convergence="0" org.eventb.core.extended="false" org.eventb.core.label="land_plane">
+<org.eventb.core.guard name="_pl9rdrHREeSr4-dLiu2luw" org.eventb.core.label="onground" org.eventb.core.predicate="shock_absorber = flight"/>
+<org.eventb.core.action name="_pl-SgLHREeSr4-dLiu2luw" org.eventb.core.assignment="shock_absorber ≔ ground" org.eventb.core.label="setflight"/>
+</org.eventb.core.event>
+<org.eventb.core.event name="_pl-SgbHREeSr4-dLiu2luw" org.eventb.core.convergence="0" org.eventb.core.extended="true" org.eventb.core.label="open_valve_door_open">
+<org.eventb.core.refinesEvent name="_z3b2ALKnEeSRt793QLaO5w" org.eventb.core.target="open_valve_door_open"/>
+<org.eventb.core.guard name="_pl-Sg7HREeSr4-dLiu2luw" org.eventb.core.label="grd3" org.eventb.core.predicate="open_EV = TRUE"/>
+</org.eventb.core.event>
+<org.eventb.core.event name="_pl-ShLHREeSr4-dLiu2luw" org.eventb.core.convergence="0" org.eventb.core.extended="true" org.eventb.core.label="close_valve_door_open">
+<org.eventb.core.refinesEvent name="_z3cdELKnEeSRt793QLaO5w" org.eventb.core.target="close_valve_door_open"/>
+<org.eventb.core.guard name="_pl-ShrHREeSr4-dLiu2luw" org.eventb.core.label="grd3" org.eventb.core.predicate="open_EV = FALSE"/>
+</org.eventb.core.event>
+<org.eventb.core.event name="_pl-5kLHREeSr4-dLiu2luw" org.eventb.core.convergence="0" org.eventb.core.extended="true" org.eventb.core.label="open_valve_door_close">
+<org.eventb.core.refinesEvent name="_z3dEILKnEeSRt793QLaO5w" org.eventb.core.target="open_valve_door_close"/>
+<org.eventb.core.guard name="_pl-5krHREeSr4-dLiu2luw" org.eventb.core.label="grd3" org.eventb.core.predicate="close_EV = TRUE"/>
+</org.eventb.core.event>
+<org.eventb.core.event name="_pl-5k7HREeSr4-dLiu2luw" org.eventb.core.convergence="0" org.eventb.core.extended="true" org.eventb.core.label="close_valve_door_close">
+<org.eventb.core.refinesEvent name="_z3dEIbKnEeSRt793QLaO5w" org.eventb.core.target="close_valve_door_close"/>
+<org.eventb.core.guard name="_pl-5lbHREeSr4-dLiu2luw" org.eventb.core.label="grd2" org.eventb.core.predicate="close_EV = FALSE"/>
+</org.eventb.core.event>
+<org.eventb.core.event name="_pl-5lrHREeSr4-dLiu2luw" org.eventb.core.convergence="0" org.eventb.core.extended="true" org.eventb.core.label="open_valve_retract_gear">
+<org.eventb.core.refinesEvent name="_z3drMLKnEeSRt793QLaO5w" org.eventb.core.target="open_valve_retract_gear"/>
+<org.eventb.core.guard name="_pl_goLHREeSr4-dLiu2luw" org.eventb.core.label="grd3" org.eventb.core.predicate="retract_EV = TRUE"/>
+</org.eventb.core.event>
+<org.eventb.core.event name="_pl_gobHREeSr4-dLiu2luw" org.eventb.core.convergence="0" org.eventb.core.extended="true" org.eventb.core.label="close_valve_retract_gear">
+<org.eventb.core.refinesEvent name="_z3eSQLKnEeSRt793QLaO5w" org.eventb.core.target="close_valve_retract_gear"/>
+<org.eventb.core.guard name="_pl_go7HREeSr4-dLiu2luw" org.eventb.core.label="grd3" org.eventb.core.predicate="retract_EV = FALSE"/>
+</org.eventb.core.event>
+<org.eventb.core.event name="_pl_gpLHREeSr4-dLiu2luw" org.eventb.core.convergence="0" org.eventb.core.extended="true" org.eventb.core.label="open_valve_extend_gear">
+<org.eventb.core.refinesEvent name="_z3eSQbKnEeSRt793QLaO5w" org.eventb.core.target="open_valve_extend_gear"/>
+<org.eventb.core.guard name="_pl_gprHREeSr4-dLiu2luw" org.eventb.core.label="grd3" org.eventb.core.predicate="extend_EV = TRUE"/>
+</org.eventb.core.event>
+<org.eventb.core.event name="_pl_gp7HREeSr4-dLiu2luw" org.eventb.core.convergence="0" org.eventb.core.extended="true" org.eventb.core.label="close_valve_extend_gear">
+<org.eventb.core.refinesEvent name="_z3e5ULKnEeSRt793QLaO5w" org.eventb.core.target="close_valve_extend_gear"/>
+<org.eventb.core.guard name="_pmAHsbHREeSr4-dLiu2luw" org.eventb.core.label="grd3" org.eventb.core.predicate="extend_EV = FALSE"/>
+</org.eventb.core.event>
+<org.eventb.core.event name="_pmAHsrHREeSr4-dLiu2luw" org.eventb.core.convergence="0" org.eventb.core.extended="false" org.eventb.core.label="con_stimulate_open_door_valve">
+<org.eventb.core.guard name="_pmAHs7HREeSr4-dLiu2luw" org.eventb.core.label="grd1" org.eventb.core.predicate="open_EV = FALSE"/>
+<org.eventb.core.guard name="_pmAHtLHREeSr4-dLiu2luw" org.eventb.core.label="grd2" org.eventb.core.predicate="close_EV = FALSE"/>
+<org.eventb.core.guard name="_pmAHtbHREeSr4-dLiu2luw" org.eventb.core.label="grdh1" org.eventb.core.predicate="(handle=down ∧ ¬(ran(gears)={extended})) ∨ (handle=up ∧ ¬(ran(gears)={retracted}) ∧ ¬(ran(doors)={open} ∧ shock_absorber=ground))"/>
+<org.eventb.core.action name="_pmAHtrHREeSr4-dLiu2luw" org.eventb.core.assignment="open_EV ≔ TRUE" org.eventb.core.label="act1"/>
+</org.eventb.core.event>
+<org.eventb.core.event name="_pmAuwLHREeSr4-dLiu2luw" org.eventb.core.convergence="0" org.eventb.core.extended="false" org.eventb.core.label="con_stop_stimulate_open_door_valve">
+<org.eventb.core.guard name="_pmAuwbHREeSr4-dLiu2luw" org.eventb.core.label="grd1" org.eventb.core.predicate="open_EV = TRUE"/>
+<org.eventb.core.guard name="_pmAuwrHREeSr4-dLiu2luw" org.eventb.core.label="grd11" org.eventb.core.predicate="extend_EV = FALSE"/>
+<org.eventb.core.guard name="_pmAuw7HREeSr4-dLiu2luw" org.eventb.core.label="grd12" org.eventb.core.predicate="retract_EV = FALSE"/>
+<org.eventb.core.guard name="_pmAuxLHREeSr4-dLiu2luw" org.eventb.core.label="grdh1" org.eventb.core.predicate="(handle=down ∧ ran(gears)={extended}) ∨ (handle=up ∧ (ran(gears)={retracted} ∨ shock_absorber=ground) ∧ ran(doors)={open})"/>
+<org.eventb.core.action name="_pmAuxbHREeSr4-dLiu2luw" org.eventb.core.assignment="open_EV ≔ FALSE" org.eventb.core.label="act1"/>
+</org.eventb.core.event>
+<org.eventb.core.event name="_pmAuxrHREeSr4-dLiu2luw" org.eventb.core.convergence="0" org.eventb.core.extended="false" org.eventb.core.label="con_stimulate_close_door_valve">
+<org.eventb.core.guard name="_pmBV0LHREeSr4-dLiu2luw" org.eventb.core.label="grd2" org.eventb.core.predicate="close_EV = FALSE"/>
+<org.eventb.core.guard name="_pmBV0bHREeSr4-dLiu2luw" org.eventb.core.label="grd1" org.eventb.core.predicate="open_EV = FALSE"/>
+<org.eventb.core.guard name="_pmBV0rHREeSr4-dLiu2luw" org.eventb.core.label="grd11" org.eventb.core.predicate="extend_EV = FALSE"/>
+<org.eventb.core.guard name="_pmBV07HREeSr4-dLiu2luw" org.eventb.core.label="grd12" org.eventb.core.predicate="retract_EV = FALSE"/>
+<org.eventb.core.guard name="_pmBV1LHREeSr4-dLiu2luw" org.eventb.core.label="grdh1" org.eventb.core.predicate="(handle=down ∧ ran(gears)={extended}) ∨ (handle=up ∧ (ran(gears)={retracted} ∨ shock_absorber=ground))"/>
+<org.eventb.core.guard name="_pmBV1bHREeSr4-dLiu2luw" org.eventb.core.label="grddoors" org.eventb.core.predicate="¬(ran(doors))={closed}"/>
+<org.eventb.core.action name="_pmBV1rHREeSr4-dLiu2luw" org.eventb.core.assignment="close_EV ≔ TRUE" org.eventb.core.label="act1"/>
+</org.eventb.core.event>
+<org.eventb.core.event name="_pmB84LHREeSr4-dLiu2luw" org.eventb.core.convergence="0" org.eventb.core.extended="false" org.eventb.core.label="con_stop_stimulate_close_door_valve">
+<org.eventb.core.guard name="_pmB84bHREeSr4-dLiu2luw" org.eventb.core.label="grd1" org.eventb.core.predicate="close_EV = TRUE"/>
+<org.eventb.core.guard name="_pmB84rHREeSr4-dLiu2luw" org.eventb.core.comment="∨ (handle=down ∧ ¬(ran(gears)={extended})) ∨ (handle=up ∧ ¬(ran(gears)={retracted}) ∧ ¬(ran(doors)={closed} ∧ shock_absorber=ground))&#10;@grdh1 (handle=down ∧ ¬(ran(gears)={extended})) ∨ (handle=up ∧ (¬(ran(gears)={retracted}) ∨ (shock_absorber=ground ∧ ran(doors)={closed}))) ∨ ran(doors)={closed}" org.eventb.core.label="grdh1" org.eventb.core.predicate="(handle=down ∧ (ran(gears)={extended}) ∧ ran(doors)={closed})&#10;           ∨ (handle=up   ∧((ran(gears)={retracted}) ∨ shock_absorber=ground) ∧ ran(doors)={closed})"/>
+<org.eventb.core.action name="_pmB847HREeSr4-dLiu2luw" org.eventb.core.assignment="close_EV ≔ FALSE" org.eventb.core.label="act1"/>
+</org.eventb.core.event>
+<org.eventb.core.event name="_pmB85LHREeSr4-dLiu2luw" org.eventb.core.convergence="0" org.eventb.core.extended="false" org.eventb.core.label="con_stimulate_retract_gear_valve">
+<org.eventb.core.guard name="_pmB85bHREeSr4-dLiu2luw" org.eventb.core.label="grd1" org.eventb.core.predicate="retract_EV = FALSE"/>
+<org.eventb.core.guard name="_pmCj8LHREeSr4-dLiu2luw" org.eventb.core.label="grd2" org.eventb.core.predicate="extend_EV = FALSE"/>
+<org.eventb.core.guard name="_pmCj8bHREeSr4-dLiu2luw" org.eventb.core.label="grd3" org.eventb.core.predicate="open_EV = TRUE"/>
+<org.eventb.core.guard name="_pmCj8rHREeSr4-dLiu2luw" org.eventb.core.label="grdh1" org.eventb.core.predicate="handle=up ∧ ¬(ran(gears)={retracted})"/>
+<org.eventb.core.guard name="_pmCj87HREeSr4-dLiu2luw" org.eventb.core.label="grdflight" org.eventb.core.predicate="shock_absorber=flight"/>
+<org.eventb.core.guard name="_pmCj9LHREeSr4-dLiu2luw" org.eventb.core.label="grddoors" org.eventb.core.predicate="ran(doors)={open}"/>
+<org.eventb.core.action name="_pmCj9bHREeSr4-dLiu2luw" org.eventb.core.assignment="retract_EV ≔ TRUE" org.eventb.core.label="act1"/>
+</org.eventb.core.event>
+<org.eventb.core.event name="_pmCj9rHREeSr4-dLiu2luw" org.eventb.core.convergence="0" org.eventb.core.extended="false" org.eventb.core.label="con_stop_stimulate_retract_gear_valve">
+<org.eventb.core.guard name="_pmDLALHREeSr4-dLiu2luw" org.eventb.core.label="grd1" org.eventb.core.predicate="retract_EV = TRUE"/>
+<org.eventb.core.guard name="_pmDLAbHREeSr4-dLiu2luw" org.eventb.core.label="grdh1" org.eventb.core.predicate="(handle=down) ∨ (ran(gears)={retracted})"/>
+<org.eventb.core.action name="_pmDLArHREeSr4-dLiu2luw" org.eventb.core.assignment="retract_EV ≔ FALSE" org.eventb.core.label="act1"/>
+</org.eventb.core.event>
+<org.eventb.core.event name="_pmDLA7HREeSr4-dLiu2luw" org.eventb.core.convergence="0" org.eventb.core.extended="false" org.eventb.core.label="con_stimulate_extend_gear_valve">
+<org.eventb.core.guard name="_pmDLBLHREeSr4-dLiu2luw" org.eventb.core.label="grd1" org.eventb.core.predicate="extend_EV = FALSE"/>
+<org.eventb.core.guard name="_pmDLBbHREeSr4-dLiu2luw" org.eventb.core.label="grd2" org.eventb.core.predicate="retract_EV = FALSE"/>
+<org.eventb.core.guard name="_pmDLBrHREeSr4-dLiu2luw" org.eventb.core.label="grd3" org.eventb.core.predicate="open_EV = TRUE"/>
+<org.eventb.core.guard name="_pmDyELHREeSr4-dLiu2luw" org.eventb.core.label="grdh1" org.eventb.core.predicate="handle=down ∧ ¬(ran(gears)={extended})"/>
+<org.eventb.core.guard name="_pmDyEbHREeSr4-dLiu2luw" org.eventb.core.label="grddoors" org.eventb.core.predicate="ran(doors)={open}"/>
+<org.eventb.core.action name="_pmDyErHREeSr4-dLiu2luw" org.eventb.core.assignment="extend_EV ≔ TRUE" org.eventb.core.label="act1"/>
+</org.eventb.core.event>
+<org.eventb.core.event name="_pmDyE7HREeSr4-dLiu2luw" org.eventb.core.convergence="0" org.eventb.core.extended="false" org.eventb.core.label="con_stop_stimulate_extend_gear_valve">
+<org.eventb.core.guard name="_pmDyFLHREeSr4-dLiu2luw" org.eventb.core.label="grd2" org.eventb.core.predicate="extend_EV = TRUE"/>
+<org.eventb.core.guard name="_pmDyFbHREeSr4-dLiu2luw" org.eventb.core.label="grdh1" org.eventb.core.predicate="(handle=up) ∨ (ran(gears)={extended})"/>
+<org.eventb.core.action name="_pmDyFrHREeSr4-dLiu2luw" org.eventb.core.assignment="extend_EV ≔ FALSE" org.eventb.core.label="act1"/>
+</org.eventb.core.event>
+<org.eventb.core.event name="_pmEZILHREeSr4-dLiu2luw" org.eventb.core.convergence="0" org.eventb.core.extended="true" org.eventb.core.label="env_start_retracting_first">
+<org.eventb.core.refinesEvent name="_z3mOELKnEeSRt793QLaO5w" org.eventb.core.target="env_start_retracting_first"/>
+</org.eventb.core.event>
+<org.eventb.core.event name="_pmEZIrHREeSr4-dLiu2luw" org.eventb.core.convergence="0" org.eventb.core.extended="true" org.eventb.core.label="env_retract_gear_skip">
+<org.eventb.core.refinesEvent name="_z3m1ILKnEeSRt793QLaO5w" org.eventb.core.target="env_retract_gear_skip"/>
+</org.eventb.core.event>
+<org.eventb.core.event name="_pmEZJLHREeSr4-dLiu2luw" org.eventb.core.convergence="0" org.eventb.core.extended="true" org.eventb.core.label="env_retract_gear_last">
+<org.eventb.core.refinesEvent name="_z3ncMLKnEeSRt793QLaO5w" org.eventb.core.target="env_retract_gear_last"/>
+</org.eventb.core.event>
+<org.eventb.core.event name="_pmEZJrHREeSr4-dLiu2luw" org.eventb.core.convergence="0" org.eventb.core.extended="true" org.eventb.core.label="env_start_extending">
+<org.eventb.core.refinesEvent name="_z3ncMbKnEeSRt793QLaO5w" org.eventb.core.target="env_start_extending"/>
+</org.eventb.core.event>
+<org.eventb.core.event name="_pmFAMbHREeSr4-dLiu2luw" org.eventb.core.convergence="0" org.eventb.core.extended="true" org.eventb.core.label="env_extend_gear_last">
+<org.eventb.core.refinesEvent name="_z3oDQLKnEeSRt793QLaO5w" org.eventb.core.target="env_extend_gear_last"/>
+</org.eventb.core.event>
+<org.eventb.core.event name="_pmFAM7HREeSr4-dLiu2luw" org.eventb.core.convergence="0" org.eventb.core.extended="true" org.eventb.core.label="env_extend_gear_skip">
+<org.eventb.core.refinesEvent name="_z3oDQbKnEeSRt793QLaO5w" org.eventb.core.target="env_extend_gear_skip"/>
+</org.eventb.core.event>
+<org.eventb.core.event name="_pmFANbHREeSr4-dLiu2luw" org.eventb.core.convergence="0" org.eventb.core.extended="true" org.eventb.core.label="env_start_open_door">
+<org.eventb.core.refinesEvent name="_z3oqULKnEeSRt793QLaO5w" org.eventb.core.target="env_start_open_door"/>
+</org.eventb.core.event>
+<org.eventb.core.event name="_pmFAN7HREeSr4-dLiu2luw" org.eventb.core.convergence="0" org.eventb.core.extended="true" org.eventb.core.label="env_open_door_last">
+<org.eventb.core.refinesEvent name="_z3pRYLKnEeSRt793QLaO5w" org.eventb.core.target="env_open_door_last"/>
+</org.eventb.core.event>
+<org.eventb.core.event name="_pmFnQbHREeSr4-dLiu2luw" org.eventb.core.convergence="0" org.eventb.core.extended="true" org.eventb.core.label="env_open_door_skip">
+<org.eventb.core.refinesEvent name="_z3p4cLKnEeSRt793QLaO5w" org.eventb.core.target="env_open_door_skip"/>
+</org.eventb.core.event>
+<org.eventb.core.event name="_pmFnQ7HREeSr4-dLiu2luw" org.eventb.core.convergence="0" org.eventb.core.extended="true" org.eventb.core.label="env_start_close_door">
+<org.eventb.core.refinesEvent name="_z3qfgLKnEeSRt793QLaO5w" org.eventb.core.target="env_start_close_door"/>
+</org.eventb.core.event>
+<org.eventb.core.event name="_pmFnRbHREeSr4-dLiu2luw" org.eventb.core.convergence="0" org.eventb.core.extended="true" org.eventb.core.label="env_close_door">
+<org.eventb.core.refinesEvent name="_z3rGkLKnEeSRt793QLaO5w" org.eventb.core.target="env_close_door"/>
+<org.eventb.core.guard name="_z3rGkbKnEeSRt793QLaO5w" org.eventb.core.label="hground" org.eventb.core.predicate="(handle=up ∧ ran(gears)={extended} ⇒ shock_absorber=ground)"/>
+</org.eventb.core.event>
+<org.eventb.core.event name="_pmG1YLHREeSr4-dLiu2luw" org.eventb.core.convergence="0" org.eventb.core.extended="true" org.eventb.core.label="env_close_door_skip">
+<org.eventb.core.refinesEvent name="_z3rtoLKnEeSRt793QLaO5w" org.eventb.core.target="env_close_door_skip"/>
+<org.eventb.core.guard name="_z3rtobKnEeSRt793QLaO5w" org.eventb.core.label="hground" org.eventb.core.predicate="(handle=up ∧ ran(gears)={extended} ⇒ shock_absorber=ground)"/>
+</org.eventb.core.event>
+<org.eventb.core.event name="_pmHcc7HREeSr4-dLiu2luw" org.eventb.core.convergence="0" org.eventb.core.extended="true" org.eventb.core.label="toggle_handle_up">
+<org.eventb.core.refinesEvent name="_z3sUsLKnEeSRt793QLaO5w" org.eventb.core.target="toggle_handle_up"/>
+</org.eventb.core.event>
+<org.eventb.core.event name="_pmHcdbHREeSr4-dLiu2luw" org.eventb.core.convergence="0" org.eventb.core.extended="true" org.eventb.core.label="toggle_handle_down">
+<org.eventb.core.refinesEvent name="_z3s7wLKnEeSRt793QLaO5w" org.eventb.core.target="toggle_handle_down"/>
+</org.eventb.core.event>
+</org.eventb.core.machineFile>

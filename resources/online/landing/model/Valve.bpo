@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<org.eventb.core.poFile org.eventb.core.poStamp="0">
+<org.eventb.core.poPredicateSet name="ABSHYP" org.eventb.core.poStamp="0">
+<org.eventb.core.poIdentifier name="PLANE_STATE" org.eventb.core.type="ℙ(PLANE_STATE)"/>
+<org.eventb.core.poIdentifier name="VALVE_STATE" org.eventb.core.type="ℙ(VALVE_STATE)"/>
+<org.eventb.core.poIdentifier name="flight" org.eventb.core.type="PLANE_STATE"/>
+<org.eventb.core.poIdentifier name="ground" org.eventb.core.type="PLANE_STATE"/>
+<org.eventb.core.poIdentifier name="valve_closed" org.eventb.core.type="VALVE_STATE"/>
+<org.eventb.core.poIdentifier name="valve_open" org.eventb.core.type="VALVE_STATE"/>
+</org.eventb.core.poPredicateSet>
+<org.eventb.core.poPredicateSet name="ALLHYP" org.eventb.core.parentSet="/LandingGearNew/Valve.bpo|org.eventb.core.poFile#Valve|org.eventb.core.poPredicateSet#ABSHYP" org.eventb.core.poStamp="0">
+<org.eventb.core.poPredicate name="PRD0" org.eventb.core.predicate="partition(VALVE_STATE,{valve_open},{valve_closed})" org.eventb.core.source="/LandingGearNew/Valve.buc|org.eventb.core.contextFile#Valve|org.eventb.core.axiom#_u7QWkqxqEeSwFfjtzWiM6w"/>
+<org.eventb.core.poPredicate name="PRD1" org.eventb.core.predicate="partition(PLANE_STATE,{ground},{flight})" org.eventb.core.source="/LandingGearNew/Valve.buc|org.eventb.core.contextFile#Valve|org.eventb.core.axiom#_CmFoc7ELEeSHQ8Zbk_WwvQ"/>
+</org.eventb.core.poPredicateSet>
+</org.eventb.core.poFile>

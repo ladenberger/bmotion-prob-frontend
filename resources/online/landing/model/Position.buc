@@ -1,0 +1,8 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<org.eventb.core.contextFile org.eventb.core.configuration="org.eventb.core.fwd" org.eventb.texttools.text_lastmodified="1423512346567" org.eventb.texttools.text_representation="context Position&#10;&#10;constants front left right&#10;&#10;sets  POSITION&#10;&#10;axioms&#10;  @axm5 partition(POSITION, {front}, {left}, {right})&#10;end&#10;" version="3">
+<org.eventb.core.carrierSet name="_22FPcKu3EeS3EZaaLT3D1A" org.eventb.core.identifier="POSITION"/>
+<org.eventb.core.constant name="_22FPcau3EeS3EZaaLT3D1A" org.eventb.core.identifier="front"/>
+<org.eventb.core.constant name="_22FPcqu3EeS3EZaaLT3D1A" org.eventb.core.identifier="left"/>
+<org.eventb.core.constant name="_22FPc6u3EeS3EZaaLT3D1A" org.eventb.core.identifier="right"/>
+<org.eventb.core.axiom name="_22FPdKu3EeS3EZaaLT3D1A" org.eventb.core.label="axm5" org.eventb.core.predicate="partition(POSITION, {front}, {left}, {right})"/>
+</org.eventb.core.contextFile>

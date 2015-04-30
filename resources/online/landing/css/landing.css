@@ -1,0 +1,46 @@
+.o_TRUE line, .o_TRUE rect {
+    stroke: green;
+}
+
+.o_FALSE line, .o_FALSE rect {
+    stroke: red;
+}
+
+.switch_TRUE line, .switch_TRUE rect {
+    stroke: green;
+    fill: green;
+}
+
+.switch_FALSE line, .switch_FALSE rect {
+    stroke: red;
+    fill: red;
+}
+
+.ev_valve_open path {
+    fill: #88d2f7;
+}
+
+.ev_valve_closed path {
+    fill: #cccccc;
+}
+
+.circuit_valve_open line {
+    stroke-width: 2;
+    stroke: #88d2f7;
+}
+
+.circuit_valve_closed line {
+    stroke-width: 1;
+    stroke: #cccccc;
+}
+
+#devices {
+    width: 600px;
+}
+
+#devices .panel {
+    float:left;
+    width:150px;
+    margin: 5px;
+    text-align:center;
+}

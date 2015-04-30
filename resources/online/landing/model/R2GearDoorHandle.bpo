@@ -1,0 +1,108 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<org.eventb.core.poFile org.eventb.core.poStamp="0">
+<org.eventb.core.poPredicateSet name="CTXHYP" org.eventb.core.poStamp="0">
+<org.eventb.core.poIdentifier name="GEAR_STATE" org.eventb.core.type="ℙ(GEAR_STATE)"/>
+<org.eventb.core.poIdentifier name="extended" org.eventb.core.type="GEAR_STATE"/>
+<org.eventb.core.poIdentifier name="gear_moving" org.eventb.core.type="GEAR_STATE"/>
+<org.eventb.core.poIdentifier name="retracted" org.eventb.core.type="GEAR_STATE"/>
+<org.eventb.core.poPredicate name="gear_movinh" org.eventb.core.predicate="partition(GEAR_STATE,{retracted},{extended},{gear_moving})" org.eventb.core.source="/LandingGearNew/Gear.buc|org.eventb.core.contextFile#Gear|org.eventb.core.axiom#_xz2BcquzEeS3EZaaLT3D1A"/>
+<org.eventb.core.poIdentifier name="DOOR_STATE" org.eventb.core.type="ℙ(DOOR_STATE)"/>
+<org.eventb.core.poIdentifier name="closed" org.eventb.core.type="DOOR_STATE"/>
+<org.eventb.core.poIdentifier name="door_moving" org.eventb.core.type="DOOR_STATE"/>
+<org.eventb.core.poIdentifier name="open" org.eventb.core.type="DOOR_STATE"/>
+<org.eventb.core.poPredicate name="gear_movini" org.eventb.core.predicate="partition(DOOR_STATE,{open},{closed},{door_moving})" org.eventb.core.source="/LandingGearNew/Door.buc|org.eventb.core.contextFile#Door|org.eventb.core.axiom#__EsXAKu0EeS3EZaaLT3D1A"/>
+<org.eventb.core.poIdentifier name="HANDLE_STATE" org.eventb.core.type="ℙ(HANDLE_STATE)"/>
+<org.eventb.core.poIdentifier name="down" org.eventb.core.type="HANDLE_STATE"/>
+<org.eventb.core.poIdentifier name="up" org.eventb.core.type="HANDLE_STATE"/>
+<org.eventb.core.poPredicate name="HANDLE_STATF" org.eventb.core.predicate="partition(HANDLE_STATE,{up},{down})" org.eventb.core.source="/LandingGearNew/Handle.buc|org.eventb.core.contextFile#Handle|org.eventb.core.axiom#_96VnQ6u1EeS3EZaaLT3D1A"/>
+</org.eventb.core.poPredicateSet>
+<org.eventb.core.poPredicateSet name="ABSHYP" org.eventb.core.parentSet="/LandingGearNew/R2GearDoorHandle.bpo|org.eventb.core.poFile#R2GearDoorHandle|org.eventb.core.poPredicateSet#CTXHYP" org.eventb.core.poStamp="0">
+<org.eventb.core.poIdentifier name="door" org.eventb.core.type="DOOR_STATE"/>
+<org.eventb.core.poIdentifier name="gear" org.eventb.core.type="GEAR_STATE"/>
+<org.eventb.core.poIdentifier name="handle" org.eventb.core.type="HANDLE_STATE"/>
+<org.eventb.core.poPredicate name="handlf" org.eventb.core.predicate="gear∈GEAR_STATE" org.eventb.core.source="/LandingGearNew/R0Gear.bum|org.eventb.core.machineFile#R0Gear|org.eventb.core.invariant#_yViqMau8EeS3EZaaLT3D1A"/>
+<org.eventb.core.poPredicate name="handlg" org.eventb.core.predicate="door∈DOOR_STATE" org.eventb.core.source="/LandingGearNew/R1GearDoor.bum|org.eventb.core.machineFile#R1GearDoor|org.eventb.core.invariant#_4JqIdqu9EeS3EZaaLT3D1A"/>
+<org.eventb.core.poPredicate name="handlh" org.eventb.core.predicate="gear=gear_moving⇒door=open" org.eventb.core.source="/LandingGearNew/R1GearDoor.bum|org.eventb.core.machineFile#R1GearDoor|org.eventb.core.invariant#_4JrWlKu9EeS3EZaaLT3D1A"/>
+</org.eventb.core.poPredicateSet>
+<org.eventb.core.poPredicateSet name="EVTIDENThandlf" org.eventb.core.parentSet="/LandingGearNew/R2GearDoorHandle.bpo|org.eventb.core.poFile#R2GearDoorHandle|org.eventb.core.poPredicateSet#CTXHYP" org.eventb.core.poStamp="0">
+<org.eventb.core.poIdentifier name="door'" org.eventb.core.type="DOOR_STATE"/>
+<org.eventb.core.poIdentifier name="gear'" org.eventb.core.type="GEAR_STATE"/>
+<org.eventb.core.poIdentifier name="handle'" org.eventb.core.type="HANDLE_STATE"/>
+</org.eventb.core.poPredicateSet>
+<org.eventb.core.poPredicateSet name="EVTALLHYPhandlf" org.eventb.core.parentSet="/LandingGearNew/R2GearDoorHandle.bpo|org.eventb.core.poFile#R2GearDoorHandle|org.eventb.core.poPredicateSet#EVTIDENThandlf" org.eventb.core.poStamp="0"/>
+<org.eventb.core.poPredicateSet name="EVTIDENThandlg" org.eventb.core.parentSet="/LandingGearNew/R2GearDoorHandle.bpo|org.eventb.core.poFile#R2GearDoorHandle|org.eventb.core.poPredicateSet#ALLHYP" org.eventb.core.poStamp="0">
+<org.eventb.core.poIdentifier name="gear'" org.eventb.core.type="GEAR_STATE"/>
+</org.eventb.core.poPredicateSet>
+<org.eventb.core.poPredicateSet name="EVTALLHYPhandlg" org.eventb.core.parentSet="/LandingGearNew/R2GearDoorHandle.bpo|org.eventb.core.poFile#R2GearDoorHandle|org.eventb.core.poPredicateSet#EVTIDENThandlg" org.eventb.core.poStamp="0">
+<org.eventb.core.poPredicate name="PRD0" org.eventb.core.predicate="gear=extended∨gear=gear_moving" org.eventb.core.source="/LandingGearNew/R0Gear.bum|org.eventb.core.machineFile#R0Gear|org.eventb.core.event#_yViqMqu8EeS3EZaaLT3D1A|org.eventb.core.guard#_yViqM6u8EeS3EZaaLT3D1A"/>
+<org.eventb.core.poPredicate name="PRD1" org.eventb.core.predicate="door=open" org.eventb.core.source="/LandingGearNew/R1GearDoor.bum|org.eventb.core.machineFile#R1GearDoor|org.eventb.core.event#_4JphYau9EeS3EZaaLT3D1A|org.eventb.core.guard#_4JphY6u9EeS3EZaaLT3D1A"/>
+<org.eventb.core.poPredicate name="PRD2" org.eventb.core.predicate="handle=up" org.eventb.core.source="/LandingGearNew/R2GearDoorHandle.bum|org.eventb.core.machineFile#R2GearDoorHandle|org.eventb.core.event#_6g-pVKu2EeS3EZaaLT3D1A|org.eventb.core.guard#_6g_QYau2EeS3EZaaLT3D1A"/>
+</org.eventb.core.poPredicateSet>
+<org.eventb.core.poPredicateSet name="EVTIDENThandlh" org.eventb.core.parentSet="/LandingGearNew/R2GearDoorHandle.bpo|org.eventb.core.poFile#R2GearDoorHandle|org.eventb.core.poPredicateSet#ALLHYP" org.eventb.core.poStamp="0">
+<org.eventb.core.poIdentifier name="gear'" org.eventb.core.type="GEAR_STATE"/>
+</org.eventb.core.poPredicateSet>
+<org.eventb.core.poPredicateSet name="EVTALLHYPhandlh" org.eventb.core.parentSet="/LandingGearNew/R2GearDoorHandle.bpo|org.eventb.core.poFile#R2GearDoorHandle|org.eventb.core.poPredicateSet#EVTIDENThandlh" org.eventb.core.poStamp="0">
+<org.eventb.core.poPredicate name="PRD0" org.eventb.core.predicate="gear=gear_moving" org.eventb.core.source="/LandingGearNew/R0Gear.bum|org.eventb.core.machineFile#R0Gear|org.eventb.core.event#_yViqNau8EeS3EZaaLT3D1A|org.eventb.core.guard#_yViqNqu8EeS3EZaaLT3D1A"/>
+<org.eventb.core.poPredicate name="PRD1" org.eventb.core.predicate="door=open" org.eventb.core.source="/LandingGearNew/R1GearDoor.bum|org.eventb.core.machineFile#R1GearDoor|org.eventb.core.event#_4JphZKu9EeS3EZaaLT3D1A|org.eventb.core.guard#_4JphZqu9EeS3EZaaLT3D1A"/>
+<org.eventb.core.poPredicate name="PRD2" org.eventb.core.predicate="handle=up" org.eventb.core.source="/LandingGearNew/R2GearDoorHandle.bum|org.eventb.core.machineFile#R2GearDoorHandle|org.eventb.core.event#_6g_QYqu2EeS3EZaaLT3D1A|org.eventb.core.guard#_6g_QZKu2EeS3EZaaLT3D1A"/>
+</org.eventb.core.poPredicateSet>
+<org.eventb.core.poPredicateSet name="EVTIDENThandli" org.eventb.core.parentSet="/LandingGearNew/R2GearDoorHandle.bpo|org.eventb.core.poFile#R2GearDoorHandle|org.eventb.core.poPredicateSet#ALLHYP" org.eventb.core.poStamp="0">
+<org.eventb.core.poIdentifier name="gear'" org.eventb.core.type="GEAR_STATE"/>
+</org.eventb.core.poPredicateSet>
+<org.eventb.core.poPredicateSet name="EVTALLHYPhandli" org.eventb.core.parentSet="/LandingGearNew/R2GearDoorHandle.bpo|org.eventb.core.poFile#R2GearDoorHandle|org.eventb.core.poPredicateSet#EVTIDENThandli" org.eventb.core.poStamp="0">
+<org.eventb.core.poPredicate name="PRD0" org.eventb.core.predicate="gear=retracted∨gear=gear_moving" org.eventb.core.source="/LandingGearNew/R0Gear.bum|org.eventb.core.machineFile#R0Gear|org.eventb.core.event#_yVjRQau8EeS3EZaaLT3D1A|org.eventb.core.guard#_yVjRQqu8EeS3EZaaLT3D1A"/>
+<org.eventb.core.poPredicate name="PRD1" org.eventb.core.predicate="door=open" org.eventb.core.source="/LandingGearNew/R1GearDoor.bum|org.eventb.core.machineFile#R1GearDoor|org.eventb.core.event#_4JphZ6u9EeS3EZaaLT3D1A|org.eventb.core.guard#_4JqIcau9EeS3EZaaLT3D1A"/>
+<org.eventb.core.poPredicate name="PRD2" org.eventb.core.predicate="handle=down" org.eventb.core.source="/LandingGearNew/R2GearDoorHandle.bum|org.eventb.core.machineFile#R2GearDoorHandle|org.eventb.core.event#_6g_QZau2EeS3EZaaLT3D1A|org.eventb.core.guard#_6g_3cau2EeS3EZaaLT3D1A"/>
+</org.eventb.core.poPredicateSet>
+<org.eventb.core.poPredicateSet name="EVTIDENThandlj" org.eventb.core.parentSet="/LandingGearNew/R2GearDoorHandle.bpo|org.eventb.core.poFile#R2GearDoorHandle|org.eventb.core.poPredicateSet#ALLHYP" org.eventb.core.poStamp="0">
+<org.eventb.core.poIdentifier name="gear'" org.eventb.core.type="GEAR_STATE"/>
+</org.eventb.core.poPredicateSet>
+<org.eventb.core.poPredicateSet name="EVTALLHYPhandlj" org.eventb.core.parentSet="/LandingGearNew/R2GearDoorHandle.bpo|org.eventb.core.poFile#R2GearDoorHandle|org.eventb.core.poPredicateSet#EVTIDENThandlj" org.eventb.core.poStamp="0">
+<org.eventb.core.poPredicate name="PRD0" org.eventb.core.predicate="gear=gear_moving" org.eventb.core.source="/LandingGearNew/R0Gear.bum|org.eventb.core.machineFile#R0Gear|org.eventb.core.event#_yVjRRKu8EeS3EZaaLT3D1A|org.eventb.core.guard#_yVjRRau8EeS3EZaaLT3D1A"/>
+<org.eventb.core.poPredicate name="PRD1" org.eventb.core.predicate="door=open" org.eventb.core.source="/LandingGearNew/R1GearDoor.bum|org.eventb.core.machineFile#R1GearDoor|org.eventb.core.event#_4JqIcqu9EeS3EZaaLT3D1A|org.eventb.core.guard#_4JqIdKu9EeS3EZaaLT3D1A"/>
+<org.eventb.core.poPredicate name="PRD2" org.eventb.core.predicate="handle=down" org.eventb.core.source="/LandingGearNew/R2GearDoorHandle.bum|org.eventb.core.machineFile#R2GearDoorHandle|org.eventb.core.event#_6g_3cqu2EeS3EZaaLT3D1A|org.eventb.core.guard#_6g_3dKu2EeS3EZaaLT3D1A"/>
+</org.eventb.core.poPredicateSet>
+<org.eventb.core.poPredicateSet name="EVTIDENThandlk" org.eventb.core.parentSet="/LandingGearNew/R2GearDoorHandle.bpo|org.eventb.core.poFile#R2GearDoorHandle|org.eventb.core.poPredicateSet#ALLHYP" org.eventb.core.poStamp="0">
+<org.eventb.core.poIdentifier name="door'" org.eventb.core.type="DOOR_STATE"/>
+</org.eventb.core.poPredicateSet>
+<org.eventb.core.poPredicateSet name="EVTALLHYPhandlk" org.eventb.core.parentSet="/LandingGearNew/R2GearDoorHandle.bpo|org.eventb.core.poFile#R2GearDoorHandle|org.eventb.core.poPredicateSet#EVTIDENThandlk" org.eventb.core.poStamp="0">
+<org.eventb.core.poPredicate name="PRD0" org.eventb.core.predicate="(door=closed∨door=door_moving)∧gear≠gear_moving" org.eventb.core.source="/LandingGearNew/R1GearDoor.bum|org.eventb.core.machineFile#R1GearDoor|org.eventb.core.event#_4JqId6u9EeS3EZaaLT3D1A|org.eventb.core.guard#_4JqvgKu9EeS3EZaaLT3D1A"/>
+<org.eventb.core.poPredicate name="PRD1" org.eventb.core.predicate="(handle=down∧gear=retracted)∨(handle=up∧gear=extended)" org.eventb.core.source="/LandingGearNew/R2GearDoorHandle.bum|org.eventb.core.machineFile#R2GearDoorHandle|org.eventb.core.event#_6g_3dau2EeS3EZaaLT3D1A|org.eventb.core.guard#_6hAegau2EeS3EZaaLT3D1A"/>
+</org.eventb.core.poPredicateSet>
+<org.eventb.core.poPredicateSet name="EVTIDENThandll" org.eventb.core.parentSet="/LandingGearNew/R2GearDoorHandle.bpo|org.eventb.core.poFile#R2GearDoorHandle|org.eventb.core.poPredicateSet#ALLHYP" org.eventb.core.poStamp="0">
+<org.eventb.core.poIdentifier name="door'" org.eventb.core.type="DOOR_STATE"/>
+</org.eventb.core.poPredicateSet>
+<org.eventb.core.poPredicateSet name="EVTALLHYPhandll" org.eventb.core.parentSet="/LandingGearNew/R2GearDoorHandle.bpo|org.eventb.core.poFile#R2GearDoorHandle|org.eventb.core.poPredicateSet#EVTIDENThandll" org.eventb.core.poStamp="0">
+<org.eventb.core.poPredicate name="PRD0" org.eventb.core.predicate="door=door_moving∧gear≠gear_moving" org.eventb.core.source="/LandingGearNew/R1GearDoor.bum|org.eventb.core.machineFile#R1GearDoor|org.eventb.core.event#_4Jqvgqu9EeS3EZaaLT3D1A|org.eventb.core.guard#_4Jqvg6u9EeS3EZaaLT3D1A"/>
+<org.eventb.core.poPredicate name="PRD1" org.eventb.core.predicate="(handle=down∧gear=retracted)∨(handle=up∧gear=extended)" org.eventb.core.source="/LandingGearNew/R2GearDoorHandle.bum|org.eventb.core.machineFile#R2GearDoorHandle|org.eventb.core.event#_6hAegqu2EeS3EZaaLT3D1A|org.eventb.core.guard#_6hAehKu2EeS3EZaaLT3D1A"/>
+</org.eventb.core.poPredicateSet>
+<org.eventb.core.poPredicateSet name="EVTIDENThandlm" org.eventb.core.parentSet="/LandingGearNew/R2GearDoorHandle.bpo|org.eventb.core.poFile#R2GearDoorHandle|org.eventb.core.poPredicateSet#ALLHYP" org.eventb.core.poStamp="0">
+<org.eventb.core.poIdentifier name="door'" org.eventb.core.type="DOOR_STATE"/>
+</org.eventb.core.poPredicateSet>
+<org.eventb.core.poPredicateSet name="EVTALLHYPhandlm" org.eventb.core.parentSet="/LandingGearNew/R2GearDoorHandle.bpo|org.eventb.core.poFile#R2GearDoorHandle|org.eventb.core.poPredicateSet#EVTIDENThandlm" org.eventb.core.poStamp="0">
+<org.eventb.core.poPredicate name="PRD0" org.eventb.core.predicate="(door=open∨door=door_moving)∧gear≠gear_moving" org.eventb.core.source="/LandingGearNew/R1GearDoor.bum|org.eventb.core.machineFile#R1GearDoor|org.eventb.core.event#_4Jqvhau9EeS3EZaaLT3D1A|org.eventb.core.guard#_4Jqvhqu9EeS3EZaaLT3D1A"/>
+<org.eventb.core.poPredicate name="PRD1" org.eventb.core.predicate="(handle=down∧gear=extended)∨(handle=up∧(gear=retracted∨gear=extended))" org.eventb.core.source="/LandingGearNew/R2GearDoorHandle.bum|org.eventb.core.machineFile#R2GearDoorHandle|org.eventb.core.event#_6hBFkKu2EeS3EZaaLT3D1A|org.eventb.core.guard#_6hBFkqu2EeS3EZaaLT3D1A"/>
+</org.eventb.core.poPredicateSet>
+<org.eventb.core.poPredicateSet name="EVTIDENThandln" org.eventb.core.parentSet="/LandingGearNew/R2GearDoorHandle.bpo|org.eventb.core.poFile#R2GearDoorHandle|org.eventb.core.poPredicateSet#ALLHYP" org.eventb.core.poStamp="0">
+<org.eventb.core.poIdentifier name="door'" org.eventb.core.type="DOOR_STATE"/>
+</org.eventb.core.poPredicateSet>
+<org.eventb.core.poPredicateSet name="EVTALLHYPhandln" org.eventb.core.parentSet="/LandingGearNew/R2GearDoorHandle.bpo|org.eventb.core.poFile#R2GearDoorHandle|org.eventb.core.poPredicateSet#EVTIDENThandln" org.eventb.core.poStamp="0">
+<org.eventb.core.poPredicate name="PRD0" org.eventb.core.predicate="door=door_moving∧gear≠gear_moving" org.eventb.core.source="/LandingGearNew/R1GearDoor.bum|org.eventb.core.machineFile#R1GearDoor|org.eventb.core.event#_4JrWkau9EeS3EZaaLT3D1A|org.eventb.core.guard#_4JrWkqu9EeS3EZaaLT3D1A"/>
+<org.eventb.core.poPredicate name="PRD1" org.eventb.core.predicate="(handle=down∧gear=extended)∨(handle=up∧(gear=retracted∨gear=extended))" org.eventb.core.source="/LandingGearNew/R2GearDoorHandle.bum|org.eventb.core.machineFile#R2GearDoorHandle|org.eventb.core.event#_6hBFk6u2EeS3EZaaLT3D1A|org.eventb.core.guard#_6hBFlau2EeS3EZaaLT3D1A"/>
+</org.eventb.core.poPredicateSet>
+<org.eventb.core.poPredicateSet name="EVTIDENThandlo" org.eventb.core.parentSet="/LandingGearNew/R2GearDoorHandle.bpo|org.eventb.core.poFile#R2GearDoorHandle|org.eventb.core.poPredicateSet#ALLHYP" org.eventb.core.poStamp="0">
+<org.eventb.core.poIdentifier name="handle'" org.eventb.core.type="HANDLE_STATE"/>
+</org.eventb.core.poPredicateSet>
+<org.eventb.core.poPredicateSet name="EVTALLHYPhandlo" org.eventb.core.parentSet="/LandingGearNew/R2GearDoorHandle.bpo|org.eventb.core.poFile#R2GearDoorHandle|org.eventb.core.poPredicateSet#EVTIDENThandlo" org.eventb.core.poStamp="0">
+<org.eventb.core.poPredicate name="PRD0" org.eventb.core.predicate="handle=down" org.eventb.core.source="/LandingGearNew/R2GearDoorHandle.bum|org.eventb.core.machineFile#R2GearDoorHandle|org.eventb.core.event#_6hBsoqu2EeS3EZaaLT3D1A|org.eventb.core.guard#_6hBso6u2EeS3EZaaLT3D1A"/>
+</org.eventb.core.poPredicateSet>
+<org.eventb.core.poPredicateSet name="EVTIDENThandlp" org.eventb.core.parentSet="/LandingGearNew/R2GearDoorHandle.bpo|org.eventb.core.poFile#R2GearDoorHandle|org.eventb.core.poPredicateSet#ALLHYP" org.eventb.core.poStamp="0">
+<org.eventb.core.poIdentifier name="handle'" org.eventb.core.type="HANDLE_STATE"/>
+</org.eventb.core.poPredicateSet>
+<org.eventb.core.poPredicateSet name="EVTALLHYPhandlp" org.eventb.core.parentSet="/LandingGearNew/R2GearDoorHandle.bpo|org.eventb.core.poFile#R2GearDoorHandle|org.eventb.core.poPredicateSet#EVTIDENThandlp" org.eventb.core.poStamp="0">
+<org.eventb.core.poPredicate name="PRD0" org.eventb.core.predicate="handle=up" org.eventb.core.source="/LandingGearNew/R2GearDoorHandle.bum|org.eventb.core.machineFile#R2GearDoorHandle|org.eventb.core.event#_6hCTsKu2EeS3EZaaLT3D1A|org.eventb.core.guard#_6hCTsau2EeS3EZaaLT3D1A"/>
+</org.eventb.core.poPredicateSet>
+<org.eventb.core.poPredicateSet name="ALLHYP" org.eventb.core.parentSet="/LandingGearNew/R2GearDoorHandle.bpo|org.eventb.core.poFile#R2GearDoorHandle|org.eventb.core.poPredicateSet#ABSHYP" org.eventb.core.poStamp="0">
+<org.eventb.core.poPredicate name="PRD0" org.eventb.core.predicate="handle∈HANDLE_STATE" org.eventb.core.source="/LandingGearNew/R2GearDoorHandle.bum|org.eventb.core.machineFile#R2GearDoorHandle|org.eventb.core.invariant#_6hBsoau2EeS3EZaaLT3D1A"/>
+</org.eventb.core.poPredicateSet>
+</org.eventb.core.poFile>

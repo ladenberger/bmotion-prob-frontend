@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<org.eventb.core.contextFile org.eventb.core.configuration="org.eventb.core.fwd;de.prob.symbolic.ctxBase;de.prob.units.mchBase;org.animb.valuation.valBase" org.eventb.texttools.text_lastmodified="1423603535603" org.eventb.texttools.text_representation="context Lights&#10;&#10;constants on off bool_to_light&#10;&#10;sets LIGHT_STATE&#10;&#10;axioms&#10;  @axm1 partition(LIGHT_STATE, {on}, {off})&#10;  @axm2 bool_to_light = {TRUE ↦ on, FALSE ↦ off}&#10;end&#10;" version="3">
+<org.eventb.core.carrierSet name="_WeulMLFrEeSe-57zv9AtOw" org.eventb.core.identifier="LIGHT_STATE"/>
+<org.eventb.core.constant name="_WevMQLFrEeSe-57zv9AtOw" org.eventb.core.identifier="on"/>
+<org.eventb.core.constant name="_WevMQbFrEeSe-57zv9AtOw" org.eventb.core.identifier="off"/>
+<org.eventb.core.constant name="_WevMQrFrEeSe-57zv9AtOw" org.eventb.core.identifier="bool_to_light"/>
+<org.eventb.core.axiom name="_WevMQ7FrEeSe-57zv9AtOw" org.eventb.core.label="axm1" org.eventb.core.predicate="partition(LIGHT_STATE, {on}, {off})"/>
+<org.eventb.core.axiom name="_WevMRLFrEeSe-57zv9AtOw" org.eventb.core.label="axm2" org.eventb.core.predicate="bool_to_light = {TRUE ↦ on, FALSE ↦ off}"/>
+</org.eventb.core.contextFile>

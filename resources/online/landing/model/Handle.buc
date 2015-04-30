@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<org.eventb.core.contextFile org.eventb.core.configuration="org.eventb.core.fwd" org.eventb.texttools.text_lastmodified="1423512346483" org.eventb.texttools.text_representation="context Handle&#10;&#10;constants up down&#10;&#10;sets HANDLE_STATE&#10;&#10;axioms&#10;  @axm3 partition(HANDLE_STATE, {up}, {down})&#10;end&#10;" version="3">
+<org.eventb.core.carrierSet name="_96VnQKu1EeS3EZaaLT3D1A" org.eventb.core.identifier="HANDLE_STATE"/>
+<org.eventb.core.constant name="_96VnQau1EeS3EZaaLT3D1A" org.eventb.core.identifier="up"/>
+<org.eventb.core.constant name="_96VnQqu1EeS3EZaaLT3D1A" org.eventb.core.identifier="down"/>
+<org.eventb.core.axiom name="_96VnQ6u1EeS3EZaaLT3D1A" org.eventb.core.label="axm3" org.eventb.core.predicate="partition(HANDLE_STATE, {up}, {down})"/>
+</org.eventb.core.contextFile>

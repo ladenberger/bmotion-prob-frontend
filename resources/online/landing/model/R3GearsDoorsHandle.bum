@@ -1,0 +1,139 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<org.eventb.core.machineFile org.eventb.core.configuration="org.eventb.core.fwd;de.prob.units.mchBase" org.eventb.texttools.text_lastmodified="1423578151753" org.eventb.texttools.text_representation="machine R3GearsDoorsHandle refines R2GearDoorHandle  sees Gear Door Handle Position&#10;&#10;variables gears doors handle&#10;&#10;invariants&#10;  @inv1 gears ∈ POSITION → GEAR_STATE&#10;  @inv2 doors ∈ POSITION → DOOR_STATE&#10;  @glued1 door=closed ⇔ ran(doors)={closed}&#10;  @glued2 door=open ⇔ ran(doors)={open}&#10;  @glueg1 gear=extended ⇔ ran(gears)={extended}&#10;  @glueg2 gear=retracted ⇔ ran(gears)={retracted}&#10;&#10;events&#10;  event INITIALISATION&#10;    then&#10;      @inig1 gears ≔ POSITION × {extended}&#10;      @inid2 doors ≔ POSITION × {closed}&#10;      @inih3 handle ≔ down&#10;  end&#10;&#10;  event env_start_retracting_first refines env_start_retracting&#10;    any gr&#10;    where&#10;      @g gr∈POSITION&#10;      @all_doors_open ran(doors) = {open}&#10;      @handle_up handle = up&#10;      @g1 gears(gr)=extended&#10;    then&#10;      @ag gears(gr) ≔ gear_moving&#10;  end&#10;&#10;  event env_retract_gear_skip&#10;    any gr&#10;    where&#10;      @g gr∈POSITION&#10;      @all_doors_open ran(doors) = {open}&#10;      @all_others gears[POSITION∖{gr}] ≠ {retracted}&#10;      @handle_up handle = up&#10;      @g1 gears(gr)=gear_moving&#10;    then&#10;      @ag gears(gr) ≔ retracted&#10;  end&#10;&#10;  event env_retract_gear_last refines env_retract_gear&#10;    any gr&#10;    where&#10;      @g gr∈POSITION&#10;      @all_doors_open ran(doors) = {open}&#10;      @all_others gears[POSITION∖{gr}] = {retracted}&#10;      @handle_up handle = up&#10;      @g1 gears(gr)=gear_moving&#10;    then&#10;      @ag gears(gr) ≔ retracted&#10;  end&#10;&#10;  event env_start_extending refines env_start_extending&#10;    any gr&#10;    where&#10;      @g gr∈POSITION&#10;      @all_doors_open ran(doors) = {open}&#10;      @handle_down handle = down&#10;      @g1 gears(gr)=retracted&#10;    then&#10;      @ag gears(gr) ≔ gear_moving&#10;  end&#10;&#10;  event env_extend_gear_last refines env_extend_gear&#10;    any gr&#10;    where&#10;      @g gr∈POSITION&#10;      @all_doors_open ran(doors) = {open}&#10;      @handle_down handle = down&#10;      @all_others gears[POSITION∖{gr}] = {extended}&#10;      @g1 gears(gr)=gear_moving&#10;    then&#10;      @ag gears(gr) ≔ extended&#10;  end&#10;&#10;  event env_extend_gear_skip&#10;    any gr&#10;    where&#10;      @g gr∈POSITION&#10;      @all_doors_open ran(doors) = {open}&#10;      @handle_down handle = down&#10;      @all_others gears[POSITION∖{gr}] ≠ {extended}&#10;      @g1 gears(gr)=gear_moving&#10;    then&#10;      @ag gears(gr) ≔ extended&#10;  end&#10;&#10;  event env_start_open_door refines env_start_open_door&#10;    any gr&#10;    where&#10;      @g gr∈POSITION&#10;      @gd doors(gr) = closed ∧ gears(gr) ≠ gear_moving&#10;      @nomov gear_moving ∉ ran(gears)&#10;      @h (handle=down ∧ ran(gears)={retracted}) ∨&#10;         (handle=up ∧ ran(gears)={extended})&#10;    then&#10;      @ad doors(gr) ≔ door_moving&#10;  end&#10;&#10;  event env_open_door_last refines env_open_door&#10;    any gr&#10;    where&#10;      @g gr∈POSITION&#10;      @gd doors(gr) = door_moving ∧ gears(gr) ≠ gear_moving&#10;      @nomov gear_moving ∉ ran(gears)&#10;      @all_others doors[POSITION∖{gr}] = {open}&#10;      @h (handle=down ∧ ran(gears)={retracted}) ∨&#10;         (handle=up ∧ ran(gears)={extended})&#10;    then&#10;      @ad doors(gr) ≔ open&#10;  end&#10;&#10;  event env_open_door_skip&#10;    any gr&#10;    where&#10;      @g gr∈POSITION&#10;      @gd doors(gr) = door_moving ∧ gears(gr) ≠ gear_moving&#10;      @nomov gear_moving ∉ ran(gears)&#10;      @all_others doors[POSITION∖{gr}] ≠ {open}&#10;      @h (handle=down ∧ ran(gears)={retracted}) ∨&#10;         (handle=up ∧ ran(gears)={extended})&#10;    then&#10;      @ad doors(gr) ≔ open&#10;  end&#10;&#10;  event env_start_close_door refines env_start_close_door&#10;    any gr&#10;    where&#10;      @g gr∈POSITION&#10;      @gd doors(gr) = open ∧ gears(gr) ≠ gear_moving&#10;      @h (handle=up ∧ (ran(gears)={retracted} ∨ ran(gears)={extended})) ∨&#10;         (handle=down ∧ ran(gears)={extended})&#10;    then&#10;      @ad doors(gr) ≔ door_moving&#10;  end&#10;&#10;  event env_close_door refines env_close_door&#10;    any gr&#10;    where&#10;      @g gr∈POSITION&#10;      @gd doors(gr) = door_moving ∧ gears(gr) ≠ gear_moving&#10;      @nomov gear_moving ∉ ran(gears)&#10;      @all_others doors[POSITION∖{gr}] = {closed}&#10;      @h (handle=up ∧ (ran(gears)={retracted} ∨ ran(gears)={extended})) ∨&#10;         (handle=down ∧ ran(gears)={extended})&#10;    then&#10;      @ad doors(gr) ≔ closed&#10;  end&#10;&#10;  event env_close_door_skip&#10;    any gr&#10;    where&#10;      @g gr∈POSITION&#10;      @gd doors(gr) = door_moving ∧ gears(gr) ≠ gear_moving&#10;      @nomov gear_moving ∉ ran(gears)&#10;      @all_others doors[POSITION∖{gr}] ≠ {closed}&#10;      @h (handle=up ∧ (ran(gears)={retracted}∨ran(gears)={extended})) ∨&#10;         (handle=down ∧ ran(gears)={extended})&#10;    then&#10;      @ad doors(gr) ≔ closed&#10;  end&#10;&#10;  event toggle_handle_up extends toggle_handle_up&#10;  end&#10;&#10;  event toggle_handle_down extends toggle_handle_down&#10;  end&#10;end&#10;" version="5">
+<org.eventb.core.refinesMachine name="_QDbXgLEwEeSBRd-3twLVDA" org.eventb.core.target="R2GearDoorHandle"/>
+<org.eventb.core.seesContext name="_QDbXgbEwEeSBRd-3twLVDA" org.eventb.core.target="Gear"/>
+<org.eventb.core.seesContext name="_QDbXgrEwEeSBRd-3twLVDA" org.eventb.core.target="Door"/>
+<org.eventb.core.seesContext name="_QDbXg7EwEeSBRd-3twLVDA" org.eventb.core.target="Handle"/>
+<org.eventb.core.seesContext name="_QDbXhLEwEeSBRd-3twLVDA" org.eventb.core.target="Position"/>
+<org.eventb.core.variable name="_7u1YBavAEeS3EZaaLT3D1A" org.eventb.core.identifier="gears"/>
+<org.eventb.core.variable name="_7u1YBqvAEeS3EZaaLT3D1A" org.eventb.core.identifier="doors"/>
+<org.eventb.core.variable name="_7u1YB6vAEeS3EZaaLT3D1A" org.eventb.core.identifier="handle"/>
+<org.eventb.core.invariant name="_7u9T1avAEeS3EZaaLT3D1A" org.eventb.core.label="inv1" org.eventb.core.predicate="gears ∈ POSITION → GEAR_STATE"/>
+<org.eventb.core.invariant name="_7u9T1qvAEeS3EZaaLT3D1A" org.eventb.core.label="inv2" org.eventb.core.predicate="doors ∈ POSITION → DOOR_STATE"/>
+<org.eventb.core.invariant name="_7u9T16vAEeS3EZaaLT3D1A" org.eventb.core.label="glued1" org.eventb.core.predicate="door=closed ⇔ ran(doors)={closed}"/>
+<org.eventb.core.invariant name="_7u964KvAEeS3EZaaLT3D1A" org.eventb.core.label="glued2" org.eventb.core.predicate="door=open ⇔ ran(doors)={open}"/>
+<org.eventb.core.invariant name="_7u964avAEeS3EZaaLT3D1A" org.eventb.core.label="glueg1" org.eventb.core.predicate="gear=extended ⇔ ran(gears)={extended}"/>
+<org.eventb.core.invariant name="_7u964qvAEeS3EZaaLT3D1A" org.eventb.core.label="glueg2" org.eventb.core.predicate="gear=retracted ⇔ ran(gears)={retracted}"/>
+<org.eventb.core.event name="_7u1YCKvAEeS3EZaaLT3D1A" org.eventb.core.convergence="0" org.eventb.core.extended="false" org.eventb.core.label="INITIALISATION">
+<org.eventb.core.action name="_7u1_EKvAEeS3EZaaLT3D1A" org.eventb.core.assignment="gears ≔ POSITION × {extended}" org.eventb.core.label="inig1"/>
+<org.eventb.core.action name="_7u1_EavAEeS3EZaaLT3D1A" org.eventb.core.assignment="doors ≔ POSITION × {closed}" org.eventb.core.label="inid2"/>
+<org.eventb.core.action name="_7u1_EqvAEeS3EZaaLT3D1A" org.eventb.core.assignment="handle ≔ down" org.eventb.core.label="inih3"/>
+</org.eventb.core.event>
+<org.eventb.core.event name="_7u1_E6vAEeS3EZaaLT3D1A" org.eventb.core.convergence="0" org.eventb.core.extended="false" org.eventb.core.label="env_start_retracting_first">
+<org.eventb.core.refinesEvent name="_QDcloLEwEeSBRd-3twLVDA" org.eventb.core.target="env_start_retracting"/>
+<org.eventb.core.parameter name="_7u1_FavAEeS3EZaaLT3D1A" org.eventb.core.identifier="gr"/>
+<org.eventb.core.guard name="_7u1_FqvAEeS3EZaaLT3D1A" org.eventb.core.label="g" org.eventb.core.predicate="gr∈POSITION"/>
+<org.eventb.core.guard name="_7u1_F6vAEeS3EZaaLT3D1A" org.eventb.core.label="all_doors_open" org.eventb.core.predicate="ran(doors) = {open}"/>
+<org.eventb.core.guard name="_7u2mIKvAEeS3EZaaLT3D1A" org.eventb.core.label="handle_up" org.eventb.core.predicate="handle = up"/>
+<org.eventb.core.guard name="_7u2mIavAEeS3EZaaLT3D1A" org.eventb.core.label="g1" org.eventb.core.predicate="gears(gr)=extended"/>
+<org.eventb.core.action name="_7u2mIqvAEeS3EZaaLT3D1A" org.eventb.core.assignment="gears(gr) ≔ gear_moving" org.eventb.core.label="ag"/>
+</org.eventb.core.event>
+<org.eventb.core.event name="_7u2mI6vAEeS3EZaaLT3D1A" org.eventb.core.convergence="0" org.eventb.core.extended="false" org.eventb.core.label="env_retract_gear_skip">
+<org.eventb.core.parameter name="_7u2mJKvAEeS3EZaaLT3D1A" org.eventb.core.identifier="gr"/>
+<org.eventb.core.guard name="_7u2mJavAEeS3EZaaLT3D1A" org.eventb.core.label="g" org.eventb.core.predicate="gr∈POSITION"/>
+<org.eventb.core.guard name="_7u2mJqvAEeS3EZaaLT3D1A" org.eventb.core.label="all_doors_open" org.eventb.core.predicate="ran(doors) = {open}"/>
+<org.eventb.core.guard name="_7u3NMKvAEeS3EZaaLT3D1A" org.eventb.core.label="all_others" org.eventb.core.predicate="gears[POSITION∖{gr}] ≠ {retracted}"/>
+<org.eventb.core.guard name="_7u3NMavAEeS3EZaaLT3D1A" org.eventb.core.label="handle_up" org.eventb.core.predicate="handle = up"/>
+<org.eventb.core.guard name="_7u3NMqvAEeS3EZaaLT3D1A" org.eventb.core.label="g1" org.eventb.core.predicate="gears(gr)=gear_moving"/>
+<org.eventb.core.action name="_7u3NM6vAEeS3EZaaLT3D1A" org.eventb.core.assignment="gears(gr) ≔ retracted" org.eventb.core.label="ag"/>
+</org.eventb.core.event>
+<org.eventb.core.event name="_7u3NNKvAEeS3EZaaLT3D1A" org.eventb.core.convergence="0" org.eventb.core.extended="false" org.eventb.core.label="env_retract_gear_last">
+<org.eventb.core.refinesEvent name="_QDdMsLEwEeSBRd-3twLVDA" org.eventb.core.target="env_retract_gear"/>
+<org.eventb.core.parameter name="_7u3NNqvAEeS3EZaaLT3D1A" org.eventb.core.identifier="gr"/>
+<org.eventb.core.guard name="_7u3NN6vAEeS3EZaaLT3D1A" org.eventb.core.label="g" org.eventb.core.predicate="gr∈POSITION"/>
+<org.eventb.core.guard name="_7u30QKvAEeS3EZaaLT3D1A" org.eventb.core.label="all_doors_open" org.eventb.core.predicate="ran(doors) = {open}"/>
+<org.eventb.core.guard name="_7u30QavAEeS3EZaaLT3D1A" org.eventb.core.label="all_others" org.eventb.core.predicate="gears[POSITION∖{gr}] = {retracted}"/>
+<org.eventb.core.guard name="_7u30QqvAEeS3EZaaLT3D1A" org.eventb.core.label="handle_up" org.eventb.core.predicate="handle = up"/>
+<org.eventb.core.guard name="_7u30Q6vAEeS3EZaaLT3D1A" org.eventb.core.label="g1" org.eventb.core.predicate="gears(gr)=gear_moving"/>
+<org.eventb.core.action name="_7u30RKvAEeS3EZaaLT3D1A" org.eventb.core.assignment="gears(gr) ≔ retracted" org.eventb.core.label="ag"/>
+</org.eventb.core.event>
+<org.eventb.core.event name="_7u30RavAEeS3EZaaLT3D1A" org.eventb.core.convergence="0" org.eventb.core.extended="false" org.eventb.core.label="env_start_extending">
+<org.eventb.core.refinesEvent name="_QDdMsbEwEeSBRd-3twLVDA" org.eventb.core.target="env_start_extending"/>
+<org.eventb.core.parameter name="_7u30R6vAEeS3EZaaLT3D1A" org.eventb.core.identifier="gr"/>
+<org.eventb.core.guard name="_7u4bUKvAEeS3EZaaLT3D1A" org.eventb.core.label="g" org.eventb.core.predicate="gr∈POSITION"/>
+<org.eventb.core.guard name="_7u4bUavAEeS3EZaaLT3D1A" org.eventb.core.label="all_doors_open" org.eventb.core.predicate="ran(doors) = {open}"/>
+<org.eventb.core.guard name="_7u4bUqvAEeS3EZaaLT3D1A" org.eventb.core.label="handle_down" org.eventb.core.predicate="handle = down"/>
+<org.eventb.core.guard name="_7u4bU6vAEeS3EZaaLT3D1A" org.eventb.core.label="g1" org.eventb.core.predicate="gears(gr)=retracted"/>
+<org.eventb.core.action name="_7u4bVKvAEeS3EZaaLT3D1A" org.eventb.core.assignment="gears(gr) ≔ gear_moving" org.eventb.core.label="ag"/>
+</org.eventb.core.event>
+<org.eventb.core.event name="_7u4bVavAEeS3EZaaLT3D1A" org.eventb.core.convergence="0" org.eventb.core.extended="false" org.eventb.core.label="env_extend_gear_last">
+<org.eventb.core.refinesEvent name="_QDdzwLEwEeSBRd-3twLVDA" org.eventb.core.target="env_extend_gear"/>
+<org.eventb.core.parameter name="_7u4bV6vAEeS3EZaaLT3D1A" org.eventb.core.identifier="gr"/>
+<org.eventb.core.guard name="_7u4bWKvAEeS3EZaaLT3D1A" org.eventb.core.label="g" org.eventb.core.predicate="gr∈POSITION"/>
+<org.eventb.core.guard name="_7u5CYKvAEeS3EZaaLT3D1A" org.eventb.core.label="all_doors_open" org.eventb.core.predicate="ran(doors) = {open}"/>
+<org.eventb.core.guard name="_7u5CYavAEeS3EZaaLT3D1A" org.eventb.core.label="handle_down" org.eventb.core.predicate="handle = down"/>
+<org.eventb.core.guard name="_7u5CYqvAEeS3EZaaLT3D1A" org.eventb.core.label="all_others" org.eventb.core.predicate="gears[POSITION∖{gr}] = {extended}"/>
+<org.eventb.core.guard name="_7u5CY6vAEeS3EZaaLT3D1A" org.eventb.core.label="g1" org.eventb.core.predicate="gears(gr)=gear_moving"/>
+<org.eventb.core.action name="_7u5CZKvAEeS3EZaaLT3D1A" org.eventb.core.assignment="gears(gr) ≔ extended" org.eventb.core.label="ag"/>
+</org.eventb.core.event>
+<org.eventb.core.event name="_7u5CZavAEeS3EZaaLT3D1A" org.eventb.core.convergence="0" org.eventb.core.extended="false" org.eventb.core.label="env_extend_gear_skip">
+<org.eventb.core.parameter name="_7u5CZqvAEeS3EZaaLT3D1A" org.eventb.core.identifier="gr"/>
+<org.eventb.core.guard name="_7u5CZ6vAEeS3EZaaLT3D1A" org.eventb.core.label="g" org.eventb.core.predicate="gr∈POSITION"/>
+<org.eventb.core.guard name="_7u5pcKvAEeS3EZaaLT3D1A" org.eventb.core.label="all_doors_open" org.eventb.core.predicate="ran(doors) = {open}"/>
+<org.eventb.core.guard name="_7u5pcavAEeS3EZaaLT3D1A" org.eventb.core.label="handle_down" org.eventb.core.predicate="handle = down"/>
+<org.eventb.core.guard name="_7u5pcqvAEeS3EZaaLT3D1A" org.eventb.core.label="all_others" org.eventb.core.predicate="gears[POSITION∖{gr}] ≠ {extended}"/>
+<org.eventb.core.guard name="_7u5pc6vAEeS3EZaaLT3D1A" org.eventb.core.label="g1" org.eventb.core.predicate="gears(gr)=gear_moving"/>
+<org.eventb.core.action name="_7u5pdKvAEeS3EZaaLT3D1A" org.eventb.core.assignment="gears(gr) ≔ extended" org.eventb.core.label="ag"/>
+</org.eventb.core.event>
+<org.eventb.core.event name="_7u5pdavAEeS3EZaaLT3D1A" org.eventb.core.convergence="0" org.eventb.core.extended="false" org.eventb.core.label="env_start_open_door">
+<org.eventb.core.refinesEvent name="_QDea0LEwEeSBRd-3twLVDA" org.eventb.core.target="env_start_open_door"/>
+<org.eventb.core.parameter name="_7u5pd6vAEeS3EZaaLT3D1A" org.eventb.core.identifier="gr"/>
+<org.eventb.core.guard name="_7u5peKvAEeS3EZaaLT3D1A" org.eventb.core.label="g" org.eventb.core.predicate="gr∈POSITION"/>
+<org.eventb.core.guard name="_7u6QgKvAEeS3EZaaLT3D1A" org.eventb.core.label="gd" org.eventb.core.predicate="doors(gr) = closed ∧ gears(gr) ≠ gear_moving"/>
+<org.eventb.core.guard name="_7u6QgavAEeS3EZaaLT3D1A" org.eventb.core.label="nomov" org.eventb.core.predicate="gear_moving ∉ ran(gears)"/>
+<org.eventb.core.guard name="_7u6QgqvAEeS3EZaaLT3D1A" org.eventb.core.label="h" org.eventb.core.predicate="(handle=down ∧ ran(gears)={retracted}) ∨&#10;         (handle=up ∧ ran(gears)={extended})"/>
+<org.eventb.core.action name="_7u6Qg6vAEeS3EZaaLT3D1A" org.eventb.core.assignment="doors(gr) ≔ door_moving" org.eventb.core.label="ad"/>
+</org.eventb.core.event>
+<org.eventb.core.event name="_7u6QhKvAEeS3EZaaLT3D1A" org.eventb.core.convergence="0" org.eventb.core.extended="false" org.eventb.core.label="env_open_door_last">
+<org.eventb.core.refinesEvent name="_QDfB4LEwEeSBRd-3twLVDA" org.eventb.core.target="env_open_door"/>
+<org.eventb.core.parameter name="_7u6QhqvAEeS3EZaaLT3D1A" org.eventb.core.identifier="gr"/>
+<org.eventb.core.guard name="_7u6Qh6vAEeS3EZaaLT3D1A" org.eventb.core.label="g" org.eventb.core.predicate="gr∈POSITION"/>
+<org.eventb.core.guard name="_7u6QiKvAEeS3EZaaLT3D1A" org.eventb.core.label="gd" org.eventb.core.predicate="doors(gr) = door_moving ∧ gears(gr) ≠ gear_moving"/>
+<org.eventb.core.guard name="_7u63kKvAEeS3EZaaLT3D1A" org.eventb.core.label="nomov" org.eventb.core.predicate="gear_moving ∉ ran(gears)"/>
+<org.eventb.core.guard name="_7u63kavAEeS3EZaaLT3D1A" org.eventb.core.label="all_others" org.eventb.core.predicate="doors[POSITION∖{gr}] = {open}"/>
+<org.eventb.core.guard name="_7u63kqvAEeS3EZaaLT3D1A" org.eventb.core.label="h" org.eventb.core.predicate="(handle=down ∧ ran(gears)={retracted}) ∨&#10;         (handle=up ∧ ran(gears)={extended})"/>
+<org.eventb.core.action name="_7u63k6vAEeS3EZaaLT3D1A" org.eventb.core.assignment="doors(gr) ≔ open" org.eventb.core.label="ad"/>
+</org.eventb.core.event>
+<org.eventb.core.event name="_7u63lKvAEeS3EZaaLT3D1A" org.eventb.core.convergence="0" org.eventb.core.extended="false" org.eventb.core.label="env_open_door_skip">
+<org.eventb.core.parameter name="_7u63lavAEeS3EZaaLT3D1A" org.eventb.core.identifier="gr"/>
+<org.eventb.core.guard name="_7u63lqvAEeS3EZaaLT3D1A" org.eventb.core.label="g" org.eventb.core.predicate="gr∈POSITION"/>
+<org.eventb.core.guard name="_7u63l6vAEeS3EZaaLT3D1A" org.eventb.core.label="gd" org.eventb.core.predicate="doors(gr) = door_moving ∧ gears(gr) ≠ gear_moving"/>
+<org.eventb.core.guard name="_7u63mKvAEeS3EZaaLT3D1A" org.eventb.core.label="nomov" org.eventb.core.predicate="gear_moving ∉ ran(gears)"/>
+<org.eventb.core.guard name="_7u7eoKvAEeS3EZaaLT3D1A" org.eventb.core.label="all_others" org.eventb.core.predicate="doors[POSITION∖{gr}] ≠ {open}"/>
+<org.eventb.core.guard name="_7u7eoavAEeS3EZaaLT3D1A" org.eventb.core.label="h" org.eventb.core.predicate="(handle=down ∧ ran(gears)={retracted}) ∨&#10;         (handle=up ∧ ran(gears)={extended})"/>
+<org.eventb.core.action name="_7u7eoqvAEeS3EZaaLT3D1A" org.eventb.core.assignment="doors(gr) ≔ open" org.eventb.core.label="ad"/>
+</org.eventb.core.event>
+<org.eventb.core.event name="_7u7eo6vAEeS3EZaaLT3D1A" org.eventb.core.convergence="0" org.eventb.core.extended="false" org.eventb.core.label="env_start_close_door">
+<org.eventb.core.refinesEvent name="_QDfo8LEwEeSBRd-3twLVDA" org.eventb.core.target="env_start_close_door"/>
+<org.eventb.core.parameter name="_7u7epavAEeS3EZaaLT3D1A" org.eventb.core.identifier="gr"/>
+<org.eventb.core.guard name="_7u7epqvAEeS3EZaaLT3D1A" org.eventb.core.label="g" org.eventb.core.predicate="gr∈POSITION"/>
+<org.eventb.core.guard name="_7u7ep6vAEeS3EZaaLT3D1A" org.eventb.core.label="gd" org.eventb.core.predicate="doors(gr) = open ∧ gears(gr) ≠ gear_moving"/>
+<org.eventb.core.guard name="_7u7eqKvAEeS3EZaaLT3D1A" org.eventb.core.label="h" org.eventb.core.predicate="(handle=up ∧ (ran(gears)={retracted} ∨ ran(gears)={extended})) ∨&#10;         (handle=down ∧ ran(gears)={extended})"/>
+<org.eventb.core.action name="_7u8FsKvAEeS3EZaaLT3D1A" org.eventb.core.assignment="doors(gr) ≔ door_moving" org.eventb.core.label="ad"/>
+</org.eventb.core.event>
+<org.eventb.core.event name="_7u8FsavAEeS3EZaaLT3D1A" org.eventb.core.convergence="0" org.eventb.core.extended="false" org.eventb.core.label="env_close_door">
+<org.eventb.core.refinesEvent name="_QDfo8bEwEeSBRd-3twLVDA" org.eventb.core.target="env_close_door"/>
+<org.eventb.core.parameter name="_7u8Fs6vAEeS3EZaaLT3D1A" org.eventb.core.identifier="gr"/>
+<org.eventb.core.guard name="_7u8FtKvAEeS3EZaaLT3D1A" org.eventb.core.label="g" org.eventb.core.predicate="gr∈POSITION"/>
+<org.eventb.core.guard name="_7u8FtavAEeS3EZaaLT3D1A" org.eventb.core.label="gd" org.eventb.core.predicate="doors(gr) = door_moving ∧ gears(gr) ≠ gear_moving"/>
+<org.eventb.core.guard name="_7u8FtqvAEeS3EZaaLT3D1A" org.eventb.core.label="nomov" org.eventb.core.predicate="gear_moving ∉ ran(gears)"/>
+<org.eventb.core.guard name="_7u8Ft6vAEeS3EZaaLT3D1A" org.eventb.core.label="all_others" org.eventb.core.predicate="doors[POSITION∖{gr}] = {closed}"/>
+<org.eventb.core.guard name="_7u8FuKvAEeS3EZaaLT3D1A" org.eventb.core.label="h" org.eventb.core.predicate="(handle=up ∧ (ran(gears)={retracted} ∨ ran(gears)={extended})) ∨&#10;         (handle=down ∧ ran(gears)={extended})"/>
+<org.eventb.core.action name="_7u8swKvAEeS3EZaaLT3D1A" org.eventb.core.assignment="doors(gr) ≔ closed" org.eventb.core.label="ad"/>
+</org.eventb.core.event>
+<org.eventb.core.event name="_7u8swavAEeS3EZaaLT3D1A" org.eventb.core.convergence="0" org.eventb.core.extended="false" org.eventb.core.label="env_close_door_skip">
+<org.eventb.core.parameter name="_7u8swqvAEeS3EZaaLT3D1A" org.eventb.core.identifier="gr"/>
+<org.eventb.core.guard name="_7u8sw6vAEeS3EZaaLT3D1A" org.eventb.core.label="g" org.eventb.core.predicate="gr∈POSITION"/>
+<org.eventb.core.guard name="_7u8sxKvAEeS3EZaaLT3D1A" org.eventb.core.label="gd" org.eventb.core.predicate="doors(gr) = door_moving ∧ gears(gr) ≠ gear_moving"/>
+<org.eventb.core.guard name="_7u8sxavAEeS3EZaaLT3D1A" org.eventb.core.label="nomov" org.eventb.core.predicate="gear_moving ∉ ran(gears)"/>
+<org.eventb.core.guard name="_7u8sxqvAEeS3EZaaLT3D1A" org.eventb.core.label="all_others" org.eventb.core.predicate="doors[POSITION∖{gr}] ≠ {closed}"/>
+<org.eventb.core.guard name="_7u8sx6vAEeS3EZaaLT3D1A" org.eventb.core.label="h" org.eventb.core.predicate="(handle=up ∧ (ran(gears)={retracted}∨ran(gears)={extended})) ∨&#10;         (handle=down ∧ ran(gears)={extended})"/>
+<org.eventb.core.action name="_7u9T0KvAEeS3EZaaLT3D1A" org.eventb.core.assignment="doors(gr) ≔ closed" org.eventb.core.label="ad"/>
+</org.eventb.core.event>
+<org.eventb.core.event name="_7u9T0avAEeS3EZaaLT3D1A" org.eventb.core.convergence="0" org.eventb.core.extended="true" org.eventb.core.label="toggle_handle_up">
+<org.eventb.core.refinesEvent name="_QDgQALEwEeSBRd-3twLVDA" org.eventb.core.target="toggle_handle_up"/>
+</org.eventb.core.event>
+<org.eventb.core.event name="_7u9T06vAEeS3EZaaLT3D1A" org.eventb.core.convergence="0" org.eventb.core.extended="true" org.eventb.core.label="toggle_handle_down">
+<org.eventb.core.refinesEvent name="_QDg3ELEwEeSBRd-3twLVDA" org.eventb.core.target="toggle_handle_down"/>
+</org.eventb.core.event>
+</org.eventb.core.machineFile>

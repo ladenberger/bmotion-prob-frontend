@@ -1,0 +1,54 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<org.eventb.core.machineFile org.eventb.core.configuration="org.eventb.core.fwd;de.prob.units.mchBase" org.eventb.texttools.text_lastmodified="1423578175496" org.eventb.texttools.text_representation="machine R2GearDoorHandle refines R1GearDoor  sees Gear Door Handle&#10;&#10;variables gear door handle&#10;&#10;invariants&#10;  @inv handle ∈ HANDLE_STATE&#10;&#10;events&#10;  event INITIALISATION extends INITIALISATION&#10;    then&#10;      @inih handle ≔ down&#10;  end&#10;&#10;  event env_start_retracting extends env_start_retracting&#10;    where&#10;      @handle_up handle = up&#10;  end&#10;&#10;  event env_retract_gear extends env_retract_gear&#10;    where&#10;      @handle_up handle = up&#10;  end&#10;&#10;  event env_start_extending extends env_start_extending&#10;    where&#10;      @handle_up handle = down&#10;  end&#10;&#10;  event env_extend_gear extends env_extend_gear&#10;    where&#10;      @handle_up handle = down&#10;  end&#10;&#10;  event env_start_open_door extends env_start_open_door&#10;    where&#10;      @h (handle=down ∧ gear=retracted) ∨ (handle=up ∧ gear=extended)&#10;  end&#10;&#10;  event env_open_door extends env_open_door&#10;    where&#10;      @h (handle=down ∧ gear=retracted) ∨ (handle=up ∧ gear=extended)&#10;  end&#10;&#10;  event env_start_close_door extends env_start_close_door&#10;    where&#10;      @h (handle=down ∧ gear=extended) ∨ (handle=up ∧ (gear=retracted ∨ gear=extended))&#10;  end&#10;&#10;  event env_close_door extends env_close_door&#10;    where&#10;      @h (handle=down ∧ gear=extended) ∨ (handle=up ∧ (gear=retracted ∨ gear=extended))&#10;  end&#10;&#10;  event toggle_handle_up&#10;    where&#10;      @h handle=down&#10;    then&#10;      @a handle ≔ up&#10;  end&#10;&#10;  event toggle_handle_down&#10;    where&#10;      @h handle=up&#10;    then&#10;      @a handle ≔ down&#10;  end&#10;end&#10;" version="5">
+<org.eventb.core.refinesMachine name="_TihUkLEwEeSBRd-3twLVDA" org.eventb.core.target="R1GearDoor"/>
+<org.eventb.core.seesContext name="_TihUkbEwEeSBRd-3twLVDA" org.eventb.core.target="Gear"/>
+<org.eventb.core.seesContext name="_TihUkrEwEeSBRd-3twLVDA" org.eventb.core.target="Door"/>
+<org.eventb.core.seesContext name="_TihUk7EwEeSBRd-3twLVDA" org.eventb.core.target="Handle"/>
+<org.eventb.core.variable name="_6g-pUKu2EeS3EZaaLT3D1A" org.eventb.core.identifier="gear"/>
+<org.eventb.core.variable name="_6g-pUau2EeS3EZaaLT3D1A" org.eventb.core.identifier="door"/>
+<org.eventb.core.variable name="_6hBsoKu2EeS3EZaaLT3D1A" org.eventb.core.identifier="handle"/>
+<org.eventb.core.invariant name="_6hBsoau2EeS3EZaaLT3D1A" org.eventb.core.label="inv" org.eventb.core.predicate="handle ∈ HANDLE_STATE"/>
+<org.eventb.core.event name="_6g-pUqu2EeS3EZaaLT3D1A" org.eventb.core.convergence="0" org.eventb.core.extended="true" org.eventb.core.label="INITIALISATION">
+<org.eventb.core.action name="_6g-pU6u2EeS3EZaaLT3D1A" org.eventb.core.assignment="handle ≔ down" org.eventb.core.label="inih"/>
+</org.eventb.core.event>
+<org.eventb.core.event name="_6g-pVKu2EeS3EZaaLT3D1A" org.eventb.core.convergence="0" org.eventb.core.extended="true" org.eventb.core.label="env_start_retracting">
+<org.eventb.core.refinesEvent name="_Tih7oLEwEeSBRd-3twLVDA" org.eventb.core.target="env_start_retracting"/>
+<org.eventb.core.guard name="_6g_QYau2EeS3EZaaLT3D1A" org.eventb.core.label="handle_up" org.eventb.core.predicate="handle = up"/>
+</org.eventb.core.event>
+<org.eventb.core.event name="_6g_QYqu2EeS3EZaaLT3D1A" org.eventb.core.convergence="0" org.eventb.core.extended="true" org.eventb.core.label="env_retract_gear">
+<org.eventb.core.refinesEvent name="_Tih7obEwEeSBRd-3twLVDA" org.eventb.core.target="env_retract_gear"/>
+<org.eventb.core.guard name="_6g_QZKu2EeS3EZaaLT3D1A" org.eventb.core.label="handle_up" org.eventb.core.predicate="handle = up"/>
+</org.eventb.core.event>
+<org.eventb.core.event name="_6g_QZau2EeS3EZaaLT3D1A" org.eventb.core.convergence="0" org.eventb.core.extended="true" org.eventb.core.label="env_start_extending">
+<org.eventb.core.refinesEvent name="_Tih7orEwEeSBRd-3twLVDA" org.eventb.core.target="env_start_extending"/>
+<org.eventb.core.guard name="_6g_3cau2EeS3EZaaLT3D1A" org.eventb.core.label="handle_up" org.eventb.core.predicate="handle = down"/>
+</org.eventb.core.event>
+<org.eventb.core.event name="_6g_3cqu2EeS3EZaaLT3D1A" org.eventb.core.convergence="0" org.eventb.core.extended="true" org.eventb.core.label="env_extend_gear">
+<org.eventb.core.refinesEvent name="_Tih7o7EwEeSBRd-3twLVDA" org.eventb.core.target="env_extend_gear"/>
+<org.eventb.core.guard name="_6g_3dKu2EeS3EZaaLT3D1A" org.eventb.core.label="handle_up" org.eventb.core.predicate="handle = down"/>
+</org.eventb.core.event>
+<org.eventb.core.event name="_6g_3dau2EeS3EZaaLT3D1A" org.eventb.core.convergence="0" org.eventb.core.extended="true" org.eventb.core.label="env_start_open_door">
+<org.eventb.core.refinesEvent name="_Tih7pLEwEeSBRd-3twLVDA" org.eventb.core.target="env_start_open_door"/>
+<org.eventb.core.guard name="_6hAegau2EeS3EZaaLT3D1A" org.eventb.core.label="h" org.eventb.core.predicate="(handle=down ∧ gear=retracted) ∨ (handle=up ∧ gear=extended)"/>
+</org.eventb.core.event>
+<org.eventb.core.event name="_6hAegqu2EeS3EZaaLT3D1A" org.eventb.core.convergence="0" org.eventb.core.extended="true" org.eventb.core.label="env_open_door">
+<org.eventb.core.refinesEvent name="_Tih7pbEwEeSBRd-3twLVDA" org.eventb.core.target="env_open_door"/>
+<org.eventb.core.guard name="_6hAehKu2EeS3EZaaLT3D1A" org.eventb.core.label="h" org.eventb.core.predicate="(handle=down ∧ gear=retracted) ∨ (handle=up ∧ gear=extended)"/>
+</org.eventb.core.event>
+<org.eventb.core.event name="_6hBFkKu2EeS3EZaaLT3D1A" org.eventb.core.convergence="0" org.eventb.core.extended="true" org.eventb.core.label="env_start_close_door">
+<org.eventb.core.refinesEvent name="_TiiisLEwEeSBRd-3twLVDA" org.eventb.core.target="env_start_close_door"/>
+<org.eventb.core.guard name="_6hBFkqu2EeS3EZaaLT3D1A" org.eventb.core.label="h" org.eventb.core.predicate="(handle=down ∧ gear=extended) ∨ (handle=up ∧ (gear=retracted ∨ gear=extended))"/>
+</org.eventb.core.event>
+<org.eventb.core.event name="_6hBFk6u2EeS3EZaaLT3D1A" org.eventb.core.convergence="0" org.eventb.core.extended="true" org.eventb.core.label="env_close_door">
+<org.eventb.core.refinesEvent name="_TiiisbEwEeSBRd-3twLVDA" org.eventb.core.target="env_close_door"/>
+<org.eventb.core.guard name="_6hBFlau2EeS3EZaaLT3D1A" org.eventb.core.label="h" org.eventb.core.predicate="(handle=down ∧ gear=extended) ∨ (handle=up ∧ (gear=retracted ∨ gear=extended))"/>
+</org.eventb.core.event>
+<org.eventb.core.event name="_6hBsoqu2EeS3EZaaLT3D1A" org.eventb.core.convergence="0" org.eventb.core.extended="false" org.eventb.core.label="toggle_handle_up">
+<org.eventb.core.guard name="_6hBso6u2EeS3EZaaLT3D1A" org.eventb.core.label="h" org.eventb.core.predicate="handle=down"/>
+<org.eventb.core.action name="_6hBspKu2EeS3EZaaLT3D1A" org.eventb.core.assignment="handle ≔ up" org.eventb.core.label="a"/>
+</org.eventb.core.event>
+<org.eventb.core.event name="_6hCTsKu2EeS3EZaaLT3D1A" org.eventb.core.convergence="0" org.eventb.core.extended="false" org.eventb.core.label="toggle_handle_down">
+<org.eventb.core.guard name="_6hCTsau2EeS3EZaaLT3D1A" org.eventb.core.label="h" org.eventb.core.predicate="handle=up"/>
+<org.eventb.core.action name="_6hCTsqu2EeS3EZaaLT3D1A" org.eventb.core.assignment="handle ≔ down" org.eventb.core.label="a"/>
+</org.eventb.core.event>
+</org.eventb.core.machineFile>

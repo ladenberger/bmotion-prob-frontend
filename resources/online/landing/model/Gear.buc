@@ -1,0 +1,8 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<org.eventb.core.contextFile org.eventb.core.configuration="org.eventb.core.fwd" org.eventb.texttools.text_lastmodified="1423512346359" org.eventb.texttools.text_representation="context Gear&#10;&#10;constants retracted extended gear_moving&#10;&#10;sets GEAR_STATE&#10;&#10;&#10;axioms&#10;  @axm2 partition(GEAR_STATE, {retracted}, {extended}, {gear_moving})&#10;end&#10;" version="3">
+<org.eventb.core.carrierSet name="_xz1aYKuzEeS3EZaaLT3D1A" org.eventb.core.identifier="GEAR_STATE"/>
+<org.eventb.core.constant name="_xz1aYauzEeS3EZaaLT3D1A" org.eventb.core.identifier="retracted"/>
+<org.eventb.core.constant name="_xz2BcKuzEeS3EZaaLT3D1A" org.eventb.core.identifier="extended"/>
+<org.eventb.core.constant name="_xz2BcauzEeS3EZaaLT3D1A" org.eventb.core.identifier="gear_moving"/>
+<org.eventb.core.axiom name="_xz2BcquzEeS3EZaaLT3D1A" org.eventb.core.label="axm2" org.eventb.core.predicate="partition(GEAR_STATE, {retracted}, {extended}, {gear_moving})"/>
+</org.eventb.core.contextFile>

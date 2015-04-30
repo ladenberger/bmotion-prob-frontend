@@ -1,0 +1,8 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<org.eventb.core.scContextFile org.eventb.core.accurate="true" org.eventb.core.configuration="org.eventb.core.fwd">
+<org.eventb.core.scAxiom name="'" org.eventb.core.label="axm2" org.eventb.core.predicate="partition(GEAR_STATE,{retracted},{extended},{gear_moving})" org.eventb.core.source="/LandingGearNew/Gear.buc|org.eventb.core.contextFile#Gear|org.eventb.core.axiom#_xz2BcquzEeS3EZaaLT3D1A" org.eventb.core.theorem="false"/>
+<org.eventb.core.scCarrierSet name="GEAR_STATE" org.eventb.core.source="/LandingGearNew/Gear.buc|org.eventb.core.contextFile#Gear|org.eventb.core.carrierSet#_xz1aYKuzEeS3EZaaLT3D1A" org.eventb.core.type="ℙ(GEAR_STATE)"/>
+<org.eventb.core.scConstant name="extended" org.eventb.core.source="/LandingGearNew/Gear.buc|org.eventb.core.contextFile#Gear|org.eventb.core.constant#_xz2BcKuzEeS3EZaaLT3D1A" org.eventb.core.type="GEAR_STATE"/>
+<org.eventb.core.scConstant name="gear_moving" org.eventb.core.source="/LandingGearNew/Gear.buc|org.eventb.core.contextFile#Gear|org.eventb.core.constant#_xz2BcauzEeS3EZaaLT3D1A" org.eventb.core.type="GEAR_STATE"/>
+<org.eventb.core.scConstant name="retracted" org.eventb.core.source="/LandingGearNew/Gear.buc|org.eventb.core.contextFile#Gear|org.eventb.core.constant#_xz1aYauzEeS3EZaaLT3D1A" org.eventb.core.type="GEAR_STATE"/>
+</org.eventb.core.scContextFile>

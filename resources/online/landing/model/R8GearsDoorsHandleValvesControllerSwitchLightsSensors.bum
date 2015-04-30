@@ -1,0 +1,315 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<org.eventb.core.machineFile org.eventb.core.configuration="org.eventb.core.fwd;de.prob.units.mchBase" org.eventb.texttools.text_lastmodified="1423824627107" org.eventb.texttools.text_representation="machine R8GearsDoorsHandleValvesControllerSwitchLightsSensors refines R7GearsDoorsHandleValvesControllerSwitchLights  sees Gear Door Handle Position Valve Switch Lights&#10;&#10;variables open_EV close_EV retract_EV extend_EV valve_open_door valve_close_door valve_extend_gear valve_retract_gear gears doors handle shock_absorber general_EV general_valve analogical_switch handle_move green_light orange_light red_light anomaly sensors_door_closed sensors_door_open sensors_gear_extended sensors_gear_retracted sensors_handle sensors_shock_absorber sensors_aswitch valid_sensors_gear_extended valid_sensors_gear_retracted valid_sensors_door_open valid_sensors_door_closed valid_sensors_handle valid_sensors_shock_absorber valid_sensors_aswitch&#10;&#10;invariants&#10;  @door_closed sensors_door_closed ∈ POSITION → (1‥3 ⇸ BOOL)&#10;  @door_open sensors_door_open ∈ POSITION → (1‥3 → BOOL)&#10;  @gear_extended sensors_gear_extended ∈ POSITION → (1‥3 → BOOL)&#10;  @gear_retracted sensors_gear_retracted ∈ POSITION → (1‥3 → BOOL)&#10;  @handles sensors_handle ∈ 1‥3 → HANDLE_STATE&#10;  @shockabs sensors_shock_absorber ∈ 1‥3 → PLANE_STATE&#10;  @aswitch sensors_aswitch ∈ 1‥3 → SWITCH_STATE&#10;  @valid_sensors1 valid_sensors_gear_extended ∈ POSITION → ℙ(1‥3)&#10;  @valid_sensors2 valid_sensors_gear_retracted ∈ POSITION → ℙ(1‥3)&#10;  @valid_sensors3 valid_sensors_door_open ∈ POSITION → ℙ(1‥3)&#10;  @valid_sensors4 valid_sensors_door_closed ∈ POSITION → ℙ(1‥3)&#10;  @valid_sensors5 valid_sensors_handle ∈ ℙ(1‥3)&#10;  @valid_sensors6 valid_sensors_shock_absorber ∈ ℙ(1‥3)&#10;  @valid_sensors7 valid_sensors_aswitch ∈ ℙ(1‥3)&#10;  @anomaly anomaly ∈ BOOL&#10;&#10;events&#10;  event INITIALISATION extends INITIALISATION&#10;    then&#10;      @door_closed sensors_door_closed ≔ λp·p∈ POSITION ∣ (λx·x ∈ 1‥3 ∣ TRUE)&#10;      @door_open sensors_door_open ≔ λp·p∈ POSITION ∣ (λx·x ∈ 1‥3 ∣ FALSE)&#10;      @gear_extended sensors_gear_extended ≔ λp·p∈ POSITION ∣ (λx·x ∈ 1‥3 ∣ TRUE)&#10;      @gear_retracted sensors_gear_retracted ≔ λp·p∈ POSITION ∣ (λx·x ∈ 1‥3 ∣ FALSE)&#10;      @handles sensors_handle ≔ {1↦down, 2↦down, 3↦down}&#10;      @shockabs sensors_shock_absorber ≔ {1↦ground, 2↦ground, 3↦ground}&#10;      @aswitch sensors_aswitch ≔ {1↦switch_closed, 2↦switch_closed, 3↦switch_closed}&#10;      @valid_sensors1 valid_sensors_gear_extended ≔ {front↦{1,2,3}, left↦{1,2,3}, right↦{1,2,3}}&#10;      @valid_sensors2 valid_sensors_gear_retracted ≔ {front↦{1,2,3}, left↦{1,2,3}, right↦{1,2,3}}&#10;      @valid_sensors3 valid_sensors_door_open ≔ {front↦{1,2,3}, left↦{1,2,3}, right↦{1,2,3}}&#10;      @valid_sensors4 valid_sensors_door_closed ≔  λp·p∈ POSITION ∣ 1‥3 // {front↦{1,2,3}, left↦{1,2,3}, right↦{1,2,3}}&#10;      @valid_sensors5 valid_sensors_handle ≔ {1,2,3}&#10;      @valid_sensors6 valid_sensors_shock_absorber ≔ {1,2,3}&#10;      @valid_sensors7 valid_sensors_aswitch ≔ {1,2,3}&#10;      @anomaly anomaly ≔ FALSE&#10;  end&#10;&#10;  event begin_flying extends begin_flying&#10;    any s v&#10;    where&#10;      @grd2 s ∈ valid_sensors_shock_absorber // choose a valid sensor&#10;      @grd3 v ∈ PLANE_STATE&#10;    then&#10;      @sensors sensors_shock_absorber ≔ (λx·x ∈ 1‥3∖{s}∣ flight) ∪ {s ↦ v}&#10;  end&#10;&#10;  event land_plane extends land_plane&#10;    any s v&#10;    where&#10;      @grd2 s ∈ valid_sensors_shock_absorber // choose a valid sensor&#10;      @grd3 v ∈ PLANE_STATE&#10;    then&#10;      @sensors sensors_shock_absorber ≔ (λx·x ∈ 1‥3∖{s}∣ ground) ∪ {s ↦ v}&#10;  end&#10;&#10;  event open_valve_door_open extends open_valve_door_open&#10;  end&#10;&#10;  event close_valve_door_open extends close_valve_door_open&#10;  end&#10;&#10;  event open_valve_door_close extends open_valve_door_close&#10;  end&#10;&#10;  event close_valve_door_close extends close_valve_door_close&#10;  end&#10;&#10;  event open_valve_retract_gear extends open_valve_retract_gear&#10;  end&#10;&#10;  event close_valve_retract_gear extends close_valve_retract_gear&#10;  end&#10;&#10;  event open_valve_extend_gear extends open_valve_extend_gear&#10;  end&#10;&#10;  event close_valve_extend_gear extends close_valve_extend_gear&#10;  end&#10;&#10;  event con_stimulate_open_door_valve extends con_stimulate_open_door_valve&#10;  end&#10;&#10;  event con_stop_stimulate_open_door_valve extends con_stop_stimulate_open_door_valve&#10;  end&#10;&#10;  event con_stimulate_close_door_valve extends con_stimulate_close_door_valve&#10;  end&#10;&#10;  event con_stop_stimulate_close_door_valve extends con_stop_stimulate_close_door_valve&#10;  end&#10;&#10;  event con_stimulate_retract_gear_valve extends con_stimulate_retract_gear_valve&#10;  end&#10;&#10;  event con_stop_stimulate_retract_gear_valve extends con_stop_stimulate_retract_gear_valve&#10;  end&#10;&#10;  event con_stimulate_extend_gear_valve extends con_stimulate_extend_gear_valve&#10;  end&#10;&#10;  event con_stop_stimulate_extend_gear_valve extends con_stop_stimulate_extend_gear_valve&#10;  end&#10;&#10;  event env_start_retracting_first extends env_start_retracting_first&#10;    any s v&#10;    where&#10;      @grd2 s ∈ valid_sensors_gear_extended(gr) // choose a valid sensor&#10;      @grd3 v ∈ BOOL&#10;    then&#10;      @sensors sensors_gear_extended(gr) ≔ (λx·x ∈ 1‥3∖{s}∣ FALSE) ∪ {s ↦ v}&#10;  end&#10;&#10;  event env_retract_gear_skip extends env_retract_gear_skip&#10;    any s v&#10;    where&#10;      @grd2 s ∈ valid_sensors_gear_retracted(gr) // choose a valid sensor&#10;      @grd3 v ∈ BOOL&#10;    then&#10;      @sensors sensors_gear_retracted(gr) ≔ (λx·x ∈ 1‥3∖{s}∣ TRUE) ∪ {s ↦ v}&#10;  end&#10;&#10;  event env_retract_gear_last extends env_retract_gear_last&#10;    any s v&#10;    where&#10;      @grd2 s ∈ valid_sensors_gear_retracted(gr) // choose a valid sensor&#10;      @grd3 v ∈ BOOL&#10;    then&#10;      @sensors sensors_gear_retracted(gr) ≔ (λx·x ∈ 1‥3∖{s}∣ TRUE) ∪ {s ↦ v}&#10;  end&#10;&#10;  event env_start_extending extends env_start_extending&#10;    any s v&#10;    where&#10;      @grd2 s ∈ valid_sensors_gear_retracted(gr) // choose a valid sensor&#10;      @grd3 v ∈ BOOL&#10;    then&#10;      @sensors sensors_gear_retracted(gr) ≔ (λx·x ∈ 1‥3∖{s}∣ FALSE) ∪ {s ↦ v}&#10;  end&#10;&#10;  event env_extend_gear_last extends env_extend_gear_last&#10;    any s v&#10;    where&#10;      @grd2 s ∈ valid_sensors_gear_extended(gr) // choose a valid sensor&#10;      @grd3 v ∈ BOOL&#10;    then&#10;      @sensors sensors_gear_extended(gr) ≔ (λx·x ∈ 1‥3∖{s}∣ TRUE) ∪ {s ↦ v}&#10;  end&#10;&#10;  event env_extend_gear_skip extends env_extend_gear_skip&#10;    any s v&#10;    where&#10;      @grd2 s ∈ valid_sensors_gear_extended(gr) // choose a valid sensor&#10;      @grd3 v ∈ BOOL&#10;    then&#10;      @sensors sensors_gear_extended(gr) ≔ (λx·x ∈ 1‥3∖{s}∣ TRUE) ∪ {s ↦ v}&#10;  end&#10;&#10;  event env_start_open_door extends env_start_open_door&#10;    any s v&#10;    where&#10;      @grd2 s ∈ valid_sensors_door_closed(gr) // choose a valid sensor&#10;      @grd3 v ∈ BOOL&#10;    then&#10;      @sensors sensors_door_closed(gr) ≔ (λx·x ∈ 1‥3∖{s}∣ FALSE) ∪ {s ↦ v}&#10;  end&#10;&#10;  event env_open_door_last extends env_open_door_last&#10;    any s v&#10;    where&#10;      @grd2 s ∈ valid_sensors_door_open(gr) // choose a valid sensor&#10;      @grd3 v ∈ BOOL&#10;    then&#10;      @sensors sensors_door_open(gr) ≔ (λx·x ∈ 1‥3∖{s}∣ TRUE) ∪ {s ↦ v}&#10;  end&#10;&#10;  event env_open_door_skip extends env_open_door_skip&#10;    any s v&#10;    where&#10;      @grd2 s ∈ valid_sensors_door_open(gr) // choose a valid sensor&#10;      @grd3 v ∈ BOOL&#10;    then&#10;      @sensors sensors_door_open(gr) ≔ (λx·x ∈ 1‥3∖{s}∣ TRUE) ∪ {s ↦ v}&#10;  end&#10;&#10;  event env_start_close_door extends env_start_close_door&#10;    any s v&#10;    where&#10;      @grd2 s ∈ valid_sensors_door_open(gr) // choose a valid sensor&#10;      @grd3 v ∈ BOOL&#10;    then&#10;      @sensors sensors_door_open(gr) ≔ (λx·x ∈ 1‥3∖{s}∣ FALSE) ∪ {s ↦ v}&#10;  end&#10;&#10;  event env_close_door extends env_close_door&#10;    any s v&#10;    where&#10;      @grd2 s ∈ valid_sensors_door_closed(gr) // choose a valid sensor&#10;      @grd3 v ∈ BOOL&#10;    then&#10;      @sensors sensors_door_closed(gr) ≔ (λx·x ∈ 1‥3∖{s}∣ TRUE) ∪ {s ↦ v}&#10;  end&#10;&#10;  event env_close_door_skip extends env_close_door_skip&#10;    any s v&#10;    where&#10;      @grd2 s ∈ valid_sensors_door_closed(gr) // choose a valid sensor&#10;      @grd3 v ∈ BOOL&#10;    then&#10;      @sensors sensors_door_closed(gr) ≔ (λx·x ∈ 1‥3∖{s}∣ TRUE) ∪ {s ↦ v}&#10;  end&#10;&#10;  event toggle_handle_up extends toggle_handle_up&#10;    any s v&#10;    where&#10;      @grd2 s ∈ valid_sensors_handle // choose a valid sensor&#10;      @grd3 v ∈ HANDLE_STATE&#10;    then&#10;      @sensors sensors_handle ≔ (λx·x ∈ 1‥3∖{s}∣ up) ∪ {s ↦ v}&#10;  end&#10;&#10;  event toggle_handle_down extends toggle_handle_down&#10;    any s v&#10;    where&#10;      @grd2 s ∈ valid_sensors_handle // choose a valid sensor&#10;      @grd3 v ∈ HANDLE_STATE&#10;    then&#10;      @sensors sensors_handle ≔ (λx·x ∈ 1‥3∖{s}∣ down) ∪ {s ↦ v}&#10;  end&#10;&#10;  event con_stimulate_general_valve extends con_stimulate_general_valve&#10;  end&#10;&#10;  event con_stop_stimulate_general_valve extends con_stop_stimulate_general_valve&#10;  end&#10;&#10;  event evn_open_general_valve extends evn_open_general_valve&#10;  end&#10;&#10;  event evn_close_general_valve extends evn_close_general_valve&#10;  end&#10;&#10;  event env_close_analogical_switch extends env_close_analogical_switch&#10;    any s v&#10;    where&#10;      @grd4 s ∈ valid_sensors_aswitch // choose a valid sensor&#10;      @grd5 v ∈ SWITCH_STATE&#10;    then&#10;      @sensors sensors_aswitch ≔ (λx·x ∈ 1‥3∖{s}∣ switch_closed) ∪ {s ↦ v}&#10;  end&#10;&#10;  event env_open_analogical_switch extends env_open_analogical_switch&#10;    any s v&#10;    where&#10;      @grd2 s ∈ valid_sensors_aswitch // choose a valid sensor&#10;      @grd3 v ∈ SWITCH_STATE&#10;    then&#10;      @sensors sensors_aswitch ≔ (λx·x ∈ 1‥3∖{s}∣ switch_open) ∪ {s ↦ v}&#10;  end&#10;&#10;  event env_turn_on_red_light extends env_turn_on_red_light&#10;    where&#10;      @grd2 anomaly = TRUE&#10;  end&#10;&#10;  event env_turn_on_orange_light extends env_turn_on_orange_light&#10;  end&#10;&#10;  event env_turn_off_orange_light extends env_turn_off_orange_light&#10;  end&#10;&#10;  event env_turn_on_green_light extends env_turn_on_green_light&#10;  end&#10;&#10;  event env_turn_off_green_light extends env_turn_off_green_light&#10;  end&#10;&#10;  event check_sensors&#10;    then&#10;      @v valid_sensors_door_closed ≔  λp·p∈ POSITION ∣&#10;         {s∣ s ∈ valid_sensors_door_closed(p)&#10;         ∧ (∃s2·s2 ∈ valid_sensors_door_closed(p)&#10;         ∧ s2 ≠ s ∧ sensors_door_closed(p)(s) = sensors_door_closed(p)(s2))} // a sensor is valid if there is another valid sensor with same value&#10;      @v2 valid_sensors_door_open ≔  λp·p∈ POSITION ∣&#10;          {s∣ s ∈ valid_sensors_door_open(p)&#10;          ∧ (∃s2·s2 ∈ valid_sensors_door_open(p)&#10;          ∧ s2 ≠ s ∧ sensors_door_open(p)(s) = sensors_door_open(p)(s2))}&#10;      @v3 valid_sensors_gear_extended ≔  λp·p∈ POSITION ∣&#10;          {s∣ s ∈ valid_sensors_gear_extended(p)&#10;          ∧ (∃s2·s2 ∈ valid_sensors_gear_extended(p)&#10;          ∧ s2 ≠ s ∧ sensors_gear_extended(p)(s) = sensors_gear_extended(p)(s2))}&#10;      @v4 valid_sensors_gear_retracted ≔  λp·p∈ POSITION ∣&#10;          {s∣ s ∈ valid_sensors_gear_retracted(p)&#10;          ∧ (∃s2·s2 ∈ valid_sensors_gear_retracted(p)&#10;          ∧ s2 ≠ s ∧ sensors_gear_retracted(p)(s) = sensors_gear_retracted(p)(s2))}&#10;      @v5 valid_sensors_handle ≔ {s∣ s ∈ valid_sensors_handle&#10;          ∧ (∃s2·s2 ∈ valid_sensors_handle&#10;          ∧ s2 ≠ s ∧ sensors_handle(s) = sensors_handle(s2))}&#10;      @v6 valid_sensors_shock_absorber ≔ {s∣ s ∈ valid_sensors_shock_absorber&#10;          ∧ (∃s2·s2 ∈ valid_sensors_shock_absorber&#10;          ∧ s2 ≠ s ∧ sensors_shock_absorber(s) = sensors_shock_absorber(s2))}&#10;      @v7 valid_sensors_aswitch ≔ {s∣ s ∈ valid_sensors_aswitch&#10;          ∧ (∃s2·s2 ∈ valid_sensors_aswitch&#10;          ∧ s2 ≠ s ∧ sensors_aswitch(s) = sensors_aswitch(s2))}&#10;  end&#10;&#10;  event set_anomaly_sensors&#10;    where&#10;      @g anomaly = FALSE&#10;      @g2 (∅ ∈ valid_sensors_gear_extended[POSITION]&#10;          ∪ valid_sensors_gear_retracted[POSITION]&#10;          ∪ valid_sensors_door_open[POSITION]&#10;          ∪ valid_sensors_door_closed[POSITION]&#10;          ∪ {valid_sensors_handle}&#10;          ∪ {valid_sensors_shock_absorber}&#10;          ∪ {valid_sensors_aswitch})&#10;    then&#10;      @a anomaly ≔ TRUE&#10;  end&#10;&#10;  event set_anomaly&#10;    where&#10;      @g anomaly = FALSE&#10;    then&#10;      @a anomaly ≔ TRUE&#10;  end&#10;end&#10;" version="5">
+<org.eventb.core.refinesMachine name="_IAN3MLNuEeSOCbS1CcjMBg" org.eventb.core.target="R7GearsDoorsHandleValvesControllerSwitchLights"/>
+<org.eventb.core.seesContext name="_IAN3MbNuEeSOCbS1CcjMBg" org.eventb.core.target="Gear"/>
+<org.eventb.core.seesContext name="_IAN3MrNuEeSOCbS1CcjMBg" org.eventb.core.target="Door"/>
+<org.eventb.core.seesContext name="_IAN3M7NuEeSOCbS1CcjMBg" org.eventb.core.target="Handle"/>
+<org.eventb.core.seesContext name="_IAN3NLNuEeSOCbS1CcjMBg" org.eventb.core.target="Position"/>
+<org.eventb.core.seesContext name="_IAOeQLNuEeSOCbS1CcjMBg" org.eventb.core.target="Valve"/>
+<org.eventb.core.seesContext name="_IAOeQbNuEeSOCbS1CcjMBg" org.eventb.core.target="Switch"/>
+<org.eventb.core.seesContext name="_IAOeQrNuEeSOCbS1CcjMBg" org.eventb.core.target="Lights"/>
+<org.eventb.core.variable name="_vlXtcLKzEeSIBO-4uCJrVQ" org.eventb.core.identifier="open_EV"/>
+<org.eventb.core.variable name="_vlXtcbKzEeSIBO-4uCJrVQ" org.eventb.core.identifier="close_EV"/>
+<org.eventb.core.variable name="_vlXtcrKzEeSIBO-4uCJrVQ" org.eventb.core.identifier="retract_EV"/>
+<org.eventb.core.variable name="_vlYUgLKzEeSIBO-4uCJrVQ" org.eventb.core.identifier="extend_EV"/>
+<org.eventb.core.variable name="_vlYUgbKzEeSIBO-4uCJrVQ" org.eventb.core.identifier="valve_open_door"/>
+<org.eventb.core.variable name="_vlYUgrKzEeSIBO-4uCJrVQ" org.eventb.core.identifier="valve_close_door"/>
+<org.eventb.core.variable name="_vlYUg7KzEeSIBO-4uCJrVQ" org.eventb.core.identifier="valve_extend_gear"/>
+<org.eventb.core.variable name="_vlYUhLKzEeSIBO-4uCJrVQ" org.eventb.core.identifier="valve_retract_gear"/>
+<org.eventb.core.variable name="_vlYUhbKzEeSIBO-4uCJrVQ" org.eventb.core.identifier="gears"/>
+<org.eventb.core.variable name="_vlY7kLKzEeSIBO-4uCJrVQ" org.eventb.core.identifier="doors"/>
+<org.eventb.core.variable name="_vlY7kbKzEeSIBO-4uCJrVQ" org.eventb.core.identifier="handle"/>
+<org.eventb.core.variable name="_vlY7krKzEeSIBO-4uCJrVQ" org.eventb.core.identifier="shock_absorber"/>
+<org.eventb.core.variable name="_vlY7k7KzEeSIBO-4uCJrVQ" org.eventb.core.identifier="general_EV"/>
+<org.eventb.core.variable name="_vlY7lLKzEeSIBO-4uCJrVQ" org.eventb.core.identifier="general_valve"/>
+<org.eventb.core.variable name="_vlY7lbKzEeSIBO-4uCJrVQ" org.eventb.core.identifier="analogical_switch"/>
+<org.eventb.core.variable name="_vlY7lrKzEeSIBO-4uCJrVQ" org.eventb.core.identifier="handle_move"/>
+<org.eventb.core.variable name="_vlY7l7KzEeSIBO-4uCJrVQ" org.eventb.core.identifier="green_light"/>
+<org.eventb.core.variable name="_vlZioLKzEeSIBO-4uCJrVQ" org.eventb.core.identifier="orange_light"/>
+<org.eventb.core.variable name="_vlZiobKzEeSIBO-4uCJrVQ" org.eventb.core.identifier="red_light"/>
+<org.eventb.core.variable name="_vlZiorKzEeSIBO-4uCJrVQ" org.eventb.core.identifier="anomaly"/>
+<org.eventb.core.variable name="_vlZio7KzEeSIBO-4uCJrVQ" org.eventb.core.identifier="sensors_door_closed"/>
+<org.eventb.core.variable name="_vlZipLKzEeSIBO-4uCJrVQ" org.eventb.core.identifier="sensors_door_open"/>
+<org.eventb.core.variable name="_vlZipbKzEeSIBO-4uCJrVQ" org.eventb.core.identifier="sensors_gear_extended"/>
+<org.eventb.core.variable name="_vlaJsLKzEeSIBO-4uCJrVQ" org.eventb.core.identifier="sensors_gear_retracted"/>
+<org.eventb.core.variable name="_vlaJsbKzEeSIBO-4uCJrVQ" org.eventb.core.identifier="sensors_handle"/>
+<org.eventb.core.variable name="_vlaJsrKzEeSIBO-4uCJrVQ" org.eventb.core.identifier="sensors_shock_absorber"/>
+<org.eventb.core.variable name="_vlaJs7KzEeSIBO-4uCJrVQ" org.eventb.core.identifier="sensors_aswitch"/>
+<org.eventb.core.variable name="_vlaJtLKzEeSIBO-4uCJrVQ" org.eventb.core.identifier="valid_sensors_gear_extended"/>
+<org.eventb.core.variable name="_vlaJtbKzEeSIBO-4uCJrVQ" org.eventb.core.identifier="valid_sensors_gear_retracted"/>
+<org.eventb.core.variable name="_vlaJtrKzEeSIBO-4uCJrVQ" org.eventb.core.identifier="valid_sensors_door_open"/>
+<org.eventb.core.variable name="_vlawwLKzEeSIBO-4uCJrVQ" org.eventb.core.identifier="valid_sensors_door_closed"/>
+<org.eventb.core.variable name="_vlawwbKzEeSIBO-4uCJrVQ" org.eventb.core.identifier="valid_sensors_handle"/>
+<org.eventb.core.variable name="_vlawwrKzEeSIBO-4uCJrVQ" org.eventb.core.identifier="valid_sensors_shock_absorber"/>
+<org.eventb.core.variable name="_vlaww7KzEeSIBO-4uCJrVQ" org.eventb.core.identifier="valid_sensors_aswitch"/>
+<org.eventb.core.invariant name="_vlawxLKzEeSIBO-4uCJrVQ" org.eventb.core.label="door_closed" org.eventb.core.predicate="sensors_door_closed ∈ POSITION → (1‥3 ⇸ BOOL)"/>
+<org.eventb.core.invariant name="_vlawxbKzEeSIBO-4uCJrVQ" org.eventb.core.label="door_open" org.eventb.core.predicate="sensors_door_open ∈ POSITION → (1‥3 → BOOL)"/>
+<org.eventb.core.invariant name="_vlbX0LKzEeSIBO-4uCJrVQ" org.eventb.core.label="gear_extended" org.eventb.core.predicate="sensors_gear_extended ∈ POSITION → (1‥3 → BOOL)"/>
+<org.eventb.core.invariant name="_vlbX0bKzEeSIBO-4uCJrVQ" org.eventb.core.label="gear_retracted" org.eventb.core.predicate="sensors_gear_retracted ∈ POSITION → (1‥3 → BOOL)"/>
+<org.eventb.core.invariant name="_vlbX0rKzEeSIBO-4uCJrVQ" org.eventb.core.label="handles" org.eventb.core.predicate="sensors_handle ∈ 1‥3 → HANDLE_STATE"/>
+<org.eventb.core.invariant name="_vlbX07KzEeSIBO-4uCJrVQ" org.eventb.core.label="shockabs" org.eventb.core.predicate="sensors_shock_absorber ∈ 1‥3 → PLANE_STATE"/>
+<org.eventb.core.invariant name="_vlb-4LKzEeSIBO-4uCJrVQ" org.eventb.core.label="aswitch" org.eventb.core.predicate="sensors_aswitch ∈ 1‥3 → SWITCH_STATE"/>
+<org.eventb.core.invariant name="_vlb-4bKzEeSIBO-4uCJrVQ" org.eventb.core.label="valid_sensors1" org.eventb.core.predicate="valid_sensors_gear_extended ∈ POSITION → ℙ(1‥3)"/>
+<org.eventb.core.invariant name="_vlb-4rKzEeSIBO-4uCJrVQ" org.eventb.core.label="valid_sensors2" org.eventb.core.predicate="valid_sensors_gear_retracted ∈ POSITION → ℙ(1‥3)"/>
+<org.eventb.core.invariant name="_vlb-47KzEeSIBO-4uCJrVQ" org.eventb.core.label="valid_sensors3" org.eventb.core.predicate="valid_sensors_door_open ∈ POSITION → ℙ(1‥3)"/>
+<org.eventb.core.invariant name="_vlb-5LKzEeSIBO-4uCJrVQ" org.eventb.core.label="valid_sensors4" org.eventb.core.predicate="valid_sensors_door_closed ∈ POSITION → ℙ(1‥3)"/>
+<org.eventb.core.invariant name="_vlcl8LKzEeSIBO-4uCJrVQ" org.eventb.core.label="valid_sensors5" org.eventb.core.predicate="valid_sensors_handle ∈ ℙ(1‥3)"/>
+<org.eventb.core.invariant name="_vlcl8bKzEeSIBO-4uCJrVQ" org.eventb.core.label="valid_sensors6" org.eventb.core.predicate="valid_sensors_shock_absorber ∈ ℙ(1‥3)"/>
+<org.eventb.core.invariant name="_vlcl8rKzEeSIBO-4uCJrVQ" org.eventb.core.label="valid_sensors7" org.eventb.core.predicate="valid_sensors_aswitch ∈ ℙ(1‥3)"/>
+<org.eventb.core.invariant name="_vlcl87KzEeSIBO-4uCJrVQ" org.eventb.core.label="anomaly" org.eventb.core.predicate="anomaly ∈ BOOL"/>
+<org.eventb.core.event name="_vldNALKzEeSIBO-4uCJrVQ" org.eventb.core.convergence="0" org.eventb.core.extended="true" org.eventb.core.label="INITIALISATION">
+<org.eventb.core.action name="_vldNAbKzEeSIBO-4uCJrVQ" org.eventb.core.assignment="sensors_door_closed ≔ λp·p∈ POSITION ∣ (λx·x ∈ 1‥3 ∣ TRUE)" org.eventb.core.label="door_closed"/>
+<org.eventb.core.action name="_vldNArKzEeSIBO-4uCJrVQ" org.eventb.core.assignment="sensors_door_open ≔ λp·p∈ POSITION ∣ (λx·x ∈ 1‥3 ∣ FALSE)" org.eventb.core.label="door_open"/>
+<org.eventb.core.action name="_vldNA7KzEeSIBO-4uCJrVQ" org.eventb.core.assignment="sensors_gear_extended ≔ λp·p∈ POSITION ∣ (λx·x ∈ 1‥3 ∣ TRUE)" org.eventb.core.label="gear_extended"/>
+<org.eventb.core.action name="_vldNBLKzEeSIBO-4uCJrVQ" org.eventb.core.assignment="sensors_gear_retracted ≔ λp·p∈ POSITION ∣ (λx·x ∈ 1‥3 ∣ FALSE)" org.eventb.core.label="gear_retracted"/>
+<org.eventb.core.action name="_vldNBbKzEeSIBO-4uCJrVQ" org.eventb.core.assignment="sensors_handle ≔ {1↦down, 2↦down, 3↦down}" org.eventb.core.label="handles"/>
+<org.eventb.core.action name="_vldNBrKzEeSIBO-4uCJrVQ" org.eventb.core.assignment="sensors_shock_absorber ≔ {1↦ground, 2↦ground, 3↦ground}" org.eventb.core.label="shockabs"/>
+<org.eventb.core.action name="_vld0ELKzEeSIBO-4uCJrVQ" org.eventb.core.assignment="sensors_aswitch ≔ {1↦switch_closed, 2↦switch_closed, 3↦switch_closed}" org.eventb.core.label="aswitch"/>
+<org.eventb.core.action name="_vld0EbKzEeSIBO-4uCJrVQ" org.eventb.core.assignment="valid_sensors_gear_extended ≔ {front↦{1,2,3}, left↦{1,2,3}, right↦{1,2,3}}" org.eventb.core.label="valid_sensors1"/>
+<org.eventb.core.action name="_vld0ErKzEeSIBO-4uCJrVQ" org.eventb.core.assignment="valid_sensors_gear_retracted ≔ {front↦{1,2,3}, left↦{1,2,3}, right↦{1,2,3}}" org.eventb.core.label="valid_sensors2"/>
+<org.eventb.core.action name="_vld0E7KzEeSIBO-4uCJrVQ" org.eventb.core.assignment="valid_sensors_door_open ≔ {front↦{1,2,3}, left↦{1,2,3}, right↦{1,2,3}}" org.eventb.core.label="valid_sensors3"/>
+<org.eventb.core.action name="_vld0FLKzEeSIBO-4uCJrVQ" org.eventb.core.assignment="valid_sensors_door_closed ≔  λp·p∈ POSITION ∣ 1‥3" org.eventb.core.comment="{front↦{1,2,3}, left↦{1,2,3}, right↦{1,2,3}}" org.eventb.core.label="valid_sensors4"/>
+<org.eventb.core.action name="_vld0FbKzEeSIBO-4uCJrVQ" org.eventb.core.assignment="valid_sensors_handle ≔ {1,2,3}" org.eventb.core.label="valid_sensors5"/>
+<org.eventb.core.action name="_vlebILKzEeSIBO-4uCJrVQ" org.eventb.core.assignment="valid_sensors_shock_absorber ≔ {1,2,3}" org.eventb.core.label="valid_sensors6"/>
+<org.eventb.core.action name="_vlebIbKzEeSIBO-4uCJrVQ" org.eventb.core.assignment="valid_sensors_aswitch ≔ {1,2,3}" org.eventb.core.label="valid_sensors7"/>
+<org.eventb.core.action name="_vlebIrKzEeSIBO-4uCJrVQ" org.eventb.core.assignment="anomaly ≔ FALSE" org.eventb.core.label="anomaly"/>
+</org.eventb.core.event>
+<org.eventb.core.event name="_vlebI7KzEeSIBO-4uCJrVQ" org.eventb.core.convergence="0" org.eventb.core.extended="true" org.eventb.core.label="begin_flying">
+<org.eventb.core.refinesEvent name="_IASIoLNuEeSOCbS1CcjMBg" org.eventb.core.target="begin_flying"/>
+<org.eventb.core.parameter name="_vlebJbKzEeSIBO-4uCJrVQ" org.eventb.core.identifier="s"/>
+<org.eventb.core.parameter name="_vlebJrKzEeSIBO-4uCJrVQ" org.eventb.core.identifier="v"/>
+<org.eventb.core.guard name="_vlfCMLKzEeSIBO-4uCJrVQ" org.eventb.core.comment="choose a valid sensor" org.eventb.core.label="grd2" org.eventb.core.predicate="s ∈ valid_sensors_shock_absorber"/>
+<org.eventb.core.guard name="_vlfCMbKzEeSIBO-4uCJrVQ" org.eventb.core.label="grd3" org.eventb.core.predicate="v ∈ PLANE_STATE"/>
+<org.eventb.core.action name="_vlfCMrKzEeSIBO-4uCJrVQ" org.eventb.core.assignment="sensors_shock_absorber ≔ (λx·x ∈ 1‥3∖{s}∣ flight) ∪ {s ↦ v}" org.eventb.core.label="sensors"/>
+</org.eventb.core.event>
+<org.eventb.core.event name="_vlfCM7KzEeSIBO-4uCJrVQ" org.eventb.core.convergence="0" org.eventb.core.extended="true" org.eventb.core.label="land_plane">
+<org.eventb.core.refinesEvent name="_IASIobNuEeSOCbS1CcjMBg" org.eventb.core.target="land_plane"/>
+<org.eventb.core.parameter name="_vlfCNbKzEeSIBO-4uCJrVQ" org.eventb.core.identifier="s"/>
+<org.eventb.core.parameter name="_vlfCNrKzEeSIBO-4uCJrVQ" org.eventb.core.identifier="v"/>
+<org.eventb.core.guard name="_vlfpQLKzEeSIBO-4uCJrVQ" org.eventb.core.comment="choose a valid sensor" org.eventb.core.label="grd2" org.eventb.core.predicate="s ∈ valid_sensors_shock_absorber"/>
+<org.eventb.core.guard name="_vlfpQbKzEeSIBO-4uCJrVQ" org.eventb.core.label="grd3" org.eventb.core.predicate="v ∈ PLANE_STATE"/>
+<org.eventb.core.action name="_vlfpQrKzEeSIBO-4uCJrVQ" org.eventb.core.assignment="sensors_shock_absorber ≔ (λx·x ∈ 1‥3∖{s}∣ ground) ∪ {s ↦ v}" org.eventb.core.label="sensors"/>
+</org.eventb.core.event>
+<org.eventb.core.event name="_vlfpQ7KzEeSIBO-4uCJrVQ" org.eventb.core.convergence="0" org.eventb.core.extended="true" org.eventb.core.label="open_valve_door_open">
+<org.eventb.core.refinesEvent name="_IASIorNuEeSOCbS1CcjMBg" org.eventb.core.target="open_valve_door_open"/>
+</org.eventb.core.event>
+<org.eventb.core.event name="_vlfpRbKzEeSIBO-4uCJrVQ" org.eventb.core.convergence="0" org.eventb.core.extended="true" org.eventb.core.label="close_valve_door_open">
+<org.eventb.core.refinesEvent name="_IASvsLNuEeSOCbS1CcjMBg" org.eventb.core.target="close_valve_door_open"/>
+</org.eventb.core.event>
+<org.eventb.core.event name="_vlgQUbKzEeSIBO-4uCJrVQ" org.eventb.core.convergence="0" org.eventb.core.extended="true" org.eventb.core.label="open_valve_door_close">
+<org.eventb.core.refinesEvent name="_IASvsbNuEeSOCbS1CcjMBg" org.eventb.core.target="open_valve_door_close"/>
+</org.eventb.core.event>
+<org.eventb.core.event name="_vlgQU7KzEeSIBO-4uCJrVQ" org.eventb.core.convergence="0" org.eventb.core.extended="true" org.eventb.core.label="close_valve_door_close">
+<org.eventb.core.refinesEvent name="_IASvsrNuEeSOCbS1CcjMBg" org.eventb.core.target="close_valve_door_close"/>
+</org.eventb.core.event>
+<org.eventb.core.event name="_vlgQVbKzEeSIBO-4uCJrVQ" org.eventb.core.convergence="0" org.eventb.core.extended="true" org.eventb.core.label="open_valve_retract_gear">
+<org.eventb.core.refinesEvent name="_IASvs7NuEeSOCbS1CcjMBg" org.eventb.core.target="open_valve_retract_gear"/>
+</org.eventb.core.event>
+<org.eventb.core.event name="_vlg3YbKzEeSIBO-4uCJrVQ" org.eventb.core.convergence="0" org.eventb.core.extended="true" org.eventb.core.label="close_valve_retract_gear">
+<org.eventb.core.refinesEvent name="_IASvtLNuEeSOCbS1CcjMBg" org.eventb.core.target="close_valve_retract_gear"/>
+</org.eventb.core.event>
+<org.eventb.core.event name="_vlg3Y7KzEeSIBO-4uCJrVQ" org.eventb.core.convergence="0" org.eventb.core.extended="true" org.eventb.core.label="open_valve_extend_gear">
+<org.eventb.core.refinesEvent name="_IASvtbNuEeSOCbS1CcjMBg" org.eventb.core.target="open_valve_extend_gear"/>
+</org.eventb.core.event>
+<org.eventb.core.event name="_vlg3ZbKzEeSIBO-4uCJrVQ" org.eventb.core.convergence="0" org.eventb.core.extended="true" org.eventb.core.label="close_valve_extend_gear">
+<org.eventb.core.refinesEvent name="_IATWwLNuEeSOCbS1CcjMBg" org.eventb.core.target="close_valve_extend_gear"/>
+</org.eventb.core.event>
+<org.eventb.core.event name="_vlhecbKzEeSIBO-4uCJrVQ" org.eventb.core.convergence="0" org.eventb.core.extended="true" org.eventb.core.label="con_stimulate_open_door_valve">
+<org.eventb.core.refinesEvent name="_IATWwbNuEeSOCbS1CcjMBg" org.eventb.core.target="con_stimulate_open_door_valve"/>
+</org.eventb.core.event>
+<org.eventb.core.event name="_vlhec7KzEeSIBO-4uCJrVQ" org.eventb.core.convergence="0" org.eventb.core.extended="true" org.eventb.core.label="con_stop_stimulate_open_door_valve">
+<org.eventb.core.refinesEvent name="_IATWwrNuEeSOCbS1CcjMBg" org.eventb.core.target="con_stop_stimulate_open_door_valve"/>
+</org.eventb.core.event>
+<org.eventb.core.event name="_vlhedbKzEeSIBO-4uCJrVQ" org.eventb.core.convergence="0" org.eventb.core.extended="true" org.eventb.core.label="con_stimulate_close_door_valve">
+<org.eventb.core.refinesEvent name="_IATWw7NuEeSOCbS1CcjMBg" org.eventb.core.target="con_stimulate_close_door_valve"/>
+</org.eventb.core.event>
+<org.eventb.core.event name="_vliFgbKzEeSIBO-4uCJrVQ" org.eventb.core.convergence="0" org.eventb.core.extended="true" org.eventb.core.label="con_stop_stimulate_close_door_valve">
+<org.eventb.core.refinesEvent name="_IATWxLNuEeSOCbS1CcjMBg" org.eventb.core.target="con_stop_stimulate_close_door_valve"/>
+</org.eventb.core.event>
+<org.eventb.core.event name="_vliFg7KzEeSIBO-4uCJrVQ" org.eventb.core.convergence="0" org.eventb.core.extended="true" org.eventb.core.label="con_stimulate_retract_gear_valve">
+<org.eventb.core.refinesEvent name="_IATWxbNuEeSOCbS1CcjMBg" org.eventb.core.target="con_stimulate_retract_gear_valve"/>
+</org.eventb.core.event>
+<org.eventb.core.event name="_vliskLKzEeSIBO-4uCJrVQ" org.eventb.core.convergence="0" org.eventb.core.extended="true" org.eventb.core.label="con_stop_stimulate_retract_gear_valve">
+<org.eventb.core.refinesEvent name="_IAT90LNuEeSOCbS1CcjMBg" org.eventb.core.target="con_stop_stimulate_retract_gear_valve"/>
+</org.eventb.core.event>
+<org.eventb.core.event name="_vliskrKzEeSIBO-4uCJrVQ" org.eventb.core.convergence="0" org.eventb.core.extended="true" org.eventb.core.label="con_stimulate_extend_gear_valve">
+<org.eventb.core.refinesEvent name="_IAT90bNuEeSOCbS1CcjMBg" org.eventb.core.target="con_stimulate_extend_gear_valve"/>
+</org.eventb.core.event>
+<org.eventb.core.event name="_vljToLKzEeSIBO-4uCJrVQ" org.eventb.core.convergence="0" org.eventb.core.extended="true" org.eventb.core.label="con_stop_stimulate_extend_gear_valve">
+<org.eventb.core.refinesEvent name="_IAT90rNuEeSOCbS1CcjMBg" org.eventb.core.target="con_stop_stimulate_extend_gear_valve"/>
+</org.eventb.core.event>
+<org.eventb.core.event name="_vljTorKzEeSIBO-4uCJrVQ" org.eventb.core.convergence="0" org.eventb.core.extended="true" org.eventb.core.label="env_start_retracting_first">
+<org.eventb.core.refinesEvent name="_IAT907NuEeSOCbS1CcjMBg" org.eventb.core.target="env_start_retracting_first"/>
+<org.eventb.core.parameter name="_vlj6sLKzEeSIBO-4uCJrVQ" org.eventb.core.identifier="s"/>
+<org.eventb.core.parameter name="_vlj6sbKzEeSIBO-4uCJrVQ" org.eventb.core.identifier="v"/>
+<org.eventb.core.guard name="_vlj6srKzEeSIBO-4uCJrVQ" org.eventb.core.comment="choose a valid sensor" org.eventb.core.label="grd2" org.eventb.core.predicate="s ∈ valid_sensors_gear_extended(gr)"/>
+<org.eventb.core.guard name="_vlj6s7KzEeSIBO-4uCJrVQ" org.eventb.core.label="grd3" org.eventb.core.predicate="v ∈ BOOL"/>
+<org.eventb.core.action name="_vlj6tLKzEeSIBO-4uCJrVQ" org.eventb.core.assignment="sensors_gear_extended(gr) ≔ (λx·x ∈ 1‥3∖{s}∣ FALSE) ∪ {s ↦ v}" org.eventb.core.label="sensors"/>
+</org.eventb.core.event>
+<org.eventb.core.event name="_vlj6tbKzEeSIBO-4uCJrVQ" org.eventb.core.convergence="0" org.eventb.core.extended="true" org.eventb.core.label="env_retract_gear_skip">
+<org.eventb.core.refinesEvent name="_IAT91LNuEeSOCbS1CcjMBg" org.eventb.core.target="env_retract_gear_skip"/>
+<org.eventb.core.parameter name="_IAT91bNuEeSOCbS1CcjMBg" org.eventb.core.identifier="s"/>
+<org.eventb.core.parameter name="_IAUk4LNuEeSOCbS1CcjMBg" org.eventb.core.identifier="v"/>
+<org.eventb.core.guard name="_IAUk4bNuEeSOCbS1CcjMBg" org.eventb.core.comment="choose a valid sensor" org.eventb.core.label="grd2" org.eventb.core.predicate="s ∈ valid_sensors_gear_retracted(gr)"/>
+<org.eventb.core.guard name="_IAUk4rNuEeSOCbS1CcjMBg" org.eventb.core.label="grd3" org.eventb.core.predicate="v ∈ BOOL"/>
+<org.eventb.core.action name="_IAUk47NuEeSOCbS1CcjMBg" org.eventb.core.assignment="sensors_gear_retracted(gr) ≔ (λx·x ∈ 1‥3∖{s}∣ TRUE) ∪ {s ↦ v}" org.eventb.core.label="sensors"/>
+</org.eventb.core.event>
+<org.eventb.core.event name="_vlkhwbKzEeSIBO-4uCJrVQ" org.eventb.core.convergence="0" org.eventb.core.extended="true" org.eventb.core.label="env_retract_gear_last">
+<org.eventb.core.refinesEvent name="_IAUk5LNuEeSOCbS1CcjMBg" org.eventb.core.target="env_retract_gear_last"/>
+<org.eventb.core.parameter name="_vlkhw7KzEeSIBO-4uCJrVQ" org.eventb.core.identifier="s"/>
+<org.eventb.core.parameter name="_vlkhxLKzEeSIBO-4uCJrVQ" org.eventb.core.identifier="v"/>
+<org.eventb.core.guard name="_vlkhxbKzEeSIBO-4uCJrVQ" org.eventb.core.comment="choose a valid sensor" org.eventb.core.label="grd2" org.eventb.core.predicate="s ∈ valid_sensors_gear_retracted(gr)"/>
+<org.eventb.core.guard name="_vllI0LKzEeSIBO-4uCJrVQ" org.eventb.core.label="grd3" org.eventb.core.predicate="v ∈ BOOL"/>
+<org.eventb.core.action name="_vllI0bKzEeSIBO-4uCJrVQ" org.eventb.core.assignment="sensors_gear_retracted(gr) ≔ (λx·x ∈ 1‥3∖{s}∣ TRUE) ∪ {s ↦ v}" org.eventb.core.label="sensors"/>
+</org.eventb.core.event>
+<org.eventb.core.event name="_vllI0rKzEeSIBO-4uCJrVQ" org.eventb.core.convergence="0" org.eventb.core.extended="true" org.eventb.core.label="env_start_extending">
+<org.eventb.core.refinesEvent name="_IAUk5bNuEeSOCbS1CcjMBg" org.eventb.core.target="env_start_extending"/>
+<org.eventb.core.parameter name="_vllI1LKzEeSIBO-4uCJrVQ" org.eventb.core.identifier="s"/>
+<org.eventb.core.parameter name="_vllI1bKzEeSIBO-4uCJrVQ" org.eventb.core.identifier="v"/>
+<org.eventb.core.guard name="_vllI1rKzEeSIBO-4uCJrVQ" org.eventb.core.comment="choose a valid sensor" org.eventb.core.label="grd2" org.eventb.core.predicate="s ∈ valid_sensors_gear_retracted(gr)"/>
+<org.eventb.core.guard name="_vllv4LKzEeSIBO-4uCJrVQ" org.eventb.core.label="grd3" org.eventb.core.predicate="v ∈ BOOL"/>
+<org.eventb.core.action name="_vllv4bKzEeSIBO-4uCJrVQ" org.eventb.core.assignment="sensors_gear_retracted(gr) ≔ (λx·x ∈ 1‥3∖{s}∣ FALSE) ∪ {s ↦ v}" org.eventb.core.label="sensors"/>
+</org.eventb.core.event>
+<org.eventb.core.event name="_vllv4rKzEeSIBO-4uCJrVQ" org.eventb.core.convergence="0" org.eventb.core.extended="true" org.eventb.core.label="env_extend_gear_last">
+<org.eventb.core.refinesEvent name="_IAVL8LNuEeSOCbS1CcjMBg" org.eventb.core.target="env_extend_gear_last"/>
+<org.eventb.core.parameter name="_vllv5LKzEeSIBO-4uCJrVQ" org.eventb.core.identifier="s"/>
+<org.eventb.core.parameter name="_vlmW8LKzEeSIBO-4uCJrVQ" org.eventb.core.identifier="v"/>
+<org.eventb.core.guard name="_vlmW8bKzEeSIBO-4uCJrVQ" org.eventb.core.comment="choose a valid sensor" org.eventb.core.label="grd2" org.eventb.core.predicate="s ∈ valid_sensors_gear_extended(gr)"/>
+<org.eventb.core.guard name="_vlmW8rKzEeSIBO-4uCJrVQ" org.eventb.core.label="grd3" org.eventb.core.predicate="v ∈ BOOL"/>
+<org.eventb.core.action name="_vlmW87KzEeSIBO-4uCJrVQ" org.eventb.core.assignment="sensors_gear_extended(gr) ≔ (λx·x ∈ 1‥3∖{s}∣ TRUE) ∪ {s ↦ v}" org.eventb.core.label="sensors"/>
+</org.eventb.core.event>
+<org.eventb.core.event name="_vlmW9LKzEeSIBO-4uCJrVQ" org.eventb.core.convergence="0" org.eventb.core.extended="true" org.eventb.core.label="env_extend_gear_skip">
+<org.eventb.core.refinesEvent name="_IAVL8bNuEeSOCbS1CcjMBg" org.eventb.core.target="env_extend_gear_skip"/>
+<org.eventb.core.parameter name="_IAVL8rNuEeSOCbS1CcjMBg" org.eventb.core.identifier="s"/>
+<org.eventb.core.parameter name="_IAVL87NuEeSOCbS1CcjMBg" org.eventb.core.identifier="v"/>
+<org.eventb.core.guard name="_IAVzALNuEeSOCbS1CcjMBg" org.eventb.core.comment="choose a valid sensor" org.eventb.core.label="grd2" org.eventb.core.predicate="s ∈ valid_sensors_gear_extended(gr)"/>
+<org.eventb.core.guard name="_IAVzAbNuEeSOCbS1CcjMBg" org.eventb.core.label="grd3" org.eventb.core.predicate="v ∈ BOOL"/>
+<org.eventb.core.action name="_IAVzArNuEeSOCbS1CcjMBg" org.eventb.core.assignment="sensors_gear_extended(gr) ≔ (λx·x ∈ 1‥3∖{s}∣ TRUE) ∪ {s ↦ v}" org.eventb.core.label="sensors"/>
+</org.eventb.core.event>
+<org.eventb.core.event name="_vlm-ALKzEeSIBO-4uCJrVQ" org.eventb.core.convergence="0" org.eventb.core.extended="true" org.eventb.core.label="env_start_open_door">
+<org.eventb.core.refinesEvent name="_IAVzA7NuEeSOCbS1CcjMBg" org.eventb.core.target="env_start_open_door"/>
+<org.eventb.core.parameter name="_vlm-ArKzEeSIBO-4uCJrVQ" org.eventb.core.identifier="s"/>
+<org.eventb.core.parameter name="_vlm-A7KzEeSIBO-4uCJrVQ" org.eventb.core.identifier="v"/>
+<org.eventb.core.guard name="_vlm-BLKzEeSIBO-4uCJrVQ" org.eventb.core.comment="choose a valid sensor" org.eventb.core.label="grd2" org.eventb.core.predicate="s ∈ valid_sensors_door_closed(gr)"/>
+<org.eventb.core.guard name="_vlm-BbKzEeSIBO-4uCJrVQ" org.eventb.core.label="grd3" org.eventb.core.predicate="v ∈ BOOL"/>
+<org.eventb.core.action name="_vlm-BrKzEeSIBO-4uCJrVQ" org.eventb.core.assignment="sensors_door_closed(gr) ≔ (λx·x ∈ 1‥3∖{s}∣ FALSE) ∪ {s ↦ v}" org.eventb.core.label="sensors"/>
+</org.eventb.core.event>
+<org.eventb.core.event name="_vlnlELKzEeSIBO-4uCJrVQ" org.eventb.core.convergence="0" org.eventb.core.extended="true" org.eventb.core.label="env_open_door_last">
+<org.eventb.core.refinesEvent name="_IAVzBLNuEeSOCbS1CcjMBg" org.eventb.core.target="env_open_door_last"/>
+<org.eventb.core.parameter name="_vlnlErKzEeSIBO-4uCJrVQ" org.eventb.core.identifier="s"/>
+<org.eventb.core.parameter name="_vlnlE7KzEeSIBO-4uCJrVQ" org.eventb.core.identifier="v"/>
+<org.eventb.core.guard name="_vlnlFLKzEeSIBO-4uCJrVQ" org.eventb.core.comment="choose a valid sensor" org.eventb.core.label="grd2" org.eventb.core.predicate="s ∈ valid_sensors_door_open(gr)"/>
+<org.eventb.core.guard name="_vlnlFbKzEeSIBO-4uCJrVQ" org.eventb.core.label="grd3" org.eventb.core.predicate="v ∈ BOOL"/>
+<org.eventb.core.action name="_vlnlFrKzEeSIBO-4uCJrVQ" org.eventb.core.assignment="sensors_door_open(gr) ≔ (λx·x ∈ 1‥3∖{s}∣ TRUE) ∪ {s ↦ v}" org.eventb.core.label="sensors"/>
+</org.eventb.core.event>
+<org.eventb.core.event name="_vloMILKzEeSIBO-4uCJrVQ" org.eventb.core.convergence="0" org.eventb.core.extended="true" org.eventb.core.label="env_open_door_skip">
+<org.eventb.core.refinesEvent name="_IAWaELNuEeSOCbS1CcjMBg" org.eventb.core.target="env_open_door_skip"/>
+<org.eventb.core.parameter name="_IAWaEbNuEeSOCbS1CcjMBg" org.eventb.core.identifier="s"/>
+<org.eventb.core.parameter name="_IAWaErNuEeSOCbS1CcjMBg" org.eventb.core.identifier="v"/>
+<org.eventb.core.guard name="_IAWaE7NuEeSOCbS1CcjMBg" org.eventb.core.comment="choose a valid sensor" org.eventb.core.label="grd2" org.eventb.core.predicate="s ∈ valid_sensors_door_open(gr)"/>
+<org.eventb.core.guard name="_IAWaFLNuEeSOCbS1CcjMBg" org.eventb.core.label="grd3" org.eventb.core.predicate="v ∈ BOOL"/>
+<org.eventb.core.action name="_IAWaFbNuEeSOCbS1CcjMBg" org.eventb.core.assignment="sensors_door_open(gr) ≔ (λx·x ∈ 1‥3∖{s}∣ TRUE) ∪ {s ↦ v}" org.eventb.core.label="sensors"/>
+</org.eventb.core.event>
+<org.eventb.core.event name="_vloMIrKzEeSIBO-4uCJrVQ" org.eventb.core.convergence="0" org.eventb.core.extended="true" org.eventb.core.label="env_start_close_door">
+<org.eventb.core.refinesEvent name="_IAWaFrNuEeSOCbS1CcjMBg" org.eventb.core.target="env_start_close_door"/>
+<org.eventb.core.parameter name="_vlozMLKzEeSIBO-4uCJrVQ" org.eventb.core.identifier="s"/>
+<org.eventb.core.parameter name="_vlozMbKzEeSIBO-4uCJrVQ" org.eventb.core.identifier="v"/>
+<org.eventb.core.guard name="_vlozMrKzEeSIBO-4uCJrVQ" org.eventb.core.comment="choose a valid sensor" org.eventb.core.label="grd2" org.eventb.core.predicate="s ∈ valid_sensors_door_open(gr)"/>
+<org.eventb.core.guard name="_vlozM7KzEeSIBO-4uCJrVQ" org.eventb.core.label="grd3" org.eventb.core.predicate="v ∈ BOOL"/>
+<org.eventb.core.action name="_vlozNLKzEeSIBO-4uCJrVQ" org.eventb.core.assignment="sensors_door_open(gr) ≔ (λx·x ∈ 1‥3∖{s}∣ FALSE) ∪ {s ↦ v}" org.eventb.core.label="sensors"/>
+</org.eventb.core.event>
+<org.eventb.core.event name="_vlozNbKzEeSIBO-4uCJrVQ" org.eventb.core.convergence="0" org.eventb.core.extended="true" org.eventb.core.label="env_close_door">
+<org.eventb.core.refinesEvent name="_IAXBILNuEeSOCbS1CcjMBg" org.eventb.core.target="env_close_door"/>
+<org.eventb.core.parameter name="_vlpaQbKzEeSIBO-4uCJrVQ" org.eventb.core.identifier="s"/>
+<org.eventb.core.parameter name="_vlpaQrKzEeSIBO-4uCJrVQ" org.eventb.core.identifier="v"/>
+<org.eventb.core.guard name="_vlpaQ7KzEeSIBO-4uCJrVQ" org.eventb.core.comment="choose a valid sensor" org.eventb.core.label="grd2" org.eventb.core.predicate="s ∈ valid_sensors_door_closed(gr)"/>
+<org.eventb.core.guard name="_vlpaRLKzEeSIBO-4uCJrVQ" org.eventb.core.label="grd3" org.eventb.core.predicate="v ∈ BOOL"/>
+<org.eventb.core.action name="_vlpaRbKzEeSIBO-4uCJrVQ" org.eventb.core.assignment="sensors_door_closed(gr) ≔ (λx·x ∈ 1‥3∖{s}∣ TRUE) ∪ {s ↦ v}" org.eventb.core.label="sensors"/>
+</org.eventb.core.event>
+<org.eventb.core.event name="_vlpaRrKzEeSIBO-4uCJrVQ" org.eventb.core.convergence="0" org.eventb.core.extended="true" org.eventb.core.label="env_close_door_skip">
+<org.eventb.core.refinesEvent name="_IAXBIbNuEeSOCbS1CcjMBg" org.eventb.core.target="env_close_door_skip"/>
+<org.eventb.core.parameter name="_IAXBIrNuEeSOCbS1CcjMBg" org.eventb.core.identifier="s"/>
+<org.eventb.core.parameter name="_IAXBI7NuEeSOCbS1CcjMBg" org.eventb.core.identifier="v"/>
+<org.eventb.core.guard name="_IAXoMLNuEeSOCbS1CcjMBg" org.eventb.core.comment="choose a valid sensor" org.eventb.core.label="grd2" org.eventb.core.predicate="s ∈ valid_sensors_door_closed(gr)"/>
+<org.eventb.core.guard name="_IAXoMbNuEeSOCbS1CcjMBg" org.eventb.core.label="grd3" org.eventb.core.predicate="v ∈ BOOL"/>
+<org.eventb.core.action name="_IAXoMrNuEeSOCbS1CcjMBg" org.eventb.core.assignment="sensors_door_closed(gr) ≔ (λx·x ∈ 1‥3∖{s}∣ TRUE) ∪ {s ↦ v}" org.eventb.core.label="sensors"/>
+</org.eventb.core.event>
+<org.eventb.core.event name="_vlqBUbKzEeSIBO-4uCJrVQ" org.eventb.core.convergence="0" org.eventb.core.extended="true" org.eventb.core.label="toggle_handle_up">
+<org.eventb.core.refinesEvent name="_IAXoM7NuEeSOCbS1CcjMBg" org.eventb.core.target="toggle_handle_up"/>
+<org.eventb.core.parameter name="_vlqBU7KzEeSIBO-4uCJrVQ" org.eventb.core.identifier="s"/>
+<org.eventb.core.parameter name="_vlqBVLKzEeSIBO-4uCJrVQ" org.eventb.core.identifier="v"/>
+<org.eventb.core.guard name="_vlqBVbKzEeSIBO-4uCJrVQ" org.eventb.core.comment="choose a valid sensor" org.eventb.core.label="grd2" org.eventb.core.predicate="s ∈ valid_sensors_handle"/>
+<org.eventb.core.guard name="_vlqoYLKzEeSIBO-4uCJrVQ" org.eventb.core.label="grd3" org.eventb.core.predicate="v ∈ HANDLE_STATE"/>
+<org.eventb.core.action name="_vlqoYbKzEeSIBO-4uCJrVQ" org.eventb.core.assignment="sensors_handle ≔ (λx·x ∈ 1‥3∖{s}∣ up) ∪ {s ↦ v}" org.eventb.core.label="sensors"/>
+</org.eventb.core.event>
+<org.eventb.core.event name="_vlqoYrKzEeSIBO-4uCJrVQ" org.eventb.core.convergence="0" org.eventb.core.extended="true" org.eventb.core.label="toggle_handle_down">
+<org.eventb.core.refinesEvent name="_IAYPQLNuEeSOCbS1CcjMBg" org.eventb.core.target="toggle_handle_down"/>
+<org.eventb.core.parameter name="_vlqoZLKzEeSIBO-4uCJrVQ" org.eventb.core.identifier="s"/>
+<org.eventb.core.parameter name="_vlqoZbKzEeSIBO-4uCJrVQ" org.eventb.core.identifier="v"/>
+<org.eventb.core.guard name="_vlrPcLKzEeSIBO-4uCJrVQ" org.eventb.core.comment="choose a valid sensor" org.eventb.core.label="grd2" org.eventb.core.predicate="s ∈ valid_sensors_handle"/>
+<org.eventb.core.guard name="_vlrPcbKzEeSIBO-4uCJrVQ" org.eventb.core.label="grd3" org.eventb.core.predicate="v ∈ HANDLE_STATE"/>
+<org.eventb.core.action name="_vlrPcrKzEeSIBO-4uCJrVQ" org.eventb.core.assignment="sensors_handle ≔ (λx·x ∈ 1‥3∖{s}∣ down) ∪ {s ↦ v}" org.eventb.core.label="sensors"/>
+</org.eventb.core.event>
+<org.eventb.core.event name="_vlrPc7KzEeSIBO-4uCJrVQ" org.eventb.core.convergence="0" org.eventb.core.extended="true" org.eventb.core.label="con_stimulate_general_valve">
+<org.eventb.core.refinesEvent name="_IAYPQbNuEeSOCbS1CcjMBg" org.eventb.core.target="con_stimulate_general_valve"/>
+</org.eventb.core.event>
+<org.eventb.core.event name="_vlrPdbKzEeSIBO-4uCJrVQ" org.eventb.core.convergence="0" org.eventb.core.extended="true" org.eventb.core.label="con_stop_stimulate_general_valve">
+<org.eventb.core.refinesEvent name="_IAYPQrNuEeSOCbS1CcjMBg" org.eventb.core.target="con_stop_stimulate_general_valve"/>
+</org.eventb.core.event>
+<org.eventb.core.event name="_vlr2gbKzEeSIBO-4uCJrVQ" org.eventb.core.convergence="0" org.eventb.core.extended="true" org.eventb.core.label="evn_open_general_valve">
+<org.eventb.core.refinesEvent name="_IAYPQ7NuEeSOCbS1CcjMBg" org.eventb.core.target="evn_open_general_valve"/>
+</org.eventb.core.event>
+<org.eventb.core.event name="_vlr2g7KzEeSIBO-4uCJrVQ" org.eventb.core.convergence="0" org.eventb.core.extended="true" org.eventb.core.label="evn_close_general_valve">
+<org.eventb.core.refinesEvent name="_IAY2ULNuEeSOCbS1CcjMBg" org.eventb.core.target="evn_close_general_valve"/>
+</org.eventb.core.event>
+<org.eventb.core.event name="_vlsdkLKzEeSIBO-4uCJrVQ" org.eventb.core.convergence="0" org.eventb.core.extended="true" org.eventb.core.label="env_close_analogical_switch">
+<org.eventb.core.refinesEvent name="_IAY2UbNuEeSOCbS1CcjMBg" org.eventb.core.target="env_close_analogical_switch"/>
+<org.eventb.core.parameter name="_vlsdkrKzEeSIBO-4uCJrVQ" org.eventb.core.identifier="s"/>
+<org.eventb.core.parameter name="_vlsdk7KzEeSIBO-4uCJrVQ" org.eventb.core.identifier="v"/>
+<org.eventb.core.guard name="_vlsdlLKzEeSIBO-4uCJrVQ" org.eventb.core.comment="choose a valid sensor" org.eventb.core.label="grd4" org.eventb.core.predicate="s ∈ valid_sensors_aswitch"/>
+<org.eventb.core.guard name="_vlsdlbKzEeSIBO-4uCJrVQ" org.eventb.core.label="grd5" org.eventb.core.predicate="v ∈ SWITCH_STATE"/>
+<org.eventb.core.action name="_vlsdlrKzEeSIBO-4uCJrVQ" org.eventb.core.assignment="sensors_aswitch ≔ (λx·x ∈ 1‥3∖{s}∣ switch_closed) ∪ {s ↦ v}" org.eventb.core.label="sensors"/>
+</org.eventb.core.event>
+<org.eventb.core.event name="_vltEoLKzEeSIBO-4uCJrVQ" org.eventb.core.convergence="0" org.eventb.core.extended="true" org.eventb.core.label="env_open_analogical_switch">
+<org.eventb.core.refinesEvent name="_IAY2UrNuEeSOCbS1CcjMBg" org.eventb.core.target="env_open_analogical_switch"/>
+<org.eventb.core.parameter name="_vltEorKzEeSIBO-4uCJrVQ" org.eventb.core.identifier="s"/>
+<org.eventb.core.parameter name="_vltEo7KzEeSIBO-4uCJrVQ" org.eventb.core.identifier="v"/>
+<org.eventb.core.guard name="_vltEpLKzEeSIBO-4uCJrVQ" org.eventb.core.comment="choose a valid sensor" org.eventb.core.label="grd2" org.eventb.core.predicate="s ∈ valid_sensors_aswitch"/>
+<org.eventb.core.guard name="_vltEpbKzEeSIBO-4uCJrVQ" org.eventb.core.label="grd3" org.eventb.core.predicate="v ∈ SWITCH_STATE"/>
+<org.eventb.core.action name="_vltrsLKzEeSIBO-4uCJrVQ" org.eventb.core.assignment="sensors_aswitch ≔ (λx·x ∈ 1‥3∖{s}∣ switch_open) ∪ {s ↦ v}" org.eventb.core.label="sensors"/>
+</org.eventb.core.event>
+<org.eventb.core.event name="_vltrsbKzEeSIBO-4uCJrVQ" org.eventb.core.convergence="0" org.eventb.core.extended="true" org.eventb.core.label="env_turn_on_red_light">
+<org.eventb.core.refinesEvent name="_IAZdYLNuEeSOCbS1CcjMBg" org.eventb.core.target="env_turn_on_red_light"/>
+<org.eventb.core.guard name="_vltrs7KzEeSIBO-4uCJrVQ" org.eventb.core.label="grd2" org.eventb.core.predicate="anomaly = TRUE"/>
+</org.eventb.core.event>
+<org.eventb.core.event name="_vltrtLKzEeSIBO-4uCJrVQ" org.eventb.core.convergence="0" org.eventb.core.extended="true" org.eventb.core.label="env_turn_on_orange_light">
+<org.eventb.core.refinesEvent name="_IAZdYbNuEeSOCbS1CcjMBg" org.eventb.core.target="env_turn_on_orange_light"/>
+</org.eventb.core.event>
+<org.eventb.core.event name="_vluSwLKzEeSIBO-4uCJrVQ" org.eventb.core.convergence="0" org.eventb.core.extended="true" org.eventb.core.label="env_turn_off_orange_light">
+<org.eventb.core.refinesEvent name="_IAZdYrNuEeSOCbS1CcjMBg" org.eventb.core.target="env_turn_off_orange_light"/>
+</org.eventb.core.event>
+<org.eventb.core.event name="_vluSwrKzEeSIBO-4uCJrVQ" org.eventb.core.convergence="0" org.eventb.core.extended="true" org.eventb.core.label="env_turn_on_green_light">
+<org.eventb.core.refinesEvent name="_IAZdY7NuEeSOCbS1CcjMBg" org.eventb.core.target="env_turn_on_green_light"/>
+</org.eventb.core.event>
+<org.eventb.core.event name="_vluSxLKzEeSIBO-4uCJrVQ" org.eventb.core.convergence="0" org.eventb.core.extended="true" org.eventb.core.label="env_turn_off_green_light">
+<org.eventb.core.refinesEvent name="_IAZdZLNuEeSOCbS1CcjMBg" org.eventb.core.target="env_turn_off_green_light"/>
+</org.eventb.core.event>
+<org.eventb.core.event name="_vlu50bKzEeSIBO-4uCJrVQ" org.eventb.core.convergence="0" org.eventb.core.extended="false" org.eventb.core.label="check_sensors">
+<org.eventb.core.action name="_vlu50rKzEeSIBO-4uCJrVQ" org.eventb.core.assignment="valid_sensors_door_closed ≔  λp·p∈ POSITION ∣&#10;         {s∣ s ∈ valid_sensors_door_closed(p)&#10;         ∧ (∃s2·s2 ∈ valid_sensors_door_closed(p)&#10;         ∧ s2 ≠ s ∧ sensors_door_closed(p)(s) = sensors_door_closed(p)(s2))}" org.eventb.core.comment="a sensor is valid if there is another valid sensor with same value" org.eventb.core.label="v"/>
+<org.eventb.core.action name="_vlu507KzEeSIBO-4uCJrVQ" org.eventb.core.assignment="valid_sensors_door_open ≔  λp·p∈ POSITION ∣&#10;          {s∣ s ∈ valid_sensors_door_open(p)&#10;          ∧ (∃s2·s2 ∈ valid_sensors_door_open(p)&#10;          ∧ s2 ≠ s ∧ sensors_door_open(p)(s) = sensors_door_open(p)(s2))}" org.eventb.core.label="v2"/>
+<org.eventb.core.action name="_vlu51LKzEeSIBO-4uCJrVQ" org.eventb.core.assignment="valid_sensors_gear_extended ≔  λp·p∈ POSITION ∣&#10;          {s∣ s ∈ valid_sensors_gear_extended(p)&#10;          ∧ (∃s2·s2 ∈ valid_sensors_gear_extended(p)&#10;          ∧ s2 ≠ s ∧ sensors_gear_extended(p)(s) = sensors_gear_extended(p)(s2))}" org.eventb.core.label="v3"/>
+<org.eventb.core.action name="_vlu51bKzEeSIBO-4uCJrVQ" org.eventb.core.assignment="valid_sensors_gear_retracted ≔  λp·p∈ POSITION ∣&#10;          {s∣ s ∈ valid_sensors_gear_retracted(p)&#10;          ∧ (∃s2·s2 ∈ valid_sensors_gear_retracted(p)&#10;          ∧ s2 ≠ s ∧ sensors_gear_retracted(p)(s) = sensors_gear_retracted(p)(s2))}" org.eventb.core.label="v4"/>
+<org.eventb.core.action name="_vlvg4LKzEeSIBO-4uCJrVQ" org.eventb.core.assignment="valid_sensors_handle ≔ {s∣ s ∈ valid_sensors_handle&#10;          ∧ (∃s2·s2 ∈ valid_sensors_handle&#10;          ∧ s2 ≠ s ∧ sensors_handle(s) = sensors_handle(s2))}" org.eventb.core.label="v5"/>
+<org.eventb.core.action name="_vlvg4bKzEeSIBO-4uCJrVQ" org.eventb.core.assignment="valid_sensors_shock_absorber ≔ {s∣ s ∈ valid_sensors_shock_absorber&#10;          ∧ (∃s2·s2 ∈ valid_sensors_shock_absorber&#10;          ∧ s2 ≠ s ∧ sensors_shock_absorber(s) = sensors_shock_absorber(s2))}" org.eventb.core.label="v6"/>
+<org.eventb.core.action name="_vlvg4rKzEeSIBO-4uCJrVQ" org.eventb.core.assignment="valid_sensors_aswitch ≔ {s∣ s ∈ valid_sensors_aswitch&#10;          ∧ (∃s2·s2 ∈ valid_sensors_aswitch&#10;          ∧ s2 ≠ s ∧ sensors_aswitch(s) = sensors_aswitch(s2))}" org.eventb.core.label="v7"/>
+</org.eventb.core.event>
+<org.eventb.core.event name="_vlvg47KzEeSIBO-4uCJrVQ" org.eventb.core.convergence="0" org.eventb.core.extended="false" org.eventb.core.label="set_anomaly_sensors">
+<org.eventb.core.guard name="_vlwH8LKzEeSIBO-4uCJrVQ" org.eventb.core.label="g" org.eventb.core.predicate="anomaly = FALSE"/>
+<org.eventb.core.guard name="_vlwH8bKzEeSIBO-4uCJrVQ" org.eventb.core.label="g2" org.eventb.core.predicate="(∅ ∈ valid_sensors_gear_extended[POSITION]&#10;          ∪ valid_sensors_gear_retracted[POSITION]&#10;          ∪ valid_sensors_door_open[POSITION]&#10;          ∪ valid_sensors_door_closed[POSITION]&#10;          ∪ {valid_sensors_handle}&#10;          ∪ {valid_sensors_shock_absorber}&#10;          ∪ {valid_sensors_aswitch})"/>
+<org.eventb.core.action name="_vlwH8rKzEeSIBO-4uCJrVQ" org.eventb.core.assignment="anomaly ≔ TRUE" org.eventb.core.label="a"/>
+</org.eventb.core.event>
+<org.eventb.core.event name="_vlwH87KzEeSIBO-4uCJrVQ" org.eventb.core.convergence="0" org.eventb.core.extended="false" org.eventb.core.label="set_anomaly">
+<org.eventb.core.guard name="_vlwvALKzEeSIBO-4uCJrVQ" org.eventb.core.label="g" org.eventb.core.predicate="anomaly = FALSE"/>
+<org.eventb.core.action name="_vlwvAbKzEeSIBO-4uCJrVQ" org.eventb.core.assignment="anomaly ≔ TRUE" org.eventb.core.label="a"/>
+</org.eventb.core.event>
+</org.eventb.core.machineFile>
