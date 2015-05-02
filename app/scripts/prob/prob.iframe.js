@@ -44,12 +44,14 @@ define(['prob.api', 'bms.common', 'prob.observers', 'prob.modal'], function (pro
                                             var jiframe = $(iframe);
 
                                             var filename = template.replace(/^.*[\\\/]/, '');
-                                            jiframe.attr('src', template.replace(filename, '') + data.template);
+                                            var templatePath = template.replace(filename, '');
+                                            jiframe.attr('src', templatePath + data.template);
                                             jiframe.load(function () {
                                                 $rootScope.currentVisualisation = $scope.id;
                                                 data.uuid = $scope.id;
                                                 data.container = jiframe;
                                                 data.path = path;
+                                                data.templatePath = templatePath;
                                                 $scope.container = jiframe;
                                                 bmsVisualisationService.addVisualisation($scope.id, data);
                                                 bmsUIService.setProBViewTraceId($scope.traceId);

@@ -179,7 +179,7 @@ define(['prob.api', 'bms.common', 'prob.observers', 'xeditable', 'cytoscape', 'c
                     var container = view.container.clone(true);
                     var observers = template.observers;
                     var traceId = template.data.traceId;
-                    var path = template.data.path;
+                    var path = template.data.templatePath;
 
                     bmsObserverService.checkObservers(observers, container, stateid, traceId).then(function (data) {
 
@@ -625,13 +625,13 @@ define(['prob.api', 'bms.common', 'prob.observers', 'xeditable', 'cytoscape', 'c
                                 var promises = [];
 
                                 // Get CSS data for HTML
-                                bmsRenderingService.getStyle(template.data.path, template.data.view.style).then(function (css) {
+                                bmsRenderingService.getStyle(template.data.templatePath, template.data.view.style).then(function (css) {
 
                                     // Get HTML data
                                     angular.forEach(data.nodes, function (node) {
                                         var results = node.data.results;
                                         if (node.data.id !== '1' && node.data.labels[0] !== '<< undefined >>') {
-                                            promises.push(bmsRenderingService.getElementSnapshotAsDataUrl(elements, results, $scope.elementSelection.bmsIdDataMap, css, template.data.path));
+                                            promises.push(bmsRenderingService.getElementSnapshotAsDataUrl(elements, results, $scope.elementSelection.bmsIdDataMap, css, template.data.templatePath));
                                         } else {
                                             promises.push(bmsRenderingService.getEmptySnapshotDataUrl());
                                         }
@@ -877,7 +877,7 @@ define(['prob.api', 'bms.common', 'prob.observers', 'xeditable', 'cytoscape', 'c
 
                             var promises = [];
 
-                            bmsRenderingService.getStyle(visualisation.name, visualisation.data.view.style).then(function (css) {
+                            bmsRenderingService.getStyle(visualisation.data.templatePath, visualisation.data.view.style).then(function (css) {
 
                                 angular.forEach(data.nodes, function (n) {
                                     if (n.data.id !== 'root' && n.data.id !== '0') {
