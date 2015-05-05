@@ -167,8 +167,8 @@ define(['prob.api', 'bms.common', 'prob.observers', 'xeditable', 'cytoscape', 'c
                     var defer = $q.defer();
                     defer.resolve({
                         dataUrl: 'data:image/gif;base64,R0lGODlhAQABAAAAACH5BAEKAAEALAAAAAABAAEAAAICTAEAOw==',
-                        width: 50,
-                        height: 50
+                        width: 25,
+                        height: 25
                     });
                     return defer.promise;
                 },
@@ -382,7 +382,7 @@ define(['prob.api', 'bms.common', 'prob.observers', 'xeditable', 'cytoscape', 'c
                                     'background-color': 'white',
                                     'border-width': 2,
                                     'border-color': 'data(color)',
-                                    'font-size': '11px',
+                                    'font-size': '15px',
                                     'text-valign': 'top',
                                     'text-halign': 'center',
                                     'background-repeat': 'no-repeat',
@@ -399,7 +399,7 @@ define(['prob.api', 'bms.common', 'prob.observers', 'xeditable', 'cytoscape', 'c
                                     'line-color': 'data(color)',
                                     'line-style': 'data(style)',
                                     'target-arrow-color': 'data(color)',
-                                    'font-size': '11px',
+                                    'font-size': '15px',
                                     'control-point-distance': 100
                                 }),
                             layout: {
@@ -570,7 +570,12 @@ define(['prob.api', 'bms.common', 'prob.observers', 'xeditable', 'cytoscape', 'c
                                 }
                             });
                             bmsModalService.startLoading();
+
+                            var start = new Date().getTime();
                             $scope.getData(elements, $scope.getVisualisationSelection()).then(function (data) {
+                                var endPredicate = new Date().getTime();
+                                var time = endPredicate - start;
+                                console.log('TIME DSP: ' + time);
                                 $scope.loadData(data).then(function () {
                                     bmsModalService.endLoading();
                                 });
@@ -736,7 +741,7 @@ define(['prob.api', 'bms.common', 'prob.observers', 'xeditable', 'cytoscape', 'c
                                     'height': 'data(height)',
                                     'background-color': 'white',
                                     'border-width': 2,
-                                    'font-size': '11px',
+                                    'font-size': '15px',
                                     'text-valign': 'top',
                                     'text-halign': 'center',
                                     'background-repeat': 'no-repeat',
@@ -753,7 +758,7 @@ define(['prob.api', 'bms.common', 'prob.observers', 'xeditable', 'cytoscape', 'c
                                     'line-color': 'black',
                                     'target-arrow-color': 'black',
                                     'color': 'black',
-                                    'font-size': '20px',
+                                    'font-size': '15px',
                                     'control-point-distance': 60
                                 }),
                             layout: {

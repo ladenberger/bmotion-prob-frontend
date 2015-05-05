@@ -18,6 +18,9 @@ define(['socketio', 'angular-route'], function (io) {
                                     socket: {
                                         "host": "localhost",
                                         "port": "19090"
+                                    },
+                                    prob: {
+                                        "host": "localhost"
                                     }
                                 }, data, true);
                                 defer.resolve(config);

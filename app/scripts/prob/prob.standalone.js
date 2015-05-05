@@ -5,14 +5,9 @@
 define(['angularAMD', 'bmotion.func', 'angular', 'bootstrap', 'jquery.cookie', 'jquery-ui', 'prob.graph', 'prob.iframe', 'prob.ui', 'prob.common'], function (angularAMD, prob) {
 
     var module = angular.module('prob.standalone', ['prob.graph', 'prob.iframe', 'prob.ui', 'prob.common'])
-        .run(['ws', 'editableOptions', 'initProB', 'bmsMainService', '$rootScope', function (ws, editableOptions, initProB, bmsMainService, $rootScope) {
+        .run(['ws', 'editableOptions', 'bmsMainService', function (ws, editableOptions, bmsMainService) {
             bmsMainService.mode = 'ModeStandalone';
             editableOptions.theme = 'bs3'; // bootstrap3 theme. Can be also 'bs2', 'default'
-            initProB.then(function (data) {
-                if (data) {
-                    $rootScope.port = data.port;
-                }
-            });
             // Load native UI library
             var gui = require('nw.gui');
             // Get the current window
@@ -78,6 +73,54 @@ define(['angularAMD', 'bmotion.func', 'angular', 'bootstrap', 'jquery.cookie', '
 
         }])
         .controller('bmsTabsChildCtrl', ['$scope', function ($scope) {
+        }])
+        .directive('bmsDropZone', ['$http', function ($http) {
+            return {
+                link: function ($scope, element) {
+
+                    // prevent default behavior from changing page on dropped file
+                    window.ondragover = function (e) {
+                        e.preventDefault();
+                        return false
+                    };
+                    window.ondrop = function (e) {
+                        e.preventDefault();
+                        return false
+                    };
+
+                    var holder = element[0];
+                    holder.ondragover = function () {
+                        $(this).addClass('dragover');
+                        return false;
+                    };
+                    holder.ondragleave = function () {
+                        $(this).removeClass('dragover');
+                        return false;
+                    };
+                    holder.ondrop = function (e) {
+                        e.preventDefault();
+                        if (e.dataTransfer.files.length > 0) {
+                            var template = e.dataTransfer.files[0].path;
+                            //TODO: Check if correct file ...
+                            var filename = template.replace(/^.*[\\\/]/, '');
+                            if (filename === 'bmotion.json') {
+                                $http.get(template).success(function (data) {
+                                    $scope.workspaces.push({
+                                        id: prob.uuid(),
+                                        name: data.name,
+                                        template: template,
+                                        active: true
+                                    });
+                                });
+                            } else {
+                                alert('Please drop a bmotion.json file!');
+                            }
+                        }
+                        return false;
+                    };
+
+                }
+            }
         }]);
     return angularAMD.bootstrap(module);
 
