@@ -99,6 +99,7 @@ define(['angularAMD', 'bmotion.func', 'angular', 'bootstrap', 'jquery.cookie', '
                     };
                     holder.ondrop = function (e) {
                         e.preventDefault();
+                        $(this).removeClass('dragover');
                         if (e.dataTransfer.files.length > 0) {
                             var template = e.dataTransfer.files[0].path;
                             //TODO: Check if correct file ...
