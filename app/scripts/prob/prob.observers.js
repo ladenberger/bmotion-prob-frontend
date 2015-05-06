@@ -4,7 +4,7 @@
  */
 define(['prob.api', 'angular', 'xeditable', 'qtip'], function (prob) {
 
-    return angular.module('prob.observers', ['bms.common'])
+    return angular.module('prob.observers', ['bms.common', 'prob.modal'])
         .service('bmsObserverService', ['$q', '$injector', function ($q, $injector) {
             var observers = {};
             var events = {};
@@ -232,7 +232,7 @@ define(['prob.api', 'angular', 'xeditable', 'qtip'], function (prob) {
                 }
             }
         }])
-        .service('formula', ['ws', '$q', 'bmsObserverService', function (ws, $q, bmsObserverService) {
+        .service('formula', ['ws', '$q', 'bmsObserverService', 'bmsModalService', function (ws, $q, bmsObserverService, bmsModalService) {
 
             var formulaObserver = {
                 getFormulas: function (observer) {
@@ -282,23 +282,29 @@ define(['prob.api', 'angular', 'xeditable', 'qtip'], function (prob) {
                             traceId: traceId
                         }
                     }, function (data) {
-                        var promises = [];
-                        angular.forEach(observers, function (o) {
-                            var ff = [];
-                            angular.forEach(o.data.formulas, function (f) {
-                                ff.push(data[f] ? data[f].result : null);
+
+                        if (data.errors) {
+                            bmsModalService.setError(data.errors);
+                            defer.reject()
+                        } else {
+                            var promises = [];
+                            angular.forEach(observers, function (o) {
+                                var ff = [];
+                                angular.forEach(o.data.formulas, function (f) {
+                                    ff.push(data[f] ? data[f].result : null);
+                                });
+                                promises.push(formulaObserver.apply(o, element, ff));
                             });
-                            promises.push(formulaObserver.apply(o, element, ff));
-                        });
-                        var fvalues = {};
-                        $q.all(promises).then(function (data) {
-                            angular.forEach(data, function (value) {
-                                if (value !== undefined) {
-                                    $.extend(true, fvalues, value);
-                                }
+                            var fvalues = {};
+                            $q.all(promises).then(function (data) {
+                                angular.forEach(data, function (value) {
+                                    if (value !== undefined) {
+                                        $.extend(true, fvalues, value);
+                                    }
+                                });
+                                defer.resolve(fvalues);
                             });
-                            defer.resolve(fvalues);
-                        });
+                        }
                     });
 
                     return defer.promise;

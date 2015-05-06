@@ -22,7 +22,7 @@ define(['prob.api', 'bms.common', 'prob.observers', 'prob.modal'], function (pro
 
                         if (template) {
 
-                            bmsModalService.startLoading();
+                            bmsModalService.openModal();
                             bmsMainService.getFullPath(template).then(function (path) {
 
                                 // Get properties from configuration file
@@ -60,7 +60,7 @@ define(['prob.api', 'bms.common', 'prob.observers', 'prob.modal'], function (pro
                                                         $scope.setStateId(data.stateid);
                                                     }
                                                 });
-                                                bmsModalService.endLoading();
+                                                bmsModalService.closeModal();
                                             });
                                         }, function (errors) {
                                             bmsModalService.setError(errors);
@@ -68,6 +68,12 @@ define(['prob.api', 'bms.common', 'prob.observers', 'prob.modal'], function (pro
 
                                     }
 
+                                }).error(function (data, status, headers, config) {
+                                    if (status === 404) {
+                                        bmsModalService.setError("BMotion Studio: File not found: " + config.url);
+                                    } else {
+                                        bmsModalService.setError("BMotion Studio: Some error occurred while requesting file " + config.url + " " + status);
+                                    }
                                 });
 
                             });
@@ -110,6 +116,8 @@ define(['prob.api', 'bms.common', 'prob.observers', 'prob.modal'], function (pro
                                         if (!prob.isEmpty(data)) {
                                             $scope.$broadcast('setValue', data);
                                         }
+                                    }, function (error) {
+                                        console.log(error)
                                     });
                                 }
                             });

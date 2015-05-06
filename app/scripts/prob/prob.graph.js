@@ -569,7 +569,7 @@ define(['prob.api', 'bms.common', 'prob.observers', 'xeditable', 'cytoscape', 'c
                                     elements.push($scope.elementSelection.bmsIdDataMap[s.bmsid]);
                                 }
                             });
-                            bmsModalService.startLoading();
+                            bmsModalService.openModal();
 
                             var start = new Date().getTime();
                             $scope.getData(elements, $scope.getVisualisationSelection()).then(function (data) {
@@ -577,7 +577,7 @@ define(['prob.api', 'bms.common', 'prob.observers', 'xeditable', 'cytoscape', 'c
                                 var time = endPredicate - start;
                                 console.log('TIME DSP: ' + time);
                                 $scope.loadData(data).then(function () {
-                                    bmsModalService.endLoading();
+                                    bmsModalService.closeModal();
                                 });
                             });
                         }
@@ -865,10 +865,10 @@ define(['prob.api', 'bms.common', 'prob.observers', 'xeditable', 'cytoscape', 'c
 
                     $scope.$watch('viewSelection.selected', function (newValue) {
                         if (newValue) {
-                            bmsModalService.startLoading();
+                            bmsModalService.openModal();
                             $scope.getData($scope.getVisualisationSelection(), $scope.getSelectedView()).then(function (data) {
                                 $scope.loadData(data).then(function() {
-                                    bmsModalService.endLoading();
+                                    bmsModalService.closeModal();
                                 });
                             });
                         }

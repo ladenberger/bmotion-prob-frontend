@@ -14,32 +14,44 @@ define(['bmotion.func', 'ui-bootstrap', 'ui-bootstrap-tpls'], function (prob) {
                     templateUrl: 'bmsLoadingModal.html',
                     controller: 'bmsLoadingModalInstanceCtrl'
                 });
+                modalInstance.opened.then(function () {
+                    modalInstance.isOpen = true;
+                });
             };
 
             $scope.close = function () {
                 if (modalInstance) {
                     modalInstance.close();
+                    modalInstance.isOpen = false;
                 }
             };
 
-            $scope.$on('startLoading', function () {
+            $scope.$on('openModal', function () {
                 $scope.open();
             });
 
-            $scope.$on('endLoading', function () {
+            $scope.$on('closeModal', function () {
                 $scope.close();
             });
 
             $scope.$on('setError', function (evt, error) {
                 if (modalInstance) {
-                    modalInstance.setError(error);
+                    if (!modalInstance.isOpen) {
+                        $scope.open();
+                    }
+                    modalInstance.opened.then(function () {
+                        modalInstance.setError(error);
+                    });
                 }
             });
 
         }])
         .controller('bmsLoadingModalInstanceCtrl', ['$scope', '$modalInstance', function ($scope, $modalInstance) {
 
-            $scope.icon = 'bmotion-img-loader';
+            $modalInstance.isOpen = false;
+            $scope.icon = "bmotion-img-loader";
+            $scope.msg = "";
+
             $modalInstance.setError = function (error) {
                 if (Object.prototype.toString.call(error) === '[object Array]') {
                     $scope.msg = error.join();
@@ -48,19 +60,16 @@ define(['bmotion.func', 'ui-bootstrap', 'ui-bootstrap-tpls'], function (prob) {
                 }
                 $scope.icon = 'bmotion-img-error';
             };
-            $scope.close = function () {
-                $modalInstance.close();
-            };
 
         }])
         .factory('bmsModalService', ['$rootScope', function ($rootScope) {
 
             return {
-                startLoading: function () {
-                    $rootScope.$broadcast('startLoading');
+                openModal: function () {
+                    $rootScope.$broadcast('openModal');
                 },
-                endLoading: function () {
-                    $rootScope.$broadcast('endLoading');
+                closeModal: function () {
+                    $rootScope.$broadcast('closeModal');
                 },
                 setError: function (error) {
                     $rootScope.$broadcast('setError', error);
