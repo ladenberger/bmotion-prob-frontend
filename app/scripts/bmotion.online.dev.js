@@ -47,9 +47,11 @@ requirejs.config({
         "cytoscape.navigator": ["cytoscape"],
         "prob.online": ['prob.graph', 'prob.ui', 'prob.iframe', 'prob.jquery', 'prob.modal'],
         "prob.iframe": ['prob.modal'],
+        "prob.jquery": ['prob.api'],
         "prob.graph": ['prob.api', 'prob.modal', 'angular', 'jquery', 'xeditable', 'cytoscape', 'cytoscape.navigator'],
         "prob.api": {
-            exports: "bmotion"
+            exports: "bmotion",
+            depends: ['bmotion.func', 'jquery']
         }
     }
 });

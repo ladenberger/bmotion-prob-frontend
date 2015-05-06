@@ -53,11 +53,11 @@ define(['angularAMD', 'angular', 'prob.jquery'], function (angularAMD) {
                 link: function ($scope, $element) {
 
                     // Give all elements an internal id
-                    var count = 0;
-                    $(document).find('body').find("*").each(function (i, v) {
-                        $(v).attr("data-bms-id", "bms" + count);
-                        count++;
-                    });
+                    /*var count = 0;
+                     $(document).find('body').find("*").each(function (i, v) {
+                     $(v).attr("data-bms-id", "bms" + count);
+                     count++;
+                     });*/
 
                     $scope.$watch('values', function () {
 

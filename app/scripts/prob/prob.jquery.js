@@ -23,7 +23,7 @@ define(['prob.api'], function (prob) {
             observers: [],
             selector: "",
             cause: "AnimationChanged"
-        }, options), [], origin);
+        }, options), ["trigger", "selector"], origin);
         var injector = angular.element(document).injector();
         var bmsObserverService = injector.get('bmsJqueryService');
         bmsObserverService.addObserver('csp-event', settings, origin);

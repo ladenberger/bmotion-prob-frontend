@@ -48,12 +48,21 @@ define(['prob.api', 'angular', 'xeditable', 'qtip'], function (prob) {
                 },
                 getBmsIds: function (selector, element) {
                     var bmsid = element.attr("data-bms-id");
+                    if (!bmsid) {
+                        bmsid = prob.uuid();
+                        element.attr("data-bms-id", bmsid);
+                    }
                     if (bmsidCache[bmsid] === undefined) {
                         bmsidCache[bmsid] = {};
                     }
                     if (bmsidCache[bmsid][selector] === undefined) {
                         var bmsids = $(element).find(selector).map(function () {
-                            return $(this).attr("data-bms-id");
+                            var cbmsid = $(this).attr("data-bms-id");
+                            if (!cbmsid) {
+                                cbmsid = prob.uuid();
+                                $(this).attr("data-bms-id", cbmsid);
+                            }
+                            return cbmsid;
                         });
                         bmsidCache[bmsid][selector] = bmsids;
                     }
@@ -148,9 +157,16 @@ define(['prob.api', 'angular', 'xeditable', 'qtip'], function (prob) {
 
                                 if ($.inArray(t.name, exprArray) > -1) {
 
+                                    if (o.trigger) {
+                                        o.trigger.call(this, t);
+                                    }
                                     angular.forEach(o.actions, function (a) {
-
-                                        var selector = replaceParameter(a.selector, t.parameter);
+                                        var selector;
+                                        if (prob.isFunction(a.selector)) {
+                                            selector = a.selector.call(this, t);
+                                        } else {
+                                            selector = replaceParameter(a.selector, t.parameter);
+                                        }
                                         var attr = replaceParameter(a.attr, t.parameter);
                                         var value = replaceParameter(a.value, t.parameter);
                                         var bmsids = bmsObserverService.getBmsIds(selector, $(observer.element));
@@ -160,7 +176,6 @@ define(['prob.api', 'angular', 'xeditable', 'qtip'], function (prob) {
                                             }
                                             fmap[id][attr] = value;
                                         });
-
                                     });
 
                                 }
@@ -388,7 +403,6 @@ define(['prob.api', 'angular', 'xeditable', 'qtip'], function (prob) {
         }])
         .service('executeEvent', ['ws', '$q', function (ws, $q) {
 
-
             var ev = {
 
                 executeEvent: function (data, origin) {
@@ -410,14 +424,15 @@ define(['prob.api', 'angular', 'xeditable', 'qtip'], function (prob) {
                     }, function (data) {
                         var container = $('<div class="qtiplinks"></div>');
                         var ul = $('<ul style="display:table-cell;"></ul>');
-                        $.each(data.events, function (i, v) {
+                        angular.forEach(data.events, function (v) {
                             var spanClass = v.canExecute ? 'glyphicon glyphicon-ok-circle' : 'glyphicon glyphicon-remove-circle';
-                            var link = $('<span aria-hidden="true"> ' + v.name + '(' + v.predicate + ')</span>').addClass(spanClass);
+                            var predicateStr = v.predicate ? '(' + v.predicate + ')' : '';
+                            var link = $('<span aria-hidden="true"> ' + v.name + predicateStr + '</span>').addClass(spanClass);
                             if (v.canExecute) {
-                                link = $('<a href="#"> ' + v.name + '(' + v.predicate + ')</a>').addClass(spanClass).click(function () {
+                                link = $('<a href="#"> ' + v.name + predicateStr + '</a>').addClass(spanClass).click(function () {
                                     ev.executeEvent({
                                         traceId: traceId,
-                                        events: [{name: v.name, predicate: v.predicate}],
+                                        events: [v],
                                         callback: function () {
                                             api.hide();
                                         }
