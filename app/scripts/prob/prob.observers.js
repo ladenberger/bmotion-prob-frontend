@@ -125,6 +125,8 @@ define(['prob.api', 'angular', 'xeditable', 'qtip'], function (prob) {
         }])
         .service('csp-event', ['ws', '$q', 'bmsObserverService', function (ws, $q, bmsObserverService) {
 
+            var expressionCache = {};
+
             var replaceParameter = function (str, para) {
                 var fstr = str;
                 angular.forEach(para, function (p, i) {
@@ -135,55 +137,95 @@ define(['prob.api', 'angular', 'xeditable', 'qtip'], function (prob) {
                 return fstr;
             };
 
+            var getExpression = function (observer, stateId, traceId) {
+
+                var defer = $q.defer();
+
+                var formulas = [];
+                angular.forEach(observer.data.observers, function (o) {
+                    if (o.exp) formulas.push(o.exp);
+                });
+
+                var expressions = expressionCache[traceId];
+                if (!expressions) {
+                    ws.emit("evaluateFormulas", {
+                        data: {
+                            formulas: formulas,
+                            stateId: stateId,
+                            traceId: traceId
+                        }
+                    }, function (data) {
+                        expressionCache[traceId] = data;
+                        angular.forEach(data, function (e) {
+                            e.trans = e.result.replace("{", "").replace("}", "").split(",");
+                        });
+                        defer.resolve(data);
+                    });
+                } else {
+                    defer.resolve(expressions);
+                }
+
+                return defer.promise;
+
+            };
+
             return {
-                check: function (observer, container, stateid, traceid) {
+                check: function (observer, container, stateId, traceId) {
 
                     var defer = $q.defer();
-                    ws.emit("observeCSPTrace", {
-                        data: {
-                            observers: observer.data.observers,
-                            stateid: stateid,
-                            traceId: traceid
-                        }
-                    }, function (result) {
 
-                        var fmap = {};
+                    getExpression(observer, stateId, traceId).then(function (expressions) {
 
-                        angular.forEach(result.ops, function (t) {
+                        ws.emit("getHistory", {
+                            data: {
+                                traceId: traceId
+                            }
+                        }, function (data) {
 
-                            angular.forEach(observer.data.observers, function (o) {
+                            var fmap = {};
 
-                                var exprArray = result.exp[o.exp].replace("{", "").replace("}", "").split(",");
+                            angular.forEach(data.ops, function (t) {
 
-                                if ($.inArray(t.name, exprArray) > -1) {
+                                angular.forEach(observer.data.observers, function (o) {
 
-                                    if (o.trigger) {
-                                        o.trigger.call(this, t);
+                                    var events = [];
+                                    if (o.exp) {
+                                        events = expressions[o.exp].trans;
+                                    } else if (o.events) {
+                                        events = o.events;
                                     }
-                                    angular.forEach(o.actions, function (a) {
-                                        var selector;
-                                        if (prob.isFunction(a.selector)) {
-                                            selector = a.selector.call(this, t);
-                                        } else {
-                                            selector = replaceParameter(a.selector, t.parameter);
-                                        }
-                                        var attr = replaceParameter(a.attr, t.parameter);
-                                        var value = replaceParameter(a.value, t.parameter);
-                                        var bmsids = bmsObserverService.getBmsIds(selector, $(observer.element));
-                                        angular.forEach(bmsids, function (id) {
-                                            if (fmap[id] === undefined) {
-                                                fmap[id] = {};
-                                            }
-                                            fmap[id][attr] = value;
-                                        });
-                                    });
 
-                                }
+                                    if ($.inArray(t.name, events) > -1) {
+                                        if (o.trigger) {
+                                            o.trigger.call(this, t);
+                                        }
+                                        angular.forEach(o.actions, function (a) {
+                                            var selector;
+                                            if (prob.isFunction(a.selector)) {
+                                                selector = a.selector.call(this, t);
+                                            } else {
+                                                selector = replaceParameter(a.selector, t.parameter);
+                                            }
+                                            var attr = replaceParameter(a.attr, t.parameter);
+                                            var value = replaceParameter(a.value, t.parameter);
+                                            var bmsids = bmsObserverService.getBmsIds(selector, $(observer.element));
+                                            angular.forEach(bmsids, function (id) {
+                                                if (fmap[id] === undefined) {
+                                                    fmap[id] = {};
+                                                }
+                                                fmap[id][attr] = value;
+                                            });
+                                        });
+                                    }
+
+                                });
 
                             });
 
+                            defer.resolve(fmap);
+
                         });
-                        defer.resolve(fmap);
+
                     });
 
                     return defer.promise;
@@ -217,72 +259,47 @@ define(['prob.api', 'angular', 'xeditable', 'qtip'], function (prob) {
                     }
                     return defer.promise;
                 },
-                check: function (observer, element, stateid, traceid) {
+                check: function (observer, element, stateId, traceId) {
 
                     var defer = $q.defer();
 
-                    if (Object.prototype.toString.call(observer) === '[object Array]') {
+                    var observers = Object.prototype.toString.call(observer) !== '[object Array]' ? [observer] : observer;
 
-                        var oo = {};
-                        angular.forEach(observer, function (o) {
-                            angular.forEach(o.data.formulas, function (f) {
-                                oo[f] = {};
-                                // TODO: handle translate property ...
-                            });
-                        });
-                        ws.emit("observe", {
-                            data: {
-                                observers: oo,
-                                stateId: stateid,
-                                traceId: traceid
-                            }
-                        }, function (data) {
-                            var promises = [];
-                            $.each(observer, function (i, o) {
-                                var ff = [];
-                                angular.forEach(o.data.formulas, function (f) {
-                                    ff.push(data[f] ? data[f].result : null);
-                                });
-                                promises.push(formulaObserver.apply(o, element, ff));
-                            });
-                            var fvalues = {};
-                            $q.all(promises).then(function (data) {
-                                angular.forEach(data, function (value) {
-                                    if (value !== undefined) {
-                                        $.extend(true, fvalues, value);
-                                    }
-                                });
-                                defer.resolve(fvalues);
-                            });
-                        });
-
-                    } else {
-
-                        var oo = {};
-                        angular.forEach(observer.data.formulas, function (f) {
-                            oo[f] = {};
+                    // Collect formulas
+                    var formulas = [];
+                    angular.forEach(observers, function (o) {
+                        angular.forEach(o.data.formulas, function (f) {
+                            formulas.push(f);
                             // TODO: handle translate property ...
                         });
+                    });
 
-                        ws.emit("observe", {data: {observers: oo, stateId: stateid, traceId: traceid}}, function (res) {
-
+                    // Evaluate formulas
+                    ws.emit("evaluateFormulas", {
+                        data: {
+                            formulas: formulas,
+                            stateId: stateId,
+                            traceId: traceId
+                        }
+                    }, function (data) {
+                        var promises = [];
+                        angular.forEach(observers, function (o) {
                             var ff = [];
-                            angular.forEach(observer.data.formulas, function (f) {
-                                ff.push(res[f] ? res[f].result : null);
+                            angular.forEach(o.data.formulas, function (f) {
+                                ff.push(data[f] ? data[f].result : null);
                             });
-                            formulaObserver.apply(observer, element, ff).then(function (data) {
-                                var fvalues = {};
-                                angular.forEach(data, function (value) {
-                                    if (value !== undefined) {
-                                        $.extend(true, fvalues, value);
-                                    }
-                                });
-                                defer.resolve(fvalues);
-                            });
-
+                            promises.push(formulaObserver.apply(o, element, ff));
                         });
-
-                    }
+                        var fvalues = {};
+                        $q.all(promises).then(function (data) {
+                            angular.forEach(data, function (value) {
+                                if (value !== undefined) {
+                                    $.extend(true, fvalues, value);
+                                }
+                            });
+                            defer.resolve(fvalues);
+                        });
+                    });
 
                     return defer.promise;
 
@@ -364,13 +381,17 @@ define(['prob.api', 'angular', 'xeditable', 'qtip'], function (prob) {
                 },
                 check: function (observers, element, stateid, traceid) {
                     var defer = $q.defer();
-                    var oo = {};
-                    $.each(observers, function (i, o) {
-                        oo[o.data.predicate] = {};
-                    });
                     var promises = [];
                     //var startWebsocket = new Date().getTime();
-                    ws.emit("observe", {data: {observers: oo, stateId: stateid, traceId: traceid}}, function (data) {
+                    ws.emit("evaluateFormulas", {
+                        data: {
+                            formulas: observers.map(function (o) {
+                                return o.data.predicate;
+                            }),
+                            stateId: stateid,
+                            traceId: traceid
+                        }
+                    }, function (data) {
                         //var end = new Date().getTime();
                         //var time = end - startWebsocket;
                         //console.log('WEBSOCKET: ' + time);
