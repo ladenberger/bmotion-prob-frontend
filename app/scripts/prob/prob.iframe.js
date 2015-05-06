@@ -62,6 +62,8 @@ define(['prob.api', 'bms.common', 'prob.observers', 'prob.modal'], function (pro
                                                 });
                                                 bmsModalService.endLoading();
                                             });
+                                        }, function (errors) {
+                                            bmsModalService.setError(errors);
                                         });
 
                                     }

@@ -30,9 +30,24 @@ define(['bmotion.func', 'ui-bootstrap', 'ui-bootstrap-tpls'], function (prob) {
                 $scope.close();
             });
 
+            $scope.$on('setError', function (evt, error) {
+                if (modalInstance) {
+                    modalInstance.setError(error);
+                }
+            });
+
         }])
         .controller('bmsLoadingModalInstanceCtrl', ['$scope', '$modalInstance', function ($scope, $modalInstance) {
 
+            $scope.icon = 'bmotion-img-loader';
+            $modalInstance.setError = function (error) {
+                if (Object.prototype.toString.call(error) === '[object Array]') {
+                    $scope.msg = error.join();
+                } else {
+                    $scope.msg = error
+                }
+                $scope.icon = 'bmotion-img-error';
+            };
             $scope.close = function () {
                 $modalInstance.close();
             };
@@ -46,6 +61,9 @@ define(['bmotion.func', 'ui-bootstrap', 'ui-bootstrap-tpls'], function (prob) {
                 },
                 endLoading: function () {
                     $rootScope.$broadcast('endLoading');
+                },
+                setError: function (error) {
+                    $rootScope.$broadcast('setError', error);
                 }
             }
 

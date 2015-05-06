@@ -104,7 +104,11 @@ define(['socketio', 'angular-route'], function (io) {
                     load: function (data) {
                         var defer = $q.defer();
                         ws.emit('loadModel', {data: data}, function (r) {
-                            defer.resolve(r)
+                            if (r.errors) {
+                                defer.reject(r.errors)
+                            } else {
+                                defer.resolve(r)
+                            }
                         });
                         return defer.promise;
                     }
