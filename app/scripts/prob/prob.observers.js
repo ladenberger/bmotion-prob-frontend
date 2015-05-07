@@ -119,6 +119,37 @@ define(['prob.api', 'angular', 'xeditable', 'qtip'], function (prob) {
 
                     return defer.promise;
 
+                },
+                showError: function (element, type, error) {
+                    if (!element.data('qtip-error')) {
+                        element.qtip({ // Grab some elements to apply the tooltip to
+                            content: {
+                                text: '',
+                                title: 'Observer errors'
+                            },
+                            position: {
+                                my: 'top left',
+                                at: 'center left',
+                                effect: false,
+                                viewport: $(window)
+                            },
+                            show: {
+                                when: false,
+                                ready: true
+                            },
+                            hide: {
+                                event: false,
+                                inactive: 10000
+                            },
+                            style: {
+                                classes: 'qtip-rounded qtip-red'
+                            }
+                        });
+                        element.data('qtip-error', true)
+                    }
+                    var api = element.qtip('api');
+                    api.set('content.text', '<p><span style="font-weight:bold">' + type + '</span>: ' + error + '</p>' + api.get('content.text'));
+
                 }
             };
             return observerService;
@@ -155,9 +186,15 @@ define(['prob.api', 'angular', 'xeditable', 'qtip'], function (prob) {
                             traceId: traceId
                         }
                     }, function (data) {
+
                         expressionCache[traceId] = data;
                         angular.forEach(data, function (e) {
-                            e.trans = e.result.replace("{", "").replace("}", "").split(",");
+                            if (e.error) {
+                                var msg = "Message: " + e.error;
+                                bmsObserverService.showError($(observer.element), 'CSP Event Observer', msg);
+                            } else {
+                                e.trans = e.result.replace("{", "").replace("}", "").split(",");
+                            }
                         });
                         defer.resolve(data);
                     });
@@ -184,7 +221,7 @@ define(['prob.api', 'angular', 'xeditable', 'qtip'], function (prob) {
 
                             var fmap = {};
 
-                            angular.forEach(data.ops, function (t) {
+                            angular.forEach(data['ops'], function (t) {
 
                                 angular.forEach(observer.data.observers, function (o) {
 
@@ -232,7 +269,7 @@ define(['prob.api', 'angular', 'xeditable', 'qtip'], function (prob) {
                 }
             }
         }])
-        .service('formula', ['ws', '$q', 'bmsObserverService', 'bmsModalService', function (ws, $q, bmsObserverService, bmsModalService) {
+        .service('formula', ['ws', '$q', 'bmsObserverService', function (ws, $q, bmsObserverService) {
 
             var formulaObserver = {
                 getFormulas: function (observer) {
@@ -283,28 +320,32 @@ define(['prob.api', 'angular', 'xeditable', 'qtip'], function (prob) {
                         }
                     }, function (data) {
 
-                        if (data.errors) {
-                            bmsModalService.setError(data.errors);
-                            defer.reject()
-                        } else {
-                            var promises = [];
-                            angular.forEach(observers, function (o) {
-                                var ff = [];
-                                angular.forEach(o.data.formulas, function (f) {
+                        var promises = [];
+                        angular.forEach(observers, function (o) {
+                            var ff = [];
+                            angular.forEach(o.data.formulas, function (f) {
+                                var formula = data[f];
+                                if (formula.error) {
+                                    var e = element.find("[data-bms-id=" + o.bmsid + "]");
+                                    var msg = "Formula: " + formula + ", Message: " + formula.error;
+                                    bmsObserverService.showError(e, 'Formula Observer', msg);
+                                    ff.push(null);
+                                } else {
                                     ff.push(data[f] ? data[f].result : null);
-                                });
-                                promises.push(formulaObserver.apply(o, element, ff));
+                                }
                             });
-                            var fvalues = {};
-                            $q.all(promises).then(function (data) {
-                                angular.forEach(data, function (value) {
-                                    if (value !== undefined) {
-                                        $.extend(true, fvalues, value);
-                                    }
-                                });
-                                defer.resolve(fvalues);
+                            promises.push(formulaObserver.apply(o, element, ff));
+                        });
+                        var fvalues = {};
+                        $q.all(promises).then(function (data) {
+                            angular.forEach(data, function (value) {
+                                if (value !== undefined) {
+                                    $.extend(true, fvalues, value);
+                                }
                             });
-                        }
+                            defer.resolve(fvalues);
+                        });
+
                     });
 
                     return defer.promise;

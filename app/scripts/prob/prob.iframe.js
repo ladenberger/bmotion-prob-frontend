@@ -22,7 +22,7 @@ define(['prob.api', 'bms.common', 'prob.observers', 'prob.modal'], function (pro
 
                         if (template) {
 
-                            bmsModalService.openModal();
+                            bmsModalService.startLoading();
                             bmsMainService.getFullPath(template).then(function (path) {
 
                                 // Get properties from configuration file
@@ -60,7 +60,7 @@ define(['prob.api', 'bms.common', 'prob.observers', 'prob.modal'], function (pro
                                                         $scope.setStateId(data.stateid);
                                                     }
                                                 });
-                                                bmsModalService.closeModal();
+                                                bmsModalService.endLoading();
                                             });
                                         }, function (errors) {
                                             bmsModalService.setError(errors);

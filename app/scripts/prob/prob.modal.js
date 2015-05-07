@@ -34,6 +34,17 @@ define(['bmotion.func', 'ui-bootstrap', 'ui-bootstrap-tpls'], function (prob) {
                 $scope.close();
             });
 
+            $scope.$on('startLoading', function () {
+                $scope.open();
+                modalInstance.opened.then(function () {
+                    modalInstance.startLoading();
+                });
+            });
+
+            $scope.$on('endLoading', function () {
+                $scope.close();
+            });
+
             $scope.$on('setError', function (evt, error) {
                 if (modalInstance) {
                     if (!modalInstance.isOpen) {
@@ -45,11 +56,13 @@ define(['bmotion.func', 'ui-bootstrap', 'ui-bootstrap-tpls'], function (prob) {
                 }
             });
 
-        }])
-        .controller('bmsLoadingModalInstanceCtrl', ['$scope', '$modalInstance', function ($scope, $modalInstance) {
+        }
+        ])
+        .
+        controller('bmsLoadingModalInstanceCtrl', ['$scope', '$modalInstance', function ($scope, $modalInstance) {
 
             $modalInstance.isOpen = false;
-            $scope.icon = "bmotion-img-loader";
+            $scope.icon = "";
             $scope.msg = "";
 
             $modalInstance.setError = function (error) {
@@ -59,6 +72,10 @@ define(['bmotion.func', 'ui-bootstrap', 'ui-bootstrap-tpls'], function (prob) {
                     $scope.msg = error
                 }
                 $scope.icon = 'bmotion-img-error';
+            };
+
+            $modalInstance.startLoading = function () {
+                $scope.icon = 'bmotion-img-loader';
             };
 
         }])
@@ -71,6 +88,12 @@ define(['bmotion.func', 'ui-bootstrap', 'ui-bootstrap-tpls'], function (prob) {
                 closeModal: function () {
                     $rootScope.$broadcast('closeModal');
                 },
+                startLoading: function () {
+                    $rootScope.$broadcast('startLoading');
+                },
+                endLoading: function () {
+                    $rootScope.$broadcast('endLoading');
+                },
                 setError: function (error) {
                     $rootScope.$broadcast('setError', error);
                 }
@@ -80,4 +103,5 @@ define(['bmotion.func', 'ui-bootstrap', 'ui-bootstrap-tpls'], function (prob) {
 
     return module;
 
-});
+})
+;
