@@ -6,11 +6,12 @@ requirejs(['../../app/scripts/bmotion.vis.dev'], function () {
 
         $('body').observe("formula", {
             formulas: ["card(positions)"],
+            translate: true,
             trigger: function (origin, r) {
 
                 if (r[0] && !dd) {
 
-                    var nr = parseInt(r[0]);
+                    var nr = r[0];
 
                     // Generate places
                     var s = Snap(nr * 50, 45);
@@ -30,6 +31,7 @@ requirejs(['../../app/scripts/bmotion.vis.dev'], function () {
                                 }
                             })
                             .executeEvent({
+                                tooltip: false,
                                 events: [
                                     {
                                         name: "Move_right",

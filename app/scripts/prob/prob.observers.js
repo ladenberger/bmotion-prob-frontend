@@ -9,6 +9,7 @@ define(['prob.api', 'angular', 'xeditable', 'qtip'], function (prob) {
             var observers = {};
             var events = {};
             var bmsidCache = {};
+            var hasErrors = false;
             var observerService = {
                 addObserver: function (name, o) {
                     if (observers[name] === undefined) {
@@ -86,6 +87,8 @@ define(['prob.api', 'angular', 'xeditable', 'qtip'], function (prob) {
                     var predicateObservers = [];
                     var promises = [];
 
+                    observerService.hideErrors();
+
                     angular.forEach(observers, function (o) {
                         if (o.type === 'formula') {
                             formulaObservers.push(o);
@@ -120,7 +123,17 @@ define(['prob.api', 'angular', 'xeditable', 'qtip'], function (prob) {
                     return defer.promise;
 
                 },
+                hideErrors: function () {
+                    if (hasErrors) {
+                        $('[data-hasqtip]').qtip('destroy');
+                    }
+                    hasErrors = false;
+                },
                 showError: function (element, type, error) {
+                    if (!element.get(0)) {
+                        element = $('body');
+                    }
+                    // TODO: check if element exists, if not attached qtip to root element (e.g. body)
                     if (!element.data('qtip-error')) {
                         element.qtip({ // Grab some elements to apply the tooltip to
                             content: {
@@ -149,7 +162,7 @@ define(['prob.api', 'angular', 'xeditable', 'qtip'], function (prob) {
                     }
                     var api = element.qtip('api');
                     api.set('content.text', '<p><span style="font-weight:bold">' + type + '</span>: ' + error + '</p>' + api.get('content.text'));
-
+                    hasErrors = true;
                 }
             };
             return observerService;
@@ -174,7 +187,7 @@ define(['prob.api', 'angular', 'xeditable', 'qtip'], function (prob) {
 
                 var formulas = [];
                 angular.forEach(observer.data.observers, function (o) {
-                    if (o.exp) formulas.push(o.exp);
+                    if (o.exp) formulas.push({formula: o.exp});
                 });
 
                 var expressions = expressionCache[traceId];
@@ -306,8 +319,10 @@ define(['prob.api', 'angular', 'xeditable', 'qtip'], function (prob) {
                     var formulas = [];
                     angular.forEach(observers, function (o) {
                         angular.forEach(o.data.formulas, function (f) {
-                            formulas.push(f);
-                            // TODO: handle translate property ...
+                            formulas.push({
+                                formula: f,
+                                translate: o.data.translate ? o.data.translate : false
+                            });
                         });
                     });
 
@@ -319,7 +334,6 @@ define(['prob.api', 'angular', 'xeditable', 'qtip'], function (prob) {
                             traceId: traceId
                         }
                     }, function (data) {
-
                         var promises = [];
                         angular.forEach(observers, function (o) {
                             var ff = [];
@@ -331,7 +345,9 @@ define(['prob.api', 'angular', 'xeditable', 'qtip'], function (prob) {
                                     bmsObserverService.showError(e, 'Formula Observer', msg);
                                     ff.push(null);
                                 } else {
-                                    ff.push(data[f] ? data[f].result : null);
+                                    if (data[f]) {
+                                        ff.push(data[f].trans ? data[f].trans : data[f].result);
+                                    }
                                 }
                             });
                             promises.push(formulaObserver.apply(o, element, ff));

@@ -42,7 +42,6 @@ define(['prob.api', 'bms.common', 'prob.observers', 'prob.modal'], function (pro
                                             data.traceId = r.traceId;
                                             data.refinements = r.refinements;
                                             var jiframe = $(iframe);
-
                                             var filename = template.replace(/^.*[\\\/]/, '');
                                             var templatePath = template.replace(filename, '');
                                             jiframe.attr('src', templatePath + data.template);
@@ -116,8 +115,6 @@ define(['prob.api', 'bms.common', 'prob.observers', 'prob.modal'], function (pro
                                         if (!prob.isEmpty(data)) {
                                             $scope.$broadcast('setValue', data);
                                         }
-                                    }, function (error) {
-                                        console.log(error)
                                     });
                                 }
                             });
