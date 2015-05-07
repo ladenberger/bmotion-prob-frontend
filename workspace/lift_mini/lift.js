@@ -29,13 +29,13 @@ requirejs(['bmotion.vis'], function () {
             var door = origin.find("#door");
             switch (val[0]) {
                 case "0":
-                    door.attr("y", "275");
+                    door.attr("y", "315");
                     break;
                 case "1":
-                    door.attr("y", "175");
+                    door.attr("y", "250");
                     break;
                 case "2":
-                    door.attr("y", "60");
+                    door.attr("y", "185");
                     break;
             }
         }

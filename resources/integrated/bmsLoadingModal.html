@@ -4,5 +4,8 @@
 </div>
 <div class="modal-body">
     <p class="bmotion-img-logo"></p>
-    <p class="bmotion-img-loader"></p>
+    <p ng-attr-class="{{icon}}"></p>
+    <div ng-if="msg">
+        <div class="bmotion-alert alert alert-danger" role="alert">{{msg}}</div>
+    </div>
 </div>
