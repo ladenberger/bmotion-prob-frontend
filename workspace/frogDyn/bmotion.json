@@ -1,0 +1,10 @@
+{
+
+  "name": "frog",
+  "template": "frog.html",
+  "model": "FrogPuzzle.mch",
+  "tool": "BAnimation",
+  "view": {
+    "elements": ["#frog"]
+  }
+}

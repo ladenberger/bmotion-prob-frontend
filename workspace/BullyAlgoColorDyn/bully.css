@@ -1,0 +1,12 @@
+.hidden {
+    display: none;
+}
+
+.visible {
+    display: inline;
+}
+
+/*.marker-vertices { display : none }*/
+.marker-arrowheads { display: none }
+/*.connection-wrap { display: none }*/
+.link-tools { display: none; }

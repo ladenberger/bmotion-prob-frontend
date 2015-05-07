@@ -1,0 +1,12 @@
+{
+
+  "name": "bully",
+  "template": "bully.html",
+  "model": "model/bully.csp",
+  "tool": "CSPAnimation",
+  "view": {
+    "elements": ["#bully"],
+    "style": "bully.css"
+  }
+
+}

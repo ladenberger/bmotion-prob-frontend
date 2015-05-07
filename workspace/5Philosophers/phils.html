@@ -1,0 +1,129 @@
+<!DOCTYPE html>
+<html data-bms-visualisation>
+<head>
+    <title>CSP Five Philosophers Problem</title>
+    <link rel="stylesheet" type="text/css" href="phils.css"/>
+</head>
+<body>
+<script data-main="phils" src="require.js"></script>
+
+<svg id="phils" width="325" height="400" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink">
+    <g>
+        <title>background</title>
+        <rect x="-1" y="-1" width="327" height="402" id="canvas_background" fill="none"/>
+    </g>
+    <g>
+        <title>Layer 1</title>
+        <ellipse ry="95.5" rx="95.5" id="svg_1" cy="176.5" cx="159.5" stroke-width="3" fill="#ffffff" stroke="#000000"/>
+        <g id="phil0">
+            <ellipse id="phil0h" ry="7.92683" rx="7.92683" cy="349.42627" cx="93.44956" stroke-linecap="null"
+                     stroke-linejoin="null" stroke-dasharray="null" stroke-width="3" fill="#000000" stroke="#000000"/>
+            <rect id="phil0s" height="15.85366" width="15.85366" y="370.82871" x="85.91907" stroke-linecap="null"
+                  stroke-linejoin="null" stroke-dasharray="null" stroke-width="3" fill="#000000" stroke="#000000"/>
+        </g>
+        <g id="phil0t" class="hidden">
+            <ellipse id="phil0th" ry="7.92683" rx="7.92683" cy="32.42627" cx="158.39274" stroke-linecap="null"
+                     stroke-linejoin="null" stroke-dasharray="null" stroke-width="3" fill="green" stroke="#000000"/>
+            <rect id="phil0ts" height="15.85366" width="15.85366" y="53.82871" x="150.86225" stroke-linecap="null"
+                  stroke-linejoin="null" stroke-dasharray="null" stroke-width="3" fill="#000000" stroke="#000000"/>
+        </g>
+        <g id="phil1">
+            <ellipse ry="7.92683" rx="7.92683" cy="349.42627" cx="126.39273" stroke-linecap="null"
+                     stroke-linejoin="null" stroke-dasharray="null" stroke-width="3" fill="#000000" stroke="#000000"
+                     id="phil1h"/>
+            <rect height="15.85366" width="15.85366" y="370.82871" x="118.86224" stroke-linecap="null"
+                  stroke-linejoin="null" stroke-dasharray="null" stroke-width="3" fill="#000000" stroke="#000000"
+                  id="phil1s"/>
+        </g>
+        <g id="phil1t" class="hidden">
+            <ellipse id="phil1th" ry="7.92683" rx="7.92683" cy="116.42627" cx="270.39274" stroke-linecap="null"
+                     stroke-linejoin="null" stroke-dasharray="null" stroke-width="3" fill="green" stroke="#000000"/>
+            <rect id="phil1ts" height="15.85366" width="15.85366" y="137.82871" x="262.86225" stroke-linecap="null"
+                  stroke-linejoin="null" stroke-dasharray="null" stroke-width="3" fill="#000000" stroke="#000000"/>
+        </g>
+        <g id="phil2">
+            <ellipse ry="7.92683" rx="7.92683" cy="349.42627" cx="160.39273" stroke-linecap="null"
+                     stroke-linejoin="null" stroke-dasharray="null" stroke-width="3" fill="#000000" stroke="#000000"
+                     id="phil2h"/>
+            <rect height="15.85366" width="15.85366" y="370.82871" x="152.86224" stroke-linecap="null"
+                  stroke-linejoin="null" stroke-dasharray="null" stroke-width="3" fill="#000000" stroke="#000000"
+                  id="phil2s"/>
+        </g>
+        <g id="phil2t" class="hidden">
+            <ellipse id="phil2th" ry="7.92683" rx="7.92683" cy="265.42627" cx="230.39274" stroke-linecap="null"
+                     stroke-linejoin="null" stroke-dasharray="null" stroke-width="3" fill="green" stroke="#000000"/>
+            <rect id="phil2ts" height="15.85366" width="15.85366" y="286.82871" x="222.86225" stroke-linecap="null"
+                  stroke-linejoin="null" stroke-dasharray="null" stroke-width="3" fill="#000000" stroke="#000000"/>
+        </g>
+        <g id="phil3">
+            <ellipse ry="7.92683" rx="7.92683" cy="349.42627" cx="192.39273" stroke-linecap="null"
+                     stroke-linejoin="null" stroke-dasharray="null" stroke-width="3" fill="#000000" stroke="#000000"
+                     id="phil3h"/>
+            <rect height="15.85366" width="15.85366" y="370.82871" x="184.86224" stroke-linecap="null"
+                  stroke-linejoin="null" stroke-dasharray="null" stroke-width="3" fill="#000000" stroke="#000000"
+                  id="phil3s"/>
+        </g>
+        <g id="phil3t" class="hidden">
+            <ellipse id="phil3th" ry="7.92683" rx="7.92683" cy="260.42627" cx="81.39274" stroke-linecap="null"
+                     stroke-linejoin="null" stroke-dasharray="null" stroke-width="3" fill="green" stroke="#000000"/>
+            <rect id="phil3ts" height="15.85366" width="15.85366" y="281.82871" x="73.86225" stroke-linecap="null"
+                  stroke-linejoin="null" stroke-dasharray="null" stroke-width="3" fill="#000000" stroke="#000000"/>
+        </g>
+        <g id="phil4">
+            <ellipse ry="7.92683" rx="7.92683" cy="349.42627" cx="226.39273" stroke-linecap="null"
+                     stroke-linejoin="null" stroke-dasharray="null" stroke-width="3" fill="#000000" stroke="#000000"
+                     id="phil4h"/>
+            <rect height="15.85366" width="15.85366" y="370.82871" x="218.86224" stroke-linecap="null"
+                  stroke-linejoin="null" stroke-dasharray="null" stroke-width="3" fill="#000000" stroke="#000000"
+                  id="phil4s"/>
+        </g>
+        <g id="phil4t" class="hidden">
+            <ellipse id="phil4th" ry="7.92683" rx="7.92683" cy="108.42627" cx="50.39274" stroke-linecap="null"
+                     stroke-linejoin="null" stroke-dasharray="null" stroke-width="3" fill="green" stroke="#000000"/>
+            <rect id="phil4ts" height="15.85366" width="15.85366" y="129.82871" x="42.86225" stroke-linecap="null"
+                  stroke-linejoin="null" stroke-dasharray="null" stroke-width="3" fill="#000000" stroke="#000000"/>
+        </g>
+        <ellipse ry="11.5" rx="11.5" id="svg_18" cy="110.45453" cx="161.27273" stroke-linecap="null"
+                 stroke-linejoin="null" stroke-dasharray="null" stroke-width="3" stroke="#000000" fill="#000000"/>
+        <ellipse id="svg_20" ry="11.5" rx="11.5" cy="152.54546" cx="101.79546" stroke-linecap="null"
+                 stroke-linejoin="null" stroke-dasharray="null" stroke-width="3" stroke="#000000" fill="#000000"/>
+        <ellipse id="svg_21" ry="11.5" rx="11.5" cy="152.54545" cx="212.79546" stroke-linecap="null"
+                 stroke-linejoin="null" stroke-dasharray="null" stroke-width="3" stroke="#000000" fill="#000000"/>
+        <ellipse id="svg_22" ry="11.5" rx="11.5" cy="226.09092" cx="117.29546" stroke-linecap="null"
+                 stroke-linejoin="null" stroke-dasharray="null" stroke-width="3" fill="#000000" stroke="#000000"/>
+        <ellipse ry="11.5" rx="11.5" cy="226.09091" cx="202.59091" stroke-linecap="null" stroke-linejoin="null"
+                 stroke-dasharray="null" stroke-width="3" stroke="#000000" fill="#000000" id="svg_14"/>
+        <image id="fork0" x="115.79546" y="100.54546" width="30" height="50" xlink:href="fork.png"
+               transform="rotate(142.745 130.795 125.545)"></image>
+        <image id="fork1" x="178.27272" y="104.45453" width="30" height="50" xlink:href="fork.png"
+               transform="rotate(-140 193.273 129.455)"></image>
+        <image id="fork2" x="195.29546" y="165.54546" width="30" height="50" xlink:href="fork.png"
+               transform="rotate(-73.5604 210.295 190.545)"></image>
+        <image id="fork3" x="145.59068" y="200.09109" width="30" height="50" xlink:href="fork.png"
+               transform="rotate(0.487685 160.591 225.091)"></image>
+        <image id="fork4" x="94.59074" y="163.08991" width="30" height="50" xlink:href="fork.png"
+               transform="rotate(63.0787 109.591 188.09)"></image>
+        <image id="fork00" x="114.0909" y="26.09091" width="30" height="50" xlink:href="fork.png"
+               transform="rotate(180 129.091 51.0909)" class="hidden"></image>
+        <image id="fork01" x="172.59203" y="27.09147" width="30" height="50" xlink:href="fork.png"
+               transform="rotate(180 187.592 52.0915)" class="hidden"></image>
+        <image id="fork11" x="242.59081" y="67.09168" width="30" height="50" xlink:href="fork.png"
+               transform="rotate(-132.286 257.591 92.0917)" class="hidden"></image>
+        <image id="fork12" x="275.0906" y="142.09074" width="30" height="50" xlink:href="fork.png"
+               transform="rotate(-99.5885 290.091 167.091)" class="hidden"></image>
+        <image id="fork22" x="248.59081" y="232.09168" width="30" height="50" xlink:href="fork.png"
+               transform="rotate(-40.2074 263.591 257.092)" class="hidden"></image>
+        <image id="fork23" x="186.09108" y="275.09071" width="30" height="50" xlink:href="fork.png"
+               transform="rotate(-17.5565 201.091 300.091)" class="hidden"></image>
+        <image id="fork33" x="100.59074" y="269.08991" width="30" height="50" xlink:href="fork.png"
+               class="hidden"></image>
+        <image id="fork34" transform="rotate(44.8265 57.0909 261.091)" x="42.09092" y="236.09092" width="30" height="50"
+               xlink:href="fork.png" class="hidden"></image>
+        <image id="fork44" x="28.09089" y="140.09092" width="30" height="50" xlink:href="fork.png"
+               transform="rotate(89.0978 43.0909 165.091)" class="hidden"></image>
+        <image id="fork40" x="58.59089" y="59.0909" width="30" height="50" xlink:href="fork.png"
+               transform="rotate(135.5 73.5909 84.0909)" class="hidden"></image>
+    </g>
+</svg>
+</body>
+</html>
