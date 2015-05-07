@@ -10,21 +10,21 @@ The constraints that your solution must satisfy are as follows:
 
 MACHINE FrogPuzzle
 SETS
- FROGS = {ffrog1, ffrog2, ffrog3, free, mfrog1, mfrog2, mfrog3};
- ROCKS = {rock1,rock2,rock3,rock4,rock5,rock6,rock7}
-DEFINITIONS
+ FROGS = {ffrog1, ffrog2, ffrog3, ffrog4, ffrog5, free, mfrog1, mfrog2, mfrog3, mfrog4, mfrog5}
+/*DEFINITIONS
  GOAL == (positions={1 |-> mfrog1, 2 |-> mfrog2, 3 |-> mfrog3, 4 |-> free,
-               5 |-> ffrog1, 6 |-> ffrog2, 7 |-> ffrog3})
+               5 |-> ffrog1, 6 |-> ffrog2, 7 |-> ffrog3})*/
 CONSTANTS FEMALE_FROGS, MALE_FROGS
 PROPERTIES
- FEMALE_FROGS = {ffrog1, ffrog2, ffrog3} &
- MALE_FROGS = {mfrog1, mfrog2, mfrog3}
+ FEMALE_FROGS = {ffrog1, ffrog2, ffrog3, ffrog4, ffrog5} &
+ MALE_FROGS = {mfrog1, mfrog2, mfrog3, mfrog4, mfrog5}
 VARIABLES positions
 INVARIANT
- positions: 1..7 >->> FROGS
+ positions: 1..11 >->> FROGS
 INITIALISATION
- positions := {1 |-> ffrog1, 2 |-> ffrog2, 3 |-> ffrog3, 4 |-> free,
-               5 |-> mfrog1, 6 |-> mfrog2, 7 |-> mfrog3}
+ positions := {1 |-> ffrog1, 2 |-> ffrog2, 3 |-> ffrog3, 4 |-> ffrog4,
+               5 |-> ffrog5, 6 |-> free, 7 |-> mfrog1, 8 |-> mfrog2,
+               9 |-> mfrog3, 10 |-> mfrog4, 11 |-> mfrog5}
 OPERATIONS
    Move_right(x) = 
   PRE 
