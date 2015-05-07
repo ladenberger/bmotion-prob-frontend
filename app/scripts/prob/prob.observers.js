@@ -278,7 +278,7 @@ define(['prob.api', 'angular', 'xeditable', 'qtip'], function (prob) {
                 apply: function (observer, container, result) {
                     var defer = $q.defer();
                     if (observer.data.trigger !== undefined) {
-                        var element = container.find("[data-bms-id=" + observer.bmsid + "]");
+                        var element = observer.element ? observer.element : container.find("[data-bms-id=" + observer.bmsid + "]");
                         observer.data.trigger.call(this, $(element), result);
                         defer.resolve();
                     } else if (observer.data.getChanges !== undefined) {
