@@ -11,7 +11,18 @@ define(['bmotion.func', 'ui-bootstrap', 'ui-bootstrap-tpls'], function (prob) {
 
             $scope.open = function () {
                 modalInstance = $modal.open({
-                    templateUrl: 'bmsLoadingModal.html',
+                    template: '<div class="modal-header" style="height:40px;">'
+                    + '<button type="button" class="close" data-dismiss="modal" ng-click="close()">'
+                    + '<span aria-hidden="true">&times;</span><span class="sr-only">Close</span>'
+                    + '</button>'
+                    + '</div>'
+                    + '<div class="modal-body">'
+                    + '<p class="bmotion-img-logo"></p>'
+                    + '<p ng-attr-class="{{icon}}"></p>'
+                    + '<div ng-if="msg">'
+                    + '<div class="bmotion-alert alert alert-danger" role="alert">{{msg}}</div>'
+                    + '</div>'
+                    + '</div>',
                     controller: 'bmsLoadingModalInstanceCtrl'
                 });
                 modalInstance.opened.then(function () {
