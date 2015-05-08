@@ -16,6 +16,7 @@ requirejs(['../../app/scripts/bmotion.vis.dev'], function () {
 
                     // Generate places
                     var s = Snap(nr * 50, 45);
+                    s.attr("id", "frog");
                     var xoffset = 0;
                     for (var i = 1; i <= nr; i++) {
                         var place = s.image("free.png", xoffset, 0, 50, 45);

@@ -117,10 +117,16 @@ define(['prob.api', 'tv4', 'prob.common', 'prob.observers', 'prob.modal'], funct
                         if (shouldAdd) {
                             var felement = element ? element : iframe.contents().find(data.selector);
                             felement.each(function (i, e) {
+                                var jElement = $(e);
+                                var bmsid = jElement.attr("data-bms-id");
+                                if (!bmsid) {
+                                    bmsid = prob.uuid();
+                                    jElement.attr("data-bms-id", bmsid);
+                                }
                                 var observer = {
                                     type: type,
                                     data: data,
-                                    bmsid: $(e).attr("data-bms-id"),
+                                    bmsid: bmsid,
                                     element: e
                                 };
                                 bmsObserverService.addObserver($scope.id, observer);

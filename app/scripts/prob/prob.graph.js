@@ -178,10 +178,10 @@ define(['prob.api', 'bms.common', 'prob.observers', 'xeditable', 'cytoscape', 'c
 
                     var container = view.container.clone(true);
                     var observers = template.observers;
-                    var traceId = template.data.traceId;
+                    //var traceId = template.data.traceId;
                     var path = template.data.templatePath;
 
-                    bmsObserverService.checkObservers(observers, container, stateid, traceId).then(function (data) {
+                    bmsObserverService.checkObservers(observers, container, stateid).then(function (data) {
 
                         // Collect attributes and values
                         var fvalues = {};
@@ -202,7 +202,8 @@ define(['prob.api', 'bms.common', 'prob.observers', 'xeditable', 'cytoscape', 'c
                         // Replace image paths with embedded images
                         var imgConvert = [];
                         container.find("image").each(function (i, e) {
-                            var src = $(e).attr("xlink:href");
+                            var src = $(e).attr("xlink:href").attr("href");
+                            console.log(src)
                             imgConvert.push(function () {
                                 var defer = $q.defer();
                                 renderingService.convertImgToBase64(path + "/" + src, function (dataUrl) {
@@ -318,25 +319,34 @@ define(['prob.api', 'bms.common', 'prob.observers', 'xeditable', 'cytoscape', 'c
                             // Replace image paths with embedded images
                             var imgConvert = [];
                             svgWrapper.find("image").each(function (i, e) {
-                                var src = $(e).attr("xlink:href");
-                                imgConvert.push(function () {
+
+                                var jElement = $(e);
+                                var cfn = function (attr, attrVal) {
                                     var defer = $q.defer();
-                                    renderingService.convertImgToBase64(path + "/" + src, function (dataUrl) {
-                                        $(e).attr("xlink:href", dataUrl);
+                                    renderingService.convertImgToBase64(path + "/" + attrVal, function (dataUrl) {
+                                        jElement.attr(attr, dataUrl);
                                         defer.resolve();
                                     });
                                     return defer.promise;
-                                }());
+                                };
+
+                                var xlinkhref = jElement.attr("xlink:href");
+                                var href = jElement.attr("href");
+                                if (xlinkhref) {
+                                    imgConvert.push(cfn("xlink:href", xlinkhref));
+                                }
+                                if (href) {
+                                    imgConvert.push(cfn("href", href));
+                                }
+
                             });
 
                             $q.all(imgConvert).then(function () {
-
-                                if (css !== undefined) {
+                                if (css) {
                                     svgWrapper.prepend(css);
                                 }
                                 var divWrapper = $('<div>').html(svgWrapper);
                                 defer.resolve(divWrapper.html());
-
                             });
 
                         });
@@ -867,7 +877,7 @@ define(['prob.api', 'bms.common', 'prob.observers', 'xeditable', 'cytoscape', 'c
                         if (newValue) {
                             bmsModalService.startLoading();
                             $scope.getData($scope.getVisualisationSelection(), $scope.getSelectedView()).then(function (data) {
-                                $scope.loadData(data).then(function() {
+                                $scope.loadData(data).then(function () {
                                     bmsModalService.endLoading();
                                 });
                             });

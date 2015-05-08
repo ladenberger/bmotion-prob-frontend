@@ -73,6 +73,7 @@ define(['prob.api', 'angular', 'xeditable', 'qtip'], function (prob) {
                     var defer = $q.defer();
                     var observerInstance = $injector.get(observer.type, '');
                     if (observerInstance) {
+                        if (!trigger) trigger = trigger.TRIGGER_ANIMATION_CHANGED;
                         observerInstance.check(observer, container, stateId, trigger, data).then(function (res) {
                             defer.resolve(res);
                         });
@@ -87,6 +88,7 @@ define(['prob.api', 'angular', 'xeditable', 'qtip'], function (prob) {
                     var predicateObservers = [];
                     var promises = [];
 
+                    if (!trigger) trigger = trigger.TRIGGER_ANIMATION_CHANGED;
                     observerService.hideErrors(container);
 
                     angular.forEach(observers, function (o) {
@@ -296,7 +298,7 @@ define(['prob.api', 'angular', 'xeditable', 'qtip'], function (prob) {
                 apply: function (observer, container, result) {
                     var defer = $q.defer();
                     if (observer.data.trigger !== undefined) {
-                        var element = observer.element ? observer.element : container.find("[data-bms-id=" + observer.bmsid + "]");
+                        var element = container.find("[data-bms-id=" + observer.bmsid + "]");
                         observer.data.trigger.call(this, $(element), result);
                         defer.resolve();
                     } else if (observer.data.getChanges !== undefined) {
