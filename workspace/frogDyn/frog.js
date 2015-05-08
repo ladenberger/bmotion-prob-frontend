@@ -1,6 +1,6 @@
 requirejs(['../../app/scripts/bmotion.vis.dev'], function () {
 
-    requirejs(['snap.svg-min.js'], function (Snap) {
+    requirejs(['libs/snap.svg-min.js'], function (Snap) {
 
         var initialised = false;
 
