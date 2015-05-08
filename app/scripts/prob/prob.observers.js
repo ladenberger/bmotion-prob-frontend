@@ -87,7 +87,7 @@ define(['prob.api', 'angular', 'xeditable', 'qtip'], function (prob) {
                     var predicateObservers = [];
                     var promises = [];
 
-                    observerService.hideErrors();
+                    observerService.hideErrors(container);
 
                     angular.forEach(observers, function (o) {
                         if (o.type === 'formula') {
@@ -123,16 +123,15 @@ define(['prob.api', 'angular', 'xeditable', 'qtip'], function (prob) {
                     return defer.promise;
 
                 },
-                hideErrors: function () {
+                hideErrors: function (container) {
                     if (hasErrors) {
-                        $('[data-hasqtip]').qtip('destroy');
+                        container.find('[data-hasqtip]').qtip('destroy');
                     }
                     hasErrors = false;
                 },
                 showError: function (element, type, error) {
-                    if (!element.get(0)) {
-                        element = $('body');
-                    }
+
+                    if (!element.get(0)) element = $('body');
                     // TODO: check if element exists, if not attached qtip to root element (e.g. body)
                     if (!element.data('qtip-error')) {
                         element.qtip({ // Grab some elements to apply the tooltip to
@@ -348,9 +347,9 @@ define(['prob.api', 'angular', 'xeditable', 'qtip'], function (prob) {
                                 angular.forEach(o.data.formulas, function (f) {
                                     var formula = data[f];
                                     if (formula.error) {
-                                        var e = observer.element ? o.element : container.find("[data-bms-id=" + o.bmsid + "]");
+                                        var e = o.element ? o.element : container.find("[data-bms-id=" + o.bmsid + "]");
                                         var msg = "Formula: " + formula + ", Message: " + formula.error;
-                                        bmsObserverService.showError(e, 'Formula Observer', msg);
+                                        bmsObserverService.showError($(e), 'Formula Observer', msg);
                                         ff.push(null);
                                     } else {
                                         if (data[f]) {

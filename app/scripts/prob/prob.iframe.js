@@ -2,10 +2,10 @@
  * BMotion Studio for ProB IFrame Module
  *
  */
-define(['prob.api', 'prob.common', 'prob.observers', 'prob.modal'], function (prob) {
+define(['prob.api', 'tv4', 'prob.common', 'prob.observers', 'prob.modal'], function (prob, tv4) {
 
     var module = angular.module('prob.iframe', ['prob.common', 'prob.observers', 'prob.modal'])
-        .directive('bmsVisualisationView', ['bmsMainService', '$rootScope', 'bmsVisualisationService', '$compile', 'bmsObserverService', '$http', 'initSession', 'ws', '$injector', 'bmsUIService', 'bmsModalService', 'trigger', function (bmsMainService, $rootScope, bmsVisualisationService, $compile, bmsObserverService, $http, initSession, ws, $injector, bmsUIService, bmsModalService, trigger) {
+        .directive('bmsVisualisationView', ['bmsMainService', '$rootScope', 'bmsVisualisationService', '$compile', 'bmsObserverService', '$http', 'initSession', 'ws', '$injector', 'bmsUIService', 'bmsModalService', 'manifest', 'trigger', function (bmsMainService, $rootScope, bmsVisualisationService, $compile, bmsObserverService, $http, initSession, ws, $injector, bmsUIService, bmsModalService, manifest, trigger) {
             return {
                 replace: false,
                 scope: true,
@@ -28,57 +28,69 @@ define(['prob.api', 'prob.common', 'prob.observers', 'prob.modal'], function (pr
                                 // Get properties from configuration file
                                 $http.get(template).success(function (data) {
 
-                                    if (data.model && data.tool) {
+                                    if (tv4.validate(data, manifest.MANIFEST_SCHEME)) {
 
-                                        // Load model
-                                        initSession.init({
-                                            model: data.model,
-                                            tool: data.tool,
-                                            path: path
-                                        }).then(function (r) {
-                                            $scope.refinements = r.refinements;
-                                            $scope.stateId = r.stateId;
-                                            $scope.traceId = r.traceId;
-                                            data.traceId = r.traceId;
-                                            data.refinements = r.refinements;
-                                            var jiframe = $(iframe);
-                                            var filename = template.replace(/^.*[\\\/]/, '');
-                                            var templatePath = template.replace(filename, '');
-                                            jiframe.attr('src', templatePath + data.template);
-                                            jiframe.load(function () {
-                                                $rootScope.currentVisualisation = $scope.id;
-                                                data.uuid = $scope.id;
-                                                data.container = jiframe;
-                                                data.path = path;
-                                                data.templatePath = templatePath;
-                                                $scope.container = jiframe;
-                                                bmsVisualisationService.addVisualisation($scope.id, data);
-                                                bmsUIService.setProBViewTraceId($scope.traceId);
-                                                ws.on('checkObserver', function (trigger, data) {
-                                                    var stateId = data.stateId;
-                                                    var traceId = data.traceId;
-                                                    if ($scope.traceId == traceId) {
-                                                        $scope.checkObservers(stateId, trigger);
-                                                    }
+                                        if (data.model && data.tool) {
+
+                                            // Load model
+                                            initSession.init({
+                                                model: data.model,
+                                                tool: data.tool,
+                                                path: path
+                                            }).then(function (r) {
+                                                $scope.refinements = r.refinements;
+                                                $scope.stateId = r.stateId;
+                                                $scope.traceId = r.traceId;
+                                                $scope.initialised = r.initialised;
+                                                data.traceId = r.traceId;
+                                                data.refinements = r.refinements;
+                                                var jiframe = $(iframe);
+                                                var filename = template.replace(/^.*[\\\/]/, '');
+                                                var templatePath = template.replace(filename, '');
+                                                jiframe.attr('src', templatePath + data.template);
+                                                jiframe.load(function () {
+                                                    $rootScope.currentVisualisation = $scope.id;
+                                                    data.uuid = $scope.id;
+                                                    data.container = jiframe;
+                                                    data.path = path;
+                                                    data.templatePath = templatePath;
+                                                    $scope.container = jiframe;
+                                                    bmsVisualisationService.addVisualisation($scope.id, data);
+                                                    bmsUIService.setProBViewTraceId($scope.traceId);
+                                                    ws.on('checkObserver', function (cause, data) {
+                                                        var stateId = data.stateId;
+                                                        var traceId = data.traceId;
+                                                        $scope.stateId = stateId;
+                                                        if (cause === trigger.TRIGGER_MODEL_INITIALISED) {
+                                                            $scope.initialised = true;
+                                                        }
+                                                        if ($scope.traceId == traceId) {
+                                                            $scope.checkObservers(stateId, cause);
+                                                        }
+                                                    });
+                                                    bmsModalService.endLoading();
                                                 });
-                                                bmsModalService.endLoading();
+                                            }, function (errors) {
+                                                bmsModalService.setError(errors);
                                             });
-                                        }, function (errors) {
-                                            bmsModalService.setError(errors);
-                                        });
 
+                                        }
+
+                                    } else {
+                                        bmsModalService.setError("BMotion manifest file invalid (bmotion.json): " + tv4.error.message);
                                     }
-
                                 }).error(function (data, status, headers, config) {
                                     if (status === 404) {
-                                        bmsModalService.setError("BMotion Studio: File not found: " + config.url);
+                                        bmsModalService.setError("File not found: " + config.url);
                                     } else {
-                                        bmsModalService.setError("BMotion Studio: Some error occurred while requesting file " + config.url + " " + status);
+                                        bmsModalService.setError("Some error occurred while requesting file " + config.url);
                                     }
                                 });
 
                             });
 
+                        } else {
+                            bmsModalService.setError("No template specified");
                         }
 
                     };
@@ -112,7 +124,7 @@ define(['prob.api', 'prob.common', 'prob.observers', 'prob.modal'], function (pr
                                     element: e
                                 };
                                 bmsObserverService.addObserver($scope.id, observer);
-                                if ($scope.stateId !== 'root') {
+                                if ($scope.stateId !== 'root' && $scope.initialised) {
                                     $scope.checkObserver(observer, $scope.stateId, data.cause);
                                 }
                             });

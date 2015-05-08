@@ -25,7 +25,8 @@ requirejs.config({
         "prob.jquery": "prob/prob.jquery",
         "prob.observers": "prob/prob.observers",
         "prob.api": "prob/prob.api",
-        "qtip": "vendor/qtip2/jquery.qtip"
+        "qtip": "vendor/qtip2/jquery.qtip",
+        "tv4": "vendor/tv4/tv4"
     },
     shim: {
         "angular": {"exports": "angular"},
@@ -44,6 +45,7 @@ requirejs.config({
             deps: ["jquery"]
         },
         "cytoscape.navigator": ["cytoscape"],
+        "prob.iframe": ['prob.modal', 'tv4'],
         "prob.standalone": ['prob.graph', 'prob.ui', 'prob.iframe', 'prob.jquery'],
         "prob.graph": ['prob.api', 'angular', 'jquery', 'xeditable', 'cytoscape', 'cytoscape.navigator'],
         "prob.api": {

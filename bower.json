@@ -16,6 +16,7 @@
     "cytoscape": "2.3.9",
     "angular-xeditable": "0.1.8",
     "qtip2": "latest",
-    "angular-bootstrap": "latest"
+    "angular-bootstrap": "latest",
+    "tv4": "latest"
   }
 }
