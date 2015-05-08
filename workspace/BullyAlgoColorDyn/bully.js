@@ -1,6 +1,6 @@
-requirejs(['../../app/scripts/bmotion.vis.dev', 'joint-wrapper'], function () {
+requirejs(['../../app/scripts/bmotion.vis.dev'], function () {
 
-    requirejs(['joint-wrapper'], function () {
+    requirejs(['joint-wrapper.js'], function () {
 
         var dd = false;
 
