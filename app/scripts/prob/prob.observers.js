@@ -5,7 +5,7 @@
 define(['prob.api', 'angular', 'xeditable', 'qtip'], function (prob) {
 
     return angular.module('prob.observers', ['bms.common', 'prob.modal'])
-        .service('bmsObserverService', ['$q', '$injector', function ($q, $injector) {
+        .service('bmsObserverService', ['$q', '$injector', 'trigger', function ($q, $injector, trigger) {
             var observers = {};
             var events = {};
             var bmsidCache = {};
@@ -69,18 +69,18 @@ define(['prob.api', 'angular', 'xeditable', 'qtip'], function (prob) {
                     }
                     return bmsidCache[bmsid][selector];
                 },
-                checkObserver: function (observer, container, stateId, trigger, data) {
+                checkObserver: function (observer, container, stateId, cause, data) {
                     var defer = $q.defer();
                     var observerInstance = $injector.get(observer.type, '');
                     if (observerInstance) {
-                        if (!trigger) trigger = trigger.TRIGGER_ANIMATION_CHANGED;
-                        observerInstance.check(observer, container, stateId, trigger, data).then(function (res) {
+                        if (!cause) cause = trigger.TRIGGER_ANIMATION_CHANGED;
+                        observerInstance.check(observer, container, stateId, cause, data).then(function (res) {
                             defer.resolve(res);
                         });
                     }
                     return defer.promise;
                 },
-                checkObservers: function (observers, container, stateId, trigger, data) {
+                checkObservers: function (observers, container, stateId, cause, data) {
 
                     var defer = $q.defer();
 
@@ -88,7 +88,7 @@ define(['prob.api', 'angular', 'xeditable', 'qtip'], function (prob) {
                     var predicateObservers = [];
                     var promises = [];
 
-                    if (!trigger) trigger = trigger.TRIGGER_ANIMATION_CHANGED;
+                    if (!cause) cause = trigger.TRIGGER_ANIMATION_CHANGED;
                     observerService.hideErrors(container);
 
                     angular.forEach(observers, function (o) {
@@ -99,7 +99,7 @@ define(['prob.api', 'angular', 'xeditable', 'qtip'], function (prob) {
                         } else {
                             var observerInstance = $injector.get(o.type, "");
                             if (observerInstance) {
-                                promises.push(observerInstance.check(o, container, stateId, trigger, data));
+                                promises.push(observerInstance.check(o, container, stateId, cause, data));
                             }
                         }
                     });
@@ -108,14 +108,14 @@ define(['prob.api', 'angular', 'xeditable', 'qtip'], function (prob) {
                     if (!$.isEmptyObject(formulaObservers)) {
                         // Execute formula observer at once (performance boost)
                         var observerInstance = $injector.get("formula", "");
-                        promises.push(observerInstance.check(formulaObservers, container, stateId, trigger, data));
+                        promises.push(observerInstance.check(formulaObservers, container, stateId, cause, data));
                     }
 
                     // Special case for predicate observers
                     if (!$.isEmptyObject(predicateObservers)) {
                         // Execute predicate observer at once (performance boost)
                         var observerInstance = $injector.get("predicate", "");
-                        promises.push(observerInstance.check(predicateObservers, container, stateId, trigger, data));
+                        promises.push(observerInstance.check(predicateObservers, container, stateId, cause, data));
                     }
 
                     $q.all(promises).then(function (res) {

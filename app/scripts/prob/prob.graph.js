@@ -163,6 +163,34 @@ define(['prob.api', 'bms.common', 'prob.observers', 'xeditable', 'cytoscape', 'c
                     };
                     img.src = url;
                 },
+                convertSvgImagePaths: function (path, container) {
+                    var defer = $q.defer();
+                    // Replace image paths with embedded images
+                    var imgConvert = [];
+                    var cfn = function (el, attr, attrVal) {
+                        var defer = $q.defer();
+                        renderingService.convertImgToBase64(path + "/" + attrVal, function (dataUrl) {
+                            el.attr(attr, dataUrl);
+                            defer.resolve();
+                        });
+                        return defer.promise;
+                    };
+                    container.find("image").each(function (i, e) {
+                        var jElement = $(e);
+                        var xlinkhref = jElement.attr("xlink:href");
+                        var href = jElement.attr("href");
+                        if (xlinkhref) {
+                            imgConvert.push(cfn(jElement, "xlink:href", xlinkhref));
+                        }
+                        if (href) {
+                            imgConvert.push(cfn(jElement, "href", href));
+                        }
+                    });
+                    $q.all(imgConvert).then(function () {
+                        defer.resolve();
+                    });
+                    return defer.promise;
+                },
                 getEmptySnapshotDataUrl: function () {
                     var defer = $q.defer();
                     defer.resolve({
@@ -200,26 +228,11 @@ define(['prob.api', 'bms.common', 'prob.observers', 'xeditable', 'cytoscape', 'c
                         }
 
                         // Replace image paths with embedded images
-                        var imgConvert = [];
-                        container.find("image").each(function (i, e) {
-                            var src = $(e).attr("xlink:href").attr("href");
-                            console.log(src)
-                            imgConvert.push(function () {
-                                var defer = $q.defer();
-                                renderingService.convertImgToBase64(path + "/" + src, function (dataUrl) {
-                                    $(e).attr("xlink:href", dataUrl);
-                                    defer.resolve();
-                                });
-                                return defer.promise;
-                            }());
-                        });
-
-                        $q.all(imgConvert).then(function () {
+                        renderingService.convertSvgImagePaths(path, container).then(function () {
                             if (css !== undefined) {
                                 container.prepend(css);
                             }
-                            var divWrapper = $('<div>').html(container);
-                            defer.resolve(divWrapper.html());
+                            defer.resolve($('<div>').html(container).html());
                         });
 
                     });
@@ -317,36 +330,11 @@ define(['prob.api', 'bms.common', 'prob.observers', 'xeditable', 'cytoscape', 'c
                             var svgWrapper = $('<svg xmlns="http://www.w3.org/2000/svg" style="background-color:white" xmlns:xlink="http://www.w3.org/1999/xlink" style="background-color:white" width="1000" height="1000">').html(screenEle);
 
                             // Replace image paths with embedded images
-                            var imgConvert = [];
-                            svgWrapper.find("image").each(function (i, e) {
-
-                                var jElement = $(e);
-                                var cfn = function (attr, attrVal) {
-                                    var defer = $q.defer();
-                                    renderingService.convertImgToBase64(path + "/" + attrVal, function (dataUrl) {
-                                        jElement.attr(attr, dataUrl);
-                                        defer.resolve();
-                                    });
-                                    return defer.promise;
-                                };
-
-                                var xlinkhref = jElement.attr("xlink:href");
-                                var href = jElement.attr("href");
-                                if (xlinkhref) {
-                                    imgConvert.push(cfn("xlink:href", xlinkhref));
-                                }
-                                if (href) {
-                                    imgConvert.push(cfn("href", href));
-                                }
-
-                            });
-
-                            $q.all(imgConvert).then(function () {
-                                if (css) {
+                            renderingService.convertSvgImagePaths(path, svgWrapper).then(function () {
+                                if (css !== undefined) {
                                     svgWrapper.prepend(css);
                                 }
-                                var divWrapper = $('<div>').html(svgWrapper);
-                                defer.resolve(divWrapper.html());
+                                defer.resolve($('<div>').html(svgWrapper).html());
                             });
 
                         });
