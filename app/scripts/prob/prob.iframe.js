@@ -2,10 +2,10 @@
  * BMotion Studio for ProB IFrame Module
  *
  */
-define(['prob.api', 'bms.common', 'prob.observers', 'prob.modal'], function (prob) {
+define(['prob.api', 'prob.common', 'prob.observers', 'prob.modal'], function (prob) {
 
-    var module = angular.module('prob.iframe', ['bms.common', 'prob.observers', 'prob.modal'])
-        .directive('bmsVisualisationView', ['bmsMainService', '$rootScope', 'bmsVisualisationService', '$compile', 'bmsObserverService', '$http', 'loadModel', 'ws', '$injector', 'bmsUIService', 'bmsModalService', function (bmsMainService, $rootScope, bmsVisualisationService, $compile, bmsObserverService, $http, loadModel, ws, $injector, bmsUIService, bmsModalService) {
+    var module = angular.module('prob.iframe', ['prob.common', 'prob.observers', 'prob.modal'])
+        .directive('bmsVisualisationView', ['bmsMainService', '$rootScope', 'bmsVisualisationService', '$compile', 'bmsObserverService', '$http', 'initSession', 'ws', '$injector', 'bmsUIService', 'bmsModalService', 'trigger', function (bmsMainService, $rootScope, bmsVisualisationService, $compile, bmsObserverService, $http, initSession, ws, $injector, bmsUIService, bmsModalService, trigger) {
             return {
                 replace: false,
                 scope: true,
@@ -31,13 +31,13 @@ define(['prob.api', 'bms.common', 'prob.observers', 'prob.modal'], function (pro
                                     if (data.model && data.tool) {
 
                                         // Load model
-                                        loadModel.load({
+                                        initSession.init({
                                             model: data.model,
                                             tool: data.tool,
                                             path: path
                                         }).then(function (r) {
                                             $scope.refinements = r.refinements;
-                                            $scope.stateid = r.stateid;
+                                            $scope.stateId = r.stateId;
                                             $scope.traceId = r.traceId;
                                             data.traceId = r.traceId;
                                             data.refinements = r.refinements;
@@ -54,9 +54,11 @@ define(['prob.api', 'bms.common', 'prob.observers', 'prob.modal'], function (pro
                                                 $scope.container = jiframe;
                                                 bmsVisualisationService.addVisualisation($scope.id, data);
                                                 bmsUIService.setProBViewTraceId($scope.traceId);
-                                                ws.on('checkObserver', function (data) {
-                                                    if (data.stateid !== undefined && $scope.traceId == data.traceId) {
-                                                        $scope.setStateId(data.stateid);
+                                                ws.on('checkObserver', function (trigger, data) {
+                                                    var stateId = data.stateId;
+                                                    var traceId = data.traceId;
+                                                    if ($scope.traceId == traceId) {
+                                                        $scope.checkObservers(stateId, trigger);
                                                     }
                                                 });
                                                 bmsModalService.endLoading();
@@ -85,9 +87,9 @@ define(['prob.api', 'bms.common', 'prob.observers', 'prob.modal'], function (pro
                     var fromParameter = prob.getUrlParameter("template");
                     $scope.openTemplate(fromParameter ? fromParameter : attrs["bmsVisualisationView"]);
 
-                    $scope.$on('reloadVisualisation', function (evt, id) {
-                        $scope.setStateId($scope.stateid);
-                    });
+                    /*$scope.$on('reloadVisualisation', function (evt, id) {
+                     $scope.setStateId($scope.stateId);
+                     });*/
 
                     $scope.$on('openTemplate', function (evt, template) {
                         $scope.openTemplate(template);
@@ -110,12 +112,8 @@ define(['prob.api', 'bms.common', 'prob.observers', 'prob.modal'], function (pro
                                     element: e
                                 };
                                 bmsObserverService.addObserver($scope.id, observer);
-                                if ($scope.stateid !== 'root') {
-                                    bmsObserverService.checkObserver(observer, $scope.container.contents(), $scope.stateid, $scope.traceId, $scope.id).then(function (data) {
-                                        if (!prob.isEmpty(data)) {
-                                            $scope.$broadcast('setValue', data);
-                                        }
-                                    });
+                                if ($scope.stateId !== 'root') {
+                                    $scope.checkObserver(observer, $scope.stateId, data.cause);
                                 }
                             });
                         }
@@ -145,15 +143,24 @@ define(['prob.api', 'bms.common', 'prob.observers', 'prob.modal'], function (pro
                         }
                     };
 
-                    $scope.setStateId = function (stateid) {
+                    $scope.checkObserver = function (observer, stateId, trigger) {
+
+                        bmsObserverService.checkObserver(observer, $scope.container.contents(), stateId, trigger).then(function (data) {
+                            if (!prob.isEmpty(data)) {
+                                $scope.$broadcast('setValue', data);
+                            }
+                        });
+
+                    };
+
+                    $scope.checkObservers = function (stateId, trigger) {
 
                         var observers = bmsObserverService.getObservers($scope.id);
 
-                        if (observers && stateid) {
+                        if (observers && stateId && trigger) {
 
-                            $scope.stateid = stateid;
                             // Collect values from observers
-                            bmsObserverService.checkObservers(observers, $scope.container.contents(), stateid, $scope.traceId, $scope.id).then(function (data) {
+                            bmsObserverService.checkObservers(observers, $scope.container.contents(), stateId, trigger).then(function (data) {
                                 var fvalues = {};
                                 angular.forEach(data, function (value) {
                                     if (value !== undefined) {

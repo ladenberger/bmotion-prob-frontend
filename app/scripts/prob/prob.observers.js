@@ -69,17 +69,17 @@ define(['prob.api', 'angular', 'xeditable', 'qtip'], function (prob) {
                     }
                     return bmsidCache[bmsid][selector];
                 },
-                checkObserver: function (observer, container, stateid, traceId, visId) {
+                checkObserver: function (observer, container, stateId, trigger, data) {
                     var defer = $q.defer();
-                    var observerInstance = $injector.get(observer.type, "");
+                    var observerInstance = $injector.get(observer.type, '');
                     if (observerInstance) {
-                        observerInstance.check(observer, container, stateid, traceId, visId).then(function (data) {
-                            defer.resolve(data);
+                        observerInstance.check(observer, container, stateId, trigger, data).then(function (res) {
+                            defer.resolve(res);
                         });
                     }
                     return defer.promise;
                 },
-                checkObservers: function (observers, container, stateid, traceId, visId) {
+                checkObservers: function (observers, container, stateId, trigger, data) {
 
                     var defer = $q.defer();
 
@@ -97,7 +97,7 @@ define(['prob.api', 'angular', 'xeditable', 'qtip'], function (prob) {
                         } else {
                             var observerInstance = $injector.get(o.type, "");
                             if (observerInstance) {
-                                promises.push(observerInstance.check(o, container, stateid, traceId, visId));
+                                promises.push(observerInstance.check(o, container, stateId, trigger, data));
                             }
                         }
                     });
@@ -106,18 +106,18 @@ define(['prob.api', 'angular', 'xeditable', 'qtip'], function (prob) {
                     if (!$.isEmptyObject(formulaObservers)) {
                         // Execute formula observer at once (performance boost)
                         var observerInstance = $injector.get("formula", "");
-                        promises.push(observerInstance.check(formulaObservers, container, stateid, traceId, visId));
+                        promises.push(observerInstance.check(formulaObservers, container, stateId, trigger, data));
                     }
 
                     // Special case for predicate observers
                     if (!$.isEmptyObject(predicateObservers)) {
                         // Execute predicate observer at once (performance boost)
                         var observerInstance = $injector.get("predicate", "");
-                        promises.push(observerInstance.check(predicateObservers, container, stateid, traceId, visId));
+                        promises.push(observerInstance.check(predicateObservers, container, stateId, trigger, data));
                     }
 
-                    $q.all(promises).then(function (data) {
-                        defer.resolve(data);
+                    $q.all(promises).then(function (res) {
+                        defer.resolve(res);
                     });
 
                     return defer.promise;
@@ -161,7 +161,9 @@ define(['prob.api', 'angular', 'xeditable', 'qtip'], function (prob) {
                         element.data('qtip-error', true)
                     }
                     var api = element.qtip('api');
-                    api.set('content.text', '<p><span style="font-weight:bold">' + type + '</span>: ' + error + '</p>' + api.get('content.text'));
+                    if (api) {
+                        api.set('content.text', '<p><span style="font-weight:bold">' + type + '</span>: ' + error + '</p>' + api.get('content.text'));
+                    }
                     hasErrors = true;
                 }
             };
@@ -220,15 +222,15 @@ define(['prob.api', 'angular', 'xeditable', 'qtip'], function (prob) {
             };
 
             return {
-                check: function (observer, container, stateId, traceId) {
+                check: function (observer, container, stateId, trigger, data) {
 
                     var defer = $q.defer();
 
-                    getExpression(observer, stateId, traceId).then(function (expressions) {
+                    getExpression(observer, stateId).then(function (expressions) {
 
                         ws.emit("getHistory", {
                             data: {
-                                traceId: traceId
+                                stateId: stateId
                             }
                         }, function (data) {
 
@@ -240,9 +242,13 @@ define(['prob.api', 'angular', 'xeditable', 'qtip'], function (prob) {
 
                                     var events = [];
                                     if (o.exp) {
-                                        events = expressions[o.exp].trans;
-                                    } else if (o.events) {
-                                        events = o.events;
+                                        var eventsFromExp = expressions[o.exp].trans;
+                                        if (eventsFromExp) {
+                                            events = events.concat(eventsFromExp);
+                                        }
+                                    }
+                                    if (o.events) {
+                                        events = events.concat(o.events);
                                     }
 
                                     if ($.inArray(t.name, events) > -1) {
@@ -309,7 +315,7 @@ define(['prob.api', 'angular', 'xeditable', 'qtip'], function (prob) {
                     }
                     return defer.promise;
                 },
-                check: function (observer, element, stateId, traceId) {
+                check: function (observer, container, stateId, trigger) {
 
                     var defer = $q.defer();
 
@@ -318,39 +324,42 @@ define(['prob.api', 'angular', 'xeditable', 'qtip'], function (prob) {
                     // Collect formulas
                     var formulas = [];
                     angular.forEach(observers, function (o) {
-                        angular.forEach(o.data.formulas, function (f) {
-                            formulas.push({
-                                formula: f,
-                                translate: o.data.translate ? o.data.translate : false
+                        if (o.data.cause === trigger) {
+                            angular.forEach(o.data.formulas, function (f) {
+                                formulas.push({
+                                    formula: f,
+                                    translate: o.data.translate ? o.data.translate : false
+                                });
                             });
-                        });
+                        }
                     });
 
                     // Evaluate formulas
                     ws.emit("evaluateFormulas", {
                         data: {
                             formulas: formulas,
-                            stateId: stateId,
-                            traceId: traceId
+                            stateId: stateId
                         }
                     }, function (data) {
                         var promises = [];
                         angular.forEach(observers, function (o) {
-                            var ff = [];
-                            angular.forEach(o.data.formulas, function (f) {
-                                var formula = data[f];
-                                if (formula.error) {
-                                    var e = element.find("[data-bms-id=" + o.bmsid + "]");
-                                    var msg = "Formula: " + formula + ", Message: " + formula.error;
-                                    bmsObserverService.showError(e, 'Formula Observer', msg);
-                                    ff.push(null);
-                                } else {
-                                    if (data[f]) {
-                                        ff.push(data[f].trans ? data[f].trans : data[f].result);
+                            if (o.data.cause === trigger) {
+                                var ff = [];
+                                angular.forEach(o.data.formulas, function (f) {
+                                    var formula = data[f];
+                                    if (formula.error) {
+                                        var e = observer.element ? o.element : container.find("[data-bms-id=" + o.bmsid + "]");
+                                        var msg = "Formula: " + formula + ", Message: " + formula.error;
+                                        bmsObserverService.showError(e, 'Formula Observer', msg);
+                                        ff.push(null);
+                                    } else {
+                                        if (data[f]) {
+                                            ff.push(data[f].trans ? data[f].trans : data[f].result);
+                                        }
                                     }
-                                }
-                            });
-                            promises.push(formulaObserver.apply(o, element, ff));
+                                });
+                                promises.push(formulaObserver.apply(o, container, ff));
+                            }
                         });
                         var fvalues = {};
                         $q.all(promises).then(function (data) {
@@ -375,12 +384,12 @@ define(['prob.api', 'angular', 'xeditable', 'qtip'], function (prob) {
         .service('refinement', ['ws', '$q', 'bmsVisualisationService', function (ws, $q, bmsVisualisationService) {
 
             return {
-                check: function (observer, element, stateId, traceId, visId) {
+                check: function (observer, container, stateId, trigger, data) {
 
                     var defer = $q.defer();
 
                     //TODO: Check refinement observer only once!
-                    var vis = bmsVisualisationService.getVisualisation(visId);
+                    var vis = bmsVisualisationService.getVisualisation(data.visId);
                     var refinements = vis.refinements;
 
                     if (refinements) {
@@ -442,17 +451,26 @@ define(['prob.api', 'angular', 'xeditable', 'qtip'], function (prob) {
                     defer.resolve(obj);
                     return defer.promise;
                 },
-                check: function (observers, element, stateid, traceid) {
+                check: function (observers, container, stateId, trigger) {
                     var defer = $q.defer();
                     var promises = [];
                     //var startWebsocket = new Date().getTime();
+
+                    // Collect formulas
+                    var formulas = [];
+                    angular.forEach(observers, function (o) {
+                        if (o.data.cause === trigger) {
+                            formulas.push({
+                                formula: o.data.predicate,
+                                translate: o.data.translate ? o.data.translate : false
+                            });
+                        }
+                    });
+
                     ws.emit("evaluateFormulas", {
                         data: {
-                            formulas: observers.map(function (o) {
-                                return o.data.predicate;
-                            }),
-                            stateId: stateid,
-                            traceId: traceid
+                            formulas: formulas,
+                            stateId: stateId
                         }
                     }, function (data) {
                         //var end = new Date().getTime();
@@ -460,9 +478,11 @@ define(['prob.api', 'angular', 'xeditable', 'qtip'], function (prob) {
                         //console.log('WEBSOCKET: ' + time);
                         //var startPredicate = new Date().getTime();
                         angular.forEach(observers, function (o) {
-                            var r = data[o.data.predicate];
-                            if (r) {
-                                promises.push(predicateObserver.apply(o, element, [r.result]));
+                            if (o.data.cause === trigger) {
+                                var r = data[o.data.predicate];
+                                if (r) {
+                                    promises.push(predicateObserver.apply(o, container, [r.result]));
+                                }
                             }
                         });
                         //var endPredicate = new Date().getTime();

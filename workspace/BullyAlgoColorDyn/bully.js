@@ -100,15 +100,6 @@ requirejs(['../../app/scripts/bmotion.vis.dev', 'joint-wrapper'], function () {
             observers: [
                 {
                     events: ["Network"],
-                    actions: [
-                        {
-                            selector: ".link",
-                            attr: "class",
-                            value: "link hidden"
-                        }
-                    ]
-                },
-                {
                     exp: "Events",
                     actions: [
                         {

@@ -99,11 +99,11 @@ define(['socketio', 'angular-route'], function (io) {
                     }
                 };
             }])
-            .factory('loadModel', ['$q', 'ws', function ($q, ws) {
+            .factory('initSession', ['$q', 'ws', function ($q, ws) {
                 return {
-                    load: function (data) {
+                    init: function (data) {
                         var defer = $q.defer();
-                        ws.emit('loadModel', {data: data}, function (r) {
+                        ws.emit('initSession', {data: data}, function (r) {
                             if (r.errors) {
                                 defer.reject(r.errors)
                             } else {

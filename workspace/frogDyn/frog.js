@@ -2,14 +2,15 @@ requirejs(['../../app/scripts/bmotion.vis.dev'], function () {
 
     requirejs(['snap.svg-min.js'], function (Snap) {
 
-        var dd = false;
+        var initialised = false;
 
         $('body').observe("formula", {
             formulas: ["card(positions)"],
             translate: true,
+            cause: "ModelInitialised",
             trigger: function (origin, r) {
 
-                if (r[0] && !dd) {
+                if (r[0] && !initialised) {
 
                     var nr = r[0];
 
@@ -61,7 +62,7 @@ requirejs(['../../app/scripts/bmotion.vis.dev'], function () {
                             });
                     }
 
-                    dd = true;
+                    initialised = true;
 
                 }
 
