@@ -28,7 +28,8 @@
         "prob.jquery": "prob/prob.jquery",
         "prob.observers": "prob/prob.observers",
         "prob.api": "prob/prob.api",
-        "qtip": "vendor/qtip2/jquery.qtip"
+        "qtip": "vendor/qtip2/jquery.qtip",
+        "tv4": "vendor/tv4/tv4"
     },
     shim: {
         "angular": {"exports": "angular"},
