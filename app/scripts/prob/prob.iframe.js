@@ -16,7 +16,8 @@ define(['prob.api', 'tv4', 'prob.common', 'prob.observers', 'prob.modal'], funct
 
                     var iframe = $element.contents();
                     $scope.id = attrs['bmsId'] ? attrs['bmsId'] : prob.uuid();
-                    iframe.attr("data-bms-id", $scope.id).attr("id", $scope.id);
+                    iframe.attr("data-bms-id", $scope.id);
+                    iframe.attr("id", $scope.id);
 
                     $scope.openTemplate = function (template) {
 
@@ -36,21 +37,23 @@ define(['prob.api', 'tv4', 'prob.common', 'prob.observers', 'prob.modal'], funct
                                             initSession.init({
                                                 model: data.model,
                                                 tool: data.tool,
+                                                id: $scope.id,
                                                 path: path
                                             }).then(function (r) {
                                                 $scope.refinements = r.refinements;
                                                 $scope.stateId = r.stateId;
                                                 $scope.traceId = r.traceId;
                                                 $scope.initialised = r.initialised;
+                                                $scope.id = $scope.id;
                                                 data.traceId = r.traceId;
                                                 data.refinements = r.refinements;
                                                 var jiframe = $(iframe);
                                                 var filename = template.replace(/^.*[\\\/]/, '');
                                                 var templatePath = template.replace(filename, '');
-                                                jiframe.attr('src', templatePath + data.template);
+                                                jiframe.attr('src', templatePath + data.template).attr('id', r.id);
                                                 jiframe.load(function () {
                                                     $rootScope.currentVisualisation = $scope.id;
-                                                    data.uuid = $scope.id;
+                                                    data.id = $scope.id;
                                                     data.container = jiframe;
                                                     data.path = path;
                                                     data.templatePath = templatePath;
@@ -65,7 +68,7 @@ define(['prob.api', 'tv4', 'prob.common', 'prob.observers', 'prob.modal'], funct
                                                             $scope.initialised = true;
                                                         }
                                                         if ($scope.traceId == traceId) {
-                                                            $scope.checkObservers(stateId, cause);
+                                                            $scope.checkObservers($scope.id, stateId, cause);
                                                         }
                                                     });
                                                     bmsModalService.endLoading();
@@ -131,7 +134,7 @@ define(['prob.api', 'tv4', 'prob.common', 'prob.observers', 'prob.modal'], funct
                                 };
                                 bmsObserverService.addObserver($scope.id, observer);
                                 if ($scope.stateId !== 'root' && $scope.initialised) {
-                                    $scope.checkObserver(observer, $scope.stateId, data.cause);
+                                    $scope.checkObserver($scope.id, observer, $scope.stateId, data.cause);
                                 }
                             });
                         }
@@ -156,14 +159,14 @@ define(['prob.api', 'tv4', 'prob.common', 'prob.observers', 'prob.modal'], funct
                             bmsObserverService.addEvent($scope.id, event);
                             var instance = $injector.get(type, "");
                             if (instance) {
-                                instance.setup(event, iframe, $scope.traceId);
+                                instance.setup($scope.id, event, iframe, $scope.traceId);
                             }
                         }
                     };
 
-                    $scope.checkObserver = function (observer, stateId, trigger) {
+                    $scope.checkObserver = function (id, observer, stateId, trigger) {
 
-                        bmsObserverService.checkObserver(observer, $scope.container.contents(), stateId, trigger).then(function (data) {
+                        bmsObserverService.checkObserver(id, observer, $scope.container.contents(), stateId, trigger).then(function (data) {
                             if (!prob.isEmpty(data)) {
                                 $scope.$broadcast('setValue', data);
                             }
@@ -171,14 +174,14 @@ define(['prob.api', 'tv4', 'prob.common', 'prob.observers', 'prob.modal'], funct
 
                     };
 
-                    $scope.checkObservers = function (stateId, trigger) {
+                    $scope.checkObservers = function (id, stateId, trigger) {
 
-                        var observers = bmsObserverService.getObservers($scope.id);
+                        var observers = bmsObserverService.getObservers(id);
 
                         if (observers && stateId && trigger) {
 
                             // Collect values from observers
-                            bmsObserverService.checkObservers(observers, $scope.container.contents(), stateId, trigger).then(function (data) {
+                            bmsObserverService.checkObservers(id, observers, $scope.container.contents(), stateId, trigger).then(function (data) {
                                 var fvalues = {};
                                 angular.forEach(data, function (value) {
                                     if (value !== undefined) {

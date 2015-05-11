@@ -74,7 +74,7 @@ define(['angularAMD', 'bmotion.func', 'angular', 'bootstrap', 'jquery.cookie', '
         }])
         .controller('bmsTabsChildCtrl', ['$scope', function ($scope) {
         }])
-        .directive('bmsDropZone', ['$http', function ($http) {
+        .directive('bmsDropZone', ['$http', 'bmsModalService', function ($http, bmsModalService) {
             return {
                 link: function ($scope, element) {
 
@@ -114,7 +114,7 @@ define(['angularAMD', 'bmotion.func', 'angular', 'bootstrap', 'jquery.cookie', '
                                     });
                                 });
                             } else {
-                                alert('Please drop a bmotion.json file!');
+                                bmsModalService.setError('Invalid file, please drop a bmotion.json file!');
                             }
                         }
                         return false;

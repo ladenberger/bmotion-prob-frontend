@@ -200,16 +200,16 @@ define(['prob.api', 'bms.common', 'prob.observers', 'xeditable', 'cytoscape', 'c
                     });
                     return defer.promise;
                 },
-                getVisualizationSnapshotAsSvg: function (template, view, stateid, css) {
+                getVisualizationSnapshotAsSvg: function (vis, view, stateid, css) {
 
                     var defer = $q.defer();
 
                     var container = view.container.clone(true);
-                    var observers = template.observers;
+                    var observers = vis.observers;
                     //var traceId = template.data.traceId;
-                    var path = template.data.templatePath;
+                    var path = vis.data.templatePath;
 
-                    bmsObserverService.checkObservers(observers, container, stateid).then(function (data) {
+                    bmsObserverService.checkObservers(vis.data.id, observers, container, stateid).then(function (data) {
 
                         // Collect attributes and values
                         var fvalues = {};
@@ -581,7 +581,7 @@ define(['prob.api', 'bms.common', 'prob.observers', 'xeditable', 'cytoscape', 'c
                         }
                     });
 
-                    $scope.getData = function (elements, template) {
+                    $scope.getData = function (elements, vis) {
 
                         var defer = $q.defer();
 
@@ -622,19 +622,23 @@ define(['prob.api', 'bms.common', 'prob.observers', 'xeditable', 'cytoscape', 'c
 
                             // (3) Send formulas to ProB and receive diagram data
                             ws.emit('createCustomTransitionDiagram', {
-                                data: {expressions: formulas, traceId: template.data.traceId}
+                                data: {
+                                    id: vis.data.id,
+                                    expressions: formulas,
+                                    traceId: vis.data.traceId
+                                }
                             }, function (data) {
 
                                 var promises = [];
 
                                 // Get CSS data for HTML
-                                bmsRenderingService.getStyle(template.data.templatePath, template.data.view.style).then(function (css) {
+                                bmsRenderingService.getStyle(vis.data.templatePath, vis.data.view.style).then(function (css) {
 
                                     // Get HTML data
                                     angular.forEach(data.nodes, function (node) {
                                         var results = node.data.results;
                                         if (node.data.id !== '1' && node.data.labels[0] !== '<< undefined >>') {
-                                            promises.push(bmsRenderingService.getElementSnapshotAsDataUrl(elements, results, $scope.elementSelection.bmsIdDataMap, css, template.data.templatePath));
+                                            promises.push(bmsRenderingService.getElementSnapshotAsDataUrl(elements, results, $scope.elementSelection.bmsIdDataMap, css, vis.data.templatePath));
                                         } else {
                                             promises.push(bmsRenderingService.getEmptySnapshotDataUrl());
                                         }
@@ -872,19 +876,24 @@ define(['prob.api', 'bms.common', 'prob.observers', 'xeditable', 'cytoscape', 'c
                         }
                     });
 
-                    $scope.getData = function (visualisation, view) {
+                    $scope.getData = function (vis, view) {
 
                         var defer = $q.defer();
 
-                        ws.emit('createTraceDiagram', {data: {traceId: visualisation.data.traceId}}, function (data) {
+                        ws.emit('createTraceDiagram', {
+                            data: {
+                                id: vis.data.id,
+                                traceId: vis.data.traceId
+                            }
+                        }, function (data) {
 
                             var promises = [];
 
-                            bmsRenderingService.getStyle(visualisation.data.templatePath, visualisation.data.view.style).then(function (css) {
+                            bmsRenderingService.getStyle(vis.data.templatePath, vis.data.view.style).then(function (css) {
 
                                 angular.forEach(data.nodes, function (n) {
                                     if (n.data.id !== 'root' && n.data.id !== '0') {
-                                        promises.push(bmsRenderingService.getVisualizationSnapshotAsDataUrl(visualisation, view, n.data.id, css));
+                                        promises.push(bmsRenderingService.getVisualizationSnapshotAsDataUrl(vis, view, n.data.id, css));
                                     } else {
                                         promises.push(bmsRenderingService.getEmptySnapshotDataUrl());
                                     }
