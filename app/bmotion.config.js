@@ -1,5 +1,4 @@
 requirejs.config({
-    baseUrl: "../../app/",
     paths: {
         "jquery": "libs/bower/jquery/dist/jquery.min",
         "angular": "libs/bower/angular/angular.min",
