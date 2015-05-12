@@ -1,0 +1,2 @@
+define(['prob.standalone'], function () {
+});

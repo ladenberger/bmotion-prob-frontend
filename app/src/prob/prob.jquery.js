@@ -2,10 +2,10 @@
  * BMotion Studio for ProB jQuery Module
  *
  */
-define(['prob.api'], function (prob) {
+define(['bms.func', 'jquery'], function (bms) {
 
     var observePredicate = function (options, origin) {
-        var settings = prob.normalize($.extend({
+        var settings = bms.normalize($.extend({
             predicate: "",
             true: [],
             false: [],
@@ -19,7 +19,7 @@ define(['prob.api'], function (prob) {
     };
 
     var observeCSPTrace = function (options, origin) {
-        var settings = prob.normalize($.extend({
+        var settings = bms.normalize($.extend({
             observers: [],
             selector: "",
             cause: "AnimationChanged"
@@ -30,7 +30,7 @@ define(['prob.api'], function (prob) {
     };
 
     var observeRefinement = function (options, origin) {
-        var settings = prob.normalize($.extend({
+        var settings = bms.normalize($.extend({
             refinements: [],
             cause: "ModelChanged",
             enable: function () {
@@ -59,7 +59,7 @@ define(['prob.api'], function (prob) {
      };*/
 
     var observeFormula = function (options, origin) {
-        var settings = prob.normalize($.extend({
+        var settings = bms.normalize($.extend({
             formulas: [],
             cause: "AnimationChanged",
             trigger: function () {

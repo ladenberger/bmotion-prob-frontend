@@ -2,8 +2,8 @@
  * BMotion Studio for ProB Common Module
  *
  */
-define(['angular-route', 'bms.common'], function () {
-        return angular.module('prob.common', ['ngRoute', 'bms.common'])
+define(['bms.common'], function () {
+        return angular.module('prob.common', ['bms.common'])
             .constant('trigger', {
                 TRIGGER_MODEL_CHANGED: "ModelChanged",
                 TRIGGER_MODEL_INITIALISED: "ModelInitialised",

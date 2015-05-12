@@ -2,7 +2,7 @@
  * BMotion Studio for ProB IFrame Module
  *
  */
-define(['prob.api', 'tv4', 'prob.common', 'prob.observers', 'prob.modal'], function (prob, tv4) {
+define(['tv4', 'bms.func', 'prob.common', 'prob.observers', 'prob.modal'], function (tv4, bms) {
 
     var module = angular.module('prob.iframe', ['prob.common', 'prob.observers', 'prob.modal'])
         .directive('bmsVisualisationView', ['bmsMainService', '$rootScope', 'bmsVisualisationService', '$compile', 'bmsObserverService', '$http', 'initSession', 'ws', '$injector', 'bmsUIService', 'bmsModalService', 'manifest', 'trigger', function (bmsMainService, $rootScope, bmsVisualisationService, $compile, bmsObserverService, $http, initSession, ws, $injector, bmsUIService, bmsModalService, manifest, trigger) {
@@ -15,7 +15,7 @@ define(['prob.api', 'tv4', 'prob.common', 'prob.observers', 'prob.modal'], funct
                     console.log("Init visualisation view ...");
 
                     var iframe = $element.contents();
-                    $scope.id = attrs['bmsId'] ? attrs['bmsId'] : prob.uuid();
+                    $scope.id = attrs['bmsId'] ? attrs['bmsId'] : bms.uuid();
                     iframe.attr("data-bms-id", $scope.id);
                     iframe.attr("id", $scope.id);
 
@@ -99,7 +99,7 @@ define(['prob.api', 'tv4', 'prob.common', 'prob.observers', 'prob.modal'], funct
                     };
 
                     // TODO: Check if visualisation name was set
-                    var fromParameter = prob.getUrlParameter("template");
+                    var fromParameter = bms.getUrlParameter("template");
                     $scope.openTemplate(fromParameter ? fromParameter : attrs["bmsVisualisationView"]);
 
                     /*$scope.$on('reloadVisualisation', function (evt, id) {
@@ -123,7 +123,7 @@ define(['prob.api', 'tv4', 'prob.common', 'prob.observers', 'prob.modal'], funct
                                 var jElement = $(e);
                                 var bmsid = jElement.attr("data-bms-id");
                                 if (!bmsid) {
-                                    bmsid = prob.uuid();
+                                    bmsid = bms.uuid();
                                     jElement.attr("data-bms-id", bmsid);
                                 }
                                 var observer = {
@@ -167,7 +167,7 @@ define(['prob.api', 'tv4', 'prob.common', 'prob.observers', 'prob.modal'], funct
                     $scope.checkObserver = function (id, observer, stateId, trigger) {
 
                         bmsObserverService.checkObserver(id, observer, $scope.container.contents(), stateId, trigger).then(function (data) {
-                            if (!prob.isEmpty(data)) {
+                            if (!bms.isEmpty(data)) {
                                 $scope.$broadcast('setValue', data);
                             }
                         });
@@ -188,7 +188,7 @@ define(['prob.api', 'tv4', 'prob.common', 'prob.observers', 'prob.modal'], funct
                                         $.extend(true, fvalues, value);
                                     }
                                 });
-                                if (!prob.isEmpty(fvalues)) {
+                                if (!bms.isEmpty(fvalues)) {
                                     $scope.$broadcast('changeValues', fvalues);
                                 }
                             });
@@ -201,24 +201,24 @@ define(['prob.api', 'tv4', 'prob.common', 'prob.observers', 'prob.modal'], funct
             }
         }]);
 
-    prob.registerObservers = function (name, elements) {
-        var injector = angular.element(document).injector();
-        var bmsObserverService = injector.get('bmsObserverService');
-        bmsObserverService.addObservers(name, elements.observers);
-        bmsObserverService.addEvents(name, elements.events);
-    };
+    /*prob.registerObservers = function (name, elements) {
+     var injector = angular.element(document).injector();
+     var bmsObserverService = injector.get('bmsObserverService');
+     bmsObserverService.addObservers(name, elements.observers);
+     bmsObserverService.addEvents(name, elements.events);
+     };
 
-    prob.registerObserver = function (name, observer) {
-        var injector = angular.element(document).injector();
-        var bmsObserverService = injector.get('bmsObserverService');
-        bmsObserverService.addObserver(name, observer);
-    };
+     prob.registerObserver = function (name, observer) {
+     var injector = angular.element(document).injector();
+     var bmsObserverService = injector.get('bmsObserverService');
+     bmsObserverService.addObserver(name, observer);
+     };
 
-    prob.registerEvent = function (name, event) {
-        var injector = angular.element(document).injector();
-        var bmsObserverService = injector.get('bmsObserverService');
-        bmsObserverService.addEvent(name, event);
-    };
+     prob.registerEvent = function (name, event) {
+     var injector = angular.element(document).injector();
+     var bmsObserverService = injector.get('bmsObserverService');
+     bmsObserverService.addEvent(name, event);
+     };*/
 
     return module;
 

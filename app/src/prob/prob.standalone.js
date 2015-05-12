@@ -2,7 +2,7 @@
  * BMotion Studio for ProB Standalone Module
  *
  */
-define(['angularAMD', 'bmotion.func', 'angular', 'bootstrap', 'jquery.cookie', 'jquery-ui', 'prob.graph', 'prob.iframe', 'prob.ui', 'prob.common'], function (angularAMD, prob) {
+define(['angularAMD', 'angular', 'prob.graph', 'prob.iframe', 'prob.ui', 'prob.common'], function (angularAMD) {
 
     var module = angular.module('prob.standalone', ['prob.graph', 'prob.iframe', 'prob.ui', 'prob.common'])
         .run(['ws', 'editableOptions', 'bmsMainService', function (ws, editableOptions, bmsMainService) {
@@ -36,7 +36,7 @@ define(['angularAMD', 'bmotion.func', 'angular', 'bootstrap', 'jquery.cookie', '
                 }
             };
         }])
-        .controller('bmsTabsCtrl', ['$rootScope', '$scope', 'fileDialogService', 'bmsVisualisationService', '$http', 'bmsUIService', function ($rootScope, $scope, fileDialogService, bmsVisualisationService, $http, bmsUIService) {
+        .controller('bmsTabsCtrl', ['$rootScope', '$scope', 'fileDialogService', 'bmsVisualisationService', '$http', 'bmsUIService', 'bmsFunc', function ($rootScope, $scope, fileDialogService, bmsVisualisationService, $http, bmsUIService, bmsFunc) {
 
             var setAllInactive = function () {
                 angular.forEach($scope.workspaces, function (workspace) {
@@ -54,7 +54,7 @@ define(['angularAMD', 'bmotion.func', 'angular', 'bootstrap', 'jquery.cookie', '
                 fileDialogService.open().then(function (template) {
                     $http.get(template).success(function (data) {
                         $scope.workspaces.push({
-                            id: prob.uuid(),
+                            id: bmsFunc.uuid(),
                             name: data.name,
                             template: template,
                             active: true
@@ -74,7 +74,7 @@ define(['angularAMD', 'bmotion.func', 'angular', 'bootstrap', 'jquery.cookie', '
         }])
         .controller('bmsTabsChildCtrl', ['$scope', function ($scope) {
         }])
-        .directive('bmsDropZone', ['$http', 'bmsModalService', function ($http, bmsModalService) {
+        .directive('bmsDropZone', ['$http', 'bmsModalService', 'bmsFunc', function ($http, bmsModalService, bmsFunc) {
             return {
                 link: function ($scope, element) {
 
@@ -107,7 +107,7 @@ define(['angularAMD', 'bmotion.func', 'angular', 'bootstrap', 'jquery.cookie', '
                             if (filename === 'bmotion.json') {
                                 $http.get(template).success(function (data) {
                                     $scope.workspaces.push({
-                                        id: prob.uuid(),
+                                        id: bmsFunc.uuid(),
                                         name: data.name,
                                         template: template,
                                         active: true

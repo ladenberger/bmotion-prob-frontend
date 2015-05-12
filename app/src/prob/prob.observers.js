@@ -2,7 +2,7 @@
  * BMotion Studio for ProB Observer Module
  *
  */
-define(['prob.api', 'angular', 'xeditable', 'qtip'], function (prob) {
+define(['bms.func', 'angular', 'xeditable', 'qtip'], function (bms) {
 
     return angular.module('prob.observers', ['bms.common', 'prob.modal'])
         .service('bmsObserverService', ['$q', '$injector', 'trigger', function ($q, $injector, trigger) {
@@ -50,7 +50,7 @@ define(['prob.api', 'angular', 'xeditable', 'qtip'], function (prob) {
                 getBmsIds: function (selector, element) {
                     var bmsid = element.attr("data-bms-id");
                     if (!bmsid) {
-                        bmsid = prob.uuid();
+                        bmsid = bms.uuid();
                         element.attr("data-bms-id", bmsid);
                     }
                     if (bmsidCache[bmsid] === undefined) {
@@ -60,7 +60,7 @@ define(['prob.api', 'angular', 'xeditable', 'qtip'], function (prob) {
                         var bmsids = $(element).find(selector).map(function () {
                             var cbmsid = $(this).attr("data-bms-id");
                             if (!cbmsid) {
-                                cbmsid = prob.uuid();
+                                cbmsid = bms.uuid();
                                 $(this).attr("data-bms-id", cbmsid);
                             }
                             return cbmsid;
@@ -260,7 +260,7 @@ define(['prob.api', 'angular', 'xeditable', 'qtip'], function (prob) {
                                         }
                                         angular.forEach(o.actions, function (a) {
                                             var selector;
-                                            if (prob.isFunction(a.selector)) {
+                                            if (bms.isFunction(a.selector)) {
                                                 selector = a.selector.call(this, t);
                                             } else {
                                                 selector = replaceParameter(a.selector, t.parameter);
@@ -421,12 +421,12 @@ define(['prob.api', 'angular', 'xeditable', 'qtip'], function (prob) {
             }
 
         }])
-        .service('predicate', ['ws', '$q', 'bmsObserverService', function (ws, $q, bmsObserverService) {
+        .service('predicate', ['ws', '$q', function (ws, $q) {
 
             var observePredicateHelper = function (tf, element, observer) {
                 if (Object.prototype.toString.call(tf) === '[object Object]') {
                     return tf;
-                } else if (prob.isFunction(tf)) {
+                } else if (bms.isFunction(tf)) {
                     var el = observer.element ? $(observer.element) : element.find(observer.data.selector);
                     el.each(function (i, v) {
                         tf.call(this, $(v))
@@ -515,7 +515,7 @@ define(['prob.api', 'angular', 'xeditable', 'qtip'], function (prob) {
             var ev = {
 
                 executeEvent: function (data, origin) {
-                    var settings = prob.normalize($.extend({
+                    var settings = bms.normalize($.extend({
                         events: [],
                         callback: function () {
                         }
@@ -529,7 +529,7 @@ define(['prob.api', 'angular', 'xeditable', 'qtip'], function (prob) {
                     var defer = $q.defer();
                     var traceId = settings.traceId;
                     ws.emit('initTooltip', {
-                        data: prob.normalize(settings, ["callback"], origin)
+                        data: bms.normalize(settings, ["callback"], origin)
                     }, function (data) {
                         var container = $('<div class="qtiplinks"></div>');
                         var ul = $('<ul style="display:table-cell;"></ul>');

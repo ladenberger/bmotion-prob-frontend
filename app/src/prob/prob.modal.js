@@ -2,7 +2,7 @@
  * BMotion Studio for ProB Modal Module
  *
  */
-define(['bmotion.func', 'ui-bootstrap', 'ui-bootstrap-tpls'], function (prob) {
+define(['ui-bootstrap', 'ui-bootstrap-tpls'], function () {
 
     var module = angular.module('prob.modal', ['ui.bootstrap'])
         .controller('bmsLoadingModalCtrl', ['$scope', '$modal', function ($scope, $modal) {

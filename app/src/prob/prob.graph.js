@@ -2,7 +2,7 @@
  * BMotion Studio for ProB Graph Module
  *
  */
-define(['prob.api', 'bms.common', 'prob.observers', 'xeditable', 'cytoscape', 'cytoscape.navigator', 'prob.modal'], function (prob) {
+define(['bms.common', 'prob.observers', 'xeditable', 'cytoscape', 'cytoscape.navigator', 'prob.modal'], function () {
 
     return angular.module('prob.graph', ['xeditable', 'bms.common', 'prob.observers', 'prob.modal'])
         .factory('bmsRenderingService', ['$q', '$injector', 'bmsObserverService', '$http', '$templateCache', function ($q, $injector, bmsObserverService, $http, $templateCache) {

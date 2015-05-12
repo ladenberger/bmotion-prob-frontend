@@ -2,9 +2,9 @@
  * BMotion Studio for ProB Visualization Module
  *
  */
-define(['angularAMD', 'prob.api', 'angular', 'prob.jquery'], function (angularAMD, prob) {
+define(['bms.func', 'angularAMD', 'angular', 'prob.jquery'], function (bms, angularAMD) {
 
-    var module = angular.module('prob.vis.integrated', [])
+    var module = angular.module('prob.vis', [])
         .factory('$parentScope', ['$window', function ($window) {
             return $window.parent.angular.element($window.frameElement).scope();
         }])
@@ -54,7 +54,7 @@ define(['angularAMD', 'prob.api', 'angular', 'prob.jquery'], function (angularAM
 
                     // Give all elements an internal id
                     $(document).find('body').find("*").each(function (i, v) {
-                        $(v).attr("data-bms-id", "bms" + prob.uuid());
+                        $(v).attr("data-bms-id", "bms" + bms.uuid());
                     });
 
                     $scope.$watch('values', function () {

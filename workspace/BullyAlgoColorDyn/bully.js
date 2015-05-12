@@ -1,6 +1,6 @@
-requirejs(['../../app/scripts/bmotion.vis.dev'], function () {
+requirejs(['../../app/bmotion.config.js'], function () {
 
-    //requirejs(['dist/joint.min.js'], function () {
+    requirejs(['../../app/bmotion.vis'], function () {
 
         var dd = false;
 
@@ -217,7 +217,6 @@ requirejs(['../../app/scripts/bmotion.vis.dev'], function () {
             ]
         });
 
-    //});
+    });
 
-})
-;
+});

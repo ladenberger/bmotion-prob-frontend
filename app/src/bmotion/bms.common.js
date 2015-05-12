@@ -2,9 +2,9 @@
  * BMotion Studio Common Module
  *
  */
-define(['socketio', 'angular-route'], function (io) {
+define(['socketio', 'angular'], function (io) {
 
-        return angular.module('bms.common', ['ngRoute'])
+        return angular.module('bms.common', [])
             .factory('bmsConfigService', ['$q', '$http', function ($q, $http) {
                 var config = null;
                 var main = {
