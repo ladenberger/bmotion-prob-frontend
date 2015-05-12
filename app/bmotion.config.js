@@ -46,11 +46,6 @@ requirejs.config({
             exports: "cy",
             deps: ["jquery"]
         },
-        "cytoscape.navigator": ['cytoscape'],
-        "prob.jquery": ['bms.func', 'jquery'],
-        "prob.vis": ['bms.func', 'angularAMD', 'angular', 'prob.jquery'],
-        "prob.online": ['angularAMD', 'angular', 'prob.graph', 'prob.iframe', 'prob.ui', 'prob.common'],
-        "prob.integrated": ['angularAMD', 'angular', 'prob.graph', 'prob.iframe', 'prob.common'],
-        "prob.standalone": ['angularAMD', 'angular', 'prob.graph', 'prob.iframe', 'prob.ui', 'prob.common']
+        "cytoscape.navigator": ['cytoscape']
     }
 });
