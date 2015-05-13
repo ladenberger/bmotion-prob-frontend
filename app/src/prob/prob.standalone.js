@@ -2,7 +2,7 @@
  * BMotion Studio for ProB Standalone Module
  *
  */
-define(['angularAMD', 'angular', 'prob.graph', 'prob.iframe', 'prob.ui', 'prob.common'], function (angularAMD) {
+define(['angularAMD', 'bms.func', 'angular', 'prob.graph', 'prob.iframe', 'prob.ui', 'prob.common'], function (angularAMD, bms) {
 
     var module = angular.module('prob.standalone', ['prob.graph', 'prob.iframe', 'prob.ui', 'prob.common'])
         .run(['ws', 'editableOptions', 'bmsMainService', function (ws, editableOptions, bmsMainService) {
@@ -36,7 +36,7 @@ define(['angularAMD', 'angular', 'prob.graph', 'prob.iframe', 'prob.ui', 'prob.c
                 }
             };
         }])
-        .controller('bmsTabsCtrl', ['$rootScope', '$scope', 'fileDialogService', 'bmsVisualisationService', '$http', 'bmsUIService', 'bmsFunc', function ($rootScope, $scope, fileDialogService, bmsVisualisationService, $http, bmsUIService, bmsFunc) {
+        .controller('bmsTabsCtrl', ['$rootScope', '$scope', 'fileDialogService', 'bmsVisualisationService', '$http', 'bmsUIService', function ($rootScope, $scope, fileDialogService, bmsVisualisationService, $http, bmsUIService) {
 
             var setAllInactive = function () {
                 angular.forEach($scope.workspaces, function (workspace) {
@@ -54,7 +54,7 @@ define(['angularAMD', 'angular', 'prob.graph', 'prob.iframe', 'prob.ui', 'prob.c
                 fileDialogService.open().then(function (template) {
                     $http.get(template).success(function (data) {
                         $scope.workspaces.push({
-                            id: bmsFunc.uuid(),
+                            id: bms.uuid(),
                             name: data.name,
                             template: template,
                             active: true
@@ -74,7 +74,7 @@ define(['angularAMD', 'angular', 'prob.graph', 'prob.iframe', 'prob.ui', 'prob.c
         }])
         .controller('bmsTabsChildCtrl', ['$scope', function ($scope) {
         }])
-        .directive('bmsDropZone', ['$http', 'bmsModalService', 'bmsFunc', function ($http, bmsModalService, bmsFunc) {
+        .directive('bmsDropZone', ['$http', 'bmsModalService', function ($http, bmsModalService) {
             return {
                 link: function ($scope, element) {
 
@@ -107,7 +107,7 @@ define(['angularAMD', 'angular', 'prob.graph', 'prob.iframe', 'prob.ui', 'prob.c
                             if (filename === 'bmotion.json') {
                                 $http.get(template).success(function (data) {
                                     $scope.workspaces.push({
-                                        id: bmsFunc.uuid(),
+                                        id: bms.uuid(),
                                         name: data.name,
                                         template: template,
                                         active: true
