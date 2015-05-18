@@ -1,2 +1,4 @@
-requirejs(['../../app/scripts/bmotion.standalone.dev'], function () {
-});
+//requirejs(['../../app/bmotion.config'], function () {
+    requirejs(['js/bmotion.standalone.js'], function () {
+    });
+//});

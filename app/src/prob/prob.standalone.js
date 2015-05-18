@@ -8,16 +8,18 @@ define(['angularAMD', 'bms.func', 'angular', 'prob.graph', 'prob.iframe', 'prob.
         .run(['ws', 'editableOptions', 'bmsMainService', function (ws, editableOptions, bmsMainService) {
             bmsMainService.mode = 'ModeStandalone';
             editableOptions.theme = 'bs3'; // bootstrap3 theme. Can be also 'bs2', 'default'
-            // Load native UI library
-            var gui = require('nw.gui');
-            // Get the current window
-            var win = gui.Window.get();
-            // Listen to close event
-            win.on('close', function () {
-                this.hide(); // Pretend to be closed already
-                ws.emit('clientClosed', {data: {}});
-                //this.close(true);
-            });
+            /*
+             // Load native UI library
+             var gui = require('nw.gui');
+             // Get the current window
+             var win = gui.Window.get();
+             // Listen to close event
+             win.on('close', function () {
+             this.hide(); // Pretend to be closed already
+             ws.emit('clientClosed', {data: {}});
+             //this.close(true);
+             });
+             */
         }])
         .factory('fileDialogService', ['$q', function ($q) {
             return {

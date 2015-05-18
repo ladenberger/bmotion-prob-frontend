@@ -1,2 +1,2 @@
-define(['prob.standalone'], function () {
+requirejs(['prob.standalone'], function () {
 });

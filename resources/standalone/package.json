@@ -1,5 +1,6 @@
 {
-  "name": "BMotion Studio for ProB",
+  "version": "0.2.0",
+  "name": "bmotion",
   "main": "index.html",
   "window": {
     "icon": "bmsicon.png",

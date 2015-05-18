@@ -1,2 +1,2 @@
-define(['prob.online'], function () {
+requirejs(['prob.online'], function () {
 });

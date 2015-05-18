@@ -1,2 +1,2 @@
-define(['prob.integrated'], function () {
+requirejs(['prob.integrated'], function () {
 });
