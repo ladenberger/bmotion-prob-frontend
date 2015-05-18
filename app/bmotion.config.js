@@ -1,7 +1,7 @@
 requirejs.config({
     baseUrl: "../../app/",
     paths: {
-        "jquery": "libs/bower/jquery/dist/jquery.min",
+        "jquery": "libs/bower/jquery/dist/jquery",
         "angular": "libs/bower/angular/angular.min",
         "angular-route": "libs/bower/angular-route/angular-route.min",
         "ui-bootstrap": "libs/bower/angular-bootstrap/ui-bootstrap",
@@ -47,6 +47,7 @@ requirejs.config({
             exports: "cy",
             deps: ["jquery"]
         },
+        "prob.jquery": ['bms.func', 'jquery'],
         "cytoscape.navigator": ['cytoscape']
     }
 });

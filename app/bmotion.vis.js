@@ -1,2 +1,2 @@
-requirejs(['prob.vis'], function () {
+define(['prob.vis'], function () {
 });
