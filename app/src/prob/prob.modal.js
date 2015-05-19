@@ -30,13 +30,6 @@ define(['ui-bootstrap', 'ui-bootstrap-tpls'], function () {
                 });
             };
 
-            $scope.close = function () {
-                if (modalInstance) {
-                    modalInstance.close();
-                    modalInstance.isOpen = false;
-                }
-            };
-
             $scope.$on('openModal', function () {
                 $scope.open();
             });
@@ -44,6 +37,10 @@ define(['ui-bootstrap', 'ui-bootstrap-tpls'], function () {
             $scope.$on('closeModal', function () {
                 $scope.close();
             });
+
+            $scope.close = function () {
+                modalInstance.close();
+            };
 
             $scope.$on('startLoading', function () {
                 $scope.open();
@@ -57,20 +54,16 @@ define(['ui-bootstrap', 'ui-bootstrap-tpls'], function () {
             });
 
             $scope.$on('setError', function (evt, error) {
-                if (modalInstance) {
-                    if (!modalInstance.isOpen) {
-                        $scope.open();
-                    }
-                    modalInstance.opened.then(function () {
-                        modalInstance.setError(error);
-                    });
+                if (!modalInstance || (modalInstance && !modalInstance.isOpen)) {
+                    $scope.open();
                 }
+                modalInstance.opened.then(function () {
+                    modalInstance.setError(error);
+                });
             });
 
-        }
-        ])
-        .
-        controller('bmsLoadingModalInstanceCtrl', ['$scope', '$modalInstance', function ($scope, $modalInstance) {
+        }])
+        .controller('bmsLoadingModalInstanceCtrl', ['$scope', '$modalInstance', function ($scope, $modalInstance) {
 
             $modalInstance.isOpen = false;
             $scope.icon = "";
@@ -88,6 +81,15 @@ define(['ui-bootstrap', 'ui-bootstrap-tpls'], function () {
             $modalInstance.startLoading = function () {
                 $scope.icon = 'bmotion-img-loader';
             };
+
+            $scope.close = function () {
+                $modalInstance.dismiss('cancel');
+                $modalInstance.isOpen = false;
+            };
+
+            $scope.$on('modal.closing', function () {
+                $modalInstance.isOpen = false;
+            });
 
         }])
         .factory('bmsModalService', ['$rootScope', function ($rootScope) {

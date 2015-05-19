@@ -38,7 +38,7 @@ define(['angularAMD', 'bms.func', 'angular', 'prob.graph', 'prob.iframe', 'prob.
                 }
             };
         }])
-        .controller('bmsTabsCtrl', ['$rootScope', '$scope', 'fileDialogService', 'bmsVisualisationService', '$http', 'bmsUIService', function ($rootScope, $scope, fileDialogService, bmsVisualisationService, $http, bmsUIService) {
+        .controller('bmsTabsCtrl', ['$rootScope', '$scope', 'fileDialogService', 'bmsVisualisationService', '$http', 'bmsUIService', 'bmsModalService', function ($rootScope, $scope, fileDialogService, bmsVisualisationService, $http, bmsUIService, bmsModalService) {
 
             var setAllInactive = function () {
                 angular.forEach($scope.workspaces, function (workspace) {
@@ -54,14 +54,19 @@ define(['angularAMD', 'bms.func', 'angular', 'prob.graph', 'prob.iframe', 'prob.
 
             $scope.openFileDialog = function () {
                 fileDialogService.open().then(function (template) {
-                    $http.get(template).success(function (data) {
-                        $scope.workspaces.push({
-                            id: bms.uuid(),
-                            name: data.name,
-                            template: template,
-                            active: true
+                    var filename = template.replace(/^.*[\\\/]/, '');
+                    if (filename === 'bmotion.json') {
+                        $http.get(template).success(function (data) {
+                            $scope.workspaces.push({
+                                id: bms.uuid(),
+                                name: data.name,
+                                template: template,
+                                active: true
+                            });
                         });
-                    });
+                    } else {
+                        bmsModalService.setError('Invalid file, please drop a bmotion.json file!');
+                    }
                 });
             };
 
