@@ -1,8 +1,8 @@
 @import url("adapted/bootstrap.css");
 @import url("adapted/jquery-ui.min.css");
-@import url("../scripts/vendor/angular-xeditable/dist/css/xeditable.css");
-@import url("../scripts/vendor/cytoscape.js-navigator/cytoscape.js-navigator.css");
-@import url("../scripts/vendor/qtip2/jquery.qtip.min.css");
+@import url("../libs/bower/angular-xeditable/dist/css/xeditable.css");
+@import url("../libs/ext/cytoscape.js-navigator.css");
+@import url("../libs/bower/qtip2/jquery.qtip.min.css");
 @import url("prob.css");
 
 html, body {
