@@ -184,7 +184,7 @@ define(['bms.func', 'angular', 'xeditable', 'qtip'], function (bms) {
                 return fstr;
             };
 
-            var getExpression = function (id, observer, stateId, traceId) {
+            var getExpression = function (id, observer, stateId) {
 
                 var defer = $q.defer();
 
@@ -193,18 +193,17 @@ define(['bms.func', 'angular', 'xeditable', 'qtip'], function (bms) {
                     if (o.exp) formulas.push({formula: o.exp});
                 });
 
-                var expressions = expressionCache[traceId];
+                var expressions = expressionCache[id];
                 if (!expressions) {
                     ws.emit("evaluateFormulas", {
                         data: {
                             id: id,
                             formulas: formulas,
-                            stateId: stateId,
-                            traceId: traceId
+                            stateId: stateId
                         }
                     }, function (data) {
 
-                        expressionCache[traceId] = data;
+                        expressionCache[id] = data;
                         angular.forEach(data, function (e) {
                             if (e.error) {
                                 var msg = "Message: " + e.error;
