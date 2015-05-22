@@ -98,9 +98,16 @@ define(['tv4', 'bms.func', 'prob.common', 'prob.observers', 'prob.modal'], funct
 
                     };
 
-                    // TODO: Check if visualisation name was set
                     var fromParameter = bms.getUrlParameter("template");
-                    $scope.openTemplate(fromParameter ? fromParameter : attrs["bmsVisualisationView"]);
+                    if (fromParameter) {
+                        $scope.openTemplate(fromParameter);
+                    }
+
+                    attrs.$observe('bmsVisualisationView', function (vis) {
+                        if (vis) {
+                            $scope.openTemplate(vis);
+                        }
+                    });
 
                     /*$scope.$on('reloadVisualisation', function (evt, id) {
                      $scope.setStateId($scope.stateId);

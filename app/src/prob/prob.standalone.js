@@ -38,18 +38,10 @@ define(['angularAMD', 'bms.func', 'angular', 'prob.graph', 'prob.iframe', 'prob.
                 }
             };
         }])
-        .controller('bmsTabsCtrl', ['$rootScope', '$scope', 'fileDialogService', 'bmsVisualisationService', '$http', 'bmsUIService', 'bmsModalService', function ($rootScope, $scope, fileDialogService, bmsVisualisationService, $http, bmsUIService, bmsModalService) {
+        .controller('bmsVisualizationCtrl', ['$scope', 'fileDialogService', 'bmsModalService', '$http', function ($scope, fileDialogService, bmsModalService, $http) {
 
-            var setAllInactive = function () {
-                angular.forEach($scope.workspaces, function (workspace) {
-                    workspace.active = false;
-                });
-            };
-
-            $scope.workspaces = [];
-
-            $scope.addWorkspace = function () {
-                setAllInactive();
+            $scope.setVisualization = function (vis) {
+                $scope.visualization = vis;
             };
 
             $scope.openFileDialog = function () {
@@ -57,11 +49,10 @@ define(['angularAMD', 'bms.func', 'angular', 'prob.graph', 'prob.iframe', 'prob.
                     var filename = template.replace(/^.*[\\\/]/, '');
                     if (filename === 'bmotion.json') {
                         $http.get(template).success(function (data) {
-                            $scope.workspaces.push({
+                            $scope.setVisualization({
                                 id: bms.uuid(),
                                 name: data.name,
-                                template: template,
-                                active: true
+                                template: template
                             });
                         });
                     } else {
@@ -70,16 +61,6 @@ define(['angularAMD', 'bms.func', 'angular', 'prob.graph', 'prob.iframe', 'prob.
                 });
             };
 
-            $scope.selectWorkspace = function (id) {
-                var vis = bmsVisualisationService.getVisualisation(id);
-                $rootScope.currentVisualisation = id;
-                if (vis) {
-                    bmsUIService.setProBViewTraceId(vis.traceId);
-                }
-            };
-
-        }])
-        .controller('bmsTabsChildCtrl', ['$scope', function ($scope) {
         }])
         .directive('bmsDropZone', ['$http', 'bmsModalService', function ($http, bmsModalService) {
             return {
@@ -113,11 +94,10 @@ define(['angularAMD', 'bms.func', 'angular', 'prob.graph', 'prob.iframe', 'prob.
                             var filename = template.replace(/^.*[\\\/]/, '');
                             if (filename === 'bmotion.json') {
                                 $http.get(template).success(function (data) {
-                                    $scope.workspaces.push({
+                                    $scope.setVisualization({
                                         id: bms.uuid(),
                                         name: data.name,
-                                        template: template,
-                                        active: true
+                                        template: template
                                     });
                                 });
                             } else {
