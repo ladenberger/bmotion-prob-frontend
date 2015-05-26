@@ -152,7 +152,6 @@ define(['angular', 'jquery.cookie', 'jquery-ui', 'bootstrap'], function () {
         }])
         .directive('probView', ['bmsConfigService', 'probMainService', '$q', function (bmsConfigService, probMainService, $q) {
             return {
-                restrict: 'E',
                 replace: true,
                 scope: {},
                 template: '<div style="width:100%;height:100%"><iframe src="" frameBorder="0" style="width:100%;height:100%"></iframe></div>',
