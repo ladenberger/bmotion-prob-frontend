@@ -543,7 +543,12 @@ define(['bms.func', 'angular', 'xeditable', 'qtip'], function (bms) {
                                         traceId: traceId,
                                         events: [v],
                                         callback: function () {
-                                            api.hide();
+                                            api.set('content.text', function (event, api) {
+                                                return ev.getTooltipContent(settings, event.target, api).then(function (container) {
+                                                    return container;
+                                                });
+                                            });
+                                            //api.hide();
                                         }
                                     })
                                 });
@@ -571,11 +576,8 @@ define(['bms.func', 'angular', 'xeditable', 'qtip'], function (bms) {
                     var el = event.element ? $(event.element) : $(element).find(settings.selector);
                     el.each(function (i2, v) {
                         var e = $(v);
-                        e.click(function (event) {
-                            $(e).qtip('hide');
-                            ev.executeEvent(settings, $(event.target));
-                        }).css('cursor', 'pointer');
-                        if (settings.tooltip) {
+                        e.css('cursor', 'pointer');
+                        if (settings.events.length > 1) {
                             e.qtip({ // Grab some elements to apply the tooltip to
                                 content: {
                                     text: function (event, api) {
@@ -590,16 +592,22 @@ define(['bms.func', 'angular', 'xeditable', 'qtip'], function (bms) {
                                     effect: false,
                                     viewport: $(window)
                                 },
-                                show: {
-                                    delay: 600
-                                },
+                                /*show: {
+                                 delay: 600
+                                 },*/
+                                show: 'click',
                                 hide: {
                                     fixed: true,
-                                    delay: 300
+                                    delay: 400
                                 },
                                 style: {
                                     classes: 'qtip-light qtip-bootstrap'
                                 }
+                            });
+                        } else {
+                            e.click(function (event) {
+                                //$(e).qtip('hide');
+                                ev.executeEvent(settings, $(event.target));
                             });
                         }
                         defer.resolve();
