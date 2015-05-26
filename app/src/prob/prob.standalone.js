@@ -56,7 +56,7 @@ define(['angularAMD', 'bms.func', 'angular', 'prob.graph', 'prob.iframe', 'prob.
                             });
                         });
                     } else {
-                        bmsModalService.setError('Invalid file, please drop a bmotion.json file!');
+                        bmsModalService.setError('Invalid file, please open a bmotion.json file!');
                     }
                 });
             };
