@@ -443,6 +443,7 @@ define(['bms.common', 'prob.observers', 'xeditable', 'cytoscape', 'cytoscape.nav
                 + '<div class="projection-diagram-graph" style="height:100%;width:80%;float:left;"></div>'
                 + '<div class="projection-diagramnavigator" style="float:left;height:100%;width:20%;position:relative;bottom:0;right:0;"></div>'
                 + '</div>',
+                require: '^bmsDialog',
                 controller: ['$scope', function ($scope) {
 
                     $scope.visualisationSelection = {
@@ -678,12 +679,12 @@ define(['bms.common', 'prob.observers', 'xeditable', 'cytoscape', 'cytoscape.nav
                         }
                     };
 
-                    $scope.$on('refreshDiagram', function () {
+                }],
+                link: function ($scope, $element, attrs, ctrl) {
+
+                    ctrl.onEventListener('resizeStop', function () {
                         $scope.refreshDiagram();
                     });
-
-                }],
-                link: function ($scope, $element) {
 
                     $scope.loadData = function (data) {
                         var defer = $q.defer();
@@ -789,6 +790,7 @@ define(['bms.common', 'prob.observers', 'xeditable', 'cytoscape', 'cytoscape.nav
                 + '</div>'
                 + '<div class="trace-diagram-graph" style="height:100%;width:80%;float:left;"></div>'
                 + '<div class="trace-diagram-navigator" style="float:left;height:100%;width:20%;position:relative;bottom:0;right:0;"></div>',
+                require: '^bmsDialog',
                 controller: ['$scope', function ($scope) {
 
                     $scope.visualisationSelection = {
@@ -935,7 +937,11 @@ define(['bms.common', 'prob.observers', 'xeditable', 'cytoscape', 'cytoscape.nav
                     });
 
                 }],
-                link: function ($scope, $element) {
+                link: function ($scope, $element, attrs, ctrl) {
+
+                    ctrl.onEventListener('resizeStop', function () {
+                        $scope.refreshDiagram();
+                    });
 
                     $scope.loadData = function (data) {
                         var defer = $q.defer();
