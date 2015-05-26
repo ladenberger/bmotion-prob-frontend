@@ -5,37 +5,18 @@
 define(['angular', 'jquery.cookie', 'jquery-ui', 'bootstrap'], function () {
 
     var module = angular.module('prob.ui', [])
-        .directive('bmsNavigation', ['ws', 'bmsUIService', '$rootScope', 'bmsVisualisationService', function (ws, bmsUIService, $rootScope) {
-            return {
-                controller: ['$scope', function ($scope) {
-                    $scope.openView = function (type) {
-                        $scope.$broadcast('open' + type);
-                    };
-                    $scope.reloadVisualisation = function () {
-                        document.getElementById($rootScope.currentVisualisation).contentDocument.location.reload(true);
-                        bmsUIService.reloadVisualisation($rootScope.currentVisualisation);
-                    };
-                    /*$scope.reloadModel = function () {
-                     bmsUIService.startLoading();
-                     if ($rootScope.currentVisualisation) {
-                     var vis = bmsVisualisationService.getVisualisation($rootScope.currentVisualisation);
-                     ws.emit('reloadModel', {data: {traceId: vis.data.traceId}}, function (newTraceId) {
-                     $rootScope.$broadcast('newTraceId', newTraceId);
-                     vis.data.traceId = newTraceId;
-                     bmsUIService.setProBViewTraceId(newTraceId);
-                     bmsUIService.endLoading();
-                     });
-                     }
-                     };*/
-                }],
-                link: function ($scope, element) {
-                    /*if (config.socket.host !== 'localhost') {
-                     $(element).find('#bt_GroovyConsoleSession').css("display", "none");
-                     $(element).find('#bt_ModelCheckingUI').css("display", "none");
-                     $(element).find('#bt_CurrentAnimations').css("display", "none");
-                     }*/
-                }
-            }
+        .controller('bmsNavigationCtrl', ['$scope', 'ws', 'bmsUIService', '$rootScope', 'bmsVisualisationService', function ($scope, ws, bmsUIService, $rootScope) {
+
+            // Navigation button actions ...
+            $scope.openDialog = function (type) {
+                $rootScope.$broadcast('openDialog_' + type);
+            };
+
+            $scope.reloadVisualisation = function () {
+                document.getElementById($rootScope.currentVisualisation).contentDocument.location.reload(true);
+                bmsUIService.reloadVisualisation($rootScope.currentVisualisation);
+            };
+
         }])
         .factory('bmsDialogService', [function () {
             return {
@@ -77,11 +58,105 @@ define(['angular', 'jquery.cookie', 'jquery-ui', 'bootstrap'], function () {
                 }
             }
         }])
+        .directive('bmsDialog', ['bmsDialogService', function (bmsDialogService) {
+            return {
+                scope: {
+                    type: '@',
+                    title: '@'
+                },
+                controller: ['$scope', function ($scope) {
+
+                    this.listeners = {
+                        dragStart: [],
+                        dragStop: [],
+                        resize: [],
+                        resizeStart: [],
+                        resizeStop: [],
+                        open: [],
+                        close: []
+                    };
+
+                    this.getType = function () {
+                        return $scope.type;
+                    };
+
+                    this.getTitle = function () {
+                        return $scope.title;
+                    };
+
+                    this.onEventListener = function (type, handler) {
+                        this.listeners[type].push(handler);
+                    };
+
+                    this.propagateEvent = function (type) {
+                        this.listeners[type].forEach(function (handler) {
+                            handler();
+                        });
+                    };
+
+                    this.isOpen = function () {
+                        return $scope.state === 'open' ? true : false;
+                    };
+
+                }],
+                link: function ($scope, element, attrs, ctrl) {
+
+                    $scope.state = bmsDialogService.isOpen($scope.type) ? 'open' : 'close';
+                    var d = $(element);
+
+                    $scope.$on('openDialog_' + $scope.type, function () {
+                        $scope.state = 'open';
+                        d.dialog('open');
+                    });
+
+                    $(element).first().css("overflow", "hidden");
+                    $(element).dialog({
+
+                        dragStart: function () {
+                            ctrl.propagateEvent('dragStart');
+                        },
+                        dragStop: function (event, ui) {
+                            bmsDialogService.dragStop(ui, $scope.type);
+                            ctrl.propagateEvent('dragStop');
+                        },
+                        resize: function () {
+                            ctrl.propagateEvent('resize');
+                        },
+                        resizeStart: function () {
+                            ctrl.propagateEvent('resizeStart');
+                        },
+                        resizeStop: function (event, ui) {
+                            bmsDialogService.resizeStop(ui, $scope.type);
+                            bmsDialogService.fixSize($(element), 0, 0);
+                            ctrl.propagateEvent('resizeStop');
+                        },
+                        open: function () {
+                            bmsDialogService.open(element, $scope.type);
+                            bmsDialogService.fixSize($(element), 0, 0);
+                            ctrl.propagateEvent('open');
+                        },
+                        close: function () {
+                            bmsDialogService.close($scope.type);
+                            $scope.state = 'close';
+                            ctrl.propagateEvent('close');
+                        },
+                        autoOpen: ctrl.isOpen(),
+                        width: 400,
+                        height: 450,
+                        title: $scope.title
+
+                    });
+
+                }
+            }
+        }])
         .directive('probView', ['bmsConfigService', 'probMainService', '$q', function (bmsConfigService, probMainService, $q) {
             return {
+                restrict: 'E',
                 replace: true,
-                scope: true,
+                scope: {},
                 template: '<div style="width:100%;height:100%"><iframe src="" frameBorder="0" style="width:100%;height:100%"></iframe></div>',
+                require: '^bmsDialog',
                 controller: ['$scope', function ($scope) {
 
                     $scope.postpone = false;
@@ -91,103 +166,45 @@ define(['angular', 'jquery.cookie', 'jquery-ui', 'bootstrap'], function () {
                     });
 
                 }],
-                link: function ($scope, element) {
+                link: function ($scope, element, attrs, ctrl) {
 
                     var iframe = $(element).find("iframe");
 
-                    $scope.setTraceId = function (traceId) {
-                        $q.all([bmsConfigService.getConfig(), probMainService.getPort()]).then(function (data) {
-                            iframe.attr("src", 'http://' + data[0].prob.host + ':' + data[1].port + '/sessions/' + $scope.type + '/' + traceId);
-                        });
-                    };
-
-                    $scope.$watch('traceId', function (newTraceId, oldTraceId) {
-                        if (newTraceId && newTraceId !== oldTraceId) {
-                            if ($scope.isOpen) {
-                                $scope.setTraceId(newTraceId);
-                            } else {
-                                $scope.postpone = true;
-                            }
-                        }
-                    });
-
-                    $scope.$on('dragStart', function () {
-                        iframe.hide();
-                    });
-                    $scope.$on('dragStop', function () {
-                        iframe.show();
-                    });
-                    $scope.$on('resize', function () {
-                        iframe.hide();
-                    });
-                    $scope.$on('resizeStart', function () {
-                        iframe.hide();
-                    });
-                    $scope.$on('resizeStop', function () {
-                        iframe.show();
-                    });
-
-                    $scope.$on('open', function () {
+                    /*ctrl.onEventListener('dragStart', function () {
+                     iframe.hide();
+                     });
+                     ctrl.onEventListener('dragStop', function () {
+                     iframe.show();
+                     });
+                     ctrl.onEventListener('resizeStart', function () {
+                     iframe.hide();
+                     });
+                     ctrl.onEventListener('resizeStop', function () {
+                     iframe.show();
+                     });*/
+                    ctrl.onEventListener('open', function () {
                         if ($scope.postpone) {
                             $scope.setTraceId($scope.traceId);
                             $scope.postpone = false;
                         }
                     });
 
-                }
-            }
-        }])
-        .directive('bmsDialog', ['bmsDialogService', function (bmsDialogService) {
-            return {
-                scope: true,
-                controller: ['$scope', function ($scope) {
-                    $scope.isOpen = false;
-                }],
-                link: function ($scope, element, attrs) {
+                    $scope.setTraceId = function (traceId) {
+                        if (traceId !== undefined) {
+                            $q.all([bmsConfigService.getConfig(), probMainService.getPort()]).then(function (data) {
+                                iframe.attr("src", 'http://' + data[0].prob.host + ':' + data[1].port + '/sessions/' + ctrl.getType() + '/' + traceId);
+                            });
+                        }
+                    };
 
-                    $scope.type = attrs.type;
-                    $scope.isOpen = bmsDialogService.isOpen($scope.type);
-                    $scope.$on('open' + $scope.type, function () {
-                        $(element).dialog("open");
-                    });
-
-                    $(element).first().css("overflow", "hidden");
-                    $(element).dialog({
-
-                        dragStart: function () {
-                            $scope.$broadcast('dragStart');
-                        },
-                        dragStop: function (event, ui) {
-                            bmsDialogService.dragStop(ui, $scope.type);
-                            $scope.$broadcast('dragStop');
-                        },
-                        resize: function () {
-                            $scope.$broadcast('resize');
-                        },
-                        resizeStart: function () {
-                            $scope.$broadcast('resizeStart');
-                        },
-                        resizeStop: function (event, ui) {
-                            bmsDialogService.resizeStop(ui, $scope.type);
-                            bmsDialogService.fixSize($(element), 0, 0);
-                            $scope.$broadcast('resizeStop');
-                        },
-                        open: function () {
-                            bmsDialogService.open(element, $scope.type);
-                            bmsDialogService.fixSize($(element), 0, 0);
-                            $scope.isOpen = true;
-                            $scope.$broadcast('open');
-                        },
-                        close: function () {
-                            bmsDialogService.close($scope.type);
-                            $scope.isOpen = false;
-                            $scope.$broadcast('close');
-                        },
-                        autoOpen: $scope.isOpen,
-                        width: 500,
-                        height: 400,
-                        title: $scope.type
-
+                    $scope.$watch('traceId', function (newTraceId, oldTraceId) {
+                        if (newTraceId && newTraceId !== oldTraceId) {
+                            if (ctrl.isOpen()) {
+                                $scope.setTraceId(newTraceId);
+                            } else {
+                                $scope.postpone = true;
+                            }
+                        }
                     });
 
                 }

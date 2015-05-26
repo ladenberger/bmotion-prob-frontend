@@ -709,14 +709,6 @@ define(['bms.common', 'prob.observers', 'xeditable', 'cytoscape', 'cytoscape.nav
             }
 
         }])
-        .controller('bmsDiagramCtrl', ['$scope', function ($scope) {
-            $scope.$on('open', function () {
-                $scope.$broadcast('initDiagram');
-            });
-            $scope.$on('resizeStop', function () {
-                $scope.$broadcast('refreshDiagram');
-            });
-        }])
         .factory('bmsDiagramTraceGraph', ['$q', 'ws', 'bmsRenderingService', function ($q, ws, bmsRenderingService) {
 
             return {
