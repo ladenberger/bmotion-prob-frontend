@@ -5,7 +5,7 @@
 define(['angular', 'jquery.cookie', 'jquery-ui', 'bootstrap'], function () {
 
     var module = angular.module('prob.ui', [])
-        .controller('bmsNavigationCtrl', ['$scope', 'ws', 'bmsUIService', '$rootScope', 'bmsVisualisationService', function ($scope, ws, bmsUIService, $rootScope) {
+        .controller('bmsNavigationCtrl', ['$scope', 'ws', 'bmsUIService', '$rootScope', function ($scope, ws, bmsUIService, $rootScope) {
 
             // Navigation button actions ...
             $scope.openDialog = function (type) {
