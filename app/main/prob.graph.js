@@ -633,7 +633,7 @@ define(['bms.common', 'prob.observers', 'xeditable', 'cytoscape', 'cytoscape.nav
                                 var promises = [];
 
                                 // Get CSS data for HTML
-                                bmsRenderingService.getStyle(vis.data.templatePath, vis.data.view.style).then(function (css) {
+                                bmsRenderingService.getStyle(vis.data.templateFolder, vis.data.view.style).then(function (css) {
 
                                     // Get HTML data
                                     angular.forEach(data.nodes, function (node) {
@@ -883,7 +883,7 @@ define(['bms.common', 'prob.observers', 'xeditable', 'cytoscape', 'cytoscape.nav
 
                             var promises = [];
 
-                            bmsRenderingService.getStyle(vis.data.templatePath, vis.data.view.style).then(function (css) {
+                            bmsRenderingService.getStyle(vis.data.templateFolder, vis.data.view.style).then(function (css) {
 
                                 angular.forEach(data.nodes, function (n) {
                                     if (n.data.id !== 'root' && n.data.id !== '0') {
