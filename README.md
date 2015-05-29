@@ -1,5 +1,3 @@
-# Build Application
-
 Run the following command for building the application:
 
 ```
