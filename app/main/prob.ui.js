@@ -5,7 +5,7 @@
 define(['angular', 'jquery.cookie', 'jquery-ui', 'bootstrap'], function () {
 
     var module = angular.module('prob.ui', [])
-        .controller('bmsNavigationCtrl', ['$scope', '$rootScope', 'bmsUIService', function ($scope, $rootScope, bmsUIService) {
+        .controller('bmsNavigationCtrl', ['$scope', '$rootScope', 'bmsUIService', 'bmsVisualisationService', function ($scope, $rootScope, bmsUIService, bmsVisualisationService) {
 
             // Navigation button actions ...
             this.openDialog = function (type) {
@@ -17,9 +17,19 @@ define(['angular', 'jquery.cookie', 'jquery-ui', 'bootstrap'], function () {
                 bmsUIService.reloadVisualisation($rootScope.currentVisualisation);
             };
 
-            this.editVisualization = function () {
-                $rootScope.$broadcast('openEditorModal', $scope.currentVisualisation, 'liftVisualisation');
+            this.editVisualization = function (id) {
+                $rootScope.$broadcast('openEditorModal', $scope.currentVisualisation, id);
             };
+
+            this.hasSvg = function () {
+                var vis = bmsVisualisationService.getVisualisation($rootScope.currentVisualisation);
+                return vis && vis['svg'] !== undefined;
+            };
+
+            this.getSvg = function () {
+                var vis = bmsVisualisationService.getVisualisation($rootScope.currentVisualisation);
+                if (vis) return vis['svg'];
+            }
 
         }])
         .factory('bmsDialogService', [function () {
