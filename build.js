@@ -21,6 +21,9 @@
         },
         {
             name: "bmotion.vis"
+        },
+        {
+            name: "bmotion.editor"
         }
     ]
 });
