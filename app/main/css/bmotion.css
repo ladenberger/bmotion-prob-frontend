@@ -103,6 +103,7 @@ html, body {
 
 .bmotion-alert {
     margin-top: 15px;
+    text-align: center;
 }
 
 .visualizationContainer, .visualizationZone, .mainContainer {

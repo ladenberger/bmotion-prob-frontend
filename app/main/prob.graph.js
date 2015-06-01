@@ -568,10 +568,12 @@ define(['bms.common', 'prob.observers', 'xeditable', 'cytoscape', 'cytoscape.nav
                                     elements.push($scope.elementSelection.bmsIdDataMap[s.bmsid]);
                                 }
                             });
-                            bmsModalService.startLoading();
+                            bmsModalService.startLoading('Loading data ...');
 
                             var start = new Date().getTime();
                             $scope.getData(elements, $scope.getVisualisationSelection()).then(function (data) {
+
+                                bmsModalService.setMessage('Generating diagram ...');
                                 var endPredicate = new Date().getTime();
                                 var time = endPredicate - start;
                                 console.log('TIME DSP: ' + time);
@@ -861,8 +863,9 @@ define(['bms.common', 'prob.observers', 'xeditable', 'cytoscape', 'cytoscape.nav
 
                     $scope.$watch('viewSelection.selected', function (newValue) {
                         if (newValue) {
-                            bmsModalService.startLoading();
+                            bmsModalService.startLoading("Loading data ...");
                             $scope.getData($scope.getVisualisationSelection(), $scope.getSelectedView()).then(function (data) {
+                                bmsModalService.setMessage("Generating diagram ...");
                                 $scope.loadData(data).then(function () {
                                     bmsModalService.endLoading();
                                 });

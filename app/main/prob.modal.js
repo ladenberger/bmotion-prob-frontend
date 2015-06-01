@@ -9,112 +9,153 @@ define(['ui-bootstrap', 'ui-bootstrap-tpls'], function () {
 
             var modalInstance = null;
 
-            $scope.open = function () {
-                modalInstance = $modal.open({
-                    template: '<div class="modal-header" style="height:40px;">'
-                    + '<button type="button" class="close" data-dismiss="modal" ng-click="close()">'
-                    + '<span aria-hidden="true">&times;</span><span class="sr-only">Close</span>'
-                    + '</button>'
-                    + '</div>'
-                    + '<div class="modal-body">'
-                    + '<p class="bmotion-img-logo"></p>'
-                    + '<p ng-attr-class="{{icon}}"></p>'
-                    + '<div ng-if="msg">'
-                    + '<div class="bmotion-alert alert alert-danger" role="alert">{{msg}}</div>'
-                    + '</div>',
-                    controller: 'bmsLoadingModalInstanceCtrl'
-                });
-                modalInstance.opened.then(function () {
-                    modalInstance.isOpen = true;
-                });
+            var states = {
+                error: {
+                    class: 'alert-danger',
+                    icon: 'bmotion-img-error'
+                },
+                loading: {
+                    class: 'alert-info',
+                    icon: 'bmotion-img-loader'
+                },
+                default: {
+                    class: 'alert-info',
+                    icon: ''
+                }
             };
 
-            $scope.$on('openModal', function () {
-                $scope.open();
+            $scope.msg = "";
+            $scope.state = states.default;
+            $scope.isOpen = false;
+
+            $scope.open = function (msg, state) {
+
+                if (Object.prototype.toString.call(msg) === '[object Array]') {
+                    $scope.msg = msg.join();
+                } else {
+                    $scope.msg = msg
+                }
+
+                $scope.state = state ? state : states.default;
+
+                if (!modalInstance || (modalInstance && !$scope.isOpen)) {
+
+                    modalInstance = $modal.open({
+                        template: '<div class="modal-header" style="height:40px;">'
+                        + '<button type="button" class="close" data-dismiss="modal" ng-click="close()">'
+                        + '<span aria-hidden="true">&times;</span><span class="sr-only">Close</span>'
+                        + '</button>'
+                        + '</div>'
+                        + '<div class="modal-body">'
+                        + '<p class="bmotion-img-logo"></p>'
+                        + '<p ng-attr-class="{{state.icon}}"></p>'
+                        + '<div ng-if="msg">'
+                        + '<div class="bmotion-alert alert {{state.class}}" role="alert">{{msg}}</div>'
+                        + '</div>',
+                        controller: 'bmsLoadingModalInstanceCtrl',
+                        resolve: {
+                            data: function () {
+                                return {
+                                    getMessage: function () {
+                                        return $scope.msg;
+                                    },
+                                    getState: function () {
+                                        return $scope.state;
+                                    }
+                                }
+                            }
+                        }
+                    });
+                    modalInstance.opened.then(function () {
+                        $scope.isOpen = true;
+                    });
+                    modalInstance.result.then(function () {
+                        $scope.isOpen = false;
+                    });
+
+                } else {
+                    modalInstance.opened.then(function () {
+                        modalInstance.setMessage($scope.msg);
+                    });
+                }
+
+            };
+
+            $scope.close = function () {
+                modalInstance.close();
+            };
+
+            $scope.setMessage = function (msg, state) {
+                $scope.open(msg, state);
+            };
+
+            $scope.$on('openModal', function (evt, msg) {
+                $scope.open(msg);
             });
 
             $scope.$on('closeModal', function () {
                 $scope.close();
             });
 
-            $scope.close = function () {
-                modalInstance.close();
-            };
-
-            $scope.$on('startLoading', function () {
-                $scope.open();
-                modalInstance.opened.then(function () {
-                    modalInstance.startLoading();
-                });
+            $scope.$on('startLoading', function (evt, msg) {
+                $scope.open(msg, states.loading);
             });
 
-            $scope.$on('endLoading', function () {
-                $scope.close();
+            $scope.$on('setModalMessage', function (evt, msg, state) {
+                $scope.setMessage(msg, state);
             });
 
-            $scope.$on('setError', function (evt, error) {
-                if (!modalInstance || (modalInstance && !modalInstance.isOpen)) {
-                    $scope.open();
-                }
-                modalInstance.opened.then(function () {
-                    modalInstance.setError(error);
-                });
+            $scope.$on('setErrorMessage', function (evt, msg) {
+                $scope.setMessage(msg, states.error);
             });
 
         }])
-        .controller('bmsLoadingModalInstanceCtrl', ['$scope', '$modalInstance', function ($scope, $modalInstance) {
+        .controller('bmsLoadingModalInstanceCtrl', ['$scope', '$modalInstance', 'data', function ($scope, $modalInstance, data) {
 
-            $modalInstance.isOpen = false;
-            $scope.icon = "";
-            $scope.msg = "";
-
-            $modalInstance.setError = function (error) {
-                if (Object.prototype.toString.call(error) === '[object Array]') {
-                    $scope.msg = error.join();
-                } else {
-                    $scope.msg = error
-                }
-                $scope.icon = 'bmotion-img-error';
-            };
-
-            $modalInstance.startLoading = function () {
-                $scope.icon = 'bmotion-img-loader';
-            };
-
+            $scope.msg = data.getMessage();
+            $scope.state = data.getState();
             $scope.close = function () {
-                $modalInstance.dismiss('cancel');
-                $modalInstance.isOpen = false;
+                $modalInstance.close();
             };
-
-            $scope.$on('modal.closing', function () {
-                $modalInstance.isOpen = false;
-            });
+            $modalInstance.setMessage = function (msg) {
+                $scope.msg = msg;
+            };
+            /*$scope.$on('modal.closing', function () {
+             $scope.isOpen = false;
+             });*/
 
         }])
         .factory('bmsModalService', ['$rootScope', function ($rootScope) {
 
-            return {
+            var modalService = {
                 openModal: function () {
                     $rootScope.$broadcast('openModal');
                 },
                 closeModal: function () {
                     $rootScope.$broadcast('closeModal');
                 },
-                startLoading: function () {
-                    $rootScope.$broadcast('startLoading');
+                setMessage: function (msg, state) {
+                    $rootScope.$broadcast('setModalMessage', msg, state);
+                },
+                setError: function (msg) {
+                    $rootScope.$broadcast('setErrorMessage', msg);
+                },
+                startLoading: function (msg) {
+                    $rootScope.$broadcast('startLoading', msg);
                 },
                 endLoading: function () {
-                    $rootScope.$broadcast('endLoading');
-                },
-                setError: function (error) {
-                    $rootScope.$broadcast('setError', error);
+                    $rootScope.$broadcast('closeModal');
                 }
-            }
+            };
+
+            return modalService;
 
         }])
         .controller('bmsEditorModalCtrl', ['$scope', '$modal', function ($scope, $modal) {
 
             var modalInstance = null;
+
+            //$scope.isOpen = false;
 
             $scope.open = function (visualisationId, svgId) {
                 modalInstance = $modal.open({
@@ -130,9 +171,16 @@ define(['ui-bootstrap', 'ui-bootstrap-tpls'], function () {
                     + '</div>',
                     controller: 'bmsEditorInstanceCtrl'
                 });
-                modalInstance.opened.then(function () {
-                    modalInstance.isOpen = true;
-                });
+                /*modalInstance.opened.then(function () {
+                 $scope.isOpen = true;
+                 });
+                 modalInstance.result.then(function () {
+                 $scope.isOpen = false;
+                 });*/
+            };
+
+            $scope.close = function () {
+                modalInstance.close();
             };
 
             $scope.$on('openEditorModal', function (evt, visualisationId, svgId) {
@@ -143,23 +191,12 @@ define(['ui-bootstrap', 'ui-bootstrap-tpls'], function () {
                 $scope.close();
             });
 
-            $scope.close = function () {
-                modalInstance.close();
-            };
-
         }])
         .controller('bmsEditorInstanceCtrl', ['$scope', '$modalInstance', function ($scope, $modalInstance) {
 
-            $modalInstance.isOpen = false;
-
             $scope.close = function () {
-                $modalInstance.dismiss('cancel');
-                $modalInstance.isOpen = false;
+                $modalInstance.close();
             };
-
-            $scope.$on('modal.closing', function () {
-                $modalInstance.isOpen = false;
-            });
 
         }]);
 

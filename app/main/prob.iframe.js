@@ -172,8 +172,11 @@ define(['tv4', 'bms.func', 'prob.common', 'prob.observers', 'prob.modal'], funct
 
                     var openTemplate = function (template) {
 
-                        bmsModalService.startLoading();
+                        bmsModalService.startLoading("Loading model ...");
+                        
                         ctrl.initSession(template).then(function () {
+
+                            bmsModalService.setMessage("Loading visualization template ...");
 
                             $.extend(ctrl.data, {
                                 container: iframe
@@ -195,7 +198,7 @@ define(['tv4', 'bms.func', 'prob.common', 'prob.observers', 'prob.modal'], funct
                                         ctrl.checkObservers(ctrl.data.id, stateId, cause);
                                     }
                                 });
-                                bmsModalService.endLoading();
+                                bmsModalService.closeModal();
                             });
 
                         }, function (error) {
