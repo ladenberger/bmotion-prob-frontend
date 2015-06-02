@@ -109,6 +109,15 @@ define(['angularAMD', 'bms.func', 'angular', 'prob.graph', 'prob.iframe', 'prob.
 
                 }
             }
+        }])
+        .directive('bmsApp', ['$compile', function ($compile) {
+            return {
+                replace: false,
+                link: function ($scope, $element, attrs) {
+                    angular.element(document.getElementsByTagName('body'))
+                        .append($compile('<div bms-ui></div>')($scope));
+                }
+            }
         }]);
     return angularAMD.bootstrap(module);
 

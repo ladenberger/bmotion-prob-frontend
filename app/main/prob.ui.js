@@ -5,7 +5,7 @@
 define(['angular', 'jquery.cookie', 'jquery-ui', 'bootstrap'], function () {
 
     var module = angular.module('prob.ui', [])
-        .controller('bmsNavigationCtrl', ['$scope', '$rootScope', 'bmsUIService', 'bmsVisualisationService', function ($scope, $rootScope, bmsUIService, bmsVisualisationService) {
+        .controller('bmsUiNavigationCtrl', ['$scope', '$rootScope', 'bmsUIService', 'bmsVisualisationService', function ($scope, $rootScope, bmsUIService, bmsVisualisationService) {
 
             var self = this;
 
@@ -41,6 +41,11 @@ define(['angular', 'jquery.cookie', 'jquery-ui', 'bootstrap'], function () {
             }
 
         }])
+        .directive('bmsUi', function () {
+            return {
+                templateUrl: 'bmsUi.html'
+            }
+        })
         .factory('bmsDialogService', [function () {
             return {
                 isOpen: function (type) {
