@@ -12,13 +12,16 @@ define(['bms.func', 'angularAMD', 'angular', 'prob.jquery'], function (bms, angu
             var observerService = {
                 addObserver: function (type, data, element) {
                     $parentScope.addObserver(type, data, element);
+                    $parentScope.$apply();
                 },
                 addEvent: function (type, data, element) {
                     $parentScope.addEvent(type, data, element);
+                    $parentScope.$apply();
                 },
                 addSvg: function (id, element) {
                     var clonedElement = element.clone();
                     $parentScope.addSvg(id, $('<div>').append(clonedElement).html());
+                    $parentScope.$apply();
                 }
             };
             return observerService;

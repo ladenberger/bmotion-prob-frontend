@@ -23,8 +23,16 @@ define(['angular', 'jquery.cookie', 'jquery-ui', 'bootstrap'], function () {
                 $rootScope.$broadcast('openEditorModal', $scope.currentVisualisation, id);
             };
 
+            self.openElementProjectionDiagram = function () {
+                $rootScope.$broadcast('openElementProjectionModal');
+            };
+
+            self.openTraceDiagram = function () {
+                $rootScope.$broadcast('openTraceDiagramModal');
+            };
+
             self.hasSvg = function () {
-                return self.getSvg();
+                return self.getSvg() !== undefined;
             };
 
             self.getSvg = function () {

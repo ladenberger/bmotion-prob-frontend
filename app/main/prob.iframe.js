@@ -198,7 +198,7 @@ define(['tv4', 'bms.func', 'prob.common', 'prob.observers', 'prob.modal'], funct
                                         ctrl.checkObservers(ctrl.data.id, stateId, cause);
                                     }
                                 });
-                                bmsModalService.closeModal();
+                                bmsModalService.endLoading();
                             });
 
                         }, function (error) {

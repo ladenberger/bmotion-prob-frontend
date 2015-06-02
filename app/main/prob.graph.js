@@ -358,7 +358,7 @@ define(['bms.common', 'prob.observers', 'xeditable', 'cytoscape', 'cytoscape.nav
                     $(function () { // on dom ready
                         var containerEle = $(container);
                         var graphEle = containerEle.find(".projection-diagram-graph");
-                        var navigatorEle = containerEle.find(".projection-diagramnavigator");
+                        var navigatorEle = containerEle.find(".projection-diagram-navigator");
                         graphEle.cytoscape({
                             zoomingEnabled: true,
                             userZoomingEnabled: true,
@@ -426,10 +426,8 @@ define(['bms.common', 'prob.observers', 'xeditable', 'cytoscape', 'cytoscape.nav
 
             return {
                 replace: false,
-                scope: true,
-                template: '<div style="width:100%;height:100%;">'
-                + '<div>'
-                + '<div style="float:left">'
+                scope: {},
+                template: '<div>'
                 + '<a href="#" editable-select="visualisationSelection.selected" buttons="no" onshow="loadVisualisations()" e-ng-options="s.value as s.name for s in visualisationSelection.data">'
                 + '{{ showVisualisationSelection() }}'
                 + '</a>'
@@ -437,13 +435,10 @@ define(['bms.common', 'prob.observers', 'xeditable', 'cytoscape', 'cytoscape.nav
                 + '{{ showElementSelection() }}'
                 + '</a>'
                 + '</div>'
-                + '<div style="float:right"><button type="button" class="btn btn-default btn-xs" ng-click="export()"><span class="glyphicon glyphicon-export"></span></button></div>'
-                + '</div><br/>'
-                + '<div style="width:100%;height:100%;">'
-                + '<div class="projection-diagram-graph" style="height:100%;width:80%;float:left;"></div>'
-                + '<div class="projection-diagramnavigator" style="float:left;height:100%;width:20%;position:relative;bottom:0;right:0;"></div>'
+                + '<div class="fullWidthHeight">'
+                + '<div class="projection-diagram-graph fullWidthHeight"></div>'
+                + '<div class="projection-diagram-navigator"></div>'
                 + '</div>',
-                require: '^bmsDialog',
                 controller: ['$scope', function ($scope) {
 
                     $scope.visualisationSelection = {
@@ -457,14 +452,14 @@ define(['bms.common', 'prob.observers', 'xeditable', 'cytoscape', 'cytoscape.nav
                         selected: []
                     };
 
-                    $scope.export = function () {
+                    $scope.$on('exportSvg', function () {
                         if ($scope.cy) {
                             window.open($scope.cy.png({
                                 full: true,
                                 scale: 2
                             }));
                         }
-                    };
+                    });
 
                     $scope.showElementSelection = function () {
                         var selected = [];
@@ -668,25 +663,25 @@ define(['bms.common', 'prob.observers', 'xeditable', 'cytoscape', 'cytoscape.nav
 
                     };
 
-                    $scope.refreshDiagram = function () {
-                        if ($scope.cy) {
-                            $scope.cy.load($scope.cy.elements().jsons())
-                        }
-                        $scope.refreshNavigator();
-                    };
+                    /*$scope.refreshDiagram = function () {
+                     if ($scope.cy) {
+                     $scope.cy.load($scope.cy.elements().jsons())
+                     }
+                     $scope.refreshNavigator();
+                     };
 
-                    $scope.refreshNavigator = function () {
-                        if ($scope.navigator) {
-                            $scope.navigator.cytoscapeNavigator('resize');
-                        }
-                    };
+                     $scope.refreshNavigator = function () {
+                     if ($scope.navigator) {
+                     $scope.navigator.cytoscapeNavigator('resize');
+                     }
+                     };*/
 
                 }],
-                link: function ($scope, $element, attrs, ctrl) {
+                link: function ($scope, $element, attrs) {
 
-                    ctrl.onEventListener('resizeStop', function () {
-                        $scope.refreshDiagram();
-                    });
+                    /*ctrl.onEventListener('resizeStop', function () {
+                     $scope.refreshDiagram();
+                     });*/
 
                     $scope.loadData = function (data) {
                         var defer = $q.defer();
@@ -702,7 +697,7 @@ define(['bms.common', 'prob.observers', 'xeditable', 'cytoscape', 'cytoscape.nav
                                 }, function () {
                                     defer.resolve();
                                 });
-                                $scope.refreshNavigator();
+                                //$scope.refreshNavigator();
                             }
                         }
                         return defer.promise;
@@ -781,8 +776,8 @@ define(['bms.common', 'prob.observers', 'xeditable', 'cytoscape', 'cytoscape.nav
         .directive('bmsDiagramTraceView', ['bmsObserverService', '$filter', 'bmsVisualisationService', 'bmsDiagramTraceGraph', 'ws', '$compile', 'bmsRenderingService', '$q', 'bmsModalService', function (bmsObserverService, $filter, bmsVisualisationService, bmsDiagramTraceGraph, ws, $compile, bmsRenderingService, $q, bmsModalService) {
             return {
                 replace: false,
-                template: '<div style="height:100%;width:100%;">'
-                + '<div>'
+                scope: {},
+                template: '<div>'
                 + '<a href="#" editable-select="visualisationSelection.selected" buttons="no" onshow="loadVisualisations()" e-ng-options="s.value as s.name for s in visualisationSelection.data">'
                 + '{{ showVisualisationSelection() }}'
                 + '</a>'
@@ -790,9 +785,10 @@ define(['bms.common', 'prob.observers', 'xeditable', 'cytoscape', 'cytoscape.nav
                 + '{{ showViewSelection() }}'
                 + '</a>'
                 + '</div>'
-                + '<div class="trace-diagram-graph" style="height:100%;width:80%;float:left;"></div>'
-                + '<div class="trace-diagram-navigator" style="float:left;height:100%;width:20%;position:relative;bottom:0;right:0;"></div>',
-                require: '^bmsDialog',
+                + '<div class="fullWidthHeight">'
+                + '<div class="trace-diagram-graph fullWidthHeight"></div>'
+                + '<div class="trace-diagram-navigator"></div>'
+                + '</div>',
                 controller: ['$scope', function ($scope) {
 
                     $scope.visualisationSelection = {
@@ -913,38 +909,34 @@ define(['bms.common', 'prob.observers', 'xeditable', 'cytoscape', 'cytoscape.nav
 
                     };
 
-                    $scope.refreshDiagram = function () {
-                        if ($scope.cy) {
-                            $scope.cy.load($scope.cy.elements().jsons())
-                        }
-                        $scope.refreshNavigator();
-                    };
+                    /*$scope.refreshDiagram = function () {
+                     if ($scope.cy) {
+                     $scope.cy.load($scope.cy.elements().jsons())
+                     }
+                     $scope.refreshNavigator();
+                     };
 
-                    $scope.refreshNavigator = function () {
-                        if ($scope.navigator) {
-                            $scope.navigator.cytoscapeNavigator('resize');
-                        }
-                    };
+                     $scope.refreshNavigator = function () {
+                     if ($scope.navigator) {
+                     $scope.navigator.cytoscapeNavigator('resize');
+                     }
+                     };
 
-                    $scope.export = function () {
+                     $scope.$on('refreshDiagram', function () {
+                     $scope.refreshDiagram();
+                     });*/
+
+                    $scope.$on('exportSvg', function () {
                         if ($scope.cy) {
                             window.open($scope.cy.png({
                                 full: true,
                                 scale: 2
                             }));
                         }
-                    };
-
-                    $scope.$on('refreshDiagram', function () {
-                        $scope.refreshDiagram();
                     });
 
                 }],
                 link: function ($scope, $element, attrs, ctrl) {
-
-                    ctrl.onEventListener('resizeStop', function () {
-                        $scope.refreshDiagram();
-                    });
 
                     $scope.loadData = function (data) {
                         var defer = $q.defer();
@@ -960,7 +952,7 @@ define(['bms.common', 'prob.observers', 'xeditable', 'cytoscape', 'cytoscape.nav
                                 }, function () {
                                     defer.resolve();
                                 });
-                                $scope.refreshNavigator();
+                                //$scope.refreshNavigator();
                             }
                         }
                         return defer.promise;

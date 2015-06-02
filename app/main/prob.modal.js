@@ -159,7 +159,7 @@ define(['ui-bootstrap', 'ui-bootstrap-tpls'], function () {
 
             $scope.open = function (visualisationId, svgId) {
                 modalInstance = $modal.open({
-                    windowClass: 'full-screen',
+                    windowClass: 'full-screen bms-editor',
                     animation: false,
                     template: '<div class="modal-header">'
                     + '<button type="button" class="close" data-dismiss="modal" ng-click="close()">'
@@ -196,6 +196,96 @@ define(['ui-bootstrap', 'ui-bootstrap-tpls'], function () {
 
             $scope.close = function () {
                 $modalInstance.close();
+            };
+
+        }])
+        .controller('bmsElementProjectionModalCtrl', ['$scope', '$modal', function ($scope, $modal) {
+
+            var modalInstance = null;
+
+            $scope.open = function () {
+                modalInstance = $modal.open({
+                    windowClass: 'full-screen',
+                    animation: false,
+                    template: '<div class="modal-header">'
+                    + '<div class="buttons">'
+                    + '<button type="button" data-dismiss="modal" ng-click="close()">'
+                    + '<span class="glyphicon glyphicon-remove"></span>'
+                    + '</button>'
+                    + '<button type="button" ng-click="export()">'
+                    + '<span class="glyphicon glyphicon-export"></span>'
+                    + '</button>'
+                    + '</div>'
+                    + '</div>'
+                    + '<div class="modal-body">'
+                    + '<div data-bms-diagram-element-projection-view class="fullWidthHeight"></div>'
+                    + '</div>',
+                    controller: 'bmsElementProjectionInstanceCtrl'
+                });
+            };
+
+            $scope.close = function () {
+                modalInstance.close();
+            };
+
+            $scope.$on('openElementProjectionModal', function (evt) {
+                $scope.open();
+            });
+
+        }])
+        .controller('bmsElementProjectionInstanceCtrl', ['$scope', '$modalInstance', function ($scope, $modalInstance) {
+
+            $scope.close = function () {
+                $modalInstance.close();
+            };
+
+            $scope.export = function () {
+                $scope.$broadcast('exportSvg');
+            };
+
+        }])
+        .controller('bmsTraceDiagramModalCtrl', ['$scope', '$modal', function ($scope, $modal) {
+
+            var modalInstance = null;
+
+            $scope.open = function () {
+                modalInstance = $modal.open({
+                    windowClass: 'full-screen',
+                    animation: false,
+                    template: '<div class="modal-header">'
+                    + '<div class="buttons">'
+                    + '<button type="button" data-dismiss="modal" ng-click="close()">'
+                    + '<span class="glyphicon glyphicon-remove"></span>'
+                    + '</button>'
+                    + '<button type="button" ng-click="export()">'
+                    + '<span class="glyphicon glyphicon-export"></span>'
+                    + '</button>'
+                    + '</div>'
+                    + '</div>'
+                    + '<div class="modal-body">'
+                    + '<div bms-diagram-trace-view class="fullWidthHeight"></div>'
+                    + '</div>',
+                    controller: 'bmsTraceDiagramInstanceCtrl'
+                });
+            };
+
+            $scope.close = function () {
+                modalInstance.close();
+            };
+
+            $scope.$on('openTraceDiagramModal', function () {
+                $scope.open();
+            });
+
+        }])
+        .controller('bmsTraceDiagramInstanceCtrl', ['$scope', '$modalInstance', function ($scope, $modalInstance) {
+
+            $scope.close = function () {
+                $modalInstance.close();
+            };
+
+            $scope.export = function () {
+                $scope.$broadcast('exportSvg');
             };
 
         }]);
