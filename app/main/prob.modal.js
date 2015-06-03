@@ -162,9 +162,11 @@ define(['ui-bootstrap', 'ui-bootstrap-tpls'], function () {
                     windowClass: 'full-screen bms-editor',
                     animation: false,
                     template: '<div class="modal-header">'
-                    + '<button type="button" class="close" data-dismiss="modal" ng-click="close()">'
-                    + '<span aria-hidden="true">&times;</span><span class="sr-only">Close</span>'
+                    + '<div class="buttons">'
+                    + '<button type="button" data-dismiss="modal" ng-click="close()">'
+                    + '<span class="glyphicon glyphicon-remove"></span>'
                     + '</button>'
+                    + '</div>'
                     + '</div>'
                     + '<div class="modal-body">'
                     + '<div data-bms-visualisation-editor data-bms-visualisation-id="' + visualisationId + '" data-bms-svg-id="' + svgId + '" class="fullWidthHeight"></div>'

@@ -41,6 +41,7 @@ define(['angularAMD', 'bms.func', 'angular', 'prob.graph', 'prob.iframe', 'prob.
         .controller('bmsVisualizationCtrl', ['$scope', 'fileDialogService', 'bmsModalService', '$http', function ($scope, fileDialogService, bmsModalService, $http) {
 
             $scope.setVisualization = function (vis) {
+                sessionStorage.template = vis.template;
                 $scope.visualization = vis;
             };
 
@@ -60,6 +61,13 @@ define(['angularAMD', 'bms.func', 'angular', 'prob.graph', 'prob.iframe', 'prob.
                     }
                 });
             };
+
+            if (sessionStorage.template) {
+                $scope.setVisualization({
+                    template: sessionStorage.template,
+                    id: bms.uuid()
+                });
+            }
 
         }])
         .directive('bmsDropZone', ['$http', 'bmsModalService', function ($http, bmsModalService) {
@@ -115,7 +123,7 @@ define(['angularAMD', 'bms.func', 'angular', 'prob.graph', 'prob.iframe', 'prob.
                 replace: false,
                 link: function ($scope, $element, attrs) {
                     angular.element(document.getElementsByTagName('body'))
-                        .append($compile('<div bms-ui></div>')($scope));
+                        .append($compile('<div bms-ui class="fullWidthHeight"></div>')($scope));
                 }
             }
         }]);

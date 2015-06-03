@@ -9,7 +9,7 @@ define(['tv4', 'bms.func', 'prob.common', 'prob.observers', 'prob.modal'], funct
             return {
                 replace: false,
                 scope: {},
-                template: '<iframe src="" frameBorder="0" style="width:100%;height:100%"></iframe>',
+                template: '<iframe src="" frameBorder="0" class="fullWidthHeight bmsIframe"></iframe>',
                 controller: ['$scope', function ($scope) {
 
                     var self = this;
