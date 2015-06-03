@@ -187,12 +187,8 @@ define(['angularAMD', 'bms.func', 'angular', 'prob.graph', 'prob.iframe', 'prob.
                             //TODO: Check if correct file ...
                             var filename = template.replace(/^.*[\\\/]/, '');
                             if (filename === 'bmotion.json') {
-                                $http.get(template).success(function (data) {
-                                    $scope.setVisualization({
-                                        id: bms.uuid(),
-                                        name: data.name,
-                                        template: template
-                                    });
+                                $http.get(template).success(function () {
+                                    $scope.$emit('setVisualization', template);
                                 });
                             } else {
                                 bmsModalService.setError('Invalid file, please drop a bmotion.json file!');
