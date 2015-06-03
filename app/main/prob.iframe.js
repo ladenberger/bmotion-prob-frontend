@@ -62,6 +62,8 @@ define(['tv4', 'bms.func', 'prob.common', 'prob.observers', 'prob.modal'], funct
 
                                     if (tv4.validate(config, manifest.MANIFEST_SCHEME)) {
 
+                                        self.data = {};
+
                                         var jsonFileName = template.replace(/^.*[\\\/]/, '');
                                         var templateFolder = template.replace(jsonFileName, '');
                                         $.extend(self.data, config, {
@@ -160,6 +162,18 @@ define(['tv4', 'bms.func', 'prob.common', 'prob.observers', 'prob.modal'], funct
                         }
                     };
 
+                    ws.on('checkObserver', function (cause, s) {
+                        var stateId = s.stateId;
+                        var traceId = s.traceId;
+                        self.data.stateId = stateId;
+                        if (cause === trigger.TRIGGER_MODEL_INITIALISED) {
+                            self.data.initialised = true;
+                        }
+                        if (self.data.traceId == traceId) {
+                            self.checkObservers(self.data.id, stateId, cause);
+                        }
+                    });
+
                 }],
                 link: function ($scope, $element, attrs, ctrl) {
 
@@ -173,7 +187,7 @@ define(['tv4', 'bms.func', 'prob.common', 'prob.observers', 'prob.modal'], funct
                     var openTemplate = function (template) {
 
                         bmsModalService.startLoading("Loading model ...");
-                        
+
                         ctrl.initSession(template).then(function () {
 
                             bmsModalService.setMessage("Loading visualization template ...");
@@ -187,17 +201,6 @@ define(['tv4', 'bms.func', 'prob.common', 'prob.observers', 'prob.modal'], funct
                                 $rootScope.currentVisualisation = ctrl.id;
                                 bmsVisualisationService.addVisualisation(ctrl.id, ctrl.data);
                                 bmsUIService.setProBViewTraceId(ctrl.data.traceId);
-                                ws.on('checkObserver', function (cause, s) {
-                                    var stateId = s.stateId;
-                                    var traceId = s.traceId;
-                                    ctrl.data.stateId = stateId;
-                                    if (cause === trigger.TRIGGER_MODEL_INITIALISED) {
-                                        ctrl.data.initialised = true;
-                                    }
-                                    if (ctrl.data.traceId == traceId) {
-                                        ctrl.checkObservers(ctrl.data.id, stateId, cause);
-                                    }
-                                });
                                 bmsModalService.endLoading();
                             });
 
@@ -213,6 +216,9 @@ define(['tv4', 'bms.func', 'prob.common', 'prob.observers', 'prob.modal'], funct
                     }
                     attrs.$observe('bmsVisualisationView', function (vis) {
                         if (vis) openTemplate(vis);
+                    });
+                    attrs.$observe('bmsId', function (id) {
+                        ctrl.id = id;
                     });
 
                 }
