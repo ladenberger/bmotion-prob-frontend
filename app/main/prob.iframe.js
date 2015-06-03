@@ -8,7 +8,10 @@ define(['tv4', 'bms.func', 'prob.common', 'prob.observers', 'prob.modal'], funct
         .directive('bmsVisualisationView', ['bmsMainService', '$rootScope', 'bmsVisualisationService', '$compile', 'bmsObserverService', '$http', 'initSession', 'ws', '$injector', 'bmsUIService', 'bmsModalService', 'manifest', 'trigger', '$q', function (bmsMainService, $rootScope, bmsVisualisationService, $compile, bmsObserverService, $http, initSession, ws, $injector, bmsUIService, bmsModalService, manifest, trigger, $q) {
             return {
                 replace: false,
-                scope: {},
+                scope: {
+                    id: '@?bmsId',
+                    template: '@bmsVisualisationView'
+                },
                 template: '<iframe src="" frameBorder="0" class="fullWidthHeight bmsIframe"></iframe>',
                 controller: ['$scope', function ($scope) {
 
@@ -74,7 +77,7 @@ define(['tv4', 'bms.func', 'prob.common', 'prob.observers', 'prob.modal'], funct
                                         initSession.init({
                                             model: self.data.model,
                                             tool: self.data.tool,
-                                            id: self.id,
+                                            id: $scope.id,
                                             path: fullPath
                                         }).then(function (modelData) {
                                             $.extend(self.data, modelData);
@@ -105,7 +108,7 @@ define(['tv4', 'bms.func', 'prob.common', 'prob.observers', 'prob.modal'], funct
                     };
 
                     $scope.addSvg = function (id, svg) {
-                        bmsVisualisationService.addSvg(self.id, id, svg);
+                        bmsVisualisationService.addSvg($scope.id, id, svg);
                     };
 
                     $scope.addObserver = function (type, data, element) {
@@ -130,9 +133,9 @@ define(['tv4', 'bms.func', 'prob.common', 'prob.observers', 'prob.modal'], funct
                                     bmsid: bmsid,
                                     element: e
                                 };
-                                bmsObserverService.addObserver(self.id, observer);
+                                bmsObserverService.addObserver($scope.id, observer);
                                 if (self.data.stateId !== 'root' && self.data.initialised) {
-                                    self.checkObserver(self.id, observer, self.data.stateId, data.cause);
+                                    self.checkObserver($scope.id, observer, self.data.stateId, data.cause);
                                 }
                             });
                         }
@@ -154,10 +157,10 @@ define(['tv4', 'bms.func', 'prob.common', 'prob.observers', 'prob.modal'], funct
                                 data: data,
                                 element: element
                             };
-                            bmsObserverService.addEvent(self.id, event);
+                            bmsObserverService.addEvent($scope.id, event);
                             var instance = $injector.get(type, "");
                             if (instance) {
-                                instance.setup(self.id, event, self.data.container.contents(), self.data.traceId);
+                                instance.setup($scope.id, event, self.data.container.contents(), self.data.traceId);
                             }
                         }
                     };
@@ -178,10 +181,10 @@ define(['tv4', 'bms.func', 'prob.common', 'prob.observers', 'prob.modal'], funct
                 link: function ($scope, $element, attrs, ctrl) {
 
                     var iframe = $($element.contents());
-                    ctrl.id = attrs['bmsId'] ? attrs['bmsId'] : bms.uuid();
+                    $scope.id = attrs['bmsId'] ? attrs['bmsId'] : bms.uuid();
                     iframe.attr({
-                        "data-bms-id": ctrl.id,
-                        "id": ctrl.id
+                        "data-bms-id": $scope.id,
+                        "id": $scope.id
                     });
 
                     var openTemplate = function (template) {
@@ -196,10 +199,10 @@ define(['tv4', 'bms.func', 'prob.common', 'prob.observers', 'prob.modal'], funct
                                 container: iframe
                             });
 
-                            iframe.attr('src', ctrl.data.templatePath).attr('id', ctrl.id);
+                            iframe.attr('src', ctrl.data.templatePath).attr('id', $scope.id);
                             iframe.load(function () {
-                                $rootScope.currentVisualisation = ctrl.id;
-                                bmsVisualisationService.addVisualisation(ctrl.id, ctrl.data);
+                                $rootScope.currentVisualisation = $scope.id;
+                                bmsVisualisationService.addVisualisation($scope.id, ctrl.data);
                                 bmsUIService.setProBViewTraceId(ctrl.data.traceId);
                                 bmsModalService.endLoading();
                             });
@@ -216,9 +219,6 @@ define(['tv4', 'bms.func', 'prob.common', 'prob.observers', 'prob.modal'], funct
                     }
                     attrs.$observe('bmsVisualisationView', function (vis) {
                         if (vis) openTemplate(vis);
-                    });
-                    attrs.$observe('bmsId', function (id) {
-                        ctrl.id = id;
                     });
 
                 }

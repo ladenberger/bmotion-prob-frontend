@@ -124,16 +124,16 @@ define(['angularAMD', 'bms.func', 'angular', 'prob.graph', 'prob.iframe', 'prob.
         }])
         .controller('bmsVisualizationCtrl', ['$scope', 'fileDialogService', 'bmsModalService', '$http', function ($scope, fileDialogService, bmsModalService, $http) {
 
-            $scope.setVisualization = function (template) {
+            var self = this;
+
+            self.setVisualization = function (template) {
 
                 var filename = template.replace(/^.*[\\\/]/, '');
                 if (filename === 'bmotion.json') {
                     $http.get(template).success(function () {
                         sessionStorage.template = template;
-                        $scope.visualization = {
-                            id: bms.uuid(),
-                            template: template
-                        };
+                        self.template = template;
+                        self.id = bms.uuid();
                     });
                 } else {
                     bmsModalService.setError('Invalid file, please open a bmotion.json file!');
@@ -141,18 +141,18 @@ define(['angularAMD', 'bms.func', 'angular', 'prob.graph', 'prob.iframe', 'prob.
 
             };
 
-            $scope.openFileDialog = function () {
+            self.openFileDialog = function () {
                 fileDialogService.open().then(function (template) {
-                    $scope.setVisualization(template);
+                    self.setVisualization(template);
                 });
             };
 
             $scope.$on('setVisualization', function (evt, template) {
-                $scope.setVisualization(template);
+                self.setVisualization(template);
             });
 
             if (sessionStorage.template) {
-                $scope.setVisualization(sessionStorage.template);
+                self.setVisualization(sessionStorage.template);
             }
 
         }])
