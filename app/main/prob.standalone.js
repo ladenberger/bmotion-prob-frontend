@@ -5,21 +5,105 @@
 define(['angularAMD', 'bms.func', 'angular', 'prob.graph', 'prob.iframe', 'prob.editor', 'prob.ui', 'prob.common'], function (angularAMD, bms) {
 
     var module = angular.module('prob.standalone', ['prob.graph', 'prob.iframe', 'prob.editor', 'prob.ui', 'prob.common'])
-        .run(['ws', 'editableOptions', 'bmsMainService', function (ws, editableOptions, bmsMainService) {
+        .run(['editableOptions', 'bmsMainService', 'GUI', 'Window', 'fileDialogService', '$rootScope', function (editableOptions, bmsMainService, GUI, Window, fileDialogService, $rootScope) {
+
             bmsMainService.mode = 'ModeStandalone';
             editableOptions.theme = 'bs3'; // bootstrap3 theme. Can be also 'bs2', 'default'
-            /*
-             // Load native UI library
-             var gui = require('nw.gui');
-             // Get the current window
-             var win = gui.Window.get();
-             // Listen to close event
-             win.on('close', function () {
-             this.hide(); // Pretend to be closed already
-             ws.emit('clientClosed', {data: {}});
-             //this.close(true);
-             });
-             */
+
+            var openDialog = function (type) {
+                $rootScope.$broadcast('openDialog_' + type);
+            };
+
+            // Create node-webkit menu
+            var windowMenu = new GUI.Menu({
+                type: "menubar"
+            });
+
+            // File menu
+            var fileMenu = new GUI.Menu();
+            windowMenu.append(new GUI.MenuItem({
+                label: 'File',
+                submenu: fileMenu
+            }));
+            fileMenu.append(new GUI.MenuItem({
+                label: 'Open Visualization',
+                click: function () {
+                    fileDialogService.open().then(function (template) {
+                        $rootScope.$broadcast('setVisualization', template);
+                    });
+                }
+            }));
+
+            // ProB menu
+            var probView = new GUI.Menu();
+            windowMenu.append(new GUI.MenuItem({
+                label: 'ProB',
+                submenu: probView
+            }));
+            probView.append(new GUI.MenuItem({
+                label: 'Events',
+                click: function () {
+                    openDialog('Events');
+                }
+            }));
+            probView.append(new GUI.MenuItem({
+                label: 'History',
+                click: function () {
+                    openDialog('CurrentTrace');
+                }
+            }));
+            probView.append(new GUI.MenuItem({
+                label: 'State',
+                click: function () {
+                    openDialog('StateInspector');
+                }
+            }));
+            probView.append(new GUI.MenuItem({
+                label: 'Animations',
+                click: function () {
+                    openDialog('CurrentAnimations');
+                }
+            }));
+            probView.append(new GUI.MenuItem({
+                label: 'Console',
+                click: function () {
+                    openDialog('GroovyConsoleSession');
+                }
+            }));
+            probView.append(new GUI.MenuItem({
+                label: 'Model Checking',
+                click: function () {
+                    openDialog('ModelCheckingUI');
+                }
+            }));
+
+            // Diagram menu
+            var diagramMenu = new GUI.Menu();
+            windowMenu.append(new GUI.MenuItem({
+                label: 'Diagram',
+                submenu: diagramMenu
+            }));
+            diagramMenu.append(new GUI.MenuItem({
+                label: 'Element Projection Diagram',
+                click: function () {
+                    $rootScope.$broadcast('openElementProjectionModal');
+                }
+            }));
+            diagramMenu.append(new GUI.MenuItem({
+                label: 'Trace Diagram',
+                click: function () {
+                    $rootScope.$broadcast('openTraceDiagramModal');
+                }
+            }));
+
+            Window.menu = windowMenu;
+
+        }])
+        .factory('GUI', function () {
+            return require('nw.gui');
+        })
+        .factory('Window', ['GUI', function (gui) {
+            return gui.Window.get();
         }])
         .factory('fileDialogService', ['$q', function ($q) {
             return {
@@ -40,33 +124,35 @@ define(['angularAMD', 'bms.func', 'angular', 'prob.graph', 'prob.iframe', 'prob.
         }])
         .controller('bmsVisualizationCtrl', ['$scope', 'fileDialogService', 'bmsModalService', '$http', function ($scope, fileDialogService, bmsModalService, $http) {
 
-            $scope.setVisualization = function (vis) {
-                sessionStorage.template = vis.template;
-                $scope.visualization = vis;
+            $scope.setVisualization = function (template) {
+
+                var filename = template.replace(/^.*[\\\/]/, '');
+                if (filename === 'bmotion.json') {
+                    $http.get(template).success(function () {
+                        sessionStorage.template = template;
+                        $scope.visualization = {
+                            id: bms.uuid(),
+                            template: template
+                        };
+                    });
+                } else {
+                    bmsModalService.setError('Invalid file, please open a bmotion.json file!');
+                }
+
             };
 
             $scope.openFileDialog = function () {
                 fileDialogService.open().then(function (template) {
-                    var filename = template.replace(/^.*[\\\/]/, '');
-                    if (filename === 'bmotion.json') {
-                        $http.get(template).success(function (data) {
-                            $scope.setVisualization({
-                                id: bms.uuid(),
-                                name: data.name,
-                                template: template
-                            });
-                        });
-                    } else {
-                        bmsModalService.setError('Invalid file, please open a bmotion.json file!');
-                    }
+                    $scope.setVisualization(template);
                 });
             };
 
+            $scope.$on('setVisualization', function (evt, template) {
+                $scope.setVisualization(template);
+            });
+
             if (sessionStorage.template) {
-                $scope.setVisualization({
-                    template: sessionStorage.template,
-                    id: bms.uuid()
-                });
+                $scope.setVisualization(sessionStorage.template);
             }
 
         }])
