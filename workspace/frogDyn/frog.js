@@ -1,6 +1,6 @@
-requirejs(['../../app/bmotion.config.js'], function () {
+requirejs(['../../app/bmotion.config'], function () {
 
-    requirejs(['../../app/bmotion.vis'], function () {
+    requirejs(['bmotion.vis'], function () {
 
         requirejs(['libs/snap.svg-min.js'], function (Snap) {
 
@@ -21,9 +21,12 @@ requirejs(['../../app/bmotion.config.js'], function () {
                         s.attr("id", "frog");
                         var xoffset = 0;
                         for (var i = 1; i <= nr; i++) {
+
                             var place = s.image("free.png", xoffset, 0, 50, 45);
                             place.attr("id", i);
                             xoffset = xoffset + 50;
+
+                            // Install observer and execute event handler
                             $(place.node)
                                 .observe("formula", {
                                     formulas: ["positions(" + i + ")"],
@@ -63,6 +66,7 @@ requirejs(['../../app/bmotion.config.js'], function () {
                                         }
                                     ]
                                 });
+
                         }
 
                         initialised = true;

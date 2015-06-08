@@ -5,6 +5,21 @@
 define(['tv4', 'bms.func', 'prob.common', 'prob.observers', 'prob.modal'], function (tv4, bms) {
 
     var module = angular.module('prob.iframe', ['prob.common', 'prob.observers', 'prob.modal'])
+        .factory('initSession', ['$q', 'ws', function ($q, ws) {
+            return {
+                init: function (data) {
+                    var defer = $q.defer();
+                    ws.emit('initSession', {data: data}, function (r) {
+                        if (r.errors) {
+                            defer.reject(r.errors)
+                        } else {
+                            defer.resolve(r)
+                        }
+                    });
+                    return defer.promise;
+                }
+            };
+        }])
         .directive('bmsVisualisationView', ['bmsMainService', '$rootScope', 'bmsVisualisationService', '$compile', 'bmsObserverService', '$http', 'initSession', 'ws', '$injector', 'bmsUIService', 'bmsModalService', 'manifest', 'trigger', '$q', function (bmsMainService, $rootScope, bmsVisualisationService, $compile, bmsObserverService, $http, initSession, ws, $injector, bmsUIService, bmsModalService, manifest, trigger, $q) {
             return {
                 replace: false,

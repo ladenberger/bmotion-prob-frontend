@@ -2,9 +2,9 @@
  * BMotion Studio for ProB Graph Module
  *
  */
-define(['bms.common', 'prob.observers', 'xeditable', 'cytoscape', 'cytoscape.navigator', 'prob.modal'], function () {
+define(['bms.visualization', 'prob.observers', 'angular-xeditable', 'cytoscape', 'cytoscape.navigator'], function () {
 
-    return angular.module('prob.graph', ['xeditable', 'bms.common', 'prob.observers', 'prob.modal'])
+    return angular.module('prob.graph', ['xeditable', 'bms.visualization', 'prob.observers'])
         .factory('bmsRenderingService', ['$q', '$injector', 'bmsObserverService', '$http', '$templateCache', function ($q, $injector, bmsObserverService, $http, $templateCache) {
 
             var renderingService = {
@@ -422,7 +422,7 @@ define(['bms.common', 'prob.observers', 'xeditable', 'cytoscape', 'cytoscape.nav
             };
 
         }])
-        .directive('bmsDiagramElementProjectionView', ['bmsObserverService', 'bmsRenderingService', 'bmsVisualisationService', 'bmsDiagramElementProjectionGraph', 'ws', '$injector', '$http', '$q', '$templateCache', '$filter', 'bmsModalService', function (bmsObserverService, bmsRenderingService, bmsVisualisationService, bmsDiagramElementProjectionGraph, ws, $injector, $http, $q, $templateCache, $filter, bmsModalService) {
+        .directive('bmsDiagramElementProjectionView', ['bmsObserverService', 'bmsRenderingService', 'bmsVisualisationService', 'bmsDiagramElementProjectionGraph', 'ws', '$injector', '$http', '$q', '$templateCache', '$filter', function (bmsObserverService, bmsRenderingService, bmsVisualisationService, bmsDiagramElementProjectionGraph, ws, $injector, $http, $q, $templateCache, $filter) {
 
             return {
                 replace: false,
@@ -563,18 +563,14 @@ define(['bms.common', 'prob.observers', 'xeditable', 'cytoscape', 'cytoscape.nav
                                     elements.push($scope.elementSelection.bmsIdDataMap[s.bmsid]);
                                 }
                             });
-                            bmsModalService.startLoading('Loading data ...');
 
                             var start = new Date().getTime();
                             $scope.getData(elements, $scope.getVisualisationSelection()).then(function (data) {
 
-                                bmsModalService.setMessage('Generating diagram ...');
                                 var endPredicate = new Date().getTime();
                                 var time = endPredicate - start;
                                 console.log('TIME DSP: ' + time);
-                                $scope.loadData(data).then(function () {
-                                    bmsModalService.endLoading();
-                                });
+                                $scope.loadData(data);
                             });
                         }
                     });
@@ -707,7 +703,7 @@ define(['bms.common', 'prob.observers', 'xeditable', 'cytoscape', 'cytoscape.nav
             }
 
         }])
-        .factory('bmsDiagramTraceGraph', ['$q', 'ws', 'bmsRenderingService', function ($q, ws, bmsRenderingService) {
+        .factory('bmsDiagramTraceGraph', ['$q', function ($q) {
 
             return {
 
@@ -773,7 +769,7 @@ define(['bms.common', 'prob.observers', 'xeditable', 'cytoscape', 'cytoscape.nav
             };
 
         }])
-        .directive('bmsDiagramTraceView', ['bmsObserverService', '$filter', 'bmsVisualisationService', 'bmsDiagramTraceGraph', 'ws', '$compile', 'bmsRenderingService', '$q', 'bmsModalService', function (bmsObserverService, $filter, bmsVisualisationService, bmsDiagramTraceGraph, ws, $compile, bmsRenderingService, $q, bmsModalService) {
+        .directive('bmsDiagramTraceView', ['bmsObserverService', '$filter', 'bmsVisualisationService', 'bmsDiagramTraceGraph', 'ws', '$compile', 'bmsRenderingService', '$q', function (bmsObserverService, $filter, bmsVisualisationService, bmsDiagramTraceGraph, ws, $compile, bmsRenderingService, $q) {
             return {
                 replace: false,
                 scope: {},
@@ -859,12 +855,8 @@ define(['bms.common', 'prob.observers', 'xeditable', 'cytoscape', 'cytoscape.nav
 
                     $scope.$watch('viewSelection.selected', function (newValue) {
                         if (newValue) {
-                            bmsModalService.startLoading("Loading data ...");
                             $scope.getData($scope.getVisualisationSelection(), $scope.getSelectedView()).then(function (data) {
-                                bmsModalService.setMessage("Generating diagram ...");
-                                $scope.loadData(data).then(function () {
-                                    bmsModalService.endLoading();
-                                });
+                                $scope.loadData(data);
                             });
                         }
                     });

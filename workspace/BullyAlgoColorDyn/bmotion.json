@@ -5,7 +5,7 @@
   "model": "model/bully.csp",
   "tool": "CSPAnimation",
   "view": {
-    "elements": ["#bully"],
+    "elements": ["#bully svg"],
     "style": "bully.css"
   }
 

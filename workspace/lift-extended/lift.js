@@ -1,6 +1,6 @@
-requirejs(['../../app/bmotion.config.js'], function () {
+requirejs(['../../app/bmotion.config'], function () {
 
-    requirejs(['../../app/bmotion.vis'], function () {
+    requirejs(['bmotion.vis'], function () {
 
         $("text[data-floor]").observe("formula", {
             formulas: ["floor"],

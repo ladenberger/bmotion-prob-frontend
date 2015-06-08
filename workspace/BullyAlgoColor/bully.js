@@ -1,4 +1,4 @@
-requirejs(['../../app/scripts/bmotion.vis.dev'], function () {
+requirejs(['bmotion.vis'], function () {
 
     $("#bully").observe("csp-event", {
         observers: [

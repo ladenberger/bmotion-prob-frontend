@@ -2,14 +2,14 @@
  * BMotion Studio for ProB Observer Module
  *
  */
-define(['bms.func', 'angular', 'xeditable', 'qtip'], function (bms) {
+define(['bms.func', 'angular', 'qtip'], function (bms) {
 
-    return angular.module('prob.observers', ['bms.common', 'prob.modal'])
+    return angular.module('prob.observers', ['bms.common'])
         .service('bmsObserverService', ['$q', '$injector', 'trigger', function ($q, $injector, trigger) {
             var observers = {};
             var events = {};
             var bmsidCache = {};
-            var hasErrors = false;
+            //var hasErrors = false;
             var observerService = {
                 addObserver: function (name, o) {
                     if (observers[name] === undefined) {
@@ -89,7 +89,7 @@ define(['bms.func', 'angular', 'xeditable', 'qtip'], function (bms) {
                     var promises = [];
 
                     if (!cause) cause = trigger.TRIGGER_ANIMATION_CHANGED;
-                    observerService.hideErrors(container);
+                    //observerService.hideErrors(container);
 
                     angular.forEach(observers, function (o) {
                         if (o.type === 'formula') {
@@ -124,49 +124,49 @@ define(['bms.func', 'angular', 'xeditable', 'qtip'], function (bms) {
 
                     return defer.promise;
 
-                },
-                hideErrors: function (container) {
-                    if (hasErrors) {
-                        container.find('[data-hasqtip]').qtip('destroy');
-                    }
-                    hasErrors = false;
-                },
-                showError: function (element, type, error) {
-
-                    if (!element.get(0)) element = $('body');
-                    // TODO: check if element exists, if not attached qtip to root element (e.g. body)
-                    if (!element.data('qtip-error')) {
-                        element.qtip({ // Grab some elements to apply the tooltip to
-                            content: {
-                                text: '',
-                                title: 'Observer errors'
-                            },
-                            position: {
-                                my: 'top left',
-                                at: 'center left',
-                                effect: false,
-                                viewport: $(window)
-                            },
-                            show: {
-                                when: false,
-                                ready: true
-                            },
-                            hide: {
-                                event: false,
-                                inactive: 10000
-                            },
-                            style: {
-                                classes: 'qtip-rounded qtip-red'
-                            }
-                        });
-                        element.data('qtip-error', true)
-                    }
-                    var api = element.qtip('api');
-                    if (api) {
-                        api.set('content.text', '<p><span style="font-weight:bold">' + type + '</span>: ' + error + '</p>' + api.get('content.text'));
-                    }
-                    hasErrors = true;
                 }
+                /*,hideErrors: function (container) {
+                 if (hasErrors) {
+                 container.find('[data-hasqtip]').qtip('destroy');
+                 }
+                 hasErrors = false;
+                 },
+                 showError: function (element, type, error) {
+
+                 if (!element.get(0)) element = $('body');
+                 // TODO: check if element exists, if not attached qtip to root element (e.g. body)
+                 if (!element.data('qtip-error')) {
+                 element.qtip({ // Grab some elements to apply the tooltip to
+                 content: {
+                 text: '',
+                 title: 'Observer errors'
+                 },
+                 position: {
+                 my: 'top left',
+                 at: 'center left',
+                 effect: false,
+                 viewport: $(window)
+                 },
+                 show: {
+                 when: false,
+                 ready: true
+                 },
+                 hide: {
+                 event: false,
+                 inactive: 10000
+                 },
+                 style: {
+                 classes: 'qtip-rounded qtip-red'
+                 }
+                 });
+                 element.data('qtip-error', true)
+                 }
+                 var api = element.qtip('api');
+                 if (api) {
+                 api.set('content.text', '<p><span style="font-weight:bold">' + type + '</span>: ' + error + '</p>' + api.get('content.text'));
+                 }
+                 hasErrors = true;
+                 }*/
             };
             return observerService;
         }])
@@ -204,14 +204,14 @@ define(['bms.func', 'angular', 'xeditable', 'qtip'], function (bms) {
                     }, function (data) {
 
                         expressionCache[id] = data;
-                        angular.forEach(data, function (e) {
-                            if (e.error) {
-                                var msg = "Message: " + e.error;
-                                bmsObserverService.showError($(observer.element), 'CSP Event Observer', msg);
-                            } else {
-                                e.trans = e.result.replace("{", "").replace("}", "").split(",");
-                            }
-                        });
+                        /*angular.forEach(data, function (e) {
+                         if (e.error) {
+                         var msg = "Message: " + e.error;
+                         bmsObserverService.showError($(observer.element), 'CSP Event Observer', msg);
+                         } else {
+                         e.trans = e.result.replace("{", "").replace("}", "").split(",");
+                         }
+                         });*/
                         defer.resolve(data);
                     });
                 } else {
@@ -350,16 +350,16 @@ define(['bms.func', 'angular', 'xeditable', 'qtip'], function (bms) {
                                 var ff = [];
                                 angular.forEach(o.data.formulas, function (f) {
                                     var formula = data[f];
-                                    if (formula.error) {
-                                        var e = o.element ? o.element : container.find("[data-bms-id=" + o.bmsid + "]");
-                                        var msg = "Formula: " + formula + ", Message: " + formula.error;
-                                        bmsObserverService.showError($(e), 'Formula Observer', msg);
-                                        ff.push(null);
-                                    } else {
-                                        if (data[f]) {
-                                            ff.push(data[f].trans ? data[f].trans : data[f].result);
-                                        }
+                                    /*if (formula.error) {
+                                     var e = o.element ? o.element : container.find("[data-bms-id=" + o.bmsid + "]");
+                                     var msg = "Formula: " + formula + ", Message: " + formula.error;
+                                     bmsObserverService.showError($(e), 'Formula Observer', msg);
+                                     ff.push(null);
+                                     } else {*/
+                                    if (data[f]) {
+                                        ff.push(data[f].trans ? data[f].trans : data[f].result);
                                     }
+                                    //}
                                 });
                                 promises.push(formulaObserver.apply(o, container, ff));
                             }

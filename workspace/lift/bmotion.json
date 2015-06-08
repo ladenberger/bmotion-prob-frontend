@@ -1,9 +1,6 @@
 {
   "name": "lift",
-  "template": "lift.html",
+  "template": "index.html",
   "model": "model/MLift.bcm",
-  "tool": "BAnimation",
-  "projection": {
-    "elements": ["#liftVisualisation"]
-  }
+  "tool": "BAnimation"
 }

@@ -1,6 +1,6 @@
 requirejs(['../../app/bmotion.config.js'], function () {
 
-    requirejs(['../../app/bmotion.vis'], function () {
+    requirejs(['bmotion.vis'], function () {
 
         var dd = false;
 
@@ -17,7 +17,7 @@ requirejs(['../../app/bmotion.config.js'], function () {
                     var paperWidth = 600;
                     var paperHeight = 500;
 
-                    var paper = new joint.dia.Paper({
+                    new joint.dia.Paper({
                         el: $('#bully'),
                         width: paperWidth,
                         height: paperHeight + 50,
@@ -55,8 +55,8 @@ requirejs(['../../app/bmotion.config.js'], function () {
 
                     }
 
-                    angular.forEach(graph.getElements(), function (source) {
-                        angular.forEach(graph.getElements(), function (target) {
+                    graph.getElements().forEach(function (source) {
+                        graph.getElements().forEach(function (target) {
                             var sourceId = source.attr('circle/data-o-id');
                             var targetId = target.attr('circle/data-o-id');
                             if (sourceId !== targetId) {
