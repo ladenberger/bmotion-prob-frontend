@@ -1,6 +1,6 @@
 @import url("jquery-ui.css");
-@import url("../../libs/bower/bootstrap/dist/css/bootstrap.min.css");
-@import url("../../libs/bower/bootstrap/dist/css/bootstrap-theme.min.css");
+@import url("bootstrap.css");
+@import url("bootstrap-theme.css");
 @import url("../../libs/bower/angular-xeditable/dist/css/xeditable.css");
 @import url("../../libs/ext/cytoscape.navigator/cytoscape.js-navigator.css");
 @import url("../../libs/bower/qtip2/jquery.qtip.min.css");
