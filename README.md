@@ -1,6 +1,6 @@
 # Build
 
-In order to build the application , you need to install <a href="https://nodejs.org/">Node.js</a> and <a href="https://github.com/gruntjs/grunt-cli">grunt-cli</a>.
+In order to build the application, you need to install <a href="https://nodejs.org/">Node.js</a> and <a href="https://github.com/gruntjs/grunt-cli">grunt-cli</a>.
 
 Grunt-cli can be installed via <a href="https://github.com/npm/npm">npm</a>:
 
