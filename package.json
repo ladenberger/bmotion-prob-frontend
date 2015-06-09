@@ -1,0 +1,21 @@
+{
+  "name": "bmotion-prob-frontend",
+  "version": "0.2.0",
+  "description": "BMotion Studio for ProB Frontend",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/ladenberger/bmotion-prob-frontend.git"
+  },
+  "author": "Lukas Ladenberger",
+  "license": "EPL",
+  "bugs": {
+    "url": "https://github.com/ladenberger/bmotion-prob-frontend/issues"
+  },
+  "homepage": "https://github.com/ladenberger/bmotion-prob-frontend",
+  "devDependencies": {
+    "grunt": "^0.4.5",
+    "grunt-bower-task": "^0.4.0",
+    "grunt-contrib-clean": "^0.6.0",
+    "grunt-contrib-requirejs": "^0.4.4"
+  }
+}

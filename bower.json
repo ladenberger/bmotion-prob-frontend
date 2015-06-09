@@ -17,30 +17,20 @@
     "qtip2": "2.2.1",
     "tv4": "1.1.9"
   },
-  "install": {
-    "path": {
-      "css": "app/css/libs/bower",
-      "eot": "app/css/libs/bower",
-      "svg": "app/css/libs/bower",
-      "ttf": "app/css/libs/bower",
-      "woff": "app/css/libs/bower",
-      "map": "app/css/libs/bower",
-      "js": "app/js/libs/bower"
+  "exportsOverride": {
+    "bootstrap": {
+      "css": "dist/css/*.*",
+      "fonts": "dist/fonts/*.*"
     },
-    "sources": {
-      "angular-bootstrap": [
-        "components/angular-bootstrap/ui-bootstrap.js",
-        "components/angular-bootstrap/ui-bootstrap-tpls.js"
-      ],
-      "socket.io-client": "components/socket.io-client/socket.io.js",
-      "qtip2": [
-        "components/qtip2/jquery.qtip.js",
-        "components/qtip2/jquery.qtip.css"
-      ],
-      "bootstrap": [
-        "components/bootstrap/dist/css/bootstrap.css",
-        "components/bootstrap/dist/css/bootstrap.css.map"
-      ]
+    "socket.io-client": {
+      "js": "socket.io.js"
+    },
+    "angular-bootstrap": {
+      "js": ["ui-bootstrap.js", "ui-bootstrap-tpls.js"]
+    },
+    "qtip2": {
+      "js": "jquery.qtip.js",
+      "css": "jquery.qtip.css"
     }
   },
   "resolutions": {
