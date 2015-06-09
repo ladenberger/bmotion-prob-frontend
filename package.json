@@ -20,6 +20,8 @@
     "grunt-contrib-requirejs": "^0.4.4"
   },
   "scripts": {
-    "install": "grunt dist"
+    "build": "npm install && grunt",
+    "start": "grunt watch",
+    "test": "grunt && grunt test"
   }
 }
