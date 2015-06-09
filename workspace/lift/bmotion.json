@@ -1,6 +1,0 @@
-{
-  "name": "lift",
-  "template": "index.html",
-  "model": "model/MLift.bcm",
-  "tool": "BAnimation"
-}

@@ -1,9 +1,0 @@
-{
-  "name": "lift",
-  "template": "lift.html",
-  "model": "model/m3.bcm",
-  "tool": "BAnimation",
-  "view": {
-    "elements": ["#liftVisualisation"]
-  }
-}
