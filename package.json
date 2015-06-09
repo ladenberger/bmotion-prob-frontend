@@ -1,7 +1,7 @@
 {
   "name": "bmotion-prob-frontend",
   "version": "0.2.0",
-  "description": "BMotion Studio for ProB Frontend",
+  "description": "Frontend for BMotion Studio for ProB",
   "repository": {
     "type": "git",
     "url": "https://github.com/ladenberger/bmotion-prob-frontend.git"
