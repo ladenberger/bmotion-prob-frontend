@@ -4,7 +4,6 @@
   "version": "0.2.0",
   "homepage": "http://www.stups.hhu.de/ProB/index.php5/BMotion_Studio",
   "dependencies": {
-    "requirejs": "2.1.17",
     "angular": "1.3.15",
     "angularAMD": "0.2.1",
     "angular-xeditable": "0.1.8",
@@ -12,12 +11,37 @@
     "jquery": "1.11.3",
     "jquery.cookie": "1.4.1",
     "jquery.browser": "0.0.7",
-    "jquery-ui": "1.11.3",
     "bootstrap": "3.1.1",
     "socket.io-client": "1.3.5",
     "cytoscape": "2.3.9",
     "qtip2": "2.2.1",
     "tv4": "1.1.9"
+  },
+  "install": {
+    "path": {
+      "css": "app/css/libs/bower",
+      "eot": "app/css/libs/bower",
+      "svg": "app/css/libs/bower",
+      "ttf": "app/css/libs/bower",
+      "woff": "app/css/libs/bower",
+      "map": "app/css/libs/bower",
+      "js": "app/js/libs/bower"
+    },
+    "sources": {
+      "angular-bootstrap": [
+        "components/angular-bootstrap/ui-bootstrap.js",
+        "components/angular-bootstrap/ui-bootstrap-tpls.js"
+      ],
+      "socket.io-client": "components/socket.io-client/socket.io.js",
+      "qtip2": [
+        "components/qtip2/jquery.qtip.js",
+        "components/qtip2/jquery.qtip.css"
+      ],
+      "bootstrap": [
+        "components/bootstrap/dist/css/bootstrap.css",
+        "components/bootstrap/dist/css/bootstrap.css.map"
+      ]
+    }
   },
   "resolutions": {
     "angular": "1.3.15"

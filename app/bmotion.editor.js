@@ -1,2 +1,0 @@
-define(['bms.editor'], function () {
-});
