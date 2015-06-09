@@ -1,6 +1,8 @@
 module.exports = function (grunt) {
 
     var path = require('path');
+    var cssBowerLibs = 'css/libs/bower/';
+    var jsBowerLibs = 'js/libs/bower/';
 
     grunt.initConfig({
 
@@ -17,18 +19,10 @@ module.exports = function (grunt) {
                     keepBuildDir: false,
                     noBuildTxt: true,
                     modules: [
-                        {
-                            name: "bmotion.online"
-                        },
-                        {
-                            name: "bmotion.integrated"
-                        },
-                        {
-                            name: "bmotion.standalone"
-                        },
-                        {
-                            name: "bmotion.vis"
-                        }
+                        {name: "bmotion.online"},
+                        {name: "bmotion.integrated"},
+                        {name: "bmotion.standalone"},
+                        {name: "bmotion.vis"}
                     ]
                 }
             },
@@ -53,16 +47,16 @@ module.exports = function (grunt) {
                         var renamedType = type;
                         switch (type) {
                             case 'js':
-                                renamedType = "js/libs/bower";
+                                renamedType = path.join(jsBowerLibs, component);
                                 break;
                             case 'css':
-                                renamedType = "css/libs/bower";
+                                renamedType = component === 'bootstrap' ? cssBowerLibs + 'bootstrap/css' : path.join(cssBowerLibs, component);
                                 break;
                             case 'fonts':
-                                renamedType = "css/libs/bower";
+                                renamedType = component === 'bootstrap' ? cssBowerLibs + '/bootstrap/fonts' : path.join(cssBowerLibs, component);
                                 break;
                         }
-                        return path.join(renamedType, component);
+                        return renamedType;
                     },
                     targetDir: 'app'
                 }
