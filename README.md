@@ -6,4 +6,4 @@ Run the following command for building the application:
 grunt dist
 ```
 
-The build script will produce the minified js files. The js files are located in the dist folder.
+The build script will produce the minified js and css files. The files are located in the dist folder.
