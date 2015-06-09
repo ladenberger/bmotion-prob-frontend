@@ -1,3 +1,7 @@
+# BMotion Studio for ProB Frontend
+
+[![Built with Grunt](https://cdn.gruntjs.com/builtwith.png)](http://gruntjs.com/)
+
 # Build
 
 In order to build the application, you need to install <a href="https://nodejs.org/">Node.js</a> and <a href="https://github.com/gruntjs/grunt-cli">grunt-cli</a>.
