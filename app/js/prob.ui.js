@@ -2,9 +2,9 @@
  * BMotion Studio for ProB UI Module
  *
  */
-define(['angular', 'jquery.cookie', 'jquery-ui', 'ui-bootstrap'], function () {
+define(['angular', 'jquery.cookie', 'jquery-ui', 'ui-bootstrap', 'bms.config'], function () {
 
-    var module = angular.module('prob.ui', ['ui.bootstrap'])
+    var module = angular.module('prob.ui', ['ui.bootstrap', 'bms.config'])
         .controller('bmsUiNavigationCtrl', ['$scope', '$rootScope', 'bmsUIService', 'bmsVisualisationService', function ($scope, $rootScope, bmsUIService, bmsVisualisationService) {
 
             var self = this;
@@ -94,7 +94,9 @@ define(['angular', 'jquery.cookie', 'jquery-ui', 'ui-bootstrap'], function () {
                 },
                 controller: ['$scope', function ($scope) {
 
-                    this.listeners = {
+                    var self = this;
+
+                    self.listeners = {
                         dragStart: [],
                         dragStop: [],
                         resize: [],
@@ -104,27 +106,42 @@ define(['angular', 'jquery.cookie', 'jquery-ui', 'ui-bootstrap'], function () {
                         close: []
                     };
 
-                    this.getType = function () {
+                    self.getType = function () {
                         return $scope.type;
                     };
 
-                    this.getTitle = function () {
+                    self.getTitle = function () {
                         return $scope.title;
                     };
 
-                    this.onEventListener = function (type, handler) {
-                        this.listeners[type].push(handler);
+                    self.onEventListener = function (type, handler) {
+                        self.listeners[type].push(handler);
                     };
 
-                    this.propagateEvent = function (type) {
-                        this.listeners[type].forEach(function (handler) {
+                    self.propagateEvent = function (type) {
+                        self.listeners[type].forEach(function (handler) {
                             handler();
                         });
                     };
 
-                    this.isOpen = function () {
+                    self.isOpen = function () {
                         return $scope.state === 'open' ? true : false;
                     };
+
+                    self.open = function () {
+                        $scope.state = 'open';
+                    };
+
+                    $scope.$on('visualizationLoaded', function (evt, vis) {
+                        var autoOpen = vis['autoOpen'];
+                        if (autoOpen && $.inArray($scope.type, autoOpen) > -1) {
+                            self.open();
+                        }
+                    });
+
+                    $scope.$on('openDialog_' + $scope.type, function () {
+                        $scope.state = 'open';
+                    });
 
                 }],
                 link: function ($scope, element, attrs, ctrl) {
@@ -132,9 +149,8 @@ define(['angular', 'jquery.cookie', 'jquery-ui', 'ui-bootstrap'], function () {
                     $scope.state = bmsDialogService.isOpen($scope.type) ? 'open' : 'close';
                     var d = $(element);
 
-                    $scope.$on('openDialog_' + $scope.type, function () {
-                        $scope.state = 'open';
-                        d.dialog('open');
+                    $scope.$watch('state', function (newValue) {
+                        d.dialog(newValue);
                     });
 
                     $(element).first().css("overflow", "hidden");

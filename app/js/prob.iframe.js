@@ -82,11 +82,17 @@ define(['tv4', 'bms.func', 'prob.common', 'prob.observers', 'prob.modal'], funct
 
                                         self.data = {};
 
+                                        //TODO: Check if template file exists ...
+
                                         var jsonFileName = template.replace(/^.*[\\\/]/, '');
                                         var templateFolder = template.replace(jsonFileName, '');
+                                        var templateFile = config.template ? config.template : 'template.html';
                                         $.extend(self.data, config, {
+                                            name: 'MyVisualization',
+                                            template: templateFile,
+                                            tool: 'BAnimation',
                                             templateFolder: templateFolder,
-                                            templatePath: templateFolder + config.template
+                                            templatePath: templateFolder + templateFile
                                         });
 
                                         initSession.init({
@@ -220,6 +226,7 @@ define(['tv4', 'bms.func', 'prob.common', 'prob.observers', 'prob.modal'], funct
                                 bmsVisualisationService.addVisualisation($scope.id, ctrl.data);
                                 bmsUIService.setProBViewTraceId(ctrl.data.traceId);
                                 bmsModalService.endLoading();
+                                $rootScope.$broadcast('visualizationLoaded', ctrl.data);
                             });
 
                         }, function (error) {

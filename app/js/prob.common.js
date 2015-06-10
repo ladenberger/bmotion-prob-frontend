@@ -28,6 +28,10 @@ define(['bms.common'], function () {
                             "options": ["BAnimation", "CSPAnimation"],
                             "description": "Tool implementation (BAnimation or CSPAnimation)"
                         },
+                        "autoOpen": {
+                            "type": "array",
+                            "description": "Specify the ProB views which should be opened automatically when starting the visualization. The following views are available: CurrentTrace, Events, StateInspector, CurrentAnimations, GroovyConsoleSession, ModelCheckingUI."
+                        },
                         "socket": {
                             "type": "object",
                             "properties": {
@@ -42,7 +46,7 @@ define(['bms.common'], function () {
                             }
                         }
                     },
-                    "required": ["template", "model", "tool"]
+                    "required": ["model"]
                 }
             })
             .factory('probMainService', ['$q', 'ws', function ($q, ws) {
