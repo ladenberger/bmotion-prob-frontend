@@ -9,3 +9,4 @@ app/js/libs/bower
 dist/js/libs
 dist/js/build.txt
 editor
+npm-debug.log
