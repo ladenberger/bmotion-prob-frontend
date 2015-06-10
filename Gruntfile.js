@@ -15,7 +15,8 @@ module.exports = function (grunt) {
                 createTag: true,
                 tagName: 'v%VERSION%',
                 tagMessage: 'Version %VERSION%',
-                push: true
+                push: true,
+                pushTo: 'origin'
             }
         },
         requirejs: {

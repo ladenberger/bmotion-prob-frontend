@@ -1,7 +1,7 @@
 {
   "name": "bmotion-prob-frontend",
   "description": "Frontend for BMotion Studio for ProB",
-  "version": "0.0.2",
+  "version": "0.0.1",
   "homepage": "http://www.stups.hhu.de/ProB/index.php5/BMotion_Studio",
   "devDependencies": {
     "angular": "1.3.15",
