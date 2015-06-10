@@ -5,8 +5,19 @@ module.exports = function (grunt) {
     var jsBowerLibs = 'js/libs/bower/';
 
     grunt.initConfig({
-
         clean: ["dist", "bower_components", "app/js/libs/bower", "app/css/libs/bower"],
+        bump: {
+            options: {
+                files: ['package.json', 'bower.json'],
+                commit: true,
+                commitMessage: 'Release v%VERSION%',
+                commitFiles: ['-a'],
+                createTag: true,
+                tagName: 'v%VERSION%',
+                tagMessage: 'Version %VERSION%',
+                push: true
+            }
+        },
         requirejs: {
             js: {
                 options: {
@@ -68,8 +79,10 @@ module.exports = function (grunt) {
     grunt.loadNpmTasks('grunt-contrib-requirejs');
     grunt.loadNpmTasks('grunt-bower-task');
     grunt.loadNpmTasks('grunt-contrib-clean');
+    grunt.loadNpmTasks('grunt-bump');
 
-    grunt.registerTask('default', ['bower:install', 'requirejs:css', 'requirejs:js']);
-    grunt.registerTask('dist', ['clean', 'default']);
+    grunt.registerTask('default', ['build']);
+    grunt.registerTask('build', ['bower:install', 'requirejs:css', 'requirejs:js']);
+    grunt.registerTask('dist', ['clean', 'build', 'bump']);
 
 };

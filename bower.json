@@ -1,7 +1,7 @@
 {
   "name": "bmotion-prob-frontend",
   "description": "Frontend for BMotion Studio for ProB",
-  "version": "0.2.0",
+  "version": "0.0.1",
   "homepage": "http://www.stups.hhu.de/ProB/index.php5/BMotion_Studio",
   "devDependencies": {
     "angular": "1.3.15",
@@ -17,6 +17,16 @@
     "qtip2": "2.2.1",
     "tv4": "1.1.9"
   },
+  "main": [
+    "dist/css/bmotion.min.css",
+    "dist/js/*.js"
+  ],
+  "ignore": [
+    "node_modules",
+    "bower_components",
+    "editor",
+    "app"
+  ],
   "exportsOverride": {
     "bootstrap": {
       "css": "dist/css/*.*",
@@ -26,7 +36,10 @@
       "js": "socket.io.js"
     },
     "angular-bootstrap": {
-      "js": ["ui-bootstrap.js", "ui-bootstrap-tpls.js"]
+      "js": [
+        "ui-bootstrap.js",
+        "ui-bootstrap-tpls.js"
+      ]
     },
     "qtip2": {
       "js": "jquery.qtip.js",
