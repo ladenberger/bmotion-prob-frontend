@@ -41,6 +41,15 @@ module.exports = function (grunt) {
             css: {
                 options: {
                     keepBuildDir: true,
+                    optimizeCss: "standard.keepLines.keepWhitespace",
+                    cssPrefix: "",
+                    cssIn: "app/css/bmotion.css",
+                    out: "dist/css/bmotion.css"
+                }
+            },
+            cssmin: {
+                options: {
+                    keepBuildDir: true,
                     optimizeCss: "standard",
                     cssPrefix: "",
                     cssIn: "app/css/bmotion.css",
@@ -83,7 +92,7 @@ module.exports = function (grunt) {
     grunt.loadNpmTasks('grunt-bump');
 
     grunt.registerTask('default', ['build']);
-    grunt.registerTask('build', ['bower:install', 'requirejs:css', 'requirejs:js']);
+    grunt.registerTask('build', ['bower:install', 'requirejs:css', 'requirejs:cssmin', 'requirejs:js']);
     grunt.registerTask('dist', ['clean', 'build', 'bump']);
 
 };
