@@ -21,6 +21,7 @@
   },
   "scripts": {
     "build": "npm install && grunt",
+    "dist": "grunt dist",
     "start": "grunt watch",
     "test": "grunt"
   }
