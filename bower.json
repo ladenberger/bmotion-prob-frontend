@@ -25,7 +25,10 @@
     "node_modules",
     "bower_components",
     "editor",
-    "app"
+    "app",
+    "Gruntfile.js",
+    "package.json",
+    "README.md"
   ],
   "exportsOverride": {
     "bootstrap": {
