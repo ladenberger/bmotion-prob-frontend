@@ -5,7 +5,7 @@ module.exports = function (grunt) {
     var jsBowerLibs = 'js/libs/bower/';
 
     grunt.initConfig({
-        clean: ["dist", "bower_components", "app/js/libs/bower", "app/css/libs/bower"],
+        clean: ["dist", "bower_components", "app/js/libs/bower", "app/css/libs/bower", "app/css/css", "app/css/fonts"],
         bump: {
             options: {
                 files: ['package.json', 'bower.json'],
@@ -71,10 +71,10 @@ module.exports = function (grunt) {
                                 renamedType = path.join(jsBowerLibs, component);
                                 break;
                             case 'css':
-                                renamedType = component === 'bootstrap' ? cssBowerLibs + 'bootstrap/css' : path.join(cssBowerLibs, component);
+                                renamedType = component === 'bootstrap' ? 'css/css' : path.join(cssBowerLibs, component);
                                 break;
                             case 'fonts':
-                                renamedType = component === 'bootstrap' ? cssBowerLibs + '/bootstrap/fonts' : path.join(cssBowerLibs, component);
+                                renamedType = component === 'bootstrap' ? 'css/fonts' : path.join(cssBowerLibs, component);
                                 break;
                         }
                         return renamedType;
