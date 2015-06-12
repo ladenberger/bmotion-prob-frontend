@@ -5,40 +5,19 @@
 define(['ui-bootstrap', 'ui-bootstrap-tpls'], function () {
 
     var module = angular.module('prob.modal', ['ui.bootstrap'])
-        .controller('bmsLoadingModalCtrl', ['$scope', '$modal', function ($scope, $modal) {
+        .controller('bmsLoadingModalCtrl', ['$scope', '$modal', 'bmsModalService', function ($scope, $modal, bmsModalService) {
+
+            var self = this;
 
             var modalInstance = null;
 
-            var states = {
-                error: {
-                    class: 'alert-danger',
-                    icon: 'bmotion-img-error'
-                },
-                loading: {
-                    class: 'alert-info',
-                    icon: 'bmotion-img-loader'
-                },
-                default: {
-                    class: 'alert-info',
-                    icon: ''
-                }
-            };
+            self.message = bmsModalService.getMessage();
+            self.state = bmsModalService.getState();
+            self.isOpen = false;
 
-            $scope.msg = "";
-            $scope.state = states.default;
-            $scope.isOpen = false;
+            self.open = function () {
 
-            $scope.open = function (msg, state) {
-
-                if (Object.prototype.toString.call(msg) === '[object Array]') {
-                    $scope.msg = msg.join();
-                } else {
-                    $scope.msg = msg
-                }
-
-                $scope.state = state ? state : states.default;
-
-                if (!modalInstance || (modalInstance && !$scope.isOpen)) {
+                if (!modalInstance || (modalInstance && !self.isOpen)) {
 
                     modalInstance = $modal.open({
                         template: '<div class="modal-header" style="height:40px;">'
@@ -49,106 +28,135 @@ define(['ui-bootstrap', 'ui-bootstrap-tpls'], function () {
                         + '<div class="modal-body">'
                         + '<p class="bmotion-img-logo"></p>'
                         + '<p ng-attr-class="{{state.icon}}"></p>'
-                        + '<div ng-if="msg">'
-                        + '<div class="bmotion-alert alert {{state.class}}" role="alert">{{msg}}</div>'
+                        + '<div ng-if="message">'
+                        + '<div class="bmotion-alert alert {{state.class}}" role="alert">{{message}}</div>'
                         + '</div>',
                         controller: 'bmsLoadingModalInstanceCtrl',
                         resolve: {
                             data: function () {
                                 return {
                                     getMessage: function () {
-                                        return $scope.msg;
+                                        return self.message;
                                     },
                                     getState: function () {
-                                        return $scope.state;
+                                        return self.state;
                                     }
                                 }
                             }
                         }
                     });
                     modalInstance.opened.then(function () {
-                        $scope.isOpen = true;
+                        self.isOpen = true;
                     });
                     modalInstance.result.then(function () {
-                        $scope.isOpen = false;
+                        self.isOpen = false;
                     });
 
                 } else {
                     modalInstance.opened.then(function () {
-                        modalInstance.setMessage($scope.msg);
+                        modalInstance.setMessage(self.message);
                     });
                 }
 
             };
 
-            $scope.close = function () {
-                modalInstance.close();
+            self.close = function () {
+                if (modalInstance) modalInstance.close();
             };
 
-            $scope.setMessage = function (msg, state) {
-                $scope.open(msg, state);
-            };
+            $scope.$watch(function () {
+                return bmsModalService.getMessage()
+            }, function (msg) {
+                self.message = msg;
+                if (msg.length > 0) self.open();
+            });
+
+            $scope.$watch(function () {
+                return bmsModalService.getState()
+            }, function (s) {
+                self.state = s;
+            });
 
             $scope.$on('openModal', function (evt, msg) {
-                $scope.open(msg);
+                self.open(msg);
             });
 
             $scope.$on('closeModal', function () {
-                $scope.close();
-            });
-
-            $scope.$on('startLoading', function (evt, msg) {
-                $scope.open(msg, states.loading);
-            });
-
-            $scope.$on('setModalMessage', function (evt, msg, state) {
-                $scope.setMessage(msg, state);
-            });
-
-            $scope.$on('setErrorMessage', function (evt, msg) {
-                $scope.setMessage(msg, states.error);
+                self.close();
             });
 
         }])
         .controller('bmsLoadingModalInstanceCtrl', ['$scope', '$modalInstance', 'data', function ($scope, $modalInstance, data) {
 
-            $scope.msg = data.getMessage();
+            $scope.message = data.getMessage();
             $scope.state = data.getState();
             $scope.close = function () {
                 $modalInstance.close();
             };
             $modalInstance.setMessage = function (msg) {
-                $scope.msg = msg;
+                $scope.message = msg;
             };
             /*$scope.$on('modal.closing', function () {
              $scope.isOpen = false;
              });*/
 
         }])
-        .factory('bmsModalService', ['$rootScope', function ($rootScope) {
+        .service('bmsModalService', ['$rootScope', function ($rootScope) {
 
-            var modalService = {
-                openModal: function () {
-                    $rootScope.$broadcast('openModal');
+            var message = "",
+                states = {
+                    error: {
+                        class: 'alert-danger',
+                        icon: 'bmotion-img-error'
+                    },
+                    loading: {
+                        class: 'alert-info',
+                        icon: 'bmotion-img-loader'
+                    },
+                    default: {
+                        class: 'alert-info',
+                        icon: ''
+                    }
                 },
-                closeModal: function () {
-                    $rootScope.$broadcast('closeModal');
-                },
-                setMessage: function (msg, state) {
-                    $rootScope.$broadcast('setModalMessage', msg, state);
-                },
-                setError: function (msg) {
-                    $rootScope.$broadcast('setErrorMessage', msg);
-                },
-                startLoading: function (msg) {
-                    $rootScope.$broadcast('startLoading', msg);
-                },
-                endLoading: function () {
-                    $rootScope.$broadcast('closeModal');
-                }
+                state = states.default;
+
+            this.openModal = function () {
+                $rootScope.$broadcast('openModal');
             };
 
-            return modalService;
+            this.closeModal = function () {
+                $rootScope.$broadcast('closeModal');
+            };
+
+            this.setMessage = function (msg, s) {
+                if (Object.prototype.toString.call(msg) === '[object Array]') {
+                    message = msg;
+                } else {
+                    message = msg;
+                }
+                state = s;
+            };
+
+            this.getMessage = function () {
+                return message;
+            };
+
+            this.setError = function (msg) {
+                message = msg;
+                state = states.error;
+            };
+
+            this.getState = function () {
+                return state;
+            };
+
+            this.startLoading = function (msg) {
+                this.setMessage(msg, states.loading)
+            };
+
+            this.endLoading = function () {
+                this.closeModal();
+            };
 
         }])
         .controller('bmsEditorModalCtrl', ['$scope', '$modal', function ($scope, $modal) {

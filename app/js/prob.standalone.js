@@ -2,9 +2,9 @@
  * BMotion Studio for ProB Standalone Module
  *
  */
-define(['angularAMD', 'bms.func', 'angular', 'prob.graph', 'prob.iframe', 'prob.editor', 'prob.ui', 'prob.common'], function (angularAMD, bms) {
+define(['angularAMD', 'bms.func', 'angular', 'prob.graph', 'prob.iframe', 'prob.editor', 'prob.ui', 'prob.common', 'prob.modal'], function (angularAMD, bms) {
 
-    var module = angular.module('prob.standalone', ['prob.graph', 'prob.iframe', 'prob.editor', 'prob.ui', 'prob.common'])
+    var module = angular.module('prob.standalone', ['prob.graph', 'prob.iframe', 'prob.editor', 'prob.ui', 'prob.common', 'prob.modal'])
         .run(['editableOptions', 'bmsMainService', 'GUI', 'Window', 'fileDialogService', '$rootScope', function (editableOptions, bmsMainService, GUI, Window, fileDialogService, $rootScope) {
 
             bmsMainService.mode = 'ModeStandalone';
@@ -122,7 +122,7 @@ define(['angularAMD', 'bms.func', 'angular', 'prob.graph', 'prob.iframe', 'prob.
                 }
             };
         }])
-        .controller('bmsVisualizationCtrl', ['$scope', 'fileDialogService', 'bmsModalService', '$http', function ($scope, fileDialogService, bmsModalService, $http) {
+        .controller('bmsVisualizationCtrl', ['$scope', 'fileDialogService', 'bmsModalService', '$http', 'GUI', function ($scope, fileDialogService, bmsModalService, $http, GUI) {
 
             var self = this;
 
@@ -151,8 +151,11 @@ define(['angularAMD', 'bms.func', 'angular', 'prob.graph', 'prob.iframe', 'prob.
                 self.setVisualization(template);
             });
 
+            var templateFromNw = GUI.App.argv[0];
             if (sessionStorage.template) {
                 self.setVisualization(sessionStorage.template);
+            } else if (templateFromNw) {
+                self.setVisualization(templateFromNw);
             }
 
         }])
