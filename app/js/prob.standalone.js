@@ -2,9 +2,20 @@
  * BMotion Studio for ProB Standalone Module
  *
  */
-define(['angularAMD', 'bms.func', 'angular', 'prob.graph', 'prob.iframe', 'prob.editor', 'prob.ui', 'prob.common', 'prob.modal'], function (angularAMD, bms) {
+define(['socketio', 'angularAMD', 'bms.func', 'angular', 'prob.graph', 'prob.iframe', 'prob.editor', 'prob.ui', 'prob.common', 'prob.modal', 'angular-route'], function (io, angularAMD, bms) {
 
-    var module = angular.module('prob.standalone', ['prob.graph', 'prob.iframe', 'prob.editor', 'prob.ui', 'prob.common', 'prob.modal'])
+    var module = angular.module('prob.standalone', ['prob.graph', 'prob.iframe', 'prob.editor', 'prob.ui', 'prob.common', 'prob.modal', 'ngRoute'])
+        .config(function ($routeProvider) {
+            $routeProvider
+                .when('/loading', {
+                    template: '<div ng-controller="bmsLoadingModalCtrl"></div>',
+                    controller: 'loadingController'
+                })
+                .when('/', {
+                    templateUrl: 'bmsUi.html',
+                    controller: 'readyController'
+                });
+        })
         .run(['editableOptions', 'bmsMainService', 'GUI', 'Window', 'fileDialogService', '$rootScope', function (editableOptions, bmsMainService, GUI, Window, fileDialogService, $rootScope) {
 
             bmsMainService.mode = 'ModeStandalone';
@@ -96,8 +107,79 @@ define(['angularAMD', 'bms.func', 'angular', 'prob.graph', 'prob.iframe', 'prob.
                 }
             }));
 
+            // Debug menu
+            var debugMenu = new GUI.Menu();
+            windowMenu.append(new GUI.MenuItem({
+                label: 'Debug',
+                submenu: debugMenu
+            }));
+            debugMenu.append(new GUI.MenuItem({
+                label: 'DevTools',
+                click: function () {
+                    Window.showDevTools('', false)
+                }
+            }));
+
             Window.menu = windowMenu;
 
+        }])
+        .controller('loadingController', ['$scope', 'bmsModalService', '$location', 'bmsSocketService', '$q', function ($scope, bmsModalService, $location, bmsSocketService, $q) {
+
+            var checkIfConnectionExists = function () {
+
+                var defer = $q.defer();
+
+                bmsSocketService.socket().then(function (socket) {
+                    var n = 0;
+                    var connectedInterval = setInterval(function () {
+                        if (socket.connected) {
+                            clearInterval(connectedInterval);
+                            defer.resolve();
+                        }
+                        if (n === 5) {
+                            clearInterval(connectedInterval);
+                            defer.reject();
+                        }
+                        n++;
+                    }, 1000);
+                });
+
+                return defer.promise;
+
+            };
+
+            var startServer = function () {
+
+                var defer = $q.defer();
+
+                checkIfConnectionExists().then(function () {
+                    defer.resolve();
+                }, function () {
+                    var spawn = require('child_process').spawn;
+                    var server = spawn('java', ['-Xmx1024m', '-cp', 'libs/libs/*:libs/bmotion-prob-standalone.jar', "-Dprob.home=./cli/", 'Start', '-standalone', '-local']);
+                    server.stdout.on('data', function (data) {
+                        console.log('stdout: ' + data);
+                        if (data && data.toString().trim() === 'started') {
+                            defer.resolve();
+                        }
+                    });
+                    server.on('close', function (code) {
+                        console.log('BMotion Studio for ProB Server process exited with code ' + code);
+                    });
+                });
+
+                return defer.promise;
+
+            };
+
+            bmsModalService.startLoading("Connecting to BMotion Studio for ProB Server ...");
+            startServer().then(function () {
+                bmsModalService.endLoading();
+                $location.path('/');
+            });
+
+        }])
+        .controller('readyController', ['$scope', function ($scope) {
         }])
         .factory('GUI', function () {
             return require('nw.gui');

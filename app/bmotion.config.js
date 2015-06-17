@@ -4,6 +4,8 @@ requirejs.config({
         "jquery": "libs/bower/jquery/jquery",
         "socketio": "libs/bower/socket.io-client/socket.io",
         "angular": "libs/bower/angular/angular",
+        "angular-route": "libs/bower/angular-route/angular-route",
+
         "ui-bootstrap": "libs/bower/angular-bootstrap/ui-bootstrap",
         "ui-bootstrap-tpls": "libs/bower/angular-bootstrap/ui-bootstrap-tpls",
         "angularAMD": "libs/bower/angularAMD/angularAMD",
@@ -78,7 +80,8 @@ requirejs.config({
             deps: ["jquery"]
         },
         "cytoscape.navigator": ['cytoscape'],
-        "jquery-ui": ["jquery"]
+        "jquery-ui": ["jquery"],
+        "angular-route": ["angular"]
         /*"jpicker": ["jquery.jgraduate"],
          "jquery.jgraduate": ["jquery"],
          "jquery.contextMenu": ["jquery"],

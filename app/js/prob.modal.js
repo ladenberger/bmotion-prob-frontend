@@ -128,6 +128,11 @@ define(['ui-bootstrap', 'ui-bootstrap-tpls'], function () {
                 $rootScope.$broadcast('closeModal');
             };
 
+            this.reset = function() {
+                message = "";
+                state = states.default;
+            };
+
             this.setMessage = function (msg, s) {
                 if (Object.prototype.toString.call(msg) === '[object Array]') {
                     message = msg;
@@ -155,6 +160,7 @@ define(['ui-bootstrap', 'ui-bootstrap-tpls'], function () {
             };
 
             this.endLoading = function () {
+                this.reset();
                 this.closeModal();
             };
 
