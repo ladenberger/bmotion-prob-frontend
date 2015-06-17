@@ -16,10 +16,86 @@ define(['socketio', 'angularAMD', 'bms.func', 'angular', 'prob.graph', 'prob.ifr
                     controller: 'readyController'
                 });
         })
-        .run(['editableOptions', 'bmsMainService', 'GUI', 'Window', 'fileDialogService', '$rootScope', function (editableOptions, bmsMainService, GUI, Window, fileDialogService, $rootScope) {
-
+        .run(['editableOptions', 'bmsMainService', function (editableOptions, bmsMainService) {
             bmsMainService.mode = 'ModeStandalone';
             editableOptions.theme = 'bs3'; // bootstrap3 theme. Can be also 'bs2', 'default'
+        }])
+        .controller('loadingController', ['$scope', 'bmsModalService', '$location', 'bmsSocketService', '$q', 'bmsConfigService', 'Window', function ($scope, bmsModalService, $location, bmsSocketService, $q, bmsConfigService, Window) {
+
+            //Window.showDevTools('', false);
+
+            var checkIfConnectionExists = function () {
+
+                var defer = $q.defer();
+
+                bmsSocketService.socket().then(function (socket) {
+                    var n = 0;
+                    var connectedInterval = setInterval(function () {
+                        if (socket.connected) {
+                            clearInterval(connectedInterval);
+                            defer.resolve(true);
+                        }
+                        if (n === 5) {
+                            clearInterval(connectedInterval);
+                            defer.resolve(false);
+                        }
+                        n++;
+                    }, 1000);
+                });
+
+                return defer.promise;
+
+            };
+
+            var startServer = function (connected) {
+                var defer = $q.defer();
+                if (!connected) {
+                    var spawn = require('child_process').spawn;
+                    var server = spawn('java', ['-Xmx1024m', '-cp', 'libs/libs/*:libs/bmotion-prob-standalone.jar', "-Dprob.home=./cli/", 'Start', '-standalone', '-local']);
+                    server.stdout.on('data', function (data) {
+                        try {
+                            var json = JSON.parse(data.toString('utf8'));
+                            if (json) defer.resolve(json);
+                        } catch (e) {
+                            console.log(data.toString('utf8'));
+                        }
+                    });
+                    server.on('close', function (code) {
+                        console.log('BMotion Studio for ProB Server process exited with code ' + code);
+                    });
+                } else {
+                    defer.resolve();
+                }
+                return defer.promise;
+            };
+
+            var updateConfig = function (obj) {
+                var defer = $q.defer();
+                bmsConfigService.getConfig().then(function (config) {
+                    if (obj) {
+                        config.socket.host = obj.host;
+                        config.socket.port = obj.port;
+                    }
+                    defer.resolve();
+                });
+                return defer.promise;
+            };
+
+            bmsModalService.startLoading("Connecting to BMotion Studio for ProB Server ...");
+            checkIfConnectionExists()
+                .then(function (connected) {
+                    return startServer(connected);
+                })
+                .then(function (obj) {
+                    return updateConfig(obj);
+                })
+                .then(function () {
+                    bmsModalService.endLoading();
+                    $location.path('/');
+                });
+
+        }])
+        .controller('readyController', ['$scope', 'GUI', 'Window', 'fileDialogService', '$rootScope', function ($scope, GUI, Window, fileDialogService, $rootScope) {
 
             var openDialog = function (type) {
                 $rootScope.$broadcast('openDialog_' + type);
@@ -122,64 +198,6 @@ define(['socketio', 'angularAMD', 'bms.func', 'angular', 'prob.graph', 'prob.ifr
 
             Window.menu = windowMenu;
 
-        }])
-        .controller('loadingController', ['$scope', 'bmsModalService', '$location', 'bmsSocketService', '$q', function ($scope, bmsModalService, $location, bmsSocketService, $q) {
-
-            var checkIfConnectionExists = function () {
-
-                var defer = $q.defer();
-
-                bmsSocketService.socket().then(function (socket) {
-                    var n = 0;
-                    var connectedInterval = setInterval(function () {
-                        if (socket.connected) {
-                            clearInterval(connectedInterval);
-                            defer.resolve();
-                        }
-                        if (n === 5) {
-                            clearInterval(connectedInterval);
-                            defer.reject();
-                        }
-                        n++;
-                    }, 1000);
-                });
-
-                return defer.promise;
-
-            };
-
-            var startServer = function () {
-
-                var defer = $q.defer();
-
-                checkIfConnectionExists().then(function () {
-                    defer.resolve();
-                }, function () {
-                    var spawn = require('child_process').spawn;
-                    var server = spawn('java', ['-Xmx1024m', '-cp', 'libs/libs/*:libs/bmotion-prob-standalone.jar', "-Dprob.home=./cli/", 'Start', '-standalone', '-local']);
-                    server.stdout.on('data', function (data) {
-                        console.log('stdout: ' + data);
-                        if (data && data.toString().trim() === 'started') {
-                            defer.resolve();
-                        }
-                    });
-                    server.on('close', function (code) {
-                        console.log('BMotion Studio for ProB Server process exited with code ' + code);
-                    });
-                });
-
-                return defer.promise;
-
-            };
-
-            bmsModalService.startLoading("Connecting to BMotion Studio for ProB Server ...");
-            startServer().then(function () {
-                bmsModalService.endLoading();
-                $location.path('/');
-            });
-
-        }])
-        .controller('readyController', ['$scope', function ($scope) {
         }])
         .factory('GUI', function () {
             return require('nw.gui');

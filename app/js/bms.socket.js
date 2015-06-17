@@ -15,6 +15,10 @@ define(['socketio', 'angular', 'bms.config'], function (io) {
                             bmsConfigService.getConfig().then(function (config) {
                                 // TODO: Check if configuration file is correct!
                                 socket = io.connect('http://' + config.socket.host + ':' + config.socket.port);
+                                socket.on('reconnecting', function () {
+                                    socket.disconnect();
+                                    socket = null;
+                                });
                                 defer.resolve(socket);
                             });
                         } else {
