@@ -50,19 +50,25 @@ define(['socketio', 'angularAMD', 'bms.func', 'angular', 'prob.graph', 'prob.ifr
             var startServer = function (connected) {
                 var defer = $q.defer();
                 if (!connected) {
-                    var spawn = require('child_process').spawn;
-                    var server = spawn('java', ['-Xmx1024m', '-cp', './libs/libs/*:./libs/bmotion-prob-standalone.jar', "-Dprob.home=./cli/", 'Start', '-standalone', '-local']);
-                    server.stdout.on('data', function (data) {
-                        try {
-                            var json = JSON.parse(data.toString('utf8'));
-                            if (json) defer.resolve(json);
-                        } catch (e) {
-                            console.log(data.toString('utf8'));
-                        }
-                    });
-                    server.on('close', function (code) {
-                        console.log('BMotion Studio for ProB Server process exited with code ' + code);
-                    });
+
+                    try {
+                        var spawn = require('child_process').spawn;
+                        var server = spawn('java', ['-Xmx1024m', '-cp', './libs/libs/*:./libs/bmotion-prob-standalone.jar', "-Dprob.home=./cli/", 'Start', '-standalone', '-local']);
+                        server.stdout.on('data', function (data) {
+                            try {
+                                var json = JSON.parse(data.toString('utf8'));
+                                if (json) defer.resolve(json);
+                            } catch (e) {
+                                console.log(data.toString('utf8'));
+                            }
+                        });
+                        server.on('close', function (code) {
+                            console.log('BMotion Studio for ProB Server process exited with code ' + code);
+                        });
+                    } catch (err) {
+                        console.log("Error while trying to start child process: " + JSON.stringify(err));
+                    }
+
                 } else {
                     defer.resolve();
                 }
