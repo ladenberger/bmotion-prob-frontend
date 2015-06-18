@@ -53,7 +53,7 @@ define(['socketio', 'angularAMD', 'bms.func', 'angular', 'prob.graph', 'prob.ifr
                     bmsModalService.setMessage("Start BMotion for ProB Server ...");
                     try {
                         var spawn = require('child_process').spawn;
-                        var server = spawn('java', ['-Xmx1024m', '-cp', './libs/libs/*:./libs/bmotion-prob-standalones.jar', "-Dprob.home=./cli/", 'Start', '-standalone', '-local']);
+                        var server = spawn('java', ['-Xmx1024m', '-cp', './libs/libs/*:./libs/bmotion-prob-standalone.jar', "-Dprob.home=./cli/", 'Start', '-standalone', '-local']);
                         server.stdout.on('data', function (data) {
                             var json = JSON.parse(data.toString('utf8'));
                             if (json) defer.resolve(json);
