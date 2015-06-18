@@ -63,6 +63,10 @@ define(['ui-bootstrap', 'ui-bootstrap-tpls'], function () {
                 }
             };
 
+            $scope.$on('closeModal', function () {
+                self.close()
+            });
+
             $scope.$watch(function () {
                 return bmsModalService.getMessage()
             }, function (msg) {
@@ -132,6 +136,10 @@ define(['ui-bootstrap', 'ui-bootstrap-tpls'], function () {
                 this.reset();
                 this.closeModal();
             };
+
+            this.closeModal = function () {
+                $rootScope.$broadcast('closeModal')
+            }
 
         }])
         .controller('bmsEditorModalCtrl', ['$scope', '$modal', function ($scope, $modal) {
