@@ -5,7 +5,7 @@
 define(['socketio', 'angularAMD', 'bms.func', 'angular', 'prob.graph', 'prob.iframe', 'prob.editor', 'prob.ui', 'prob.common', 'prob.modal', 'angular-route'], function (io, angularAMD, bms) {
 
     var module = angular.module('prob.standalone', ['prob.graph', 'prob.iframe', 'prob.editor', 'prob.ui', 'prob.common', 'prob.modal', 'ngRoute'])
-        .config(function ($routeProvider) {
+        .config(['$routeProvider', function ($routeProvider) {
             $routeProvider
                 .when('/loading', {
                     template: '<div ng-controller="bmsLoadingModalCtrl"></div>',
@@ -15,12 +15,12 @@ define(['socketio', 'angularAMD', 'bms.func', 'angular', 'prob.graph', 'prob.ifr
                     templateUrl: 'bmsUi.html',
                     controller: 'readyController'
                 });
-        })
+        }])
         .run(['editableOptions', 'bmsMainService', function (editableOptions, bmsMainService) {
             bmsMainService.mode = 'ModeStandalone';
             editableOptions.theme = 'bs3'; // bootstrap3 theme. Can be also 'bs2', 'default'
         }])
-        .controller('loadingController', ['$scope', 'bmsModalService', '$location', 'bmsSocketService', '$q', 'bmsConfigService', 'Window', function ($scope, bmsModalService, $location, bmsSocketService, $q, bmsConfigService, Window) {
+        .controller('loadingController', ['$scope', 'bmsModalService', '$location', 'bmsSocketService', '$q', 'bmsConfigService', function ($scope, bmsModalService, $location, bmsSocketService, $q, bmsConfigService) {
 
             //Window.showDevTools('', false);
 
