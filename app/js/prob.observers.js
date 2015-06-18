@@ -537,7 +537,7 @@ define(['bms.func', 'angular', 'qtip'], function (bms) {
                             var predicateStr = v.predicate ? '(' + v.predicate + ')' : '';
                             var link = $('<span aria-hidden="true"> ' + v.name + predicateStr + '</span>').addClass(spanClass);
                             if (v.canExecute) {
-                                link = $('<a href="#"> ' + v.name + predicateStr + '</a>').addClass(spanClass).click(function () {
+                                link = $('<a href="#/"> ' + v.name + predicateStr + '</a>').addClass(spanClass).click(function () {
                                     ev.executeEvent({
                                         id: settings.id,
                                         traceId: traceId,
