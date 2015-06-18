@@ -53,7 +53,7 @@ define(['socketio', 'angularAMD', 'bms.func', 'angular', 'prob.graph', 'prob.ifr
                     bmsModalService.setMessage("Start BMotion for ProB Server ...");
                     try {
                         var spawn = require('child_process').spawn;
-                        var server = spawn('java', ['-Xmx1024m', '-cp', './libs/libs/*:./libs/bmotion-prob-standalone.jar', "-Dprob.home=./cli/", 'Start', '-standalone', '-local']);
+                        var server = spawn('java', ['-Xmx1024m', '-cp', './libs/libs/*:./libs/bmotion-prob-standalone.jar', "-Dprob.home=./cli/", 'Starts', '-standalone', '-local']);
                         server.stdout.on('data', function (data) {
                             var json = JSON.parse(data.toString('utf8'));
                             if (json) defer.resolve(json);
@@ -61,11 +61,11 @@ define(['socketio', 'angularAMD', 'bms.func', 'angular', 'prob.graph', 'prob.ifr
                         server.stderr.on('data', function (data) {
                             bmsModalService.setError('Error while trying to start BMotion Studio for ProB Server: ' + data.toString('utf8'));
                         });
-                        server.on('close', function (code) {
-                            bmsModalService.setError('BMotion Studio for ProB Server process exited with code ' + code);
-                        });
+                        /*server.on('close', function (code) {
+                         bmsModalService.setError('BMotion Studio for ProB Server process exited with code ' + code);
+                         });*/
                     } catch (err) {
-                        bmsModalService.setError('Error while trying to start BMotion Studio for ProB Server: ' + JSON.stringify(err));
+                        bmsModalService.setError('Error while trying to start BMotion Studio for ProB Server: ' + data.toString('utf8'));
                     }
                 } else {
                     defer.resolve();
