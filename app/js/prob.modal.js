@@ -12,10 +12,9 @@ define(['ui-bootstrap', 'ui-bootstrap-tpls'], function () {
             var modalInstance = null;
 
             self.message = bmsModalService.getMessage();
-            self.state = bmsModalService.getState();
             self.isOpen = false;
 
-            self.open = function () {
+            self.open = function (msg) {
 
                 if (!modalInstance || (modalInstance && !self.isOpen)) {
 
@@ -27,9 +26,9 @@ define(['ui-bootstrap', 'ui-bootstrap-tpls'], function () {
                         + '</div>'
                         + '<div class="modal-body">'
                         + '<p class="bmotion-img-logo"></p>'
-                        + '<p ng-attr-class="{{state.icon}}"></p>'
+                        + '<p ng-attr-class="{{message.state.icon}}"></p>'
                         + '<div ng-if="message">'
-                        + '<div class="bmotion-alert alert {{state.class}}" role="alert">{{message}}</div>'
+                        + '<div class="bmotion-alert alert {{message.state.class}}" role="alert">{{message.text}}</div>'
                         + '</div>',
                         controller: 'bmsLoadingModalInstanceCtrl',
                         resolve: {
@@ -37,9 +36,6 @@ define(['ui-bootstrap', 'ui-bootstrap-tpls'], function () {
                                 return {
                                     getMessage: function () {
                                         return self.message;
-                                    },
-                                    getState: function () {
-                                        return self.state;
                                     }
                                 }
                             }
@@ -54,57 +50,41 @@ define(['ui-bootstrap', 'ui-bootstrap-tpls'], function () {
 
                 } else {
                     modalInstance.opened.then(function () {
-                        modalInstance.setMessage(self.message);
+                        modalInstance.setMessage(msg)
                     });
                 }
 
             };
 
             self.close = function () {
-                if (modalInstance) modalInstance.close();
+                if (modalInstance) {
+                    modalInstance.close();
+                    modalInstance = null;
+                }
             };
 
             $scope.$watch(function () {
                 return bmsModalService.getMessage()
             }, function (msg) {
                 self.message = msg;
-                if (msg.length > 0) self.open();
-            });
-
-            $scope.$watch(function () {
-                return bmsModalService.getState()
-            }, function (s) {
-                self.state = s;
-            });
-
-            $scope.$on('openModal', function (evt, msg) {
-                self.open(msg);
-            });
-
-            $scope.$on('closeModal', function () {
-                self.close();
+                if (msg.text.length > 0) self.open(msg);
             });
 
         }])
         .controller('bmsLoadingModalInstanceCtrl', ['$scope', '$modalInstance', 'data', function ($scope, $modalInstance, data) {
 
             $scope.message = data.getMessage();
-            $scope.state = data.getState();
             $scope.close = function () {
                 $modalInstance.close();
             };
             $modalInstance.setMessage = function (msg) {
                 $scope.message = msg;
             };
-            /*$scope.$on('modal.closing', function () {
-             $scope.isOpen = false;
-             });*/
 
         }])
         .service('bmsModalService', ['$rootScope', function ($rootScope) {
 
-            var message = "",
-                states = {
+            var states = {
                     error: {
                         class: 'alert-danger',
                         icon: 'bmotion-img-error'
@@ -118,28 +98,22 @@ define(['ui-bootstrap', 'ui-bootstrap-tpls'], function () {
                         icon: ''
                     }
                 },
-                state = states.default;
+                message = {text: "", state: states.default};
 
-            this.openModal = function () {
-                $rootScope.$broadcast('openModal');
-            };
-
-            this.closeModal = function () {
-                $rootScope.$broadcast('closeModal');
-            };
-
-            this.reset = function() {
-                message = "";
-                state = states.default;
+            this.reset = function () {
+                this.setMessage("", states.default);
             };
 
             this.setMessage = function (msg, s) {
-                if (Object.prototype.toString.call(msg) === '[object Array]') {
-                    message = msg;
-                } else {
-                    message = msg;
+                var tmp = {text: msg, state: s ? s : message.state};
+                if ($rootScope.$root.$$phase != '$apply' && $rootScope.$root.$$phase != '$digest') {
+                    $rootScope.$apply(function () {
+                        message = tmp;
+                    });
                 }
-                state = s;
+                else {
+                    message = tmp;
+                }
             };
 
             this.getMessage = function () {
@@ -148,10 +122,6 @@ define(['ui-bootstrap', 'ui-bootstrap-tpls'], function () {
 
             this.setError = function (msg) {
                 this.setMessage(msg, states.error);
-            };
-
-            this.getState = function () {
-                return state;
             };
 
             this.startLoading = function (msg) {
