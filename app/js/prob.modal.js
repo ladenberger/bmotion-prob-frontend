@@ -147,8 +147,7 @@ define(['ui-bootstrap', 'ui-bootstrap-tpls'], function () {
             };
 
             this.setError = function (msg) {
-                message = msg;
-                state = states.error;
+                this.setMessage(msg, states.error);
             };
 
             this.getState = function () {

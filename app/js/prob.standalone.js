@@ -20,9 +20,9 @@ define(['socketio', 'angularAMD', 'bms.func', 'angular', 'prob.graph', 'prob.ifr
             bmsMainService.mode = 'ModeStandalone';
             editableOptions.theme = 'bs3'; // bootstrap3 theme. Can be also 'bs2', 'default'
         }])
-        .controller('loadingController', ['$scope', 'bmsModalService', '$location', 'bmsSocketService', '$q', 'bmsConfigService', function ($scope, bmsModalService, $location, bmsSocketService, $q, bmsConfigService) {
+        .controller('loadingController', ['$scope', 'bmsModalService', '$location', 'bmsSocketService', '$q', 'bmsConfigService', 'Window', function ($scope, bmsModalService, $location, bmsSocketService, $q, bmsConfigService, Window) {
 
-            //Window.showDevTools('', false);
+            Window.showDevTools('', false);
 
             var checkIfConnectionExists = function () {
 
