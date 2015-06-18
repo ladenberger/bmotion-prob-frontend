@@ -25,9 +25,7 @@ define(['socketio', 'angularAMD', 'bms.func', 'angular', 'prob.graph', 'prob.ifr
             Window.showDevTools('', false);
 
             var checkIfConnectionExists = function () {
-
                 var defer = $q.defer();
-
                 bmsSocketService.socket().then(function (socket) {
                     var n = 0;
                     var connectedInterval = setInterval(function () {
@@ -42,31 +40,29 @@ define(['socketio', 'angularAMD', 'bms.func', 'angular', 'prob.graph', 'prob.ifr
                         n++;
                     }, 1000);
                 });
-
                 return defer.promise;
-
             };
 
             var startServer = function (connected) {
                 var defer = $q.defer();
                 if (!connected) {
                     bmsModalService.setMessage("Start BMotion for ProB Server ...");
-                    try {
-                        var spawn = require('child_process').spawn;
-                        var server = spawn('java', ['-Xmx1024m', '-cp', './libs/libs/*:./libs/bmotion-prob-standalone.jar', "-Dprob.home=./cli/", 'Start', '-standalone', '-local']);
-                        server.stdout.on('data', function (data) {
+                    var spawn = require('child_process').spawn;
+                    var server = spawn('java', ['-Xmx1024m', '-cp', './libs/libs/*:./libs/bmotion-prob-standalone.jar', "-Dprob.home=./cli/", 'Starts', '-standalone', '-local']);
+                    server.stdout.on('data', function (data) {
+                        try {
                             var json = JSON.parse(data.toString('utf8'));
                             if (json) defer.resolve(json);
-                        });
-                        server.stderr.on('data', function (data) {
-                            bmsModalService.setError('Error while trying to start BMotion Studio for ProB Server: ' + data.toString('utf8'));
-                        });
-                        /*server.on('close', function (code) {
-                         bmsModalService.setError('BMotion Studio for ProB Server process exited with code ' + code);
-                         });*/
-                    } catch (err) {
-                        bmsModalService.setError('Error while trying to start BMotion Studio for ProB Server: ' + err.toString('utf8'));
-                    }
+                        } catch (err) {
+                            console.log(data.toString('utf8'));
+                        }
+                    });
+                    server.stderr.on('data', function (data) {
+                        console.log(data.toString('utf8'));
+                    });
+                    server.on('close', function (code) {
+                        console.log('BMotion Studio for ProB Server process exited with code ' + code);
+                    });
                 } else {
                     defer.resolve();
                 }
