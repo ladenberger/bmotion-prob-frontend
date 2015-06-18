@@ -24,6 +24,7 @@
     "build": "npm install && grunt",
     "dist": "grunt dist",
     "start": "grunt watch",
+    "clean": "grunt clean",
     "test": "grunt"
   }
 }
