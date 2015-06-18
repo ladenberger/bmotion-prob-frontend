@@ -63,10 +63,10 @@ define(['socketio', 'angularAMD', 'bms.func', 'angular', 'prob.graph', 'prob.ifr
                             }
                         });
                         server.on('close', function (code) {
-                            console.log('BMotion Studio for ProB Server process exited with code ' + code);
+                            bmsModalService.setError('BMotion Studio for ProB Server process exited with code ' + code);
                         });
                     } catch (err) {
-                        console.log("Error while trying to start child process: " + JSON.stringify(err));
+                        bmsModalService.setError('Error while trying to start child process: ' + JSON.stringify(err));
                     }
 
                 } else {
