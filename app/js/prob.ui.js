@@ -41,11 +41,6 @@ define(['angular', 'jquery.cookie', 'jquery-ui', 'ui-bootstrap', 'bms.config'], 
             }
 
         }])
-        .directive('bmsUi', function () {
-            return {
-                templateUrl: 'bmsUi.html'
-            }
-        })
         .factory('bmsDialogService', [function () {
             return {
                 isOpen: function (type) {

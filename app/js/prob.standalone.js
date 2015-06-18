@@ -302,15 +302,6 @@ define(['socketio', 'angularAMD', 'bms.func', 'angular', 'prob.graph', 'prob.ifr
 
                 }
             }
-        }])
-        .directive('bmsApp', ['$compile', function ($compile) {
-            return {
-                replace: false,
-                link: function ($scope, $element, attrs) {
-                    angular.element(document.getElementsByTagName('body'))
-                        .append($compile('<div bms-ui class="fullWidthHeight"></div>')($scope));
-                }
-            }
         }]);
     return angularAMD.bootstrap(module);
 
