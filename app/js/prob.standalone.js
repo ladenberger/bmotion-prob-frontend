@@ -51,6 +51,8 @@ define(['socketio', 'angularAMD', 'bms.func', 'angular', 'prob.graph', 'prob.ifr
                 var defer = $q.defer();
                 if (!connected) {
 
+                    bmsModalService.setMessage("Start BMotion for ProB Server ...");
+
                     try {
                         var spawn = require('child_process').spawn;
                         var server = spawn('java', ['-Xmx1024m', '-cp', './libs/libs/*:./libs/bmotion-prob-standalone.jar', "-Dprob.home=./cli/", 'Start', '-standalone', '-local']);
@@ -66,7 +68,7 @@ define(['socketio', 'angularAMD', 'bms.func', 'angular', 'prob.graph', 'prob.ifr
                             bmsModalService.setError('BMotion Studio for ProB Server process exited with code ' + code);
                         });
                     } catch (err) {
-                        bmsModalService.setError('Error while trying to start child process: ' + JSON.stringify(err));
+                        bmsModalService.setError('Error while trying to start BMotion Studio for ProB Server: ' + JSON.stringify(err));
                     }
 
                 } else {
@@ -87,7 +89,7 @@ define(['socketio', 'angularAMD', 'bms.func', 'angular', 'prob.graph', 'prob.ifr
                 return defer.promise;
             };
 
-            bmsModalService.startLoading("Connecting to BMotion Studio for ProB Server ...");
+            bmsModalService.startLoading("Check if BMotion Studio for ProB Server exists ...");
             checkIfConnectionExists()
                 .then(function (connected) {
                     return startServer(connected);
