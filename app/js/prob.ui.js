@@ -106,6 +106,8 @@ define(['angular', 'jquery.cookie', 'jquery-ui', 'ui-bootstrap', 'bms.config'], 
                         close: []
                     };
 
+                    self.state = 'close';
+
                     self.getType = function () {
                         return $scope.type;
                     };
@@ -125,11 +127,11 @@ define(['angular', 'jquery.cookie', 'jquery-ui', 'ui-bootstrap', 'bms.config'], 
                     };
 
                     self.isOpen = function () {
-                        return $scope.state === 'open' ? true : false;
+                        return self.state === 'open' ? true : false;
                     };
 
                     self.open = function () {
-                        $scope.state = 'open';
+                        self.state = 'open';
                     };
 
                     $scope.$on('visualizationLoaded', function (evt, vis) {
@@ -140,17 +142,19 @@ define(['angular', 'jquery.cookie', 'jquery-ui', 'ui-bootstrap', 'bms.config'], 
                     });
 
                     $scope.$on('openDialog_' + $scope.type, function () {
-                        $scope.state = 'open';
+                        self.state = 'open';
                     });
 
                 }],
                 link: function ($scope, element, attrs, ctrl) {
 
-                    $scope.state = bmsDialogService.isOpen($scope.type) ? 'open' : 'close';
+                    ctrl.state = bmsDialogService.isOpen($scope.type) ? 'open' : 'close';
                     var d = $(element);
 
-                    $scope.$watch('state', function (newValue) {
-                        d.dialog(newValue);
+                    $scope.$watch(function () {
+                        return ctrl.state;
+                    }, function (newVal) {
+                        d.dialog(newVal);
                     });
 
                     $(element).first().css("overflow", "hidden");
@@ -181,7 +185,9 @@ define(['angular', 'jquery.cookie', 'jquery-ui', 'ui-bootstrap', 'bms.config'], 
                         },
                         close: function () {
                             bmsDialogService.close($scope.type);
-                            $scope.state = 'close';
+                            $scope.$apply(function () {
+                                ctrl.state = 'close';
+                            });
                             ctrl.propagateEvent('close');
                         },
                         autoOpen: ctrl.isOpen(),

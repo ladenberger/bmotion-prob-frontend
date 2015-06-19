@@ -20,9 +20,27 @@ define(['socketio', 'angularAMD', 'bms.func', 'angular', 'prob.graph', 'prob.ifr
             bmsMainService.mode = 'ModeStandalone';
             editableOptions.theme = 'bs3'; // bootstrap3 theme. Can be also 'bs2', 'default'
         }])
-        .controller('loadingController', ['$scope', 'bmsModalService', '$location', 'bmsSocketService', '$q', 'bmsConfigService', 'Window', function ($scope, bmsModalService, $location, bmsSocketService, $q, bmsConfigService, Window) {
+        .controller('loadingController', ['$scope', 'bmsModalService', '$location', 'bmsSocketService', '$q', 'bmsConfigService', 'Window', 'GUI', function ($scope, bmsModalService, $location, bmsSocketService, $q, bmsConfigService, Window, GUI) {
 
-            Window.showDevTools('', false);
+            // Create node-webkit menu
+            var windowMenu = new GUI.Menu({
+                type: "menubar"
+            });
+
+            // Debug menu
+            var debugMenu = new GUI.Menu();
+            windowMenu.append(new GUI.MenuItem({
+                label: 'Debug',
+                submenu: debugMenu
+            }));
+            debugMenu.append(new GUI.MenuItem({
+                label: 'DevTools',
+                click: function () {
+                    Window.showDevTools('', false)
+                }
+            }));
+
+            Window.menu = windowMenu;
 
             var checkIfConnectionExists = function () {
                 var defer = $q.defer();
@@ -98,7 +116,9 @@ define(['socketio', 'angularAMD', 'bms.func', 'angular', 'prob.graph', 'prob.ifr
         .controller('readyController', ['$scope', 'GUI', 'Window', 'fileDialogService', '$rootScope', function ($scope, GUI, Window, fileDialogService, $rootScope) {
 
             var openDialog = function (type) {
-                $rootScope.$broadcast('openDialog_' + type);
+                $scope.$apply(function () {
+                    $rootScope.$broadcast('openDialog_' + type);
+                });
             };
 
             // Create node-webkit menu
