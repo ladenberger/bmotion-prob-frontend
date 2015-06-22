@@ -5,7 +5,7 @@ module.exports = function (grunt) {
     var jsBowerLibs = 'js/libs/bower/';
 
     grunt.initConfig({
-        clean: ["dist", "bower_components", "app/js/libs/bower", "app/css/libs/bower", "app/css/css", "app/css/fonts"],
+        clean: ["dist", "bower_components", "app/js/libs/bower", "app/css/libs/bower"],
         bump: {
             options: {
                 files: ['package.json', 'bower.json'],
