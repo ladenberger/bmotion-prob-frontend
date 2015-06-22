@@ -20,24 +20,6 @@ module.exports = function (grunt) {
             }
         },
         requirejs: {
-            /*js: {
-             options: {
-             mainConfigFile: "app/bmotion.config.js",
-             baseUrl: "app/js",
-             removeCombined: true,
-             findNestedDependencies: true,
-             dir: "dist/js",
-             skipDirOptimize: true,
-             keepBuildDir: false,
-             noBuildTxt: true,
-             modules: [
-             {name: "bmotion.online"},
-             {name: "bmotion.integrated"},
-             {name: "bmotion.standalone"},
-             {name: "bmotion.vis"}
-             ]
-             }
-             },*/
             'js': {
                 options: {
                     mainConfigFile: "app/bmotion.config.js",
@@ -59,7 +41,8 @@ module.exports = function (grunt) {
                     cssIn: "app/css/bmotion.css",
                     out: "dist/<%= mode %>/css/bmotion.css"
                 }
-            }, cssmin: {
+            },
+            cssmin: {
                 options: {
                     keepBuildDir: true,
                     optimizeCss: "standard",
@@ -117,6 +100,16 @@ module.exports = function (grunt) {
                 ]
             }
         },
+        compress: {
+            main: {
+                options: {
+                    archive: 'dist/<%= mode %>.zip'
+                },
+                files: [
+                    {expand: true, cwd: 'dist/<%= mode %>/', src: ['**']}
+                ]
+            }
+        },
         "file-creator": {
             "standalone": {
                 "dist/standalone/index.html": function (fs, fd, done) {
@@ -165,6 +158,7 @@ module.exports = function (grunt) {
     grunt.loadNpmTasks('grunt-bump');
     grunt.loadNpmTasks('grunt-contrib-copy');
     grunt.loadNpmTasks('grunt-file-creator');
+    grunt.loadNpmTasks('grunt-contrib-compress');
 
     grunt.registerTask('default', ['build']);
 
@@ -173,15 +167,15 @@ module.exports = function (grunt) {
 
     grunt.registerTask('standalone', '', function () {
         grunt.config.set('mode', 'standalone');
-        grunt.task.run(['prepare', 'file-creator:standalone']);
+        grunt.task.run(['prepare', 'file-creator:standalone', 'compress']);
     });
     grunt.registerTask('online', '', function () {
         grunt.config.set('mode', 'online');
-        grunt.task.run(['prepare', 'file-creator:online']);
+        grunt.task.run(['prepare', 'file-creator:online', 'compress']);
     });
     grunt.registerTask('template', '', function () {
         grunt.config.set('mode', 'template');
-        grunt.task.run(['bower:install', 'requirejs:js', 'copy:template']);
+        grunt.task.run(['bower:install', 'copy:template', 'compress']);
     });
 
     grunt.registerTask('dist', ['clean', 'build', 'bump']);

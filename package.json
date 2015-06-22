@@ -18,6 +18,7 @@
     "grunt-bump": "^0.3.1",
     "grunt-cli": "^0.1.13",
     "grunt-contrib-clean": "^0.6.0",
+    "grunt-contrib-compress": "^0.13.0",
     "grunt-contrib-copy": "^0.8.0",
     "grunt-contrib-requirejs": "^0.4.4",
     "grunt-file-creator": "^0.1.3"
