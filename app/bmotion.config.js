@@ -39,7 +39,7 @@ requirejs.config({
 
         "jquery-ui": "libs/ext/jquery-ui/jquery-ui",
 
-        "jquery.cookie": "libs/bower/jquery.cookie/jquery.cookie",
+        //"jquery.cookie": "libs/bower/jquery.cookie/jquery.cookie",
         "qtip": "libs/bower/qtip2/jquery.qtip",
         "tv4": "libs/bower/tv4/tv4",
         "angular-xeditable": "libs/bower/angular-xeditable/xeditable",

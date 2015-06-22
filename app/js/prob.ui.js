@@ -2,7 +2,7 @@
  * BMotion Studio for ProB UI Module
  *
  */
-define(['angular', 'jquery.cookie', 'jquery-ui', 'ui-bootstrap', 'bms.config'], function () {
+define(['angular', 'jquery-ui', 'ui-bootstrap', 'bms.config'], function () {
 
     var module = angular.module('prob.ui', ['ui.bootstrap', 'bms.config'])
         .controller('bmsUiNavigationCtrl', ['$scope', '$rootScope', 'bmsUIService', 'bmsVisualisationService', function ($scope, $rootScope, bmsUIService, bmsVisualisationService) {
@@ -14,7 +14,7 @@ define(['angular', 'jquery.cookie', 'jquery-ui', 'ui-bootstrap', 'bms.config'], 
                 $rootScope.$broadcast('openDialog_' + type);
             };
 
-            self.visualizationLoaded = function() {
+            self.visualizationLoaded = function () {
                 return $rootScope.currentVisualisation !== undefined;
             };
 
@@ -47,37 +47,37 @@ define(['angular', 'jquery.cookie', 'jquery-ui', 'ui-bootstrap', 'bms.config'], 
         }])
         .factory('bmsDialogService', [function () {
             return {
-                isOpen: function (type) {
-                    return $.cookie("open_" + type) === undefined ? false : $.cookie("open_" + type);
-                },
-                open: function (element, type) {
-                    $.cookie("open_" + type, true);
-                    var toppos = $.cookie("position_top_" + type);
-                    var leftpos = $.cookie("position_left_" + type);
-                    var width = $.cookie("width_" + type);
-                    var height = $.cookie("height_" + type);
-                    if (toppos !== undefined && leftpos !== undefined) {
-                        element.parent().css("top", toppos + "px").css("left", leftpos + "px")
-                    }
-                    if (width !== undefined && height !== undefined) {
-                        element.parent().css("width", width + "px").css("height", height + "px")
-                    }
-                },
-                close: function (type) {
-                    $.removeCookie("open_" + type);
-                    $.removeCookie("position_top" + type);
-                    $.removeCookie("position_left_" + type);
-                    $.removeCookie("width_" + type);
-                    $.removeCookie("height_" + type);
-                },
-                dragStop: function (ui, type) {
-                    $.cookie("position_top_" + type, ui.position.top);
-                    $.cookie("position_left_" + type, ui.position.left)
-                },
-                resizeStop: function (ui, type) {
-                    $.cookie("width_" + type, ui.size.width);
-                    $.cookie("height_" + type, ui.size.height);
-                },
+                /*isOpen: function (type) {
+                 return $.cookie("open_" + type) === undefined ? false : $.cookie("open_" + type);
+                 },
+                 open: function (element, type) {
+                 $.cookie("open_" + type, true);
+                 var toppos = $.cookie("position_top_" + type);
+                 var leftpos = $.cookie("position_left_" + type);
+                 var width = $.cookie("width_" + type);
+                 var height = $.cookie("height_" + type);
+                 if (toppos !== undefined && leftpos !== undefined) {
+                 element.parent().css("top", toppos + "px").css("left", leftpos + "px")
+                 }
+                 if (width !== undefined && height !== undefined) {
+                 element.parent().css("width", width + "px").css("height", height + "px")
+                 }
+                 },
+                 close: function (type) {
+                 $.removeCookie("open_" + type);
+                 $.removeCookie("position_top" + type);
+                 $.removeCookie("position_left_" + type);
+                 $.removeCookie("width_" + type);
+                 $.removeCookie("height_" + type);
+                 },
+                 dragStop: function (ui, type) {
+                 $.cookie("position_top_" + type, ui.position.top);
+                 $.cookie("position_left_" + type, ui.position.left)
+                 },
+                 resizeStop: function (ui, type) {
+                 $.cookie("width_" + type, ui.size.width);
+                 $.cookie("height_" + type, ui.size.height);
+                 },*/
                 fixSize: function (dialog, ox, oy) {
                     var newwidth = dialog.parent().width() - ox;
                     var newheight = dialog.parent().height() - oy;
@@ -147,7 +147,7 @@ define(['angular', 'jquery.cookie', 'jquery-ui', 'ui-bootstrap', 'bms.config'], 
                 }],
                 link: function ($scope, element, attrs, ctrl) {
 
-                    ctrl.state = bmsDialogService.isOpen($scope.type) ? 'open' : 'close';
+                    //ctrl.state = bmsDialogService.isOpen($scope.type) ? 'open' : 'close';
                     var d = $(element);
 
                     $scope.$watch(function () {
@@ -163,7 +163,7 @@ define(['angular', 'jquery.cookie', 'jquery-ui', 'ui-bootstrap', 'bms.config'], 
                             ctrl.propagateEvent('dragStart');
                         },
                         dragStop: function (event, ui) {
-                            bmsDialogService.dragStop(ui, $scope.type);
+                            //bmsDialogService.dragStop(ui, $scope.type);
                             ctrl.propagateEvent('dragStop');
                         },
                         resize: function () {
@@ -173,17 +173,17 @@ define(['angular', 'jquery.cookie', 'jquery-ui', 'ui-bootstrap', 'bms.config'], 
                             ctrl.propagateEvent('resizeStart');
                         },
                         resizeStop: function (event, ui) {
-                            bmsDialogService.resizeStop(ui, $scope.type);
+                            //bmsDialogService.resizeStop(ui, $scope.type);
                             bmsDialogService.fixSize($(element), 0, 0);
                             ctrl.propagateEvent('resizeStop');
                         },
                         open: function () {
-                            bmsDialogService.open(element, $scope.type);
+                            //bmsDialogService.open(element, $scope.type);
                             bmsDialogService.fixSize($(element), 0, 0);
                             ctrl.propagateEvent('open');
                         },
                         close: function () {
-                            bmsDialogService.close($scope.type);
+                            //bmsDialogService.close($scope.type);
                             $scope.$apply(function () {
                                 ctrl.state = 'close';
                             });
