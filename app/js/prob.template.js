@@ -4,7 +4,7 @@
  */
 define(['bms.func', 'angularAMD', 'angular', 'prob.jquery'], function (bms, angularAMD) {
 
-    var module = angular.module('prob.vis', [])
+    var module = angular.module('prob.template', [])
         .factory('$parentScope', ['$window', function ($window) {
             return $window.parent.angular.element($window.frameElement).scope();
         }])

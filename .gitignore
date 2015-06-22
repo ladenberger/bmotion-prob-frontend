@@ -8,5 +8,6 @@ app/css/libs/bower
 app/js/libs/bower
 dist/js/libs
 dist/js/build.txt
+dev
 editor
 npm-debug.log

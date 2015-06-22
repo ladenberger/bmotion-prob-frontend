@@ -1,43 +1,30 @@
+
 /**
- * BMotion Studio for ProB Editor Module
+ * BMotion Studio for ProB Editor Iframe Module
  *
  */
-define(['prob.modal'], function () {
+define(['angularAMD', 'angular', 'jquery', 'jquery.contextMenu', 'jquery.jgraduate', 'jpicker',
+    'jquery.bbq', 'jquery.hotkeys', 'jquery.draginput', 'mousewheel',
+    'taphold', 'touch', 'requestanimationframe',
+    'svgtransformlist', 'method-draw'], function (angularAMD) {
 
-    var module = angular.module('prob.editor', ['prob.modal'])
-        .directive('bmsVisualisationEditor', ['bmsVisualisationService', 'bmsModalService', function (bmsVisualisationService, bmsModalService) {
-            return {
-                replace: false,
-                scope: {
-                    svgId: '@bmsSvgId',
-                    visualisationId: '@bmsVisualisationId'
-                },
-                template: '<iframe src="../../app/editor/index.html"></iframe>',
-                controller: ['$scope', function ($scope) {
-
-                    //var self = this;
-
-                    $scope.getSvg = function () {
-                        var vis = bmsVisualisationService.getVisualisation(this.visualisationId);
-                        if (vis) {
-                            var svgList = vis['svg'];
-                            var svg = svgList[this.svgId];
-                            if (svg) {
-                                return svg;
-                            } else {
-                                bmsModalService.setError("No svg data found with id " + this.svgId);
-                            }
-                        } else {
-                            bmsModalService.setError("No visualisation found with id " + this.visualisationId);
-                        }
-                    };
-
-                }],
-                link: function ($scope, $element, attrs, ctrl) {
+    var module = angular.module('prob.editor', [])
+        .factory('$parentScope', ['$window', function ($window) {
+            return $window.parent.angular.element($window.frameElement).scope();
+        }])
+        .service('bmsParentService', ['$parentScope', function ($parentScope) {
+            var observerService = {
+                getSvg: function () {
+                    return $parentScope.getSvg();
                 }
-            }
+            };
+            return observerService;
+        }])
+        .controller('bmsEditorCtrl', ['$scope', 'bmsParentService', function ($scope, bmsParentService) {
+            var svg = bmsParentService.getSvg();
+            if (svg) methodDraw.loadFromString(svg);
         }]);
 
-    return module;
+    return angularAMD.bootstrap(module);
 
 });

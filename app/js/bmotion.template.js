@@ -1,0 +1,2 @@
+define(['prob.template'], function () {
+});

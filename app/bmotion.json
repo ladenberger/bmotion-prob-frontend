@@ -1,0 +1,9 @@
+{
+  "socket": {
+    "host": "localhost",
+    "port": "19090"
+  },
+  "prob": {
+    "host": "localhost"
+  }
+}

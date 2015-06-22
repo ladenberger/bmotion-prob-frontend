@@ -1,6 +1,33 @@
 requirejs.config({
-    baseUrl: "../../app/js",
+    baseUrl: "../app/js/",
     paths: {
+
+        // Common modules
+        "bms.common": "bms.common",
+        "bms.func": "bms.func",
+        "bms.socket": "bms.socket",
+        "bms.config": "bms.config",
+        "bms.visualization": "bms.visualization",
+
+        "prob.ui": "prob.ui",
+        "prob.common": "prob.common",
+        "prob.modal": "prob.modal",
+        "prob.graph": "prob.graph",
+        "prob.jquery": "prob.jquery",
+        "prob.observers": "prob.observers",
+
+        // IFrame directive modules
+        "prob.iframe.editor": "prob.iframe.editor",
+        "prob.iframe.template": "prob.iframe.template",
+        "prob.template": "prob.template",
+        "prob.editor": "prob.editor",
+
+        // Mode modules
+        "prob.online": "prob.online",
+        "prob.integrated": "prob.integrated",
+        "prob.standalone": "prob.standalone",
+
+        // Third party modules
         "jquery": "libs/bower/jquery/jquery",
         "socketio": "libs/bower/socket.io-client/socket.io",
         "angular": "libs/bower/angular/angular",
@@ -17,26 +44,7 @@ requirejs.config({
         "tv4": "libs/bower/tv4/tv4",
         "angular-xeditable": "libs/bower/angular-xeditable/xeditable",
         "cytoscape": "libs/bower/cytoscape/cytoscape",
-        "cytoscape.navigator": "libs/ext/cytoscape.navigator/cytoscape.js-navigator",
-
-        "bms.common": "bms.common",
-        "bms.func": "bms.func",
-        "bms.socket": "bms.socket",
-        "bms.config": "bms.config",
-        "bms.visualization": "bms.visualization",
-        "bms.editor": "editor/bms.editor",
-        "prob.ui": "prob.ui",
-        "prob.iframe": "prob.iframe",
-        "prob.editor": "prob.editor",
-        "prob.common": "prob.common",
-        "prob.modal": "prob.modal",
-        "prob.graph": "prob.graph",
-        "prob.jquery": "prob.jquery",
-        "prob.observers": "prob.observers",
-        "prob.online": "prob.online",
-        "prob.integrated": "prob.integrated",
-        "prob.standalone": "prob.standalone",
-        "prob.vis": "prob.vis"
+        "cytoscape.navigator": "libs/ext/cytoscape.navigator/cytoscape.js-navigator"
 
         /*"jquery.contextMenu": "libs/ext/contextmenu/jquery.contextMenu",
          "jquery.jgraduate": "libs/ext/jgraduate/jquery.jgraduate.min",

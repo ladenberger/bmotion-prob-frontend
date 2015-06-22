@@ -81,11 +81,6 @@ define(['angular', 'jquery.cookie', 'jquery-ui', 'ui-bootstrap', 'bms.config'], 
                 }
             }
         }])
-        .directive('bmsUi', function () {
-            return {
-                templateUrl: 'bmsUi.html'
-            }
-        })
         .directive('bmsDialog', ['bmsDialogService', function (bmsDialogService) {
             return {
                 scope: {

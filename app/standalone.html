@@ -1,0 +1,19 @@
+<!DOCTYPE html>
+<html data-bms-app>
+<head>
+    <title>BMotion Studio for ProB</title>
+    <link rel="stylesheet" type="text/css" href="css/bmotion.css"/>
+    <script src="js/require.js"></script>
+    <script>
+        requirejs(['bmotion.config.js'], function () {
+            requirejs(['bmotion.standalone'], function () {
+            });
+        });
+    </script>
+</head>
+<body>
+
+<div ng-view class="fullWidthHeight"></div>
+
+</body>
+</html>

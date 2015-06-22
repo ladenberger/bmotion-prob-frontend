@@ -1,2 +1,0 @@
-define(['prob.vis'], function () {
-});

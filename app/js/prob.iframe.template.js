@@ -4,7 +4,7 @@
  */
 define(['tv4', 'bms.func', 'prob.common', 'prob.observers', 'prob.modal'], function (tv4, bms) {
 
-    var module = angular.module('prob.iframe', ['prob.common', 'prob.observers', 'prob.modal'])
+    var module = angular.module('prob.iframe.template', ['prob.common', 'prob.observers', 'prob.modal'])
         .factory('initSession', ['$q', 'ws', function ($q, ws) {
             return {
                 init: function (data) {

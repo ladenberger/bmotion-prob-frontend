@@ -2,9 +2,9 @@
  * BMotion Studio for ProB Standalone Module
  *
  */
-define(['socketio', 'angularAMD', 'bms.func', 'angular', 'prob.graph', 'prob.iframe', 'prob.editor', 'prob.ui', 'prob.common', 'prob.modal', 'angular-route'], function (io, angularAMD, bms) {
+define(['socketio', 'angularAMD', 'bms.func', 'angular', 'prob.graph', 'prob.iframe.template', 'prob.ui', 'prob.common', 'prob.modal', 'angular-route'], function (io, angularAMD, bms) {
 
-    var module = angular.module('prob.standalone', ['prob.graph', 'prob.iframe', 'prob.editor', 'prob.ui', 'prob.common', 'prob.modal', 'ngRoute'])
+    var module = angular.module('prob.standalone', ['prob.graph', 'prob.iframe.template', 'prob.ui', 'prob.common', 'prob.modal', 'ngRoute'])
         .config(['$routeProvider', function ($routeProvider) {
             $routeProvider
                 .when('/loading', {
@@ -12,7 +12,7 @@ define(['socketio', 'angularAMD', 'bms.func', 'angular', 'prob.graph', 'prob.ifr
                     controller: 'loadingController'
                 })
                 .when('/', {
-                    templateUrl: 'bmsUi.html',
+                    templateUrl: 'resources/templates/bms-standalone-ui.html',
                     controller: 'readyController'
                 });
         }])
