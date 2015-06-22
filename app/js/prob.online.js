@@ -10,6 +10,9 @@ define(['angularAMD', 'angular', 'prob.graph', 'prob.iframe.template', 'prob.ui'
                 .when('/', {
                     templateUrl: 'resources/templates/bms-online-ui.html',
                     controller: 'readyController'
+                }).
+                otherwise({
+                    redirectTo: '/'
                 });
         }])
         .controller('readyController', ['$scope', function ($scope) {

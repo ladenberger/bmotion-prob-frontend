@@ -14,6 +14,9 @@ define(['socketio', 'angularAMD', 'bms.func', 'angular', 'prob.graph', 'prob.ifr
                 .when('/', {
                     templateUrl: 'resources/templates/bms-standalone-ui.html',
                     controller: 'readyController'
+                }).
+                otherwise({
+                    redirectTo: '/loading'
                 });
         }])
         .run(['editableOptions', 'bmsMainService', function (editableOptions, bmsMainService) {
