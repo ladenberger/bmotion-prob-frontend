@@ -5,7 +5,7 @@ module.exports = function (grunt) {
     var jsBowerLibs = 'js/libs/bower/';
 
     grunt.initConfig({
-        clean: ["dist", "bower_components", "app/js/libs/bower", "app/css/libs/bower"],
+        clean: ["build", "bower_components", "app/js/libs/bower", "app/css/libs/bower"],
         bump: {
             options: {
                 files: ['package.json', 'bower.json'],
@@ -27,7 +27,7 @@ module.exports = function (grunt) {
                     removeCombined: true,
                     findNestedDependencies: true,
                     name: "bmotion.<%= mode %>",
-                    out: "dist/<%= mode %>/js/bmotion.<%= mode %>.js",
+                    out: "build/<%= mode %>/js/bmotion.<%= mode %>.js",
                     skipDirOptimize: true,
                     keepBuildDir: false,
                     noBuildTxt: true
@@ -39,7 +39,7 @@ module.exports = function (grunt) {
                     optimizeCss: "standard.keepLines.keepWhitespace",
                     cssPrefix: "",
                     cssIn: "app/css/bmotion.css",
-                    out: "dist/<%= mode %>/css/bmotion.css"
+                    out: "build/<%= mode %>/css/bmotion.css"
                 }
             },
             cssmin: {
@@ -48,7 +48,7 @@ module.exports = function (grunt) {
                     optimizeCss: "standard",
                     cssPrefix: "",
                     cssIn: "app/css/bmotion.css",
-                    out: "dist/<%= mode %>/css/bmotion.min.css"
+                    out: "build/<%= mode %>/css/bmotion.min.css"
                 }
             }
         },
@@ -85,7 +85,7 @@ module.exports = function (grunt) {
                         expand: true,
                         cwd: 'app/',
                         src: ['resources/editor/**', 'resources/templates/bms-<%= mode %>-ui.html', 'js/require.js', 'css/bootstrap/fonts/**'],
-                        dest: 'dist/<%= mode %>/'
+                        dest: 'build/<%= mode %>/'
                     }
                 ]
             },
@@ -95,7 +95,7 @@ module.exports = function (grunt) {
                         expand: true,
                         cwd: 'app/resources/template',
                         src: ['**'],
-                        dest: 'dist/template'
+                        dest: 'build/template'
                     }
                 ]
             }
@@ -103,16 +103,16 @@ module.exports = function (grunt) {
         compress: {
             main: {
                 options: {
-                    archive: 'dist/<%= mode %>.zip'
+                    archive: 'build/<%= mode %>.zip'
                 },
                 files: [
-                    {expand: true, cwd: 'dist/<%= mode %>/', src: ['**']}
+                    {expand: true, cwd: 'build/<%= mode %>/', src: ['**']}
                 ]
             }
         },
         "file-creator": {
             "standalone": {
-                "dist/standalone/index.html": function (fs, fd, done) {
+                "build/standalone/index.html": function (fs, fd, done) {
                     fs.writeSync(fd, '<!DOCTYPE html>\n'
                         + '<html>\n'
                         + '<head>\n'
@@ -131,7 +131,7 @@ module.exports = function (grunt) {
                 }
             },
             "online": {
-                "dist/online/index.html": function (fs, fd, done) {
+                "build/online/index.html": function (fs, fd, done) {
                     fs.writeSync(fd, '<!DOCTYPE html>\n'
                         + '<html>\n'
                         + '<head>\n'

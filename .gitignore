@@ -5,7 +5,6 @@ bower_components
 bmotion-prob-frontend.iml
 app/css/libs/bower
 app/js/libs/bower
-dist/js/libs
-dist/js/build.txt
+build
 dev
 npm-debug.log
