@@ -145,66 +145,66 @@ define(['socketio', 'angularAMD', 'bms.func', 'angular', 'prob.graph', 'prob.ifr
             }));
 
             // ProB menu
-            var probView = new GUI.Menu();
-            windowMenu.append(new GUI.MenuItem({
-                label: 'ProB',
-                submenu: probView
-            }));
-            probView.append(new GUI.MenuItem({
-                label: 'Events',
-                click: function () {
-                    openDialog('Events');
-                }
-            }));
-            probView.append(new GUI.MenuItem({
-                label: 'History',
-                click: function () {
-                    openDialog('CurrentTrace');
-                }
-            }));
-            probView.append(new GUI.MenuItem({
-                label: 'State',
-                click: function () {
-                    openDialog('StateInspector');
-                }
-            }));
-            probView.append(new GUI.MenuItem({
-                label: 'Animations',
-                click: function () {
-                    openDialog('CurrentAnimations');
-                }
-            }));
-            probView.append(new GUI.MenuItem({
-                label: 'Console',
-                click: function () {
-                    openDialog('GroovyConsoleSession');
-                }
-            }));
-            probView.append(new GUI.MenuItem({
-                label: 'Model Checking',
-                click: function () {
-                    openDialog('ModelCheckingUI');
-                }
-            }));
+            /*var probView = new GUI.Menu();
+             windowMenu.append(new GUI.MenuItem({
+             label: 'ProB',
+             submenu: probView
+             }));
+             probView.append(new GUI.MenuItem({
+             label: 'Events',
+             click: function () {
+             openDialog('Events');
+             }
+             }));
+             probView.append(new GUI.MenuItem({
+             label: 'History',
+             click: function () {
+             openDialog('CurrentTrace');
+             }
+             }));
+             probView.append(new GUI.MenuItem({
+             label: 'State',
+             click: function () {
+             openDialog('StateInspector');
+             }
+             }));
+             probView.append(new GUI.MenuItem({
+             label: 'Animations',
+             click: function () {
+             openDialog('CurrentAnimations');
+             }
+             }));
+             probView.append(new GUI.MenuItem({
+             label: 'Console',
+             click: function () {
+             openDialog('GroovyConsoleSession');
+             }
+             }));
+             probView.append(new GUI.MenuItem({
+             label: 'Model Checking',
+             click: function () {
+             openDialog('ModelCheckingUI');
+             }
+             }));
 
-            // Diagram menu
-            var diagramMenu = new GUI.Menu();
-            windowMenu.append(new GUI.MenuItem({
-                label: 'Diagram',
-                submenu: diagramMenu
-            }));
-            diagramMenu.append(new GUI.MenuItem({
-                label: 'Element Projection Diagram',
-                click: function () {
-                    $rootScope.$broadcast('openElementProjectionModal');
-                }
-            }));
-            diagramMenu.append(new GUI.MenuItem({
-                label: 'Trace Diagram',
-                click: function () {
-                    $rootScope.$broadcast('openTraceDiagramModal');
-                }
-            }));
+             // Diagram menu
+             var diagramMenu = new GUI.Menu();
+             windowMenu.append(new GUI.MenuItem({
+             label: 'Diagram',
+             submenu: diagramMenu
+             }));
+             diagramMenu.append(new GUI.MenuItem({
+             label: 'Element Projection Diagram',
+             click: function () {
+             $rootScope.$broadcast('openElementProjectionModal');
+             }
+             }));
+             diagramMenu.append(new GUI.MenuItem({
+             label: 'Trace Diagram',
+             click: function () {
+             $rootScope.$broadcast('openTraceDiagramModal');
+             }
+             }));*/
 
             // Debug menu
             var debugMenu = new GUI.Menu();

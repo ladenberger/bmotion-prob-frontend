@@ -21,7 +21,7 @@
             </div>
             <div class="collapse navbar-collapse">
                 <ul class="nav navbar-nav navbar-right" id="bmotion-navigation">
-                    <li><a href="#/" ng-click="nav.reloadVisualization()"><i class="glyphicon glyphicon-refresh"></i>
+                    <li><a href="#/" ng-show="nav.visualizationLoaded()" ng-click="nav.reloadVisualization()"><i class="glyphicon glyphicon-refresh"></i>
                         Reload</a>
                         <!--li class="dropup" dropdown ng-show="nav.hasSvg()">
                             <a href="#/" dropdown-toggle>Edit <span class="caret"></span></a>
@@ -31,7 +31,7 @@
                                         class="glyphicon glyphicon-edit"></i> {{id}}</a></li>
                             </ul>
                         </li-->
-                    <li class="dropup" dropdown>
+                    <li class="dropup" dropdown ng-show="nav.visualizationLoaded()">
                         <a href="#/" dropdown-toggle>Open View <span
                                 class="caret"></span></a>
                         <ul class="dropdown-menu" role="menu">
@@ -52,7 +52,7 @@
                                     class="glyphicon glyphicon-ok"></i> Model Checking</a></li>
                         </ul>
                     </li>
-                    <li class="dropup" dropdown>
+                    <li class="dropup" dropdown ng-show="nav.visualizationLoaded()">
                         <a href="#/" dropdown-toggle>Open Diagram <span
                                 class="caret"></span></a>
                         <ul class="dropdown-menu" role="menu">

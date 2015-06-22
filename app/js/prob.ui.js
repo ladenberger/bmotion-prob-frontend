@@ -14,6 +14,10 @@ define(['angular', 'jquery.cookie', 'jquery-ui', 'ui-bootstrap', 'bms.config'], 
                 $rootScope.$broadcast('openDialog_' + type);
             };
 
+            self.visualizationLoaded = function() {
+                return $rootScope.currentVisualisation !== undefined;
+            };
+
             self.reloadVisualization = function () {
                 document.getElementById($rootScope.currentVisualisation).contentDocument.location.reload(true);
                 bmsUIService.reloadVisualisation($rootScope.currentVisualisation);
