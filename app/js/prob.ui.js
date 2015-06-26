@@ -5,7 +5,7 @@
 define(['angular', 'jquery-ui', 'ui-bootstrap', 'bms.config'], function () {
 
     var module = angular.module('prob.ui', ['ui.bootstrap', 'bms.config'])
-        .controller('bmsUiNavigationCtrl', ['$scope', '$rootScope', 'bmsUIService', 'bmsVisualisationService', function ($scope, $rootScope, bmsUIService, bmsVisualisationService) {
+        .controller('bmsUiNavigationCtrl', ['$scope', '$rootScope', 'bmsUIService', 'bmsVisualizationService', function ($scope, $rootScope, bmsUIService, bmsVisualizationService) {
 
             var self = this;
 
@@ -15,16 +15,19 @@ define(['angular', 'jquery-ui', 'ui-bootstrap', 'bms.config'], function () {
             };
 
             self.visualizationLoaded = function () {
-                return $rootScope.currentVisualisation !== undefined;
+                return bmsVisualizationService.getCurrentVisualizationId() !== undefined;
             };
 
             self.reloadVisualization = function () {
-                document.getElementById($rootScope.currentVisualisation).contentDocument.location.reload(true);
-                bmsUIService.reloadVisualisation($rootScope.currentVisualisation);
+                var id = bmsVisualizationService.getCurrentVisualizationId();
+                if (id) {
+                    document.getElementById(id).contentDocument.location.reload(true);
+                    bmsUIService.reloadVisualisation(id);
+                }
             };
 
-            self.editVisualization = function (id) {
-                $rootScope.$broadcast('openEditorModal', $scope.currentVisualisation, id);
+            self.editVisualization = function (svgid) {
+                $rootScope.$broadcast('openEditorModal', bmsVisualizationService.getCurrentVisualizationId(), svgid);
             };
 
             self.openElementProjectionDiagram = function () {
@@ -40,8 +43,8 @@ define(['angular', 'jquery-ui', 'ui-bootstrap', 'bms.config'], function () {
             };
 
             self.getSvg = function () {
-                var vis = bmsVisualisationService.getVisualisation($rootScope.currentVisualisation);
-                if (vis) return vis['svg'];
+                var vis = bmsVisualizationService.getCurrentVisualization();
+                if (vis) return vis.svg;
             }
 
         }])
@@ -106,6 +109,7 @@ define(['angular', 'jquery-ui', 'ui-bootstrap', 'bms.config'], function () {
                     };
 
                     self.state = 'close';
+                    self.hidden = false;
 
                     self.getType = function () {
                         return $scope.type;
@@ -142,6 +146,24 @@ define(['angular', 'jquery-ui', 'ui-bootstrap', 'bms.config'], function () {
 
                     $scope.$on('openDialog_' + $scope.type, function () {
                         self.state = 'open';
+                    });
+
+                    $scope.$on('closeDialog', function () {
+                        self.state = 'close';
+                    });
+
+                    $scope.$on('hideDialog', function () {
+                        if (self.state === 'open') {
+                            self.hidden = true;
+                            self.state = 'close';
+                        }
+                    });
+
+                    $scope.$on('showDialog', function () {
+                        if (self.state === 'close' && self.hidden) {
+                            self.hidden = false;
+                            self.state = 'open';
+                        }
                     });
 
                 }],
@@ -184,9 +206,7 @@ define(['angular', 'jquery-ui', 'ui-bootstrap', 'bms.config'], function () {
                         },
                         close: function () {
                             //bmsDialogService.close($scope.type);
-                            $scope.$apply(function () {
-                                ctrl.state = 'close';
-                            });
+                            ctrl.state = 'close';
                             ctrl.propagateEvent('close');
                         },
                         autoOpen: ctrl.isOpen(),

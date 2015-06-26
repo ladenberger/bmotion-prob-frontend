@@ -20,10 +20,10 @@ module.exports = function (grunt) {
             }
         },
         requirejs: {
-            'js': {
+            'js-main': {
                 options: {
                     mainConfigFile: "app/bmotion.config.js",
-                    baseUrl: "app/js",
+                    baseUrl: "app",
                     removeCombined: true,
                     findNestedDependencies: true,
                     name: "bmotion.<%= mode %>",
@@ -33,24 +33,61 @@ module.exports = function (grunt) {
                     noBuildTxt: true
                 }
             },
-            css: {
+            'js-editor': {
                 options: {
-                    keepBuildDir: true,
-                    optimizeCss: "standard.keepLines.keepWhitespace",
-                    cssPrefix: "",
-                    cssIn: "app/css/bmotion.css",
-                    out: "build/<%= mode %>/css/bmotion.css"
+                    mainConfigFile: "app/bmotion.config.js",
+                    baseUrl: "app",
+                    removeCombined: true,
+                    findNestedDependencies: true,
+                    name: "bmotion.editor",
+                    out: "build/<%= mode %>/js/bmotion.editor.js",
+                    skipDirOptimize: true,
+                    keepBuildDir: false,
+                    noBuildTxt: true
                 }
             },
-            cssmin: {
+            'css-main': {
                 options: {
                     keepBuildDir: true,
+                    //optimizeCss: "standard.keepLines.keepWhitespace",
                     optimizeCss: "standard",
                     cssPrefix: "",
-                    cssIn: "app/css/bmotion.css",
-                    out: "build/<%= mode %>/css/bmotion.min.css"
+                    cssIn: "app/css/bms.main.css",
+                    out: "build/<%= mode %>/css/bms.main.css"
+                }
+            },
+            'css-editor': {
+                options: {
+                    keepBuildDir: true,
+                    //optimizeCss: "standard.keepLines.keepWhitespace",
+                    optimizeCss: "standard",
+                    cssPrefix: "",
+                    cssIn: "app/css/bms.editor.css",
+                    out: "build/<%= mode %>/css/bms.editor.css"
+                }
+            },
+            'js-template': {
+                options: {
+                    mainConfigFile: "app/bmotion.config.js",
+                    baseUrl: "app",
+                    removeCombined: true,
+                    findNestedDependencies: true,
+                    name: "bmotion.template",
+                    out: "build/template/bmotion.template.js",
+                    skipDirOptimize: true,
+                    keepBuildDir: false,
+                    noBuildTxt: true
                 }
             }
+            /*,cssmin: {
+             options: {
+             keepBuildDir: true,
+             optimizeCss: "standard",
+             cssPrefix: "",
+             cssIn: "app/css/bmotion.css",
+             out: "build/<%= mode %>/css/bmotion.min.css"
+             }
+             }*/
         },
         bower: {
             install: {
@@ -79,12 +116,22 @@ module.exports = function (grunt) {
             }
         },
         copy: {
+            editor: {
+                files: [
+                    {
+                        expand: true,
+                        cwd: 'app/',
+                        src: ['extensions/**', 'images/**', 'css/font-files/**', 'editor.html'],
+                        dest: 'build/<%= mode %>/'
+                    }
+                ]
+            },
             resources: {
                 files: [
                     {
                         expand: true,
                         cwd: 'app/',
-                        src: ['resources/editor/**', 'resources/templates/bms-<%= mode %>-ui.html', 'js/require.js', 'css/bootstrap/fonts/**'],
+                        src: ['bmotion.json', 'resources/templates/bms-<%= mode %>-ui.html', 'resources/templates/bms-editor.html', 'js/require.js', 'css/bootstrap/fonts/**'],
                         dest: 'build/<%= mode %>/'
                     }
                 ]
@@ -93,9 +140,23 @@ module.exports = function (grunt) {
                 files: [
                     {
                         expand: true,
-                        cwd: 'app/resources/template',
+                        cwd: 'app/resources/template/',
                         src: ['**'],
                         dest: 'build/template'
+                    }
+                ]
+            },
+            root: {
+                files: [
+                    {
+                        expand: true,
+                        cwd: 'app/',
+                        src: ['<%= mode %>.html'],
+                        dest: 'build/<%= mode %>/',
+                        filter: 'isFile',
+                        rename: function (dest) {
+                            return dest + 'index.html';
+                        }
                     }
                 ]
             }
@@ -109,46 +170,6 @@ module.exports = function (grunt) {
                     {expand: true, cwd: 'build/<%= mode %>/', src: ['**']}
                 ]
             }
-        },
-        "file-creator": {
-            "standalone": {
-                "build/standalone/index.html": function (fs, fd, done) {
-                    fs.writeSync(fd, '<!DOCTYPE html>\n'
-                        + '<html>\n'
-                        + '<head>\n'
-                        + '<title>BMotion Studio for ProB</title>\n'
-                        + '  <link rel="stylesheet" type="text/css" href="css/bmotion.min.css"/>\n'
-                        + '  <script src="js/require.js"></script>\n'
-                        + '  <script>\n'
-                        + '    requirejs(["js/bmotion.standalone"]);\n'
-                        + '  </script>\n'
-                        + '</head>\n'
-                        + '<body>\n'
-                        + '  <div ng-view class="fullWidthHeight"></div>\n'
-                        + '</body>\n'
-                        + '</html>');
-                    done();
-                }
-            },
-            "online": {
-                "build/online/index.html": function (fs, fd, done) {
-                    fs.writeSync(fd, '<!DOCTYPE html>\n'
-                        + '<html>\n'
-                        + '<head>\n'
-                        + '<title>BMotion Studio for ProB</title>\n'
-                        + '  <link rel="stylesheet" type="text/css" href="css/bmotion.min.css"/>\n'
-                        + '  <script src="js/require.js"></script>\n'
-                        + '  <script>\n'
-                        + '    requirejs(["js/bmotion.online"]);\n'
-                        + '  </script>\n'
-                        + '</head>\n'
-                        + '<body>\n'
-                        + '  <div ng-view class="fullWidthHeight"></div>\n'
-                        + '</body>\n'
-                        + '</html>');
-                    done();
-                }
-            }
         }
     });
 
@@ -157,26 +178,23 @@ module.exports = function (grunt) {
     grunt.loadNpmTasks('grunt-contrib-clean');
     grunt.loadNpmTasks('grunt-bump');
     grunt.loadNpmTasks('grunt-contrib-copy');
-    grunt.loadNpmTasks('grunt-file-creator');
     grunt.loadNpmTasks('grunt-contrib-compress');
 
     grunt.registerTask('default', ['build']);
 
-    grunt.registerTask('prepare', ['bower:install', 'requirejs:cssmin', 'requirejs:js', 'copy:resources']);
+    grunt.registerTask('prepare', ['bower:install', 'requirejs:css-main', 'requirejs:js-main', 'copy:resources', 'copy:root']);
     grunt.registerTask('build', ['standalone', 'online', 'template']);
+    grunt.registerTask('editor', ['requirejs:js-editor', 'requirejs:css-editor', 'copy:editor']);
 
     grunt.registerTask('standalone', '', function () {
         grunt.config.set('mode', 'standalone');
-        grunt.task.run(['prepare', 'file-creator:standalone', 'compress']);
+        grunt.task.run(['prepare', 'editor', 'compress']);
     });
     grunt.registerTask('online', '', function () {
         grunt.config.set('mode', 'online');
-        grunt.task.run(['prepare', 'file-creator:online', 'compress']);
+        grunt.task.run(['prepare', 'compress']);
     });
-    grunt.registerTask('template', '', function () {
-        grunt.config.set('mode', 'template');
-        grunt.task.run(['bower:install', 'copy:template', 'compress']);
-    });
+    grunt.registerTask('template', ['bower:install', 'requirejs:js-template', 'copy:template', 'compress']);
 
     grunt.registerTask('dist', ['clean', 'build', 'bump']);
 

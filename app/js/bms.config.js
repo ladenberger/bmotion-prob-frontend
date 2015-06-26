@@ -24,6 +24,12 @@ define(['angular'], function () {
                                     }
                                 }, data, true);
                                 defer.resolve(config);
+                            }).error(function (data, status, headers, config) {
+                                if (status === 404) {
+                                    defer.reject("File not found: " + config.url);
+                                } else {
+                                    defer.reject("Some error occurred while requesting file " + config.url);
+                                }
                             });
                         }
                         return defer.promise;
@@ -31,6 +37,6 @@ define(['angular'], function () {
                 };
                 return main;
             }]);
-        
+
     }
 );

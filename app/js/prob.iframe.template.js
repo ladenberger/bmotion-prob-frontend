@@ -20,7 +20,7 @@ define(['tv4', 'bms.func', 'prob.common', 'prob.observers', 'prob.modal'], funct
                 }
             };
         }])
-        .directive('bmsVisualisationView', ['bmsMainService', '$rootScope', 'bmsVisualisationService', '$compile', 'bmsObserverService', '$http', 'initSession', 'ws', '$injector', 'bmsUIService', 'bmsModalService', 'manifest', 'trigger', '$q', function (bmsMainService, $rootScope, bmsVisualisationService, $compile, bmsObserverService, $http, initSession, ws, $injector, bmsUIService, bmsModalService, manifest, trigger, $q) {
+        .directive('bmsVisualisationView', ['bmsMainService', '$rootScope', 'bmsVisualizationService', '$compile', 'bmsObserverService', '$http', 'initSession', 'ws', '$injector', 'bmsUIService', 'bmsModalService', 'manifest', 'trigger', '$q', function (bmsMainService, $rootScope, bmsVisualizationService, $compile, bmsObserverService, $http, initSession, ws, $injector, bmsUIService, bmsModalService, manifest, trigger, $q) {
             return {
                 replace: false,
                 scope: {
@@ -34,24 +34,28 @@ define(['tv4', 'bms.func', 'prob.common', 'prob.observers', 'prob.modal'], funct
 
                     self.data = {};
 
-                    self.checkObserver = function (id, observer, stateId, trigger) {
-
-                        bmsObserverService.checkObserver(id, observer, self.data.container.contents(), stateId, trigger).then(function (data) {
-                            if (!bms.isEmpty(data)) {
-                                $scope.$broadcast('setValue', data);
-                            }
-                        });
-
+                    self.checkObserver = function (observer, stateId, cause) {
+                        stateId = stateId ? stateId : self.data.stateId;
+                        cause = cause ? cause : trigger.TRIGGER_ANIMATION_CHANGED;
+                        if (observer && stateId && trigger) {
+                            bmsObserverService.checkObserver($scope.id, observer, self.data.container.contents(), stateId, cause).then(function (data) {
+                                if (!bms.isEmpty(data)) {
+                                    $scope.$broadcast('setValue', data);
+                                }
+                            });
+                        }
                     };
 
-                    self.checkObservers = function (id, stateId, trigger) {
+                    self.checkObservers = function (stateId, cause) {
 
-                        var observers = bmsObserverService.getObservers(id);
+                        var observers = bmsObserverService.getObservers($scope.id);
+                        stateId = stateId ? stateId : self.data.stateId;
+                        cause = cause ? cause : trigger.TRIGGER_ANIMATION_CHANGED;
 
-                        if (observers && stateId && trigger) {
+                        if (observers && stateId && cause) {
 
                             // Collect values from observers
-                            bmsObserverService.checkObservers(id, observers, self.data.container.contents(), stateId, trigger).then(function (data) {
+                            bmsObserverService.checkObservers($scope.id, observers, self.data.container.contents(), stateId, cause).then(function (data) {
                                 var fvalues = {};
                                 angular.forEach(data, function (value) {
                                     if (value !== undefined) {
@@ -65,6 +69,16 @@ define(['tv4', 'bms.func', 'prob.common', 'prob.observers', 'prob.modal'], funct
 
                         }
 
+                    };
+
+                    self.setupEvents = function () {
+                        var events = bmsObserverService.getEvents($scope.id);
+                        events.forEach(function (evt) {
+                            var instance = $injector.get(evt.type, "");
+                            if (instance) {
+                                instance.setup($scope.id, evt, self.data.container.contents(), self.data.traceId);
+                            }
+                        });
                     };
 
                     self.initSession = function (template) {
@@ -128,11 +142,12 @@ define(['tv4', 'bms.func', 'prob.common', 'prob.observers', 'prob.modal'], funct
 
                     };
 
-                    $scope.addSvg = function (id, svg) {
-                        bmsVisualisationService.addSvg($scope.id, id, svg);
+                    $scope.addSvg = function (svg) {
+                        bmsVisualizationService.addSvg($scope.id, svg);
                     };
 
-                    $scope.addObserver = function (type, data, element) {
+                    $scope.addObserver = function (type, data) {
+
                         var shouldAdd = true;
                         if (data.refinement) {
                             if ($.inArray(data.refinement, self.data.refinements) == -1) {
@@ -140,29 +155,22 @@ define(['tv4', 'bms.func', 'prob.common', 'prob.observers', 'prob.modal'], funct
                             }
                         }
                         if (shouldAdd) {
-                            var felement = element ? element : self.data.container.contents().find(data.selector);
-                            felement.each(function (i, e) {
-                                var jElement = $(e);
-                                var bmsid = jElement.attr("data-bms-id");
-                                if (!bmsid) {
-                                    bmsid = bms.uuid();
-                                    jElement.attr("data-bms-id", bmsid);
-                                }
-                                var observer = {
-                                    type: type,
-                                    data: data,
-                                    bmsid: bmsid,
-                                    element: e
-                                };
-                                bmsObserverService.addObserver($scope.id, observer);
-                                if (self.data.stateId !== 'root' && self.data.initialised) {
-                                    self.checkObserver($scope.id, observer, self.data.stateId, data.cause);
-                                }
-                            });
+
+                            var observer = {
+                                type: type,
+                                data: data
+                            };
+
+                            bmsObserverService.addObserver($scope.id, observer);
+
+                            if (self.data.stateId !== 'root' && self.data.initialised) {
+                                self.checkObserver(observer, self.data.stateId, data.cause);
+                            }
+
                         }
                     };
 
-                    $scope.addEvent = function (type, data, element) {
+                    $scope.addEvent = function (type, data) {
                         var shouldAdd = true;
                         if (data.refinement) {
                             if ($.inArray(data.refinement, self.data.refinements) == -1) {
@@ -170,13 +178,9 @@ define(['tv4', 'bms.func', 'prob.common', 'prob.observers', 'prob.modal'], funct
                             }
                         }
                         if (shouldAdd) {
-                            if (element) {
-                                data.selector = element.selector;
-                            }
                             var event = {
                                 type: type,
-                                data: data,
-                                element: element
+                                data: data
                             };
                             bmsObserverService.addEvent($scope.id, event);
                             var instance = $injector.get(type, "");
@@ -194,15 +198,20 @@ define(['tv4', 'bms.func', 'prob.common', 'prob.observers', 'prob.modal'], funct
                             self.data.initialised = true;
                         }
                         if (self.data.traceId == traceId) {
-                            self.checkObservers(self.data.id, stateId, cause);
+                            self.checkObservers(stateId, cause);
                         }
+                    });
+
+                    $scope.$on('reloadTemplate', function () {
+                        self.checkObservers();
+                        self.setupEvents();
                     });
 
                 }],
                 link: function ($scope, $element, attrs, ctrl) {
 
                     var iframe = $($element.contents());
-                    $scope.id = attrs['bmsId'] ? attrs['bmsId'] : bms.uuid();
+                    $scope.id = bms.uuid();
                     iframe.attr({
                         "data-bms-id": $scope.id,
                         "id": $scope.id
@@ -222,8 +231,8 @@ define(['tv4', 'bms.func', 'prob.common', 'prob.observers', 'prob.modal'], funct
 
                             iframe.attr('src', ctrl.data.templatePath).attr('id', $scope.id);
                             iframe.load(function () {
-                                $rootScope.currentVisualisation = $scope.id;
-                                bmsVisualisationService.addVisualisation($scope.id, ctrl.data);
+                                bmsVisualizationService.setCurrentVisualizationId($scope.id);
+                                bmsVisualizationService.addVisualization($scope.id, ctrl.data);
                                 bmsUIService.setProBViewTraceId(ctrl.data.traceId);
                                 bmsModalService.endLoading();
                                 $rootScope.$broadcast('visualizationLoaded', ctrl.data);
@@ -246,25 +255,6 @@ define(['tv4', 'bms.func', 'prob.common', 'prob.observers', 'prob.modal'], funct
                 }
             }
         }]);
-
-    /*prob.registerObservers = function (name, elements) {
-     var injector = angular.element(document).injector();
-     var bmsObserverService = injector.get('bmsObserverService');
-     bmsObserverService.addObservers(name, elements.observers);
-     bmsObserverService.addEvents(name, elements.events);
-     };
-
-     prob.registerObserver = function (name, observer) {
-     var injector = angular.element(document).injector();
-     var bmsObserverService = injector.get('bmsObserverService');
-     bmsObserverService.addObserver(name, observer);
-     };
-
-     prob.registerEvent = function (name, event) {
-     var injector = angular.element(document).injector();
-     var bmsObserverService = injector.get('bmsObserverService');
-     bmsObserverService.addEvent(name, event);
-     };*/
 
     return module;
 

@@ -1,2 +1,4 @@
-requirejs(['prob.standalone'], function () {
+requirejs(['bmotion.config'], function () {
+    requirejs(['prob.standalone'], function () {
+    });
 });

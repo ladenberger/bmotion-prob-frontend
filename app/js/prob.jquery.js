@@ -102,11 +102,11 @@ define(['bms.func', 'jquery'], function (bms) {
         };
 
         $.fn.executeEvent = function (options) {
-            var element = this;
+            var ele = this;
             setTimeout(function () {
                 var injector = angular.element(document).injector();
                 var bmsObserverService = injector.get('bmsParentService');
-                bmsObserverService.addEvent('executeEvent', options, element);
+                bmsObserverService.addEvent('executeEvent', options, ele);
             }, 0);
         };
 

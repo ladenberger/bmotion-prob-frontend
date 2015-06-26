@@ -1,2 +1,3 @@
-define(['prob.template'], function () {
+define(['prob.template'], function (bms) {
+    return bms;
 });

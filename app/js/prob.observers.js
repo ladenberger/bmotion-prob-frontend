@@ -47,6 +47,9 @@ define(['bms.func', 'angular', 'qtip'], function (bms) {
                 getObservers: function (name) {
                     return observers[name];
                 },
+                getEvents: function (name) {
+                    return events[name];
+                },
                 getBmsIds: function (selector, element) {
                     var bmsid = element.attr("data-bms-id");
                     if (!bmsid) {
@@ -297,10 +300,15 @@ define(['bms.func', 'angular', 'qtip'], function (bms) {
                     return observer.data.formulas;
                 },
                 apply: function (observer, container, result) {
+
                     var defer = $q.defer();
                     if (observer.data.trigger !== undefined) {
-                        var element = container.find("[data-bms-id=" + observer.bmsid + "]");
-                        observer.data.trigger.call(this, $(element), result);
+                        var element = container.find(observer.data.selector);
+                        var self = this;
+                        //var element = container.find("[data-bms-id=" + observer.bmsid + "]");
+                        element.each(function () {
+                            observer.data.trigger.call(self, $(this), result);
+                        });
                         defer.resolve();
                     } else if (observer.data.getChanges !== undefined) {
                         var obj = {};
@@ -384,7 +392,7 @@ define(['bms.func', 'angular', 'qtip'], function (bms) {
             return formulaObserver;
 
         }])
-        .service('refinement', ['ws', '$q', 'bmsVisualisationService', function (ws, $q, bmsVisualisationService) {
+        .service('refinement', ['ws', '$q', 'bmsVisualizationService', function (ws, $q, bmsVisualizationService) {
 
             return {
                 check: function (observer, container, stateId, trigger, data) {
@@ -392,7 +400,7 @@ define(['bms.func', 'angular', 'qtip'], function (bms) {
                     var defer = $q.defer();
 
                     //TODO: Check refinement observer only once!
-                    var vis = bmsVisualisationService.getVisualisation(data.visId);
+                    var vis = bmsVisualizationService.getVisualization(data.visId);
                     var refinements = vis.refinements;
 
                     if (refinements) {
@@ -560,7 +568,7 @@ define(['bms.func', 'angular', 'qtip'], function (bms) {
                     });
                     return defer.promise;
                 },
-                setup: function (id, event, element, traceId) {
+                setup: function (id, event, container, traceId) {
 
                     var defer = $q.defer();
 
@@ -573,7 +581,8 @@ define(['bms.func', 'angular', 'qtip'], function (bms) {
                         }
                     }, event.data);
 
-                    var el = event.element ? $(event.element) : $(element).find(settings.selector);
+                    //var el = event.element ? $(event.element) : $(container).find(settings.selector);
+                    var el = $(container).find(settings.selector);
                     el.each(function (i2, v) {
                         var e = $(v);
                         e.css('cursor', 'pointer');

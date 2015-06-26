@@ -2,10 +2,10 @@
  * BMotion Studio for ProB Standalone Module
  *
  */
-define(['socketio', 'angularAMD', 'bms.func', 'angular', 'prob.graph', 'prob.iframe.template', 'prob.ui', 'prob.common', 'prob.modal', 'angular-route'], function (io, angularAMD, bms) {
+define(['socketio', 'angularAMD', 'bms.func', 'angular', 'prob.graph', 'prob.iframe.template', 'prob.iframe.editor', 'prob.ui', 'prob.common', 'prob.modal', 'angular-route'], function (io, angularAMD, bms) {
 
-    var module = angular.module('prob.standalone', ['prob.graph', 'prob.iframe.template', 'prob.ui', 'prob.common', 'prob.modal', 'ngRoute'])
-        .config(['$routeProvider', function ($routeProvider) {
+    var module = angular.module('prob.standalone', ['prob.graph', 'prob.iframe.template', 'prob.iframe.editor', 'prob.ui', 'prob.common', 'prob.modal', 'ngRoute'])
+        .config(['$routeProvider', '$locationProvider', function ($routeProvider) {
             $routeProvider
                 .when('/loading', {
                     template: '<div ng-controller="bmsLoadingModalCtrl"></div>',
@@ -22,6 +22,29 @@ define(['socketio', 'angularAMD', 'bms.func', 'angular', 'prob.graph', 'prob.ifr
         .run(['editableOptions', 'bmsMainService', function (editableOptions, bmsMainService) {
             bmsMainService.mode = 'ModeStandalone';
             editableOptions.theme = 'bs3'; // bootstrap3 theme. Can be also 'bs2', 'default'
+        }])
+        .factory('GUI', function () {
+            return require('nw.gui');
+        })
+        .factory('Window', ['GUI', function (gui) {
+            return gui.Window.get();
+        }])
+        .factory('fileDialogService', ['$q', function ($q) {
+            return {
+                open: function () {
+                    var defer = $q.defer();
+                    var fileDialog = $("#fileDialog");
+                    fileDialog.click(function () {
+                        this.value = null;
+                    });
+                    fileDialog.change(function () {
+                        var template = $(this).val();
+                        defer.resolve(template);
+                    });
+                    fileDialog.trigger('click');
+                    return defer.promise;
+                }
+            };
         }])
         .controller('loadingController', ['$scope', 'bmsModalService', '$location', 'bmsSocketService', '$q', 'bmsConfigService', 'Window', 'GUI', function ($scope, bmsModalService, $location, bmsSocketService, $q, bmsConfigService, Window, GUI) {
 
@@ -118,12 +141,6 @@ define(['socketio', 'angularAMD', 'bms.func', 'angular', 'prob.graph', 'prob.ifr
         }])
         .controller('readyController', ['$scope', 'GUI', 'Window', 'fileDialogService', '$rootScope', function ($scope, GUI, Window, fileDialogService, $rootScope) {
 
-            var openDialog = function (type) {
-                $scope.$apply(function () {
-                    $rootScope.$broadcast('openDialog_' + type);
-                });
-            };
-
             // Create node-webkit menu
             var windowMenu = new GUI.Menu({
                 type: "menubar"
@@ -144,8 +161,14 @@ define(['socketio', 'angularAMD', 'bms.func', 'angular', 'prob.graph', 'prob.ifr
                 }
             }));
 
-            // ProB menu
-            /*var probView = new GUI.Menu();
+            /*var openDialog = function (type) {
+             $scope.$apply(function () {
+             $rootScope.$broadcast('openDialog_' + type);
+             });
+             };
+
+             // ProB menu
+             var probView = new GUI.Menu();
              windowMenu.append(new GUI.MenuItem({
              label: 'ProB',
              submenu: probView
@@ -222,29 +245,6 @@ define(['socketio', 'angularAMD', 'bms.func', 'angular', 'prob.graph', 'prob.ifr
             Window.menu = windowMenu;
 
         }])
-        .factory('GUI', function () {
-            return require('nw.gui');
-        })
-        .factory('Window', ['GUI', function (gui) {
-            return gui.Window.get();
-        }])
-        .factory('fileDialogService', ['$q', function ($q) {
-            return {
-                open: function () {
-                    var defer = $q.defer();
-                    var fileDialog = $("#fileDialog");
-                    fileDialog.click(function () {
-                        this.value = null;
-                    });
-                    fileDialog.change(function () {
-                        var template = $(this).val();
-                        defer.resolve(template);
-                    });
-                    fileDialog.trigger('click');
-                    return defer.promise;
-                }
-            };
-        }])
         .controller('bmsVisualizationCtrl', ['$scope', 'fileDialogService', 'bmsModalService', '$http', 'GUI', function ($scope, fileDialogService, bmsModalService, $http, GUI) {
 
             var self = this;
@@ -280,6 +280,40 @@ define(['socketio', 'angularAMD', 'bms.func', 'angular', 'prob.graph', 'prob.ifr
             } else if (templateFromNw) {
                 self.setVisualization(templateFromNw);
             }
+
+        }])
+        .controller('bmsTabsCtrl', ['$scope', '$rootScope', 'bmsVisualizationService', function ($scope, $rootScope, bmsVisualizationService) {
+
+            var self = this;
+
+            self.lastTab = 'simulator';
+
+            self.visualizationLoaded = function () {
+                return bmsVisualizationService.getCurrentVisualizationId() !== undefined;
+            };
+
+            self.hasSvg = function () {
+                return self.getSvg() !== undefined;
+            };
+
+            self.getSvg = function () {
+                var vis = bmsVisualizationService.getCurrentVisualization();
+                if (vis) return vis.svg;
+            };
+
+            self.selectEditorTab = function (svg) {
+                self.currentSvg = svg;
+                self.lastTab = 'editor';
+                $rootScope.$broadcast('hideDialog');
+            };
+
+            self.selectSimulatorTab = function () {
+                if (self.lastTab === 'editor') {
+                    $rootScope.$broadcast('saveVisualization', self.currentSvg);
+                }
+                self.lastTab = 'simulator';
+                $rootScope.$broadcast('showDialog');
+            };
 
         }])
         .directive('bmsDropZone', ['$http', 'bmsModalService', function ($http, bmsModalService) {

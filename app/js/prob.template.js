@@ -2,7 +2,7 @@
  * BMotion Studio for ProB Visualization Module
  *
  */
-define(['bms.func', 'angularAMD', 'angular', 'prob.jquery'], function (bms, angularAMD) {
+define(['bms.func', 'angularAMD', 'angular', 'prob.jquery', 'jquery'], function (bms, angularAMD) {
 
     var module = angular.module('prob.template', [])
         .factory('$parentScope', ['$window', function ($window) {
@@ -10,17 +10,16 @@ define(['bms.func', 'angularAMD', 'angular', 'prob.jquery'], function (bms, angu
         }])
         .service('bmsParentService', ['$parentScope', function ($parentScope) {
             var observerService = {
-                addObserver: function (type, data, element) {
-                    $parentScope.addObserver(type, data, element);
+                addObserver: function (type, data) {
+                    $parentScope.addObserver(type, data);
                     $parentScope.$apply();
                 },
-                addEvent: function (type, data, element) {
-                    $parentScope.addEvent(type, data, element);
+                addEvent: function (type, data) {
+                    $parentScope.addEvent(type, data);
                     $parentScope.$apply();
                 },
-                addSvg: function (id, element) {
-                    var clonedElement = element.clone();
-                    $parentScope.addSvg(id, $('<div>').append(clonedElement).html());
+                addSvg: function (svg) {
+                    $parentScope.addSvg(svg);
                     $parentScope.$apply();
                 }
             };
@@ -91,21 +90,73 @@ define(['bms.func', 'angularAMD', 'angular', 'prob.jquery'], function (bms, angu
                 }
             }
         }])
-        .directive('bmsSvg', ['bmsParentService', function (bmsParentService) {
+        .directive('bmsSvg', ['bmsParentService', '$parentScope', '$compile', '$http', function (bmsParentService, $parentScope, $compile, $http) {
             return {
-                scope: {},
+                replace: false,
+                transclude: true,
+                scope: {
+                    svg: '@bmsSvg'
+                },
+                /*,
+                 templateUrl: function (elem, attrs) {
+                 return attrs['bmsSvg'];
+                 },*/
+                controller: ['$scope', function ($scope) {
+                    bmsParentService.addSvg($scope.svg);
+                }],
                 link: function ($scope, element) {
-                    var jElement = $(element);
-                    var id = jElement.attr('id') ? jElement.attr('id') : jElement.attr('data-bms-id');
-                    if (!id) {
-                        jElement.attr("data-bms-id", "bms" + bms.uuid());
-                        id = jElement.attr("data-bms-id");
-                    }
-                    bmsParentService.addSvg(id, jElement);
+
+                    var reloadTemplate = function () {
+                        return $http.get($scope.svg).success(function (svg) {
+                            element.html(svg);
+                        });
+                    };
+                    reloadTemplate();
+
+                    $parentScope.$on('visualizationSaved', function () {
+                        reloadTemplate().then(function () {
+                            $compile(element.contents())($scope);
+                            $parentScope.$broadcast('reloadTemplate');
+                        });
+                    });
+
                 }
             }
         }]);
 
-    return angularAMD.bootstrap(module);
+    angularAMD.bootstrap(module);
+
+    var observeFormula = function (options) {
+        var settings = bms.normalize($.extend({
+            formulas: [],
+            cause: "AnimationChanged",
+            trigger: function () {
+            }
+        }, options), ["trigger"]);
+        var injector = angular.element(document).injector();
+        var bmsObserverService = injector.get('bmsParentService');
+        bmsObserverService.addObserver('formula', settings);
+    };
+
+    var observe = function (what, options) {
+        setTimeout(function () {
+            if (what === "formula") {
+                observeFormula(options)
+            }
+        }, 0);
+    };
+
+    var executeEvent = function (options) {
+        setTimeout(function () {
+            var injector = angular.element(document).injector();
+            var bmsObserverService = injector.get('bmsParentService');
+            bmsObserverService.addEvent('executeEvent', options);
+        }, 0);
+    };
+
+    return {
+        observe: observe,
+        executeEvent: executeEvent
+    };
 
 });

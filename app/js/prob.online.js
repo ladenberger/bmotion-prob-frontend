@@ -5,7 +5,7 @@
 define(['angularAMD', 'angular', 'prob.graph', 'prob.iframe.template', 'prob.ui', 'angular-route'], function (angularAMD) {
 
     var module = angular.module('prob.online', ['prob.graph', 'prob.iframe.template', 'prob.ui', 'ngRoute'])
-        .config(['$routeProvider', function ($routeProvider) {
+        .config(['$routeProvider', '$locationProvider', function ($routeProvider) {
             $routeProvider
                 .when('/', {
                     templateUrl: 'resources/templates/bms-online-ui.html',
@@ -23,4 +23,5 @@ define(['angularAMD', 'angular', 'prob.graph', 'prob.iframe.template', 'prob.ui'
         }]);
     return angularAMD.bootstrap(module);
 
-});
+})
+;

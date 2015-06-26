@@ -2,34 +2,59 @@
  * BMotion Studio for ProB Editor Module
  *
  */
-define(['prob.modal'], function () {
+define(['prob.modal', 'bms.common'], function () {
 
-    var module = angular.module('prob.iframe.editor', ['prob.modal'])
-        .directive('bmsVisualisationEditor', ['bmsVisualisationService', 'bmsModalService', function (bmsVisualisationService, bmsModalService) {
+    var module = angular.module('prob.iframe.editor', ['prob.modal', 'bms.common'])
+        .factory('fs', function () {
+            return require('fs');
+        })
+        .directive('bmsVisualisationEditor', ['bmsVisualizationService', 'bmsModalService', 'bmsMainService', '$q', '$http', 'fs', '$rootScope', function (bmsVisualizationService, bmsModalService, bmsMainService, $q, $http, fs, $rootScope) {
             return {
                 replace: false,
                 scope: {
-                    svgId: '@bmsSvgId',
-                    visualisationId: '@bmsVisualisationId'
+                    svg: '@bmsSvg',
+                    id: '@bmsVisualisationEditor'
                 },
-                template: '<iframe src="../resources/editor/index.html"></iframe>',
-                controller: ['$scope', function ($scope) {
+                template: '<iframe src="editor.html" class="editorIframe"></iframe>',
+                controller: ['$scope', '$rootScope', function ($scope, $rootScope) {
 
-                    var self = this;
+                    $scope.init = function () {
 
-                    $scope.getSvg = function () {
-                        var vis = bmsVisualisationService.getVisualisation(self.visualisationId);
+                        var defer = $q.defer();
+
+                        var vis = bmsVisualizationService.getVisualization($scope.id);
                         if (vis) {
-                            var svgList = vis['svg'];
-                            var svg = svgList[self.svgId];
-                            if (svg) {
-                                return svg;
-                            } else {
-                                bmsModalService.setError("No svg data found with id " + self.svgId);
-                            }
+                            $http.get(vis.templateFolder + $scope.svg).success(function (svg) {
+                                defer.resolve({
+                                    svg: $scope.svg,
+                                    content: svg,
+                                    vis: vis
+                                });
+                            }).error(function (error) {
+                                bmsModalService.setError("Some error occurred while requesting file " + $scope.svg);
+                                defer.reject();
+                            });
                         } else {
-                            bmsModalService.setError("No visualisation found with id " + self.visualisationId);
+                            bmsModalService.setError("No visualisation found with id " + $scope.id);
                         }
+
+                        return defer.promise;
+
+                    };
+
+                    $scope.save = function (svg) {
+
+                        var vis = bmsVisualizationService.getVisualization($scope.id);
+                        if (vis) {
+                            fs.writeFile(vis.templateFolder + $scope.svg, svg, function (err) {
+                                if (err) bmsModalService.setError(err);
+                                $rootScope.$broadcast('visualizationSaved');
+
+                            });
+                        } else {
+                            bmsModalService.setError("No visualisation found with id " + $scope.id);
+                        }
+
                     };
 
                 }],

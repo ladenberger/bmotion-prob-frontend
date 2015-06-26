@@ -1,2 +1,4 @@
-requirejs(['prob.editor.js'], function () {
+requirejs(['bmotion.config'], function () {
+    requirejs(['prob.editor'], function () {
+    });
 });

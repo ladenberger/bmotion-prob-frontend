@@ -5,21 +5,31 @@
 define(['angular'], function () {
 
         return angular.module('bms.visualization', [])
-            .factory('bmsVisualisationService', [function () {
-                var visualisations = {};
+            .factory('bmsVisualizationService', [function () {
+                var currentVisualization,
+                    visualizations = {};
                 return {
-                    addVisualisation: function (name, data) {
-                        visualisations[name] = data;
+                    addVisualization: function (id, data) {
+                        visualizations[id] = data;
                     },
-                    getVisualisations: function () {
-                        return visualisations;
+                    getVisualizations: function () {
+                        return visualizations;
                     },
-                    getVisualisation: function (name) {
-                        return visualisations[name];
+                    getVisualization: function (id) {
+                        return visualizations[id];
                     },
-                    addSvg: function (name, id, svg) {
-                        if (!visualisations[name]['svg']) visualisations[name]['svg'] = {};
-                        visualisations[name]['svg'][id] = svg;
+                    setCurrentVisualizationId: function (id) {
+                        currentVisualization = id;
+                    },
+                    getCurrentVisualizationId: function () {
+                        return currentVisualization;
+                    },
+                    getCurrentVisualization: function () {
+                        return visualizations[currentVisualization];
+                    },
+                    addSvg: function (id, svg) {
+                        if (!visualizations[id]['svg']) visualizations[id]['svg'] = [];
+                        if (visualizations[id]['svg'].indexOf(svg) === -1) visualizations[id]['svg'].push(svg);
                     }
                 }
             }]);

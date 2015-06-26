@@ -422,7 +422,7 @@ define(['bms.visualization', 'prob.observers', 'angular-xeditable', 'cytoscape',
             };
 
         }])
-        .directive('bmsDiagramElementProjectionView', ['bmsObserverService', 'bmsRenderingService', 'bmsVisualisationService', 'bmsDiagramElementProjectionGraph', 'ws', '$injector', '$http', '$q', '$templateCache', '$filter', function (bmsObserverService, bmsRenderingService, bmsVisualisationService, bmsDiagramElementProjectionGraph, ws, $injector, $http, $q, $templateCache, $filter) {
+        .directive('bmsDiagramElementProjectionView', ['bmsObserverService', 'bmsRenderingService', 'bmsVisualizationService', 'bmsDiagramElementProjectionGraph', 'ws', '$injector', '$http', '$q', '$templateCache', '$filter', function (bmsObserverService, bmsRenderingService, bmsVisualizationService, bmsDiagramElementProjectionGraph, ws, $injector, $http, $q, $templateCache, $filter) {
 
             return {
                 replace: false,
@@ -483,7 +483,7 @@ define(['bms.visualization', 'prob.observers', 'angular-xeditable', 'cytoscape',
 
                     $scope.loadVisualisations = function () {
                         var data = [];
-                        angular.forEach(bmsVisualisationService.getVisualisations(), function (v, i) {
+                        angular.forEach(bmsVisualizationService.getVisualizations(), function (v, i) {
                             if (v.view) {
                                 data.push({
                                     value: data.length + 1,
@@ -769,7 +769,7 @@ define(['bms.visualization', 'prob.observers', 'angular-xeditable', 'cytoscape',
             };
 
         }])
-        .directive('bmsDiagramTraceView', ['bmsObserverService', '$filter', 'bmsVisualisationService', 'bmsDiagramTraceGraph', 'ws', '$compile', 'bmsRenderingService', '$q', function (bmsObserverService, $filter, bmsVisualisationService, bmsDiagramTraceGraph, ws, $compile, bmsRenderingService, $q) {
+        .directive('bmsDiagramTraceView', ['bmsObserverService', '$filter', 'bmsVisualizationService', 'bmsDiagramTraceGraph', 'ws', '$compile', 'bmsRenderingService', '$q', function (bmsObserverService, $filter, bmsbmsVisualizationServiceVisualisationService, bmsDiagramTraceGraph, ws, $compile, bmsRenderingService, $q) {
             return {
                 replace: false,
                 scope: {},
@@ -809,7 +809,7 @@ define(['bms.visualization', 'prob.observers', 'angular-xeditable', 'cytoscape',
 
                     $scope.loadVisualisations = function () {
                         var data = [];
-                        angular.forEach(bmsVisualisationService.getVisualisations(), function (v, i) {
+                        angular.forEach(bmsVisualizationService.getVisualizations(), function (v, i) {
                             if (v.view) {
                                 data.push({
                                     value: data.length + 1,

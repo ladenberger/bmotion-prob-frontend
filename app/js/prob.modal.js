@@ -146,8 +146,6 @@ define(['ui-bootstrap', 'ui-bootstrap-tpls'], function () {
 
             var modalInstance = null;
 
-            //$scope.isOpen = false;
-
             $scope.open = function (visualisationId, svgId) {
                 modalInstance = $modal.open({
                     windowClass: 'full-screen bms-editor',
@@ -160,20 +158,14 @@ define(['ui-bootstrap', 'ui-bootstrap-tpls'], function () {
                     + '</div>'
                     + '</div>'
                     + '<div class="modal-body">'
-                    + '<div data-bms-visualisation-editor data-bms-visualisation-id="' + visualisationId + '" data-bms-svg-id="' + svgId + '" class="fullWidthHeight"></div>'
+                    + '<div data-bms-visualisation-editor="' + visualisationId + '" data-bms-svg="' + svgId + '" class="fullWidthHeight"></div>'
                     + '</div>',
                     controller: 'bmsEditorInstanceCtrl'
                 });
-                /*modalInstance.opened.then(function () {
-                 $scope.isOpen = true;
-                 });
-                 modalInstance.result.then(function () {
-                 $scope.isOpen = false;
-                 });*/
             };
 
             $scope.close = function () {
-                modalInstance.close();
+                if (modalInstance) modalInstance.close();
             };
 
             $scope.$on('openEditorModal', function (evt, visualisationId, svgId) {

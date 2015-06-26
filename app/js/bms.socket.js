@@ -2,10 +2,10 @@
  * BMotion Studio Socket Module
  *
  */
-define(['socketio', 'angular', 'bms.config'], function (io) {
+define(['socketio', 'angular', 'bms.config', 'prob.modal'], function (io) {
 
-        return angular.module('bms.socket', ['bms.config'])
-            .factory('bmsSocketService', ['bmsConfigService', '$q', function (bmsConfigService, $q) {
+        return angular.module('bms.socket', ['bms.config', 'prob.modal'])
+            .factory('bmsSocketService', ['bmsConfigService', '$q', 'bmsModalService', function (bmsConfigService, $q, bmsModalService) {
                 'use strict';
                 var socket = null;
                 return {
@@ -20,6 +20,8 @@ define(['socketio', 'angular', 'bms.config'], function (io) {
                                     socket = null;
                                 });
                                 defer.resolve(socket);
+                            }, function (error) {
+                                bmsModalService.setError(error);
                             });
                         } else {
                             defer.resolve(socket);
