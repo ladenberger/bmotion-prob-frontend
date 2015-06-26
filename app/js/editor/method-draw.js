@@ -16,7 +16,12 @@
 // 2) browser.js
 // 3) svgcanvas.js
 
-(function () {
+define(["jquery", "touch", "jquery.hotkeys", "jquery.bbq",
+    "jquery.svgicons", "jquery.contextMenu",
+    "browser", "svgtransformlist", "math",
+    "units", "svgutils", "sanitize", "history",
+    "select", "draw", "path", "dialog", "svgcanvas",
+    "jquery.browser"], function () {
 
     document.addEventListener("touchstart", touchHandler, true);
     document.addEventListener("touchmove", touchHandler, true);
@@ -4306,5 +4311,4 @@
     // Run init once DOM is loaded
     $(methodDraw.init);
 
-
-})();
+});

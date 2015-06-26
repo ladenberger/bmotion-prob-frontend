@@ -2,13 +2,11 @@
  * BMotion Studio for ProB Editor Iframe Module
  *
  */
-define(['angularAMD', 'angular', 'jquery', 'jquery.contextMenu', 'jquery.jgraduate', 'jpicker',
-    'jquery.bbq', 'jquery.hotkeys', 'jquery.draginput', 'mousewheel',
-    'taphold', 'touch', 'requestanimationframe',
-    'svgtransformlist', 'method-draw', 'angular-json-editor',
-    'prob.modal', 'bms.visualization'], function (angularAMD) {
+define(['angularAMD', 'angular', 'jquery.jgraduate', 'jpicker',
+    'jquery.draginput', 'mousewheel', 'taphold', 'requestanimationframe',
+    'method-draw', 'angular-json-editor'], function (angularAMD) {
 
-    var module = angular.module('prob.editor', ['prob.modal', 'bms.visualization', 'angular-json-editor'])
+    var module = angular.module('prob.editor', ['angular-json-editor'])
         .factory('$parentScope', ['$window', function ($window) {
             return $window.parent.angular.element($window.frameElement).scope();
         }])
@@ -23,7 +21,7 @@ define(['angularAMD', 'angular', 'jquery', 'jquery.contextMenu', 'jquery.jgradua
             };
             return observerService;
         }])
-        .controller('bmsEditorCtrl', ['$scope', 'bmsParentService', 'bmsModalService', '$http', 'bmsVisualizationService', '$parentScope', function ($scope, bmsParentService, bmsModalService, $http, bmsVisualizationService, $parentScope) {
+        .controller('bmsEditorCtrl', ['$scope', 'bmsParentService', '$http', '$parentScope', function ($scope, bmsParentService, $http, $parentScope) {
 
             var self = this;
             bmsParentService.init().then(function (obj) {
