@@ -40,14 +40,6 @@
                     <li><a href="#/" ng-show="nav.visualizationLoaded()" ng-click="nav.reloadVisualization()"><i
                             class="glyphicon glyphicon-refresh"></i>
                         Reload</a>
-                    <li class="dropup" dropdown ng-show="nav.hasSvg() && nav.visualizationLoaded()">
-                        <a href="#/" dropdown-toggle>Edit <span class="caret"></span></a>
-                        <ul class="dropdown-menu" role="menu">
-                            <li ng-repeat="svg in nav.getSvg()"><a href="#/"
-                                                                   ng-click="nav.editVisualization(svg)"><i
-                                    class="glyphicon glyphicon-edit"></i> {{svg}}</a></li>
-                        </ul>
-                    </li>
                     <li class="dropup" dropdown ng-show="nav.visualizationLoaded()">
                         <a href="#/" dropdown-toggle>ProB <span
                                 class="caret"></span></a>
