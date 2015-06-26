@@ -4,9 +4,9 @@
  */
 define(['angularAMD', 'angular', 'jquery.jgraduate', 'jpicker',
     'jquery.draginput', 'mousewheel', 'taphold', 'requestanimationframe',
-    'method-draw', 'angular-json-editor'], function (angularAMD) {
+    'method-draw'], function (angularAMD) {
 
-    var module = angular.module('prob.editor', ['angular-json-editor'])
+    var module = angular.module('prob.editor', [])
         .factory('$parentScope', ['$window', function ($window) {
             return $window.parent.angular.element($window.frameElement).scope();
         }])

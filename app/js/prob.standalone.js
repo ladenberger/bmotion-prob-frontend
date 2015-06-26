@@ -48,6 +48,8 @@ define(['socketio', 'angularAMD', 'bms.func', 'angular', 'prob.graph', 'prob.ifr
         }])
         .controller('loadingController', ['$scope', 'bmsModalService', '$location', 'bmsSocketService', '$q', 'bmsConfigService', 'Window', 'GUI', function ($scope, bmsModalService, $location, bmsSocketService, $q, bmsConfigService, Window, GUI) {
 
+            bmsModalService.closeModal();
+
             // Create node-webkit menu
             var windowMenu = new GUI.Menu({
                 type: "menubar"
@@ -71,18 +73,18 @@ define(['socketio', 'angularAMD', 'bms.func', 'angular', 'prob.graph', 'prob.ifr
             var checkIfConnectionExists = function () {
                 var defer = $q.defer();
                 bmsSocketService.socket().then(function (socket) {
-                    var n = 0;
-                    var connectedInterval = setInterval(function () {
-                        if (socket.connected) {
-                            clearInterval(connectedInterval);
-                            defer.resolve(true);
-                        }
-                        if (n === 3) {
-                            clearInterval(connectedInterval);
-                            defer.resolve(false);
-                        }
-                        n++;
-                    }, 1000);
+                    if (socket.connected) defer.resolve(true);
+                    socket.on('connect_error', function () {
+                        defer.resolve(false);
+                    });
+                    socket.on('connect_timeout', function () {
+                        defer.resolve(false);
+                    });
+                    socket.on('connect', function () {
+                        defer.resolve(true);
+                    });
+                }, function () {
+                    defer.resolve(false);
                 });
                 return defer.promise;
             };
@@ -118,7 +120,7 @@ define(['socketio', 'angularAMD', 'bms.func', 'angular', 'prob.graph', 'prob.ifr
                 var defer = $q.defer();
                 bmsConfigService.getConfig().then(function (config) {
                     if (obj) {
-                        config.socket.host = obj.host;
+                        //config.socket.host = obj.host;
                         config.socket.port = obj.port;
                     }
                     defer.resolve();
