@@ -47,7 +47,6 @@ requirejs.config({
 
         "jquery-ui": "js/libs/ext/jquery-ui/jquery-ui",
 
-        //"jquery.cookie": "libs/bower/jquery.cookie/jquery.cookie",
         "qtip": "js/libs/bower/qtip2/jquery.qtip",
         "tv4": "js/libs/bower/tv4/tv4",
         "angular-xeditable": "js/libs/bower/angular-xeditable/xeditable",
@@ -59,7 +58,7 @@ requirejs.config({
         "jquery.jgraduate": "js/libs/ext/jgraduate/jquery.jgraduate.min",
         "jpicker": "js/libs/ext/jgraduate/jpicker.min",
         "jquery.svgicons": "js/libs/ext/jquery.svgicons",
-        "jquery.bbq": "js/libs/ext/jquerybbq/jquery.bbq.min",
+        "jquery.bbq": "js/libs/ext/jquerybbq/jquery.ba-bbq",
         "jquery.browser": "js/libs/bower/jquery.browser/jquery.browser",
         "jquery.hotkeys": "js/libs/ext/js-hotkeys/jquery.hotkeys.min",
         "jquery.draginput": "js/libs/ext/jquery-draginput",
@@ -116,10 +115,12 @@ requirejs.config({
         "dialog": ["jquery", "jquery-ui"],
         "svgutils": ["browser"],
         "method-draw": [
-            "jquery", "jquery.bbq", "jquery.svgicons",
-            "units", "math", "svgutils", "sanitize",
-            "history", "select", "draw", "path", "dialog",
-            "jquery.contextMenu", "svgcanvas", "browser"
+            "jquery", "touch", "jquery.hotkeys", "jquery.bbq",
+            "jquery.svgicons", "jquery.contextMenu",
+            "browser", "svgtransformlist", "math",
+            "units", "svgutils", "sanitize", "history",
+            "select", "draw", "path", "dialog", "svgcanvas",
+            "jquery.browser"
         ]
     }
 });
