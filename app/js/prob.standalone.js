@@ -87,16 +87,13 @@ define(['socketio', 'angularAMD', 'bms.func', 'angular', 'prob.graph', 'prob.ifr
                 return defer.promise;
             };
 
-            var getSeparator = function () {
-                return process.platform === 'win32' ? ';' : ':';
-            };
-
             var startServer = function (connected) {
                 var defer = $q.defer();
                 if (!connected) {
                     bmsModalService.setMessage("Start BMotion for ProB Server ...");
                     var spawn = require('child_process').spawn;
-                    var server = spawn('java', ['-Xmx1024m', '-cp', './libs/libs/*' + getSeparator() + './libs/bmotion-prob-standalone.jar', "-Dprob.home=./cli/", 'Start', '-standalone', '-local']);
+                    var separator = process.platform === 'win32' ? ';' : ':';
+                    var server = spawn('java', ['-Xmx1024m', '-cp', './libs/libs/*' + separator + './libs/bmotion-prob-standalone.jar', "-Dprob.home=./cli/", 'Start', '-standalone', '-local']);
                     server.stdout.on('data', function (data) {
                         try {
                             var json = JSON.parse(data.toString('utf8'));
