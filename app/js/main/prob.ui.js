@@ -48,47 +48,7 @@ define(['angular', 'jquery-ui', 'ui-bootstrap', 'bms.config'], function () {
             }
 
         }])
-        .factory('bmsDialogService', [function () {
-            return {
-                /*isOpen: function (type) {
-                 return $.cookie("open_" + type) === undefined ? false : $.cookie("open_" + type);
-                 },
-                 open: function (element, type) {
-                 $.cookie("open_" + type, true);
-                 var toppos = $.cookie("position_top_" + type);
-                 var leftpos = $.cookie("position_left_" + type);
-                 var width = $.cookie("width_" + type);
-                 var height = $.cookie("height_" + type);
-                 if (toppos !== undefined && leftpos !== undefined) {
-                 element.parent().css("top", toppos + "px").css("left", leftpos + "px")
-                 }
-                 if (width !== undefined && height !== undefined) {
-                 element.parent().css("width", width + "px").css("height", height + "px")
-                 }
-                 },
-                 close: function (type) {
-                 $.removeCookie("open_" + type);
-                 $.removeCookie("position_top" + type);
-                 $.removeCookie("position_left_" + type);
-                 $.removeCookie("width_" + type);
-                 $.removeCookie("height_" + type);
-                 },
-                 dragStop: function (ui, type) {
-                 $.cookie("position_top_" + type, ui.position.top);
-                 $.cookie("position_left_" + type, ui.position.left)
-                 },
-                 resizeStop: function (ui, type) {
-                 $.cookie("width_" + type, ui.size.width);
-                 $.cookie("height_" + type, ui.size.height);
-                 },*/
-                fixSize: function (dialog, ox, oy) {
-                    var newwidth = dialog.parent().width() - ox;
-                    var newheight = dialog.parent().height() - oy;
-                    dialog.first().css("width", (newwidth) + "px").css("height", (newheight - 38) + "px");
-                }
-            }
-        }])
-        .directive('bmsDialog', ['bmsDialogService', function (bmsDialogService) {
+        .directive('bmsDialog', [function () {
             return {
                 scope: {
                     type: '@',
@@ -137,6 +97,12 @@ define(['angular', 'jquery-ui', 'ui-bootstrap', 'bms.config'], function () {
                         self.state = 'open';
                     };
 
+                    self.fixSize = function (dialog, ox, oy) {
+                        var newwidth = dialog.parent().width() - ox;
+                        var newheight = dialog.parent().height() - oy;
+                        dialog.first().css("width", (newwidth) + "px").css("height", (newheight - 38) + "px");
+                    };
+
                     $scope.$on('visualizationLoaded', function (evt, vis) {
                         var autoOpen = vis['autoOpen'];
                         if (autoOpen && $.inArray($scope.type, autoOpen) > -1) {
@@ -169,7 +135,6 @@ define(['angular', 'jquery-ui', 'ui-bootstrap', 'bms.config'], function () {
                 }],
                 link: function ($scope, element, attrs, ctrl) {
 
-                    //ctrl.state = bmsDialogService.isOpen($scope.type) ? 'open' : 'close';
                     var d = $(element);
 
                     $scope.$watch(function () {
@@ -180,32 +145,15 @@ define(['angular', 'jquery-ui', 'ui-bootstrap', 'bms.config'], function () {
 
                     $(element).first().css("overflow", "hidden");
                     $(element).dialog({
-
-                        dragStart: function () {
-                            ctrl.propagateEvent('dragStart');
-                        },
-                        dragStop: function (event, ui) {
-                            //bmsDialogService.dragStop(ui, $scope.type);
-                            ctrl.propagateEvent('dragStop');
-                        },
-                        resize: function () {
-                            ctrl.propagateEvent('resize');
-                        },
-                        resizeStart: function () {
-                            ctrl.propagateEvent('resizeStart');
-                        },
-                        resizeStop: function (event, ui) {
-                            //bmsDialogService.resizeStop(ui, $scope.type);
-                            bmsDialogService.fixSize($(element), 0, 0);
+                        resizeStop: function () {
+                            ctrl.fixSize($(element), 0, 0);
                             ctrl.propagateEvent('resizeStop');
                         },
                         open: function () {
-                            //bmsDialogService.open(element, $scope.type);
-                            bmsDialogService.fixSize($(element), 0, 0);
+                            ctrl.fixSize($(element), 0, 0);
                             ctrl.propagateEvent('open');
                         },
                         close: function () {
-                            //bmsDialogService.close($scope.type);
                             ctrl.state = 'close';
                             ctrl.propagateEvent('close');
                         },
@@ -213,7 +161,6 @@ define(['angular', 'jquery-ui', 'ui-bootstrap', 'bms.config'], function () {
                         width: 400,
                         height: 450,
                         title: $scope.title
-
                     });
 
                 }
@@ -238,18 +185,6 @@ define(['angular', 'jquery-ui', 'ui-bootstrap', 'bms.config'], function () {
 
                     var iframe = $(element).find("iframe");
 
-                    /*ctrl.onEventListener('dragStart', function () {
-                     iframe.hide();
-                     });
-                     ctrl.onEventListener('dragStop', function () {
-                     iframe.show();
-                     });
-                     ctrl.onEventListener('resizeStart', function () {
-                     iframe.hide();
-                     });
-                     ctrl.onEventListener('resizeStop', function () {
-                     iframe.show();
-                     });*/
                     ctrl.onEventListener('open', function () {
                         if ($scope.postpone) {
                             $scope.setTraceId($scope.traceId);

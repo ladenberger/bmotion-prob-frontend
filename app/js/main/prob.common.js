@@ -2,8 +2,8 @@
  * BMotion Studio for ProB Common Module
  *
  */
-define(['bms.common'], function () {
-        return angular.module('prob.common', ['bms.common'])
+define(['bms.socket'], function () {
+        return angular.module('prob.common', ['bms.socket'])
             .constant('trigger', {
                 TRIGGER_MODEL_CHANGED: "ModelChanged",
                 TRIGGER_MODEL_INITIALISED: "ModelInitialised",

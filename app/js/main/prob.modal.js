@@ -144,48 +144,6 @@ define(['ui-bootstrap', 'ui-bootstrap-tpls'], function () {
             }
 
         }])
-        .controller('bmsEditorModalCtrl', ['$scope', '$modal', function ($scope, $modal) {
-
-            var modalInstance = null;
-
-            $scope.open = function (visualisationId, svgId) {
-                modalInstance = $modal.open({
-                    windowClass: 'full-screen bms-editor',
-                    animation: false,
-                    template: '<div class="modal-header">'
-                    + '<div class="buttons">'
-                    + '<button type="button" data-dismiss="modal" ng-click="close()">'
-                    + '<span class="glyphicon glyphicon-remove"></span>'
-                    + '</button>'
-                    + '</div>'
-                    + '</div>'
-                    + '<div class="modal-body">'
-                    + '<div data-bms-visualisation-editor="' + visualisationId + '" data-bms-svg="' + svgId + '" class="fullWidthHeight"></div>'
-                    + '</div>',
-                    controller: 'bmsEditorInstanceCtrl'
-                });
-            };
-
-            $scope.close = function () {
-                if (modalInstance) modalInstance.close();
-            };
-
-            $scope.$on('openEditorModal', function (evt, visualisationId, svgId) {
-                $scope.open(visualisationId, svgId);
-            });
-
-            $scope.$on('closeEditorModal', function () {
-                $scope.close();
-            });
-
-        }])
-        .controller('bmsEditorInstanceCtrl', ['$scope', '$modalInstance', function ($scope, $modalInstance) {
-
-            $scope.close = function () {
-                $modalInstance.close();
-            };
-
-        }])
         .controller('bmsElementProjectionModalCtrl', ['$scope', '$modal', function ($scope, $modal) {
 
             var modalInstance = null;

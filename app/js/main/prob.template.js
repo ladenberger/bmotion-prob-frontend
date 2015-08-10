@@ -2,7 +2,7 @@
  * BMotion Studio for ProB Visualization Module
  *
  */
-define(['bms.func', 'angularAMD', 'angular', 'prob.jquery', 'jquery'], function (bms, angularAMD) {
+define(['bms.func', 'angularAMD', 'angular', 'jquery'], function (bms, angularAMD) {
 
     var module = angular.module('prob.template', [])
         .factory('$parentScope', ['$window', function ($window) {

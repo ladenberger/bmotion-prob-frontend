@@ -27,24 +27,6 @@ define(['angular', 'bms.socket'], function () {
                 };
                 return main;
             }])
-            .factory('bmsVisualisationService', [function () {
-                var visualisations = {};
-                return {
-                    addVisualisation: function (name, data) {
-                        visualisations[name] = data;
-                    },
-                    getVisualisations: function () {
-                        return visualisations;
-                    },
-                    getVisualisation: function (name) {
-                        return visualisations[name];
-                    },
-                    addSvg: function (name, id, svg) {
-                        if (!visualisations[name]['svg']) visualisations[name]['svg'] = {};
-                        visualisations[name]['svg'][id] = svg;
-                    }
-                }
-            }])
             .factory('bmsUIService', ['$rootScope', function ($rootScope) {
 
                 return {

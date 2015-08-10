@@ -38,11 +38,12 @@ define(['tv4', 'bms.func', 'prob.common', 'prob.observers', 'prob.modal'], funct
                         stateId = stateId ? stateId : self.data.stateId;
                         cause = cause ? cause : trigger.TRIGGER_ANIMATION_CHANGED;
                         if (observer && stateId && trigger) {
-                            bmsObserverService.checkObserver($scope.id, observer, self.data.container.contents(), stateId, cause).then(function (data) {
-                                if (!bms.isEmpty(data)) {
-                                    $scope.$broadcast('setValue', data);
-                                }
-                            });
+                            bmsObserverService.checkObserver($scope.id, observer, self.data.container.contents(), stateId, cause)
+                                .then(function (data) {
+                                    if (!bms.isEmpty(data)) {
+                                        $scope.$broadcast('setValue', data);
+                                    }
+                                });
                         }
                     };
 
