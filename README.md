@@ -19,4 +19,4 @@ Run the following command for building the application:
 $ npm run build
 ```
 
-The build script will produce the minified js and css files. The files are located in the dist folder.
+The build script will produce zip files. The files are located in the build folder.
