@@ -15,13 +15,13 @@
     "socket.io-client": "1.3.5",
     "cytoscape": "2.3.9",
     "qtip2": "2.2.1",
-    "tv4": "1.1.9",
-    "angular-json-editor": "~0.1.8"
+    "tv4": "1.1.9"
+    //"angular-json-editor": "~0.1.8"
   },
-  "main": [
+  /*"main": [
     "dist/css/bmotion.min.css",
     "dist/js/*.js"
-  ],
+  ],*/
   "ignore": [
     "node_modules",
     "bower_components",

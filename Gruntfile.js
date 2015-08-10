@@ -65,20 +65,20 @@ module.exports = function (grunt) {
                     cssIn: "app/css/bms.editor.css",
                     out: "build/<%= mode %>/css/bms.editor.css"
                 }
-            },
-            'js-template': {
-                options: {
-                    mainConfigFile: "app/bmotion.config.js",
-                    baseUrl: "app",
-                    removeCombined: true,
-                    findNestedDependencies: true,
-                    name: "bmotion.template",
-                    out: "build/template/bmotion.template.js",
-                    skipDirOptimize: true,
-                    keepBuildDir: false,
-                    noBuildTxt: true
-                }
             }
+            /*'js-template': {
+             options: {
+             mainConfigFile: "app/bmotion.config.js",
+             baseUrl: "app",
+             removeCombined: true,
+             findNestedDependencies: true,
+             name: "bmotion.template",
+             out: "build/template/bmotion.template.js",
+             skipDirOptimize: true,
+             keepBuildDir: false,
+             noBuildTxt: true
+             }
+             }*/
             /*,cssmin: {
              options: {
              keepBuildDir: true,
@@ -183,7 +183,8 @@ module.exports = function (grunt) {
     grunt.registerTask('default', ['build']);
 
     grunt.registerTask('prepare', ['bower:install', 'requirejs:css-main', 'requirejs:js-main', 'copy:resources', 'copy:root']);
-    grunt.registerTask('build', ['standalone', 'online', 'template']);
+    //grunt.registerTask('build', ['standalone', 'online', 'template']);
+    grunt.registerTask('build', ['standalone', 'online']);
     grunt.registerTask('editor', ['requirejs:js-editor', 'requirejs:css-editor', 'copy:editor']);
 
     grunt.registerTask('standalone', '', function () {
@@ -194,7 +195,7 @@ module.exports = function (grunt) {
         grunt.config.set('mode', 'online');
         grunt.task.run(['prepare', 'compress']);
     });
-    grunt.registerTask('template', ['bower:install', 'requirejs:js-template', 'copy:template', 'compress']);
+    //grunt.registerTask('template', ['bower:install', 'requirejs:js-template', 'copy:template', 'compress']);
 
     grunt.registerTask('dist', ['clean', 'build', 'bump']);
 

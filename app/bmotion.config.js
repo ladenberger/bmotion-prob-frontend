@@ -2,36 +2,36 @@ requirejs.config({
     baseUrl: "./",
     paths: {
 
-        // Common modules
-        "bms.common": "js/bms.common",
-        "bms.func": "js/bms.func",
-        "bms.socket": "js/bms.socket",
-        "bms.config": "js/bms.config",
-        "bms.visualization": "js/bms.visualization",
-
+        // Root modules
         "bmotion.editor": "js/bmotion.editor",
         "bmotion.online": "js/bmotion.online",
         "bmotion.standalone": "js/bmotion.standalone",
         "bmotion.integrated": "js/bmotion.integrated",
         "bmotion.template": "js/bmotion.template",
 
-        "prob.ui": "js/prob.ui",
-        "prob.common": "js/prob.common",
-        "prob.modal": "js/prob.modal",
-        "prob.graph": "js/prob.graph",
-        "prob.jquery": "js/prob.jquery",
-        "prob.observers": "js/prob.observers",
+        // Mode modules
+        "prob.online": "js/main/prob.online",
+        "prob.integrated": "js/main/prob.integrated",
+        "prob.standalone": "js/main/prob.standalone",
+
+        // Common modules
+        "bms.common": "js/main/bms.common",
+        "bms.func": "js/main/bms.func",
+        "bms.socket": "js/main/bms.socket",
+        "bms.config": "js/main/bms.config",
+        "bms.visualization": "js/main/bms.visualization",
+
+        "prob.ui": "js/main/prob.ui",
+        "prob.common": "js/main/prob.common",
+        "prob.modal": "js/main/prob.modal",
+        "prob.graph": "js/main/prob.graph",
+        "prob.observers": "js/main/prob.observers",
 
         // IFrame directive modules
-        "prob.iframe.editor": "js/prob.iframe.editor",
-        "prob.iframe.template": "js/prob.iframe.template",
-        "prob.template": "js/prob.template",
-        "prob.editor": "js/prob.editor",
-
-        // Mode modules
-        "prob.online": "js/prob.online",
-        "prob.integrated": "js/prob.integrated",
-        "prob.standalone": "js/prob.standalone",
+        "prob.iframe.editor": "js/main/prob.iframe.editor",
+        "prob.iframe.template": "js/main/prob.iframe.template",
+        "prob.template": "js/main/prob.template",
+        "prob.editor": "js/main/prob.editor",
 
         // Third party modules
         "jquery": "js/libs/bower/jquery/jquery",
@@ -82,7 +82,6 @@ requirejs.config({
         "units": "js/editor/units"
     },
     shim: {
-        "prob.jquery": ['bms.func', 'jquery'],
         "socketio": {"exports": "io"},
         "jquery": {"exports": "$"},
         "angular": {"exports": "angular"},
