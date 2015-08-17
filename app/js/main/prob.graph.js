@@ -525,7 +525,7 @@ define(['bms.visualization', 'prob.observers', 'angular-xeditable', 'cytoscape',
             };
 
         }])
-        .directive('bmsDiagramElementProjectionView', ['bmsObserverService', 'bmsProjectionDiagramService', 'bmsRenderingService', 'bmsVisualizationService', 'bmsDiagramElementProjectionGraph', 'ws', '$injector', '$http', '$q', '$templateCache', '$filter', function (bmsObserverService, bmsProjectionDiagramService, bmsRenderingService, bmsVisualizationService, bmsDiagramElementProjectionGraph, ws, $injector, $http, $q, $templateCache, $filter) {
+        .directive('bmsDiagramElementProjectionView', ['bmsObserverService', 'bmsProjectionDiagramService', 'bmsRenderingService', 'bmsVisualizationService', 'bmsDiagramElementProjectionGraph', function (bmsObserverService, bmsProjectionDiagramService, bmsRenderingService, bmsVisualizationService, bmsDiagramElementProjectionGraph) {
 
             return {
                 replace: false,
