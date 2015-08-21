@@ -50,17 +50,17 @@ define(['bms.func', 'angular', 'qtip'], function (bms) {
                 getEvents: function (name) {
                     return events[name];
                 },
-                getBmsIds: function (selector, element) {
-                    var bmsid = element.attr("data-bms-id");
-                    if (!bmsid) {
-                        bmsid = bms.uuid();
-                        element.attr("data-bms-id", bmsid);
+                getBmsIds: function (visId, selector, container) {
+                    /*var bmsid = element.attr("data-bms-id");
+                     if (!bmsid) {
+                     bmsid = bms.uuid();
+                     element.attr("data-bms-id", bmsid);
+                     }*/
+                    if (bmsidCache[visId] === undefined) {
+                        bmsidCache[visId] = {};
                     }
-                    if (bmsidCache[bmsid] === undefined) {
-                        bmsidCache[bmsid] = {};
-                    }
-                    if (bmsidCache[bmsid][selector] === undefined) {
-                        var bmsids = $(element).find(selector).map(function () {
+                    if (bmsidCache[visId][selector] === undefined) {
+                        var bmsids = container.find(selector).map(function () {
                             var cbmsid = $(this).attr("data-bms-id");
                             if (!cbmsid) {
                                 cbmsid = bms.uuid();
@@ -68,9 +68,9 @@ define(['bms.func', 'angular', 'qtip'], function (bms) {
                             }
                             return cbmsid;
                         });
-                        bmsidCache[bmsid][selector] = bmsids;
+                        bmsidCache[visId][selector] = bmsids;
                     }
-                    return bmsidCache[bmsid][selector];
+                    return bmsidCache[visId][selector];
                 },
                 checkObserver: function (id, observer, container, stateId, cause, data) {
                     var defer = $q.defer();
@@ -173,7 +173,7 @@ define(['bms.func', 'angular', 'qtip'], function (bms) {
             };
             return observerService;
         }])
-        .service('csp-event', ['ws', '$q', 'bmsObserverService', function (ws, $q, bmsObserverService) {
+        .service('csp-event', ['ws', '$q', 'bmsObserverService', 'bmsVisualizationService', function (ws, $q, bmsObserverService, bmsVisualizationService) {
 
             var expressionCache = {};
 
@@ -205,16 +205,12 @@ define(['bms.func', 'angular', 'qtip'], function (bms) {
                             stateId: stateId
                         }
                     }, function (data) {
-
                         expressionCache[id] = data;
-                        /*angular.forEach(data, function (e) {
-                         if (e.error) {
-                         var msg = "Message: " + e.error;
-                         bmsObserverService.showError($(observer.element), 'CSP Event Observer', msg);
-                         } else {
-                         e.trans = e.result.replace("{", "").replace("}", "").split(",");
-                         }
-                         });*/
+                        angular.forEach(data, function (e) {
+                            if (!e.error) {
+                                e.trans = e.result.replace("{", "").replace("}", "").split(",");
+                            }
+                        });
                         defer.resolve(data);
                     });
                 } else {
@@ -226,9 +222,12 @@ define(['bms.func', 'angular', 'qtip'], function (bms) {
             };
 
             return {
-                check: function (id, observer, container, stateId, trigger, data) {
+
+                check: function (id, observer, container, stateId, trigger) {
 
                     var defer = $q.defer();
+
+                    var vis = bmsVisualizationService.getVisualization(id);
 
                     getExpression(id, observer, stateId).then(function (expressions) {
 
@@ -269,7 +268,8 @@ define(['bms.func', 'angular', 'qtip'], function (bms) {
                                             }
                                             var attr = replaceParameter(a.attr, t.parameter);
                                             var value = replaceParameter(a.value, t.parameter);
-                                            var bmsids = bmsObserverService.getBmsIds(selector, $(observer.element));
+
+                                            var bmsids = bmsObserverService.getBmsIds(vis.id, selector, vis.container.contents());
                                             angular.forEach(bmsids, function (id) {
                                                 if (fmap[id] === undefined) {
                                                     fmap[id] = {};
@@ -291,6 +291,7 @@ define(['bms.func', 'angular', 'qtip'], function (bms) {
 
                     return defer.promise;
                 }
+
             }
         }])
         .service('formula', ['ws', '$q', 'bmsObserverService', function (ws, $q, bmsObserverService) {

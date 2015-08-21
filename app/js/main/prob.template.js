@@ -138,10 +138,22 @@ define(['bms.func', 'angularAMD', 'angular', 'jquery'], function (bms, angularAM
         bmsObserverService.addObserver('formula', settings);
     };
 
+    var observeCSPEvent = function (options) {
+        var settings = bms.normalize($.extend({
+            cause: "AnimationChanged",
+            observers: []
+        }, options), []);
+        var injector = angular.element(document).injector();
+        var bmsObserverService = injector.get('bmsParentService');
+        bmsObserverService.addObserver('csp-event', settings);
+    };
+
     var observe = function (what, options) {
         setTimeout(function () {
             if (what === "formula") {
-                observeFormula(options)
+                observeFormula(options);
+            } else if (what === "csp-event") {
+                observeCSPEvent(options);
             }
         }, 0);
     };

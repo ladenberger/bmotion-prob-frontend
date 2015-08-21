@@ -102,13 +102,13 @@ define(['tv4', 'bms.func', 'prob.common', 'prob.observers', 'prob.modal'], funct
                                         var jsonFileName = template.replace(/^.*[\\\/]/, '');
                                         var templateFolder = template.replace(jsonFileName, '');
                                         var templateFile = config.template ? config.template : 'template.html';
-                                        $.extend(self.data, config, {
+                                        self.data = $.extend({
                                             name: 'MyVisualization',
                                             template: templateFile,
                                             tool: 'BAnimation',
                                             templateFolder: templateFolder,
                                             templatePath: templateFolder + templateFile
-                                        });
+                                        }, config);
 
                                         initSession.init({
                                             model: self.data.model,
