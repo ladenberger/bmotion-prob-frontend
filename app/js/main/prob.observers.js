@@ -221,26 +221,37 @@ define(['bms.func', 'angular', 'qtip'], function (bms) {
 
             };
 
-            return {
+            var cspEventObserver = {
 
-                check: function (id, observer, container, stateId, trigger) {
+                apply: function (id, observer, container, options) {
 
                     var defer = $q.defer();
 
+                    var stateId = options.stateId;
+
                     var vis = bmsVisualizationService.getVisualization(id);
 
-                    getExpression(id, observer, stateId).then(function (expressions) {
-
-                        ws.emit("getHistory", {
-                            data: {
-                                id: id,
-                                stateId: stateId
-                            }
-                        }, function (data) {
+                    ws.emit("getHistory", {
+                        data: {
+                            id: id,
+                            stateId: stateId
+                        }
+                    }, function (data) {
+                        /**
+                         * { data:
+                         *    {
+                         *      events: [
+                         *       { name: <event name>, parameter: <parameter as list> },
+                         *       ...
+                         *      ]
+                         *    }
+                         * }
+                         */
+                        getExpression(id, observer, stateId).then(function (expressions) {
 
                             var fmap = {};
 
-                            angular.forEach(data['ops'], function (t) {
+                            angular.forEach(data.events, function (t) {
 
                                 angular.forEach(observer.data.observers, function (o) {
 
@@ -269,7 +280,7 @@ define(['bms.func', 'angular', 'qtip'], function (bms) {
                                             var attr = replaceParameter(a.attr, t.parameter);
                                             var value = replaceParameter(a.value, t.parameter);
 
-                                            var bmsids = bmsObserverService.getBmsIds(vis.id, selector, vis.container.contents());
+                                            var bmsids = bmsObserverService.getBmsIds(vis.id, selector, container);
                                             angular.forEach(bmsids, function (id) {
                                                 if (fmap[id] === undefined) {
                                                     fmap[id] = {};
@@ -290,9 +301,26 @@ define(['bms.func', 'angular', 'qtip'], function (bms) {
                     });
 
                     return defer.promise;
+
+                },
+
+                check: function (id, observer, container, stateId) {
+
+                    var defer = $q.defer();
+
+                    cspEventObserver.apply(id, observer, container, {
+                        stateId: stateId
+                    }).then(function (d) {
+                        defer.resolve(d);
+                    });
+
+                    return defer.promise;
                 }
 
-            }
+            };
+
+            return cspEventObserver;
+
         }])
         .service('formula', ['ws', '$q', 'bmsObserverService', function (ws, $q, bmsObserverService) {
 
@@ -300,9 +328,12 @@ define(['bms.func', 'angular', 'qtip'], function (bms) {
                 getFormulas: function (observer) {
                     return observer.data.formulas;
                 },
-                apply: function (observer, container, result) {
+                apply: function (id, observer, container, options) {
 
                     var defer = $q.defer();
+
+                    var result = options.result;
+
                     if (observer.data.trigger !== undefined) {
                         var element = container.find(observer.data.selector);
                         var self = this;
@@ -358,19 +389,13 @@ define(['bms.func', 'angular', 'qtip'], function (bms) {
                             if (o.data.cause === trigger) {
                                 var ff = [];
                                 angular.forEach(o.data.formulas, function (f) {
-                                    var formula = data[f];
-                                    /*if (formula.error) {
-                                     var e = o.element ? o.element : container.find("[data-bms-id=" + o.bmsid + "]");
-                                     var msg = "Formula: " + formula + ", Message: " + formula.error;
-                                     bmsObserverService.showError($(e), 'Formula Observer', msg);
-                                     ff.push(null);
-                                     } else {*/
                                     if (data[f]) {
                                         ff.push(data[f].trans ? data[f].trans : data[f].result);
                                     }
-                                    //}
                                 });
-                                promises.push(formulaObserver.apply(o, container, ff));
+                                promises.push(formulaObserver.apply(id, o, container, {
+                                    result: ff
+                                }));
                             }
                         });
                         var fvalues = {};

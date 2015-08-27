@@ -37,7 +37,7 @@
                         <a href="#/" dropdown-toggle>Diagram <span
                                 class="caret"></span></a>
                         <ul class="dropdown-menu" role="menu">
-                            <li><a href="#/" ng-click="nav.openElementProjectionDiagram()"><i
+                            <li ng-show="nav.isBAnimation()"><a href="#/" ng-click="nav.openElementProjectionDiagram()"><i
                                     class="glyphicon glyphicon-random"></i> Element Projection</a></li>
                             <li><a href="#/" ng-click="nav.openTraceDiagram()"><i
                                     class="glyphicon glyphicon glyphicon-road"></i> Trace Diagram</a></li>

@@ -18,6 +18,11 @@ define(['angular', 'jquery-ui', 'ui-bootstrap', 'bms.config'], function () {
                 return bmsVisualizationService.getCurrentVisualizationId() !== undefined;
             };
 
+            self.isBAnimation = function () {
+                var vis = bmsVisualizationService.getCurrentVisualization();
+                return vis && vis.tool === 'BAnimation';
+            };
+
             self.reloadVisualization = function () {
                 var id = bmsVisualizationService.getCurrentVisualizationId();
                 if (id) {

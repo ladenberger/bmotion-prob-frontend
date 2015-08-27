@@ -173,16 +173,16 @@ define(['bms.visualization', 'prob.observers', 'angular-xeditable', 'cytoscape',
                     });
                     return defer.promise;
                 },
-                getElementSnapshotAsDataUrl: function (elements, observers, formulaResults, path) {
+                getElementSnapshotAsDataUrl: function (visualizationId, elementObservers, node, path) {
 
                     var defer = $q.defer();
 
                     // Generate for each element a single canvas image
                     var promises = [];
-                    elements.each(function (i, ele) {
+                    angular.forEach(elementObservers, function (obj) {
                         promises.push(function () {
                             var d = $q.defer();
-                            renderingService.getElementSnapshotAsSvg($(ele), observers, formulaResults, path)
+                            renderingService.getElementSnapshotAsSvg(visualizationId, obj, node, path)
                                 .then(function (svg) {
                                     d.resolve(renderingService.getImageCanvasForSvg(svg));
                                 });
@@ -223,9 +223,13 @@ define(['bms.visualization', 'prob.observers', 'angular-xeditable', 'cytoscape',
                     return defer.promise;
 
                 },
-                getElementSnapshotAsSvg: function (element, observers, formulaResults, path) {
+                getElementSnapshotAsSvg: function (visualizationId, elementAndObservers, node, path) {
 
                     var defer = $q.defer();
+
+                    var element = elementAndObservers.element;
+                    var observers = elementAndObservers.observers;
+                    var results = node.data['results'];
 
                     var clonedElement = element.clone(true);
                     var svgWrapper = $('<svg xmlns="http://www.w3.org/2000/svg" style="background-color:white" xmlns:xlink="http://www.w3.org/1999/xlink" style="background-color:white" width="1000" height="1000">').html(clonedElement);
@@ -233,15 +237,24 @@ define(['bms.visualization', 'prob.observers', 'angular-xeditable', 'cytoscape',
                     // Prepare observers
                     var promises = [];
                     angular.forEach(observers, function (o) {
-                        var observerInstance = $injector.get(o.type, "");
-                        if (observerInstance) {
-                            var formulas = observerInstance.getFormulas(o);
-                            console.log(formulas, formulaResults);
-                            promises.push(observerInstance.apply(o, svgWrapper, formulas.map(function (formula) {
-                                return formulaResults[formula].result;
-                            })));
+                            var observerInstance = $injector.get(o.type, "");
+                            if (observerInstance) {
+                                try {
+                                    var result = observerInstance.getFormulas(o).map(function (formula) {
+                                        return results[formula].result;
+                                    });
+                                    promises.push(observerInstance.apply(visualizationId, o, svgWrapper, {
+                                            result: result
+                                        }
+                                    ));
+                                } catch (err) {
+                                    promises.push(observerInstance.apply(visualizationId, o, svgWrapper, {
+                                        stateId: node.data.id
+                                    }));
+                                }
+                            }
                         }
-                    });
+                    );
 
                     // Apply observers
                     $q.all(promises).then(function (data) {
@@ -257,7 +270,7 @@ define(['bms.visualization', 'prob.observers', 'angular-xeditable', 'cytoscape',
                         for (bid in fvalues) {
                             var nattrs = fvalues[bid];
                             for (a in nattrs) {
-                                var orgElement = container.find('[data-bms-id=' + bid + ']');
+                                var orgElement = svgWrapper.find('[data-bms-id=' + bid + ']');
                                 $(orgElement).attr(a, nattrs[a]);
                             }
                         }
@@ -299,10 +312,10 @@ define(['bms.visualization', 'prob.observers', 'angular-xeditable', 'cytoscape',
                         var elements = container.find(selector);
                         var observers = bmsObserverService.getObservers(vis.id);
 
-                        // Attach observers to elements
+                        // (1) Attach observers to elements
                         angular.forEach(observers, function (o) {
                             var oe = container.find(o.data.selector);
-                            if (oe.length) {
+                            if (oe.length) { // If element(s) exist(s)
                                 oe.each(function () {
                                     var e = $(this);
                                     if (!e.data('observers')) {
@@ -313,42 +326,52 @@ define(['bms.visualization', 'prob.observers', 'angular-xeditable', 'cytoscape',
                             }
                         });
 
-                        // Collect needed observers
+                        // (2) Generate element observer map
                         var elementObservers = [];
                         elements.each(function () {
                             var e = $(this);
-                            elementObservers = elementObservers.concat(e.data('observers'));
+                            var eo = {
+                                element: e,
+                                observers: e.data('observers')
+                            };
                             var eleChildren = e.children();
                             if (eleChildren.length > 0) {
                                 eleChildren.each(function () {
                                     var co = $(this).data('observers');
                                     if (co) {
-                                        elementObservers = elementObservers.concat(co);
+                                        eo.observers = eo.observers.concat(co);
                                     }
                                 });
                             }
+                            elementObservers.push(eo);
                         });
 
                         // (2) Collect formulas of observers
                         var formulas = [];
-                        elementObservers.forEach(function (o) {
-                            var observerInstance = $injector.get(o.type, "");
-                            if (observerInstance) {
-                                observerInstance.getFormulas(o).forEach(function (f) {
-                                    var index = formulas.indexOf(f);
-                                    if (index === -1) {
-                                        formulas.push(f);
+                        elementObservers.forEach(function (oe) {
+                            oe.observers.forEach(function (o) {
+                                var observerInstance = $injector.get(o.type, "");
+                                if (observerInstance) {
+                                    try {
+                                        observerInstance.getFormulas(o).forEach(function (f) {
+                                            var index = formulas.indexOf(f);
+                                            if (index === -1) {
+                                                formulas.push(f);
+                                            }
+                                        });
+                                    } catch (err) {
+
                                     }
-                                });
-                            }
+                                }
+                            });
                         });
 
-                        // (3) Send formulas to ProB and receive diagram data
+                        // (3) Receive diagram data from ProB
                         ws.emit(diagramType, {
                             data: {
                                 id: vis.id,
-                                formulas: formulas,
-                                traceId: vis.traceId
+                                traceId: vis.traceId,
+                                formulas: formulas
                             }
                         }, function (data) {
 
@@ -361,7 +384,7 @@ define(['bms.visualization', 'prob.observers', 'angular-xeditable', 'cytoscape',
                             angular.forEach(data.nodes, function (node) {
 
                                 if (diagramCond(node)) {
-                                    promises.push(renderingService.getElementSnapshotAsDataUrl(elements, elementObservers, node.data.results, vis.templatePath));
+                                    promises.push(renderingService.getElementSnapshotAsDataUrl(visualizationId, elementObservers, node, vis.templateFolder));
                                 } else {
                                     promises.push(renderingService.getEmptySnapshotDataUrl());
                                 }
@@ -644,4 +667,5 @@ define(['bms.visualization', 'prob.observers', 'angular-xeditable', 'cytoscape',
 
         }]);
 
-});
+})
+;
