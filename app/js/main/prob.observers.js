@@ -558,31 +558,36 @@ define(['bms.func', 'angular', 'qtip'], function (bms) {
                     });
                     return settings
                 },
-                getTooltipContent: function (settings, origin, api) {
+                getTooltipContent: function (options, origin, api) {
                     var defer = $q.defer();
-                    var traceId = settings.traceId;
+                    var traceId = options.traceId;
                     ws.emit('initTooltip', {
-                        data: bms.normalize(settings, ["callback"], origin)
+                        data: bms.normalize(options, ["callback", "label"], origin)
                     }, function (data) {
                         var container = $('<div class="qtiplinks"></div>');
                         var ul = $('<ul style="display:table-cell;"></ul>');
                         angular.forEach(data.events, function (v) {
-                            var spanClass = v.canExecute ? 'glyphicon glyphicon-ok-circle' : 'glyphicon glyphicon-remove-circle';
-                            var predicateStr = v.predicate ? '(' + v.predicate + ')' : '';
-                            var link = $('<span aria-hidden="true"> ' + v.name + predicateStr + '</span>').addClass(spanClass);
+                            var spanClass = 'glyphicon glyphicon-remove-circle';
+                            var label = options.label(v, origin);
+                            var labelElement = label;
                             if (v.canExecute) {
-                                link = $('<a href="#/"> ' + v.name + predicateStr + '</a>').addClass(spanClass).click(function () {
+                                spanClass = 'glyphicon glyphicon-ok-circle';
+                                labelElement = '<a href="#/"> ' + label + '</a>';
+                            }
+                            var link = $(labelElement).addClass(spanClass);
+                            if (v.canExecute) {
+                                link.click(function () {
                                     ev.executeEvent({
-                                        id: settings.id,
+                                        id: options.id,
                                         traceId: traceId,
                                         events: [v],
                                         callback: function () {
                                             api.set('content.text', function (event, api) {
-                                                return ev.getTooltipContent(settings, event.target, api).then(function (container) {
-                                                    return container;
-                                                });
+                                                return ev.getTooltipContent(options, event.target, api)
+                                                    .then(function (container) {
+                                                        return container;
+                                                    });
                                             });
-                                            //api.hide();
                                         }
                                     })
                                 });
@@ -595,30 +600,35 @@ define(['bms.func', 'angular', 'qtip'], function (bms) {
                     return defer.promise;
                 },
                 setup: function (id, event, container, traceId) {
-
                     var defer = $q.defer();
 
-                    var settings = $.extend({
+                    var options = $.extend({
                         id: id,
                         events: [],
                         tooltip: true,
                         traceId: traceId,
+                        label: function (event) {
+                            console.log(event)
+                            var predicateStr = event.predicate ? '(' + event.predicate + ')' : '';
+                            return '<span aria-hidden="true"> ' + event.name + predicateStr + '</span>';
+                        },
                         callback: function () {
                         }
                     }, event.data);
 
-                    //var el = event.element ? $(event.element) : $(container).find(settings.selector);
-                    var el = $(container).find(settings.selector);
-                    el.each(function (i2, v) {
-                        var e = $(v);
-                        e.css('cursor', 'pointer');
-                        if (settings.events.length > 1) {
+                    if (options.events.length > 0) {
+
+                        var el = $(container).find(options.selector);
+                        el.each(function (i2, v) {
+                            var e = $(v);
+                            e.css('cursor', 'pointer');
                             e.qtip({ // Grab some elements to apply the tooltip to
                                 content: {
                                     text: function (event, api) {
-                                        return ev.getTooltipContent(settings, event.target, api).then(function (container) {
-                                            return container;
-                                        });
+                                        return ev.getTooltipContent(options, event.target, api)
+                                            .then(function (container) {
+                                                return container;
+                                            });
                                     }
                                 },
                                 position: {
@@ -627,9 +637,6 @@ define(['bms.func', 'angular', 'qtip'], function (bms) {
                                     effect: false,
                                     viewport: $(window)
                                 },
-                                /*show: {
-                                 delay: 600
-                                 },*/
                                 show: 'click',
                                 hide: {
                                     fixed: true,
@@ -639,14 +646,12 @@ define(['bms.func', 'angular', 'qtip'], function (bms) {
                                     classes: 'qtip-light qtip-bootstrap'
                                 }
                             });
-                        } else {
-                            e.click(function (event) {
-                                //$(e).qtip('hide');
-                                ev.executeEvent(settings, $(event.target));
-                            });
-                        }
-                        defer.resolve();
-                    });
+                        });
+
+                    }
+
+                    defer.resolve();
+
                     return defer.promise;
                 }
             };
