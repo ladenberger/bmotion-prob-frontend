@@ -608,7 +608,6 @@ define(['bms.func', 'angular', 'qtip'], function (bms) {
                         tooltip: true,
                         traceId: traceId,
                         label: function (event) {
-                            console.log(event)
                             var predicateStr = event.predicate ? '(' + event.predicate + ')' : '';
                             return '<span aria-hidden="true"> ' + event.name + predicateStr + '</span>';
                         },
