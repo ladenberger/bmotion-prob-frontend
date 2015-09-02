@@ -173,7 +173,7 @@ define(['bms.visualization', 'prob.observers', 'angular-xeditable', 'cytoscape',
                     });
                     return defer.promise;
                 },
-                getElementSnapshotAsDataUrl: function (visualizationId, elementObservers, node, path) {
+                getElementSnapshotAsDataUrl: function (sessionId, visualizationId, elementObservers, node, path) {
 
                     var defer = $q.defer();
 
@@ -182,7 +182,7 @@ define(['bms.visualization', 'prob.observers', 'angular-xeditable', 'cytoscape',
                     angular.forEach(elementObservers, function (obj) {
                         promises.push(function () {
                             var d = $q.defer();
-                            renderingService.getElementSnapshotAsSvg(visualizationId, obj, node, path)
+                            renderingService.getElementSnapshotAsSvg(sessionId, visualizationId, obj, node, path)
                                 .then(function (svg) {
                                     d.resolve(renderingService.getImageCanvasForSvg(svg));
                                 });
@@ -223,7 +223,7 @@ define(['bms.visualization', 'prob.observers', 'angular-xeditable', 'cytoscape',
                     return defer.promise;
 
                 },
-                getElementSnapshotAsSvg: function (visualizationId, elementAndObservers, node, path) {
+                getElementSnapshotAsSvg: function (sessionId, visualizationId, elementAndObservers, node, path) {
 
                     var defer = $q.defer();
 
@@ -243,12 +243,12 @@ define(['bms.visualization', 'prob.observers', 'angular-xeditable', 'cytoscape',
                                     var result = observerInstance.getFormulas(o).map(function (formula) {
                                         return results[formula].result;
                                     });
-                                    promises.push(observerInstance.apply(visualizationId, o, svgWrapper, {
+                                    promises.push(observerInstance.apply(sessionId, visualizationId, o, svgWrapper, {
                                             result: result
                                         }
                                     ));
                                 } catch (err) {
-                                    promises.push(observerInstance.apply(visualizationId, o, svgWrapper, {
+                                    promises.push(observerInstance.apply(sessionId, visualizationId, o, svgWrapper, {
                                         stateId: node.data.id
                                     }));
                                 }
@@ -289,17 +289,17 @@ define(['bms.visualization', 'prob.observers', 'angular-xeditable', 'cytoscape',
                     return defer.promise;
 
                 },
-                getTraceDiagramData: function (visualizationId, selector) {
-                    return renderingService.getDiagramData(visualizationId, selector, 'createTraceDiagram', function (node) {
+                getTraceDiagramData: function (sessionId, visualizationId, selector) {
+                    return renderingService.getDiagramData(sessionId, visualizationId, selector, 'createTraceDiagram', function (node) {
                         return node.data.id !== 'root' && node.data.id !== '0';
                     });
                 },
-                getProjectionDiagramData: function (visualizationId, selector) {
-                    return renderingService.getDiagramData(visualizationId, selector, 'createProjectionDiagram', function (node) {
+                getProjectionDiagramData: function (sessionId, visualizationId, selector) {
+                    return renderingService.getDiagramData(sessionId, visualizationId, selector, 'createProjectionDiagram', function (node) {
                         return node.data.id !== '1' && node.data.labels[0] !== '<< undefined >>';
                     });
                 },
-                getDiagramData: function (visualizationId, selector, diagramType, diagramCond) {
+                getDiagramData: function (sessionId, visualizationId, selector, diagramType, diagramCond) {
 
                     var defer = $q.defer();
 
@@ -310,7 +310,7 @@ define(['bms.visualization', 'prob.observers', 'angular-xeditable', 'cytoscape',
                         var vis = bmsVisualizationService.getVisualization(visualizationId);
                         var container = vis.container.contents();
                         var elements = container.find(selector);
-                        var observers = bmsObserverService.getObservers(vis.id);
+                        var observers = bmsObserverService.getObservers(visualizationId);
 
                         // (1) Attach observers to elements
                         angular.forEach(observers, function (o) {
@@ -348,8 +348,8 @@ define(['bms.visualization', 'prob.observers', 'angular-xeditable', 'cytoscape',
 
                         // (2) Collect formulas of observers
                         var formulas = [];
-                        elementObservers.forEach(function (oe) {
-                            oe.observers.forEach(function (o) {
+                        angular.forEach(elementObservers, function (oe) {
+                            angular.forEach(oe.observers, function (o) {
                                 var observerInstance = $injector.get(o.type, "");
                                 if (observerInstance) {
                                     try {
@@ -369,7 +369,7 @@ define(['bms.visualization', 'prob.observers', 'angular-xeditable', 'cytoscape',
                         // (3) Receive diagram data from ProB
                         ws.emit(diagramType, {
                             data: {
-                                id: vis.id,
+                                id: sessionId,
                                 traceId: vis.traceId,
                                 formulas: formulas
                             }
@@ -384,7 +384,7 @@ define(['bms.visualization', 'prob.observers', 'angular-xeditable', 'cytoscape',
                             angular.forEach(data.nodes, function (node) {
 
                                 if (diagramCond(node)) {
-                                    promises.push(renderingService.getElementSnapshotAsDataUrl(visualizationId, elementObservers, node, vis.templateFolder));
+                                    promises.push(renderingService.getElementSnapshotAsDataUrl(sessionId, visualizationId, elementObservers, node, vis.templateFolder));
                                 } else {
                                     promises.push(renderingService.getEmptySnapshotDataUrl());
                                 }
@@ -523,7 +523,10 @@ define(['bms.visualization', 'prob.observers', 'angular-xeditable', 'cytoscape',
 
                     $scope.createDiagram = function () {
 
-                        bmsRenderingService.getProjectionDiagramData(bmsVisualizationService.getCurrentVisualizationId(), $scope.selector)
+                        var currentVis = bmsVisualizationService.getCurrentVisualization();
+                        var sessionId = currentVis.id;
+
+                        bmsRenderingService.getProjectionDiagramData(sessionId, bmsVisualizationService.getCurrentVisualizationId(), $scope.selector)
                             .then(function (graphData) {
                                 if (graphData) {
                                     if (!$scope.cy) {
@@ -643,7 +646,10 @@ define(['bms.visualization', 'prob.observers', 'angular-xeditable', 'cytoscape',
 
                     $scope.createDiagram = function () {
 
-                        bmsRenderingService.getTraceDiagramData(bmsVisualizationService.getCurrentVisualizationId(), $scope.selector)
+                        var currentVis = bmsVisualizationService.getCurrentVisualization();
+                        var sessionId = currentVis.id;
+
+                        bmsRenderingService.getTraceDiagramData(sessionId, bmsVisualizationService.getCurrentVisualizationId(), $scope.selector)
                             .then(function (graphData) {
                                 if (graphData) {
                                     if (!$scope.cy) {

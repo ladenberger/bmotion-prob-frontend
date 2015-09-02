@@ -1,4 +1,25 @@
-<div data-bms-visualisation-view class="fullWidthHeight"></div>
+<div ng-controller="bmsVisualizationCtrl as vis" class="fullWidthHeight">
+
+    <div ng-show="vis.sessionId" class="fullWidthHeight" ng-controller="bmsTabsCtrl as bmsTabs">
+
+        <tabset class="fullWidthHeight">
+            <tab select="bmsTabs.selectSimulatorTab()" heading="Simulator">
+                <div data-bms-visualisation-session="{{vis.sessionId}}"
+                     data-bms-visualisation-view="{{vis.view}}"
+                     class="fullWidthHeight"></div>
+            </tab>
+            <tab select="bmsTabs.selectEditorTab(svg)" ng-show="bmsTabs.hasSvg() && bmsTabs.visualizationLoaded()"
+                 ng-repeat="svg in bmsTabs.getSvg()"
+                 heading="Editor ({{svg}})">
+                <div data-bms-visualisation-editor="{{vis.sessionId}}"
+                     data-bms-visualisation-id="{{bmsTabs.getCurrentVisualizationId()}}" data-bms-svg="{{svg}}"
+                     class="fullWidthHeight"></div>
+            </tab>
+        </tabset>
+
+    </div>
+
+</div>
 
 <div ng-controller="bmsUiNavigationCtrl as nav">
 
@@ -23,8 +44,7 @@
                                 Events</a></li>
                             <li><a href="" ng-click="nav.openDialog('StateInspector')"><i
                                     class="glyphicon glyphicon-list-alt"></i> State</a></li>
-                            <li id="bt_CurrentAnimations"><a href=""
-                                                             ng-click="nav.openDialog('CurrentAnimations')"><i
+                            <li id="bt_CurrentAnimations"><a href="" ng-click="nav.openDialog('CurrentAnimations')"><i
                                     class="glyphicon glyphicon-th-list"></i> Animations</a></li>
                             <li id="bt_GroovyConsoleSession"><a href=""
                                                                 ng-click="nav.openDialog('GroovyConsoleSession')"><i

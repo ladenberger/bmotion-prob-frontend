@@ -215,3 +215,7 @@ html, body {
     height: 300px;
     width: 300px;
 }
+
+.cursor-pointer {
+    cursor: pointer;
+}

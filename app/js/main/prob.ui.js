@@ -53,7 +53,7 @@ define(['angular', 'jquery-ui', 'ui-bootstrap', 'bms.config'], function () {
             }
 
         }])
-        .directive('bmsDialog', [function () {
+        .directive('bmsDialog', ['bmsVisualizationService', function (bmsVisualizationService) {
             return {
                 scope: {
                     type: '@',
@@ -108,8 +108,14 @@ define(['angular', 'jquery-ui', 'ui-bootstrap', 'bms.config'], function () {
                         dialog.first().css("width", (newwidth) + "px").css("height", (newheight - 38) + "px");
                     };
 
-                    $scope.$on('visualizationLoaded', function (evt, vis) {
-                        var autoOpen = vis['autoOpen'];
+                    $scope.$on('visualizationLoaded', function (evt, visId, viewObj) {
+                        var autoOpen;
+                        if (viewObj) {
+                            autoOpen = viewObj.autoOpen;
+                        } else {
+                            var vis = bmsVisualizationService.getVisualization(visId);
+                            autoOpen = vis.autoOpen;
+                        }
                         if (autoOpen && $.inArray($scope.type, autoOpen) > -1) {
                             self.open();
                         }

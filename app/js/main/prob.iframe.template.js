@@ -2,30 +2,15 @@
  * BMotion Studio for ProB IFrame Module
  *
  */
-define(['tv4', 'bms.func', 'prob.common', 'prob.observers', 'prob.modal'], function (tv4, bms) {
+define(['bms.func', 'prob.common', 'prob.observers', 'prob.modal'], function (bms) {
 
     var module = angular.module('prob.iframe.template', ['prob.common', 'prob.observers', 'prob.modal'])
-        .factory('initSession', ['$q', 'ws', function ($q, ws) {
-            return {
-                init: function (data) {
-                    var defer = $q.defer();
-                    ws.emit('initSession', {data: data}, function (r) {
-                        if (r.errors) {
-                            defer.reject(r.errors)
-                        } else {
-                            defer.resolve(r)
-                        }
-                    });
-                    return defer.promise;
-                }
-            };
-        }])
-        .directive('bmsVisualisationView', ['bmsMainService', '$rootScope', 'bmsVisualizationService', '$compile', 'bmsObserverService', '$http', 'initSession', 'ws', '$injector', 'bmsUIService', 'bmsModalService', 'manifest', 'trigger', '$q', function (bmsMainService, $rootScope, bmsVisualizationService, $compile, bmsObserverService, $http, initSession, ws, $injector, bmsUIService, bmsModalService, manifest, trigger, $q) {
+        .directive('bmsVisualisationView', ['$rootScope', 'bmsVisualizationService', 'bmsObserverService', 'ws', '$injector', 'bmsUIService', 'bmsModalService', 'trigger', function ($rootScope, bmsVisualizationService, bmsObserverService, ws, $injector, bmsUIService, bmsModalService, trigger) {
             return {
                 replace: false,
                 scope: {
-                    id: '@?bmsId',
-                    template: '@bmsVisualisationView'
+                    view: '@bmsVisualisationView',
+                    sessionId: '@bmsVisualisationSession'
                 },
                 template: '<iframe src="" frameBorder="0" class="fullWidthHeight bmsIframe"></iframe>',
                 controller: ['$scope', function ($scope) {
@@ -38,7 +23,7 @@ define(['tv4', 'bms.func', 'prob.common', 'prob.observers', 'prob.modal'], funct
                         stateId = stateId ? stateId : self.data.stateId;
                         cause = cause ? cause : trigger.TRIGGER_ANIMATION_CHANGED;
                         if (observer && stateId && trigger) {
-                            bmsObserverService.checkObserver($scope.id, observer, self.data.container.contents(), stateId, cause)
+                            bmsObserverService.checkObserver($scope.sessionId, $scope.id, observer, self.data.container.contents(), stateId, cause)
                                 .then(function (data) {
                                     if (!bms.isEmpty(data)) {
                                         $scope.$broadcast('setValue', data);
@@ -56,7 +41,7 @@ define(['tv4', 'bms.func', 'prob.common', 'prob.observers', 'prob.modal'], funct
                         if (observers && stateId && cause) {
 
                             // Collect values from observers
-                            bmsObserverService.checkObservers($scope.id, observers, self.data.container.contents(), stateId, cause).then(function (data) {
+                            bmsObserverService.checkObservers($scope.sessionId, $scope.id, observers, self.data.container.contents(), stateId, cause).then(function (data) {
                                 var fvalues = {};
                                 angular.forEach(data, function (value) {
                                     if (value !== undefined) {
@@ -77,70 +62,9 @@ define(['tv4', 'bms.func', 'prob.common', 'prob.observers', 'prob.modal'], funct
                         events.forEach(function (evt) {
                             var instance = $injector.get(evt.type, "");
                             if (instance) {
-                                instance.setup($scope.id, evt, self.data.container.contents(), self.data.traceId);
+                                instance.setup($scope.sessionId, $scope.id, evt, self.data.container.contents(), self.data.traceId);
                             }
                         });
-                    };
-
-                    self.initSession = function (template) {
-
-                        var defer = $q.defer();
-
-                        if (template) {
-
-                            bmsMainService.getFullPath(template).then(function (fullPath) {
-
-                                // Get properties from configuration file
-                                $http.get(template).success(function (config) {
-
-                                    if (tv4.validate(config, manifest.MANIFEST_SCHEME)) {
-
-                                        self.data = {};
-
-                                        //TODO: Check if template file exists ...
-
-                                        var jsonFileName = template.replace(/^.*[\\\/]/, '');
-                                        var templateFolder = template.replace(jsonFileName, '');
-                                        var templateFile = config.template ? config.template : 'template.html';
-                                        self.data = $.extend({
-                                            name: 'MyVisualization',
-                                            template: templateFile,
-                                            tool: 'BAnimation',
-                                            templateFolder: templateFolder,
-                                            templatePath: templateFolder + templateFile
-                                        }, config);
-
-                                        initSession.init({
-                                            model: self.data.model,
-                                            tool: self.data.tool,
-                                            id: $scope.id,
-                                            path: fullPath
-                                        }).then(function (modelData) {
-                                            $.extend(self.data, modelData);
-                                            defer.resolve();
-                                        }, function (errors) {
-                                            defer.reject(errors);
-                                        });
-
-                                    } else {
-                                        defer.reject("BMotion manifest file (bmotion.json) invalid: " + tv4.error.message);
-                                    }
-                                }).error(function (data, status, headers, config) {
-                                    if (status === 404) {
-                                        defer.reject("File not found: " + config.url);
-                                    } else {
-                                        defer.reject("Some error occurred while requesting file " + config.url);
-                                    }
-                                });
-
-                            });
-
-                        } else {
-                            defer.reject("No template specified");
-                        }
-
-                        return defer.promise;
-
                     };
 
                     $scope.addSvg = function (svg) {
@@ -186,7 +110,7 @@ define(['tv4', 'bms.func', 'prob.common', 'prob.observers', 'prob.modal'], funct
                             bmsObserverService.addEvent($scope.id, event);
                             var instance = $injector.get(type, "");
                             if (instance) {
-                                instance.setup($scope.id, event, self.data.container.contents(), self.data.traceId);
+                                instance.setup($scope.sessionId, $scope.id, event, self.data.container.contents(), self.data.traceId);
                             }
                         }
                     };
@@ -195,6 +119,7 @@ define(['tv4', 'bms.func', 'prob.common', 'prob.observers', 'prob.modal'], funct
                         var stateId = s.stateId;
                         var traceId = s.traceId;
                         self.data.stateId = stateId;
+                        self.data.traceID = traceId;
                         if (cause === trigger.TRIGGER_MODEL_INITIALISED) {
                             self.data.initialised = true;
                         }
@@ -213,45 +138,54 @@ define(['tv4', 'bms.func', 'prob.common', 'prob.observers', 'prob.modal'], funct
 
                     var iframe = $($element.contents());
                     $scope.id = bms.uuid();
-                    iframe.attr({
-                        "data-bms-id": $scope.id,
-                        "id": $scope.id
-                    });
 
-                    var openTemplate = function (template) {
+                    var initView = function (sessionId, view) {
 
-                        bmsModalService.startLoading("Loading model ...");
+                        bmsModalService.startLoading("Initialising View ...");
 
-                        ctrl.initSession(template).then(function () {
+                        $scope.sessionId = sessionId;
 
-                            bmsModalService.setMessage("Loading visualization template ...");
+                        ws.emit('initView', {data: {id: sessionId}}, function (r) {
 
-                            $.extend(ctrl.data, {
+                            ctrl.data = $.extend(r, {
                                 container: iframe
                             });
 
-                            iframe.attr('src', ctrl.data.templatePath).attr('id', $scope.id);
-                            iframe.load(function () {
-                                bmsVisualizationService.setCurrentVisualizationId($scope.id);
-                                bmsVisualizationService.addVisualization($scope.id, ctrl.data);
-                                bmsUIService.setProBViewTraceId(ctrl.data.traceId);
-                                bmsModalService.endLoading();
-                                $rootScope.$broadcast('visualizationLoaded', ctrl.data);
-                            });
+                            var template;
+                            var viewObj;
+                            if (view) {
+                                angular.forEach(ctrl.data.views, function (v) {
+                                    if (v.id === view) {
+                                        viewObj = v;
+                                        template = v.template;
+                                    }
+                                });
+                            } else {
+                                template = ctrl.data.template;
+                            }
 
-                        }, function (error) {
-                            bmsModalService.setError(error);
+                            if (template) {
+                                iframe.attr('src', ctrl.data.templateFolder + '/' + template).attr('id', $scope.id);
+                                iframe.load(function () {
+                                    bmsVisualizationService.setCurrentVisualizationId($scope.id);
+                                    bmsVisualizationService.addVisualization($scope.id, ctrl.data);
+                                    bmsUIService.setProBViewTraceId(ctrl.data.traceId);
+                                    bmsModalService.endLoading();
+                                    $rootScope.$broadcast('visualizationLoaded', $scope.id, viewObj);
+                                });
+                            }
+
                         });
 
                     };
 
-                    var fromParameter = bms.getUrlParameter("template");
-                    if (fromParameter) {
-                        openTemplate(fromParameter);
-                    }
-                    attrs.$observe('bmsVisualisationView', function (vis) {
-                        if (vis) openTemplate(vis);
-                    });
+                    $scope.$watch(function () {
+                        return [attrs.bmsVisualisationSession, attrs.bmsVisualisationView];
+                    }, function (d) {
+                        if (d[0]) {
+                            initView(d[0], d[1]);
+                        }
+                    }, true);
 
                 }
             }

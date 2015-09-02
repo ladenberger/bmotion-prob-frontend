@@ -11,44 +11,44 @@ define(['bms.func', 'angular', 'qtip'], function (bms) {
             var bmsidCache = {};
             //var hasErrors = false;
             var observerService = {
-                addObserver: function (name, o) {
-                    if (observers[name] === undefined) {
-                        observers[name] = [];
+                addObserver: function (visId, o) {
+                    if (observers[visId] === undefined) {
+                        observers[visId] = [];
                     }
                     var no = $.extend({cause: "AnimationChanged"}, o);
-                    observers[name].push(no);
+                    observers[visId].push(no);
                 },
-                addEvent: function (name, e) {
-                    if (events[name] === undefined) {
-                        events[name] = [];
+                addEvent: function (visId, e) {
+                    if (events[visId] === undefined) {
+                        events[visId] = [];
                     }
-                    events[name].push(e);
+                    events[visId].push(e);
                 },
-                addObservers: function (name, obs) {
-                    if (observers[name] === undefined) {
-                        observers[name] = [];
+                addObservers: function (visId, obs) {
+                    if (observers[visId] === undefined) {
+                        observers[visId] = [];
                     }
                     if (obs) {
                         $.each(obs, function (i, v) {
-                            observerService.addObserver(name, v)
+                            observerService.addObserver(visId, v)
                         });
                     }
                 },
-                addEvents: function (name, evts) {
-                    if (events[name] === undefined) {
-                        events[name] = [];
+                addEvents: function (visId, evts) {
+                    if (events[visId] === undefined) {
+                        events[visId] = [];
                     }
                     if (evts) {
                         $.each(evts, function (i, v) {
-                            observerService.addEvent(name, v)
+                            observerService.addEvent(visId, v)
                         });
                     }
                 },
-                getObservers: function (name) {
-                    return observers[name];
+                getObservers: function (visId) {
+                    return observers[visId];
                 },
-                getEvents: function (name) {
-                    return events[name];
+                getEvents: function (visId) {
+                    return events[visId];
                 },
                 getBmsIds: function (visId, selector, container) {
                     /*var bmsid = element.attr("data-bms-id");
@@ -72,18 +72,18 @@ define(['bms.func', 'angular', 'qtip'], function (bms) {
                     }
                     return bmsidCache[visId][selector];
                 },
-                checkObserver: function (id, observer, container, stateId, cause, data) {
+                checkObserver: function (sessionId, visId, observer, container, stateId, cause, data) {
                     var defer = $q.defer();
                     var observerInstance = $injector.get(observer.type, '');
                     if (observerInstance) {
                         if (!cause) cause = trigger.TRIGGER_ANIMATION_CHANGED;
-                        observerInstance.check(id, observer, container, stateId, cause, data).then(function (res) {
+                        observerInstance.check(sessionId, visId, observer, container, stateId, cause, data).then(function (res) {
                             defer.resolve(res);
                         });
                     }
                     return defer.promise;
                 },
-                checkObservers: function (id, observers, container, stateId, cause, data) {
+                checkObservers: function (sessionId, visId, observers, container, stateId, cause, data) {
 
                     var defer = $q.defer();
 
@@ -102,7 +102,7 @@ define(['bms.func', 'angular', 'qtip'], function (bms) {
                         } else {
                             var observerInstance = $injector.get(o.type, "");
                             if (observerInstance) {
-                                promises.push(observerInstance.check(id, o, container, stateId, cause, data));
+                                promises.push(observerInstance.check(sessionId, visId, o, container, stateId, cause, data));
                             }
                         }
                     });
@@ -111,14 +111,14 @@ define(['bms.func', 'angular', 'qtip'], function (bms) {
                     if (!$.isEmptyObject(formulaObservers)) {
                         // Execute formula observer at once (performance boost)
                         var observerInstance = $injector.get("formula", "");
-                        promises.push(observerInstance.check(id, formulaObservers, container, stateId, cause, data));
+                        promises.push(observerInstance.check(sessionId, visId, formulaObservers, container, stateId, cause, data));
                     }
 
                     // Special case for predicate observers
                     if (!$.isEmptyObject(predicateObservers)) {
                         // Execute predicate observer at once (performance boost)
                         var observerInstance = $injector.get("predicate", "");
-                        promises.push(observerInstance.check(id, predicateObservers, container, stateId, cause, data));
+                        promises.push(observerInstance.check(sessionId, visId, predicateObservers, container, stateId, cause, data));
                     }
 
                     $q.all(promises).then(function (res) {
@@ -187,7 +187,7 @@ define(['bms.func', 'angular', 'qtip'], function (bms) {
                 return fstr;
             };
 
-            var getExpression = function (id, observer, stateId) {
+            var getExpression = function (sessionId, visId, observer, stateId) {
 
                 var defer = $q.defer();
 
@@ -196,16 +196,16 @@ define(['bms.func', 'angular', 'qtip'], function (bms) {
                     if (o.exp) formulas.push({formula: o.exp});
                 });
 
-                var expressions = expressionCache[id];
+                var expressions = expressionCache[visId];
                 if (!expressions) {
                     ws.emit("evaluateFormulas", {
                         data: {
-                            id: id,
+                            id: sessionId,
                             formulas: formulas,
                             stateId: stateId
                         }
                     }, function (data) {
-                        expressionCache[id] = data;
+                        expressionCache[visId] = data;
                         angular.forEach(data, function (e) {
                             if (!e.error) {
                                 e.trans = e.result.replace("{", "").replace("}", "").split(",");
@@ -223,17 +223,15 @@ define(['bms.func', 'angular', 'qtip'], function (bms) {
 
             var cspEventObserver = {
 
-                apply: function (id, observer, container, options) {
+                apply: function (sessionId, visId, observer, container, options) {
 
                     var defer = $q.defer();
 
                     var stateId = options.stateId;
 
-                    var vis = bmsVisualizationService.getVisualization(id);
-
                     ws.emit("getHistory", {
                         data: {
-                            id: id,
+                            id: sessionId,
                             stateId: stateId
                         }
                     }, function (data) {
@@ -247,7 +245,7 @@ define(['bms.func', 'angular', 'qtip'], function (bms) {
                          *    }
                          * }
                          */
-                        getExpression(id, observer, stateId).then(function (expressions) {
+                        getExpression(sessionId, visId, observer, stateId).then(function (expressions) {
 
                             var fmap = {};
 
@@ -280,7 +278,7 @@ define(['bms.func', 'angular', 'qtip'], function (bms) {
                                             var attr = replaceParameter(a.attr, t.parameter);
                                             var value = replaceParameter(a.value, t.parameter);
 
-                                            var bmsids = bmsObserverService.getBmsIds(vis.id, selector, container);
+                                            var bmsids = bmsObserverService.getBmsIds(visId, selector, container);
                                             angular.forEach(bmsids, function (id) {
                                                 if (fmap[id] === undefined) {
                                                     fmap[id] = {};
@@ -304,11 +302,11 @@ define(['bms.func', 'angular', 'qtip'], function (bms) {
 
                 },
 
-                check: function (id, observer, container, stateId) {
+                check: function (sessionId, visId, observer, container, stateId) {
 
                     var defer = $q.defer();
 
-                    cspEventObserver.apply(id, observer, container, {
+                    cspEventObserver.apply(sessionId, visId, observer, container, {
                         stateId: stateId
                     }).then(function (d) {
                         defer.resolve(d);
@@ -328,7 +326,7 @@ define(['bms.func', 'angular', 'qtip'], function (bms) {
                 getFormulas: function (observer) {
                     return observer.data.formulas;
                 },
-                apply: function (id, observer, container, options) {
+                apply: function (sessionId, visId, observer, container, options) {
 
                     var defer = $q.defer();
 
@@ -346,7 +344,7 @@ define(['bms.func', 'angular', 'qtip'], function (bms) {
                         var obj = {};
                         var rr = observer.data.getChanges.call(this, result);
                         if (rr) {
-                            var bmsids = bmsObserverService.getBmsIds(observer.data.selector, container);
+                            var bmsids = bmsObserverService.getBmsIds(visId, observer.data.selector, container);
                             angular.forEach(bmsids, function (id) {
                                 obj[id] = rr;
                             });
@@ -357,7 +355,7 @@ define(['bms.func', 'angular', 'qtip'], function (bms) {
                     }
                     return defer.promise;
                 },
-                check: function (id, observer, container, stateId, trigger) {
+                check: function (sessionId, visId, observer, container, stateId, trigger) {
 
                     var defer = $q.defer();
 
@@ -379,7 +377,7 @@ define(['bms.func', 'angular', 'qtip'], function (bms) {
                     // Evaluate formulas
                     ws.emit("evaluateFormulas", {
                         data: {
-                            id: id,
+                            id: sessionId,
                             formulas: formulas,
                             stateId: stateId
                         }
@@ -393,7 +391,7 @@ define(['bms.func', 'angular', 'qtip'], function (bms) {
                                         ff.push(data[f].trans ? data[f].trans : data[f].result);
                                     }
                                 });
-                                promises.push(formulaObserver.apply(id, o, container, {
+                                promises.push(formulaObserver.apply(sessionId, visId, o, container, {
                                     result: ff
                                 }));
                             }
@@ -571,8 +569,8 @@ define(['bms.func', 'angular', 'qtip'], function (bms) {
                             var label = options.label(v, origin);
                             var labelElement = label;
                             if (v.canExecute) {
-                                spanClass = 'glyphicon glyphicon-ok-circle';
-                                labelElement = '<a href="#/"> ' + label + '</a>';
+                                spanClass = 'glyphicon glyphicon-ok-circle cursor-pointer';
+                                labelElement = label;
                             }
                             var link = $(labelElement).addClass(spanClass);
                             if (v.canExecute) {
@@ -599,11 +597,11 @@ define(['bms.func', 'angular', 'qtip'], function (bms) {
                     });
                     return defer.promise;
                 },
-                setup: function (id, event, container, traceId) {
+                setup: function (sessionId, visId, event, container, traceId) {
                     var defer = $q.defer();
 
                     var options = $.extend({
-                        id: id,
+                        id: sessionId,
                         events: [],
                         tooltip: true,
                         traceId: traceId,

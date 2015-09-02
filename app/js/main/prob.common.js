@@ -10,14 +10,43 @@ define(['bms.socket'], function () {
                 TRIGGER_MODEL_SETUP_CONSTANTS: "ModelSetupConstants",
                 TRIGGER_ANIMATION_CHANGED: "AnimationChanged"
             })
-            .constant('manifest', {
+            .constant('manifestConstants', {
                 MANIFEST_SCHEME: {
                     "title": "BMotion Studio Manifest",
                     "type": "object",
                     "properties": {
                         "template": {
                             "type": "string",
-                            "description": "Template HTML file"
+                            "description": "Template Root HTML file"
+                        },
+                        "views": {
+                            "type": "array",
+                            "items": {
+                                "type": "object",
+                                "properties": {
+                                    "id": {
+                                        "type": "string"
+                                    },
+                                    "template": {
+                                        "type": "string"
+                                    },
+                                    "width": {
+                                        "type": "integer"
+                                    },
+                                    "height": {
+                                        "type": "integer"
+                                    },
+                                    "autoOpen": {
+                                        "type": "array",
+                                        "description": "Specify the ProB views which should be opened automatically when starting the visualization. The following views are available: CurrentTrace, Events, StateInspector, CurrentAnimations, GroovyConsoleSession, ModelCheckingUI.",
+                                        "items": {
+                                            "type": "string"
+                                        }
+
+                                    }
+                                },
+                                "required": ["id", "template"]
+                            }
                         },
                         "model": {
                             "type": "string",

@@ -2,24 +2,30 @@
  * BMotion Studio for ProB Standalone Module
  *
  */
-define(['socketio', 'angularAMD', 'bms.func', 'angular', 'prob.graph', 'prob.iframe.template', 'prob.iframe.editor', 'prob.ui', 'prob.common', 'prob.modal', 'angular-route'], function (io, angularAMD, bms) {
+define(['socketio', 'angularAMD', 'bms.func', 'bms.config', 'angular', 'prob.graph', 'prob.iframe.template', 'prob.iframe.editor', 'prob.ui', 'prob.common', 'prob.modal', 'angular-route', 'prob.standalone.view'], function (io, angularAMD, bms) {
 
-    var module = angular.module('prob.standalone', ['prob.graph', 'prob.iframe.template', 'prob.iframe.editor', 'prob.ui', 'prob.common', 'prob.modal', 'ngRoute'])
+    var module = angular.module('prob.standalone', ['prob.standalone.view', 'bms.config', 'prob.graph', 'prob.iframe.template', 'prob.iframe.editor', 'prob.ui', 'prob.common', 'prob.modal', 'ngRoute'])
         .config(['$routeProvider', '$locationProvider', function ($routeProvider) {
             $routeProvider
-                .when('/loading', {
+                .when('/startServer', {
                     template: '<div ng-controller="bmsLoadingModalCtrl"></div>',
-                    controller: 'loadingController'
+                    controller: 'bmsStartServerController'
                 })
-                .when('/', {
+                .when('/welcome', {
                     templateUrl: 'resources/templates/bms-standalone-ui.html',
-                    controller: 'readyController'
-                }).
-                otherwise({
-                    redirectTo: '/loading'
+                    controller: 'bmsWelcomeController'
+                })
+                .when('/:sessionId/:view', {
+                    templateUrl: 'resources/templates/bms-standalone-view.html'
+                })
+                .when('/:sessionId', {
+                    templateUrl: 'resources/templates/bms-standalone-view.html'
+                })
+                .otherwise({
+                    redirectTo: '/startServer'
                 });
         }])
-        .run(['editableOptions', 'bmsMainService', function (editableOptions, bmsMainService) {
+        .run(['editableOptions', 'bmsMainService', 'GUI', function (editableOptions, bmsMainService, GUI) {
             bmsMainService.mode = 'ModeStandalone';
             editableOptions.theme = 'bs3'; // bootstrap3 theme. Can be also 'bs2', 'default'
         }])
@@ -46,7 +52,87 @@ define(['socketio', 'angularAMD', 'bms.func', 'angular', 'prob.graph', 'prob.ifr
                 }
             };
         }])
-        .controller('loadingController', ['$scope', 'bmsModalService', '$location', 'bmsSocketService', '$q', 'bmsConfigService', 'Window', 'GUI', function ($scope, bmsModalService, $location, bmsSocketService, $q, bmsConfigService, Window, GUI) {
+        .factory('initVisualisation', ['$q', '$location', 'ws', 'bmsConfigService', 'bmsMainService', 'bmsModalService', 'GUI', function ($q, $location, ws, bmsConfigService, bmsMainService, bmsModalService, GUI) {
+
+            var initSession = function (manifestFilePath, manifestData) {
+
+                var defer = $q.defer();
+
+                var visualisationData = $.extend({
+                    template: 'template.html',
+                    name: 'MyVisualization',
+                    tool: 'BAnimation',
+                    manifest: manifestFilePath
+                }, manifestData);
+
+                ws.emit('initSession', {data: visualisationData}, function (r) {
+                    if (r.errors) {
+                        defer.reject(r.errors)
+                    } else {
+                        defer.resolve(r)
+                    }
+                });
+
+                return defer.promise;
+
+            };
+
+            return function (manifestFilePath) {
+
+                bmsModalService.startLoading("Initialising session ...");
+
+                bmsConfigService.validate(manifestFilePath).then(function (manifestData) {
+
+                    initSession(manifestFilePath, manifestData).then(function (sessionId) {
+
+                        var views = manifestData.views;
+                        if (views) {
+                            // Open a new window for each view
+                            var aWindows = [];
+                            var win = GUI.Window.get();
+                            win.on('closed', function () {
+                                angular.forEach(aWindows, function (w) {
+                                    w.close(true);
+                                });
+                            });
+                            angular.forEach(views, function (view, i) {
+                                if (i === 0) {
+                                    $location.path('/' + sessionId + '/' + view.id);
+                                    win.title = 'BMotion Studio for ProB: ' + view.id;
+                                } else {
+                                    win = GUI.Window.open('standalone.html#/' + sessionId + '/' + view.id, {
+                                        title: 'BMotion Studio for ProB: ' + view.id,
+                                        icon: 'bmsicon.png'
+                                    });
+                                    aWindows.push(win);
+                                }
+                                if (view.width && view.height) win.resizeTo(view.width, view.height);
+                            });
+                        } else {
+                            // Delegate to template view
+                            $location.path('/' + sessionId);
+                        }
+
+                        /*.search({
+                         //sessionId: sessionId,
+                         //template: manifestData.template
+                         });*/
+
+                        bmsModalService.endLoading();
+
+                    });
+
+                }, function (error) {
+                    bmsModalService.setError(error);
+                });
+
+            }
+
+        }])
+        .controller('bmsStartServerController', ['$scope', 'bmsModalService', '$location', 'bmsSocketService', '$q', 'bmsConfigService', 'Window', 'GUI', function ($scope, bmsModalService, $location, bmsSocketService, $q, bmsConfigService, Window, GUI) {
+
+            var win = GUI.Window.get();
+            win.title = "BMotion Studio for ProB";
 
             bmsModalService.closeModal();
 
@@ -138,11 +224,11 @@ define(['socketio', 'angularAMD', 'bms.func', 'angular', 'prob.graph', 'prob.ifr
                 })
                 .then(function () {
                     bmsModalService.endLoading();
-                    $location.path('/');
+                    $location.path('/welcome');
                 });
 
         }])
-        .controller('readyController', ['$scope', 'GUI', 'Window', 'fileDialogService', '$rootScope', function ($scope, GUI, Window, fileDialogService, $rootScope) {
+        .controller('bmsWelcomeController', ['initVisualisation', 'GUI', 'Window', 'fileDialogService', function (initVisualisation, GUI, Window, fileDialogService) {
 
             // Create node-webkit menu
             var windowMenu = new GUI.Menu({
@@ -158,8 +244,8 @@ define(['socketio', 'angularAMD', 'bms.func', 'angular', 'prob.graph', 'prob.ifr
             fileMenu.append(new GUI.MenuItem({
                 label: 'Open Visualization',
                 click: function () {
-                    fileDialogService.open().then(function (template) {
-                        $rootScope.$broadcast('setVisualization', template);
+                    fileDialogService.open().then(function (manifestFilePath) {
+                        initVisualisation(manifestFilePath);
                     });
                 }
             }));
@@ -180,42 +266,13 @@ define(['socketio', 'angularAMD', 'bms.func', 'angular', 'prob.graph', 'prob.ifr
             Window.menu = windowMenu;
 
         }])
-        .controller('bmsVisualizationCtrl', ['$scope', 'fileDialogService', 'bmsModalService', '$http', 'GUI', function ($scope, fileDialogService, bmsModalService, $http, GUI) {
-
+        .controller('bmsDropZoneCtrl', ['fileDialogService', 'initVisualisation', function (fileDialogService, initVisualisation) {
             var self = this;
-
-            self.setVisualization = function (template) {
-
-                var filename = template.replace(/^.*[\\\/]/, '');
-                if (filename === 'bmotion.json') {
-                    $http.get(template).success(function () {
-                        sessionStorage.template = template;
-                        self.template = template;
-                        self.id = bms.uuid();
-                    });
-                } else {
-                    bmsModalService.setError('Invalid file, please open a bmotion.json file!');
-                }
-
-            };
-
             self.openFileDialog = function () {
-                fileDialogService.open().then(function (template) {
-                    self.setVisualization(template);
+                fileDialogService.open().then(function (manifestFilePath) {
+                    initVisualisation(manifestFilePath);
                 });
             };
-
-            $scope.$on('setVisualization', function (evt, template) {
-                self.setVisualization(template);
-            });
-
-            var templateFromNw = GUI.App.argv[0];
-            if (sessionStorage.template) {
-                self.setVisualization(sessionStorage.template);
-            } else if (templateFromNw) {
-                self.setVisualization(templateFromNw);
-            }
-
         }])
         .controller('bmsTabsCtrl', ['$scope', '$rootScope', 'bmsVisualizationService', function ($scope, $rootScope, bmsVisualizationService) {
 
@@ -234,6 +291,10 @@ define(['socketio', 'angularAMD', 'bms.func', 'angular', 'prob.graph', 'prob.ifr
             self.getSvg = function () {
                 var vis = bmsVisualizationService.getCurrentVisualization();
                 if (vis) return vis.svg;
+            };
+
+            self.getCurrentVisualizationId = function () {
+                return bmsVisualizationService.getCurrentVisualizationId();
             };
 
             self.selectEditorTab = function (svg) {
@@ -278,12 +339,12 @@ define(['socketio', 'angularAMD', 'bms.func', 'angular', 'prob.graph', 'prob.ifr
                         e.preventDefault();
                         $(this).removeClass('dragover');
                         if (e.dataTransfer.files.length > 0) {
-                            var template = e.dataTransfer.files[0].path;
+                            var manifest = e.dataTransfer.files[0].path;
                             //TODO: Check if correct file ...
-                            var filename = template.replace(/^.*[\\\/]/, '');
+                            var filename = manifest.replace(/^.*[\\\/]/, '');
                             if (filename === 'bmotion.json') {
-                                $http.get(template).success(function () {
-                                    $scope.$emit('setVisualization', template);
+                                $http.get(manifest).success(function () {
+                                    $scope.$emit('openManifest', manifest);
                                 });
                             } else {
                                 bmsModalService.setError('Invalid file, please drop a bmotion.json file!');

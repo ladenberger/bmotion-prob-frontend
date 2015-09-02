@@ -13,7 +13,8 @@ define(['prob.modal', 'bms.common'], function () {
                 replace: false,
                 scope: {
                     svg: '@bmsSvg',
-                    id: '@bmsVisualisationEditor'
+                    id: '@bmsVisualisationId',
+                    sessionId: '@bmsVisualisationEditor'
                 },
                 template: '<iframe src="editor.html" class="editorIframe"></iframe>',
                 controller: ['$scope', '$rootScope', function ($scope, $rootScope) {
@@ -24,7 +25,7 @@ define(['prob.modal', 'bms.common'], function () {
 
                         var vis = bmsVisualizationService.getVisualization($scope.id);
                         if (vis) {
-                            $http.get(vis.templateFolder + $scope.svg).success(function (svg) {
+                            $http.get(vis.templateFolder + '/' + $scope.svg).success(function (svg) {
                                 defer.resolve({
                                     svg: $scope.svg,
                                     content: svg,
@@ -46,7 +47,7 @@ define(['prob.modal', 'bms.common'], function () {
 
                         var vis = bmsVisualizationService.getVisualization($scope.id);
                         if (vis) {
-                            fs.writeFile(vis.templateFolder + $scope.svg, svg, function (err) {
+                            fs.writeFile(vis.templateFolder + '/' + $scope.svg, svg, function (err) {
                                 if (err) bmsModalService.setError(err);
                                 $rootScope.$broadcast('visualizationSaved');
 
