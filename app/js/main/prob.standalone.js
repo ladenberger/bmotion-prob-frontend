@@ -15,11 +15,15 @@ define(['socketio', 'angularAMD', 'bms.func', 'bms.manifest', 'bms.config', 'ang
                     templateUrl: 'resources/templates/bms-standalone-ui.html',
                     controller: 'bmsWelcomeController'
                 })
-                .when('/:sessionId/:view', {
+                .when('/root/:sessionId/:view', {
+                    templateUrl: 'resources/templates/bms-standalone-view.html',
+                    controller: 'bmsStandaloneRootViewCtrl'
+                })
+                .when('/:sessionId', {
                     templateUrl: 'resources/templates/bms-standalone-view.html',
                     controller: 'bmsStandaloneViewCtrl'
                 })
-                .when('/:sessionId', {
+                .when('/:sessionId/:view', {
                     templateUrl: 'resources/templates/bms-standalone-view.html',
                     controller: 'bmsStandaloneViewCtrl'
                 })
@@ -27,26 +31,20 @@ define(['socketio', 'angularAMD', 'bms.func', 'bms.manifest', 'bms.config', 'ang
                     redirectTo: '/startServer'
                 });
         }])
-        .run(['editableOptions', 'bmsMainService', 'GUI', function (editableOptions, bmsMainService, GUI) {
+        .run(['editableOptions', 'bmsMainService', 'Menu', 'Window', 'fileDialogService', 'initVisualisation', 'MenuService', function (editableOptions, bmsMainService, Menu, Window, fileDialogService, initVisualisation, MenuService) {
+
             bmsMainService.mode = 'ModeStandalone';
             editableOptions.theme = 'bs3'; // bootstrap3 theme. Can be also 'bs2', 'default'
-        }])
-        .factory('fileDialogService', ['$q', function ($q) {
-            return {
-                open: function () {
-                    var defer = $q.defer();
-                    var fileDialog = $("#fileDialog");
-                    fileDialog.click(function () {
-                        this.value = null;
-                    });
-                    fileDialog.change(function () {
-                        var template = $(this).val();
-                        defer.resolve(template);
-                    });
-                    fileDialog.trigger('click');
-                    return defer.promise;
-                }
+            var menu = Menu.createNewMenu();
+            var fileMenu = MenuService.buildFileBMenu(menu);
+            fileMenu.items[0].click = function () {
+                fileDialogService.open().then(function (manifestFilePath) {
+                    initVisualisation(manifestFilePath);
+                });
             };
+            MenuService.buildDebugMenu(menu);
+            Window.menu = menu;
+
         }])
         .factory('initVisualisation', ['$q', '$location', 'ws', 'bmsManifestService', 'bmsMainService', 'bmsModalService', 'GUI', function ($q, $location, ws, bmsManifestService, bmsMainService, bmsModalService, GUI) {
 
@@ -94,7 +92,7 @@ define(['socketio', 'angularAMD', 'bms.func', 'bms.manifest', 'bms.config', 'ang
                             angular.forEach(views, function (view, i) {
                                 var viewName = view.name ? view.name : view.id;
                                 if (i === 0) {
-                                    $location.path('/' + sessionId + '/' + view.id);
+                                    $location.path('/root/' + sessionId + '/' + view.id);
                                     win.title = 'BMotion Studio for ProB: ' + viewName;
                                 } else {
                                     win = GUI.Window.open('standalone.html#/' + sessionId + '/' + view.id, {
@@ -206,13 +204,6 @@ define(['socketio', 'angularAMD', 'bms.func', 'bms.manifest', 'bms.config', 'ang
 
         }])
         .controller('bmsWelcomeController', ['$rootScope', 'Menu', 'initVisualisation', 'GUI', 'Window', 'fileDialogService', function ($rootScope, Menu, initVisualisation, GUI, Window, fileDialogService) {
-            var windowMenu = Menu;
-            windowMenu.fileMenu.items[0].click = function () {
-                fileDialogService.open().then(function (manifestFilePath) {
-                    initVisualisation(manifestFilePath);
-                });
-            };
-            Window.menu = windowMenu.windowMenu;
         }])
         .controller('bmsDropZoneCtrl', ['fileDialogService', 'initVisualisation', function (fileDialogService, initVisualisation) {
             var self = this;
