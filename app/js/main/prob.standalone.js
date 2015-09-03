@@ -2,9 +2,9 @@
  * BMotion Studio for ProB Standalone Module
  *
  */
-define(['socketio', 'angularAMD', 'bms.func', 'bms.config', 'angular', 'prob.graph', 'prob.iframe.template', 'prob.iframe.editor', 'prob.ui', 'prob.common', 'prob.modal', 'angular-route', 'prob.standalone.view'], function (io, angularAMD, bms) {
+define(['socketio', 'angularAMD', 'bms.func', 'bms.manifest', 'bms.config', 'angular', 'prob.graph', 'prob.iframe.template', 'prob.iframe.editor', 'prob.ui', 'prob.common', 'prob.modal', 'angular-route', 'prob.standalone.view', 'bms.nwjs'], function (io, angularAMD, bms) {
 
-    var module = angular.module('prob.standalone', ['prob.standalone.view', 'bms.config', 'prob.graph', 'prob.iframe.template', 'prob.iframe.editor', 'prob.ui', 'prob.common', 'prob.modal', 'ngRoute'])
+    var module = angular.module('prob.standalone', ['prob.standalone.view', 'bms.manifest', 'bms.config', 'prob.graph', 'prob.iframe.template', 'prob.iframe.editor', 'prob.ui', 'prob.common', 'prob.modal', 'ngRoute', 'bms.nwjs'])
         .config(['$routeProvider', '$locationProvider', function ($routeProvider) {
             $routeProvider
                 .when('/startServer', {
@@ -16,10 +16,12 @@ define(['socketio', 'angularAMD', 'bms.func', 'bms.config', 'angular', 'prob.gra
                     controller: 'bmsWelcomeController'
                 })
                 .when('/:sessionId/:view', {
-                    templateUrl: 'resources/templates/bms-standalone-view.html'
+                    templateUrl: 'resources/templates/bms-standalone-view.html',
+                    controller: 'bmsStandaloneViewCtrl'
                 })
                 .when('/:sessionId', {
-                    templateUrl: 'resources/templates/bms-standalone-view.html'
+                    templateUrl: 'resources/templates/bms-standalone-view.html',
+                    controller: 'bmsStandaloneViewCtrl'
                 })
                 .otherwise({
                     redirectTo: '/startServer'
@@ -28,12 +30,6 @@ define(['socketio', 'angularAMD', 'bms.func', 'bms.config', 'angular', 'prob.gra
         .run(['editableOptions', 'bmsMainService', 'GUI', function (editableOptions, bmsMainService, GUI) {
             bmsMainService.mode = 'ModeStandalone';
             editableOptions.theme = 'bs3'; // bootstrap3 theme. Can be also 'bs2', 'default'
-        }])
-        .factory('GUI', function () {
-            return require('nw.gui');
-        })
-        .factory('Window', ['GUI', function (gui) {
-            return gui.Window.get();
         }])
         .factory('fileDialogService', ['$q', function ($q) {
             return {
@@ -52,7 +48,7 @@ define(['socketio', 'angularAMD', 'bms.func', 'bms.config', 'angular', 'prob.gra
                 }
             };
         }])
-        .factory('initVisualisation', ['$q', '$location', 'ws', 'bmsConfigService', 'bmsMainService', 'bmsModalService', 'GUI', function ($q, $location, ws, bmsConfigService, bmsMainService, bmsModalService, GUI) {
+        .factory('initVisualisation', ['$q', '$location', 'ws', 'bmsManifestService', 'bmsMainService', 'bmsModalService', 'GUI', function ($q, $location, ws, bmsManifestService, bmsMainService, bmsModalService, GUI) {
 
             var initSession = function (manifestFilePath, manifestData) {
 
@@ -81,7 +77,7 @@ define(['socketio', 'angularAMD', 'bms.func', 'bms.config', 'angular', 'prob.gra
 
                 bmsModalService.startLoading("Initialising session ...");
 
-                bmsConfigService.validate(manifestFilePath).then(function (manifestData) {
+                bmsManifestService.validate(manifestFilePath).then(function (manifestData) {
 
                     initSession(manifestFilePath, manifestData).then(function (sessionId) {
 
@@ -96,12 +92,13 @@ define(['socketio', 'angularAMD', 'bms.func', 'bms.config', 'angular', 'prob.gra
                                 });
                             });
                             angular.forEach(views, function (view, i) {
+                                var viewName = view.name ? view.name : view.id;
                                 if (i === 0) {
                                     $location.path('/' + sessionId + '/' + view.id);
-                                    win.title = 'BMotion Studio for ProB: ' + view.id;
+                                    win.title = 'BMotion Studio for ProB: ' + viewName;
                                 } else {
                                     win = GUI.Window.open('standalone.html#/' + sessionId + '/' + view.id, {
-                                        title: 'BMotion Studio for ProB: ' + view.id,
+                                        title: 'BMotion Studio for ProB: ' + viewName,
                                         icon: 'bmsicon.png'
                                     });
                                     aWindows.push(win);
@@ -129,32 +126,12 @@ define(['socketio', 'angularAMD', 'bms.func', 'bms.config', 'angular', 'prob.gra
             }
 
         }])
-        .controller('bmsStartServerController', ['$scope', 'bmsModalService', '$location', 'bmsSocketService', '$q', 'bmsConfigService', 'Window', 'GUI', function ($scope, bmsModalService, $location, bmsSocketService, $q, bmsConfigService, Window, GUI) {
+        .controller('bmsStartServerController', ['$scope', 'Menu', 'bmsModalService', '$location', 'bmsSocketService', '$q', 'bmsConfigService', 'Window', 'GUI', function ($scope, Menu, bmsModalService, $location, bmsSocketService, $q, bmsConfigService, Window, GUI) {
 
             var win = GUI.Window.get();
             win.title = "BMotion Studio for ProB";
 
             bmsModalService.closeModal();
-
-            // Create node-webkit menu
-            var windowMenu = new GUI.Menu({
-                type: "menubar"
-            });
-
-            // Debug menu
-            var debugMenu = new GUI.Menu();
-            windowMenu.append(new GUI.MenuItem({
-                label: 'Debug',
-                submenu: debugMenu
-            }));
-            debugMenu.append(new GUI.MenuItem({
-                label: 'DevTools',
-                click: function () {
-                    Window.showDevTools('', false)
-                }
-            }));
-
-            Window.menu = windowMenu;
 
             var checkIfConnectionExists = function () {
                 var defer = $q.defer();
@@ -228,43 +205,14 @@ define(['socketio', 'angularAMD', 'bms.func', 'bms.config', 'angular', 'prob.gra
                 });
 
         }])
-        .controller('bmsWelcomeController', ['initVisualisation', 'GUI', 'Window', 'fileDialogService', function (initVisualisation, GUI, Window, fileDialogService) {
-
-            // Create node-webkit menu
-            var windowMenu = new GUI.Menu({
-                type: "menubar"
-            });
-
-            // File menu
-            var fileMenu = new GUI.Menu();
-            windowMenu.append(new GUI.MenuItem({
-                label: 'File',
-                submenu: fileMenu
-            }));
-            fileMenu.append(new GUI.MenuItem({
-                label: 'Open Visualization',
-                click: function () {
-                    fileDialogService.open().then(function (manifestFilePath) {
-                        initVisualisation(manifestFilePath);
-                    });
-                }
-            }));
-
-            // Debug menu
-            var debugMenu = new GUI.Menu();
-            windowMenu.append(new GUI.MenuItem({
-                label: 'Debug',
-                submenu: debugMenu
-            }));
-            debugMenu.append(new GUI.MenuItem({
-                label: 'DevTools',
-                click: function () {
-                    Window.showDevTools('', false)
-                }
-            }));
-
-            Window.menu = windowMenu;
-
+        .controller('bmsWelcomeController', ['$rootScope', 'Menu', 'initVisualisation', 'GUI', 'Window', 'fileDialogService', function ($rootScope, Menu, initVisualisation, GUI, Window, fileDialogService) {
+            var windowMenu = Menu;
+            windowMenu.fileMenu.items[0].click = function () {
+                fileDialogService.open().then(function (manifestFilePath) {
+                    initVisualisation(manifestFilePath);
+                });
+            };
+            Window.menu = windowMenu.windowMenu;
         }])
         .controller('bmsDropZoneCtrl', ['fileDialogService', 'initVisualisation', function (fileDialogService, initVisualisation) {
             var self = this;

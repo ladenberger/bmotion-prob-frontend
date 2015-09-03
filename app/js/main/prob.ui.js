@@ -53,7 +53,7 @@ define(['angular', 'jquery-ui', 'ui-bootstrap', 'bms.config'], function () {
             }
 
         }])
-        .directive('bmsDialog', ['bmsVisualizationService', function (bmsVisualizationService) {
+        .directive('bmsDialog', ['bmsVisualizationService', '$timeout', function (bmsVisualizationService, $timeout) {
             return {
                 scope: {
                     type: '@',
@@ -165,7 +165,11 @@ define(['angular', 'jquery-ui', 'ui-bootstrap', 'bms.config'], function () {
                             ctrl.propagateEvent('open');
                         },
                         close: function () {
-                            ctrl.state = 'close';
+                            $timeout(function () {
+                                $scope.$apply(function () {
+                                    ctrl.state = 'close';
+                                });
+                            });
                             ctrl.propagateEvent('close');
                         },
                         autoOpen: ctrl.isOpen(),

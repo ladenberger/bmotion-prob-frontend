@@ -21,6 +21,8 @@ requirejs.config({
         "bms.socket": "js/main/bms.socket",
         "bms.config": "js/main/bms.config",
         "bms.visualization": "js/main/bms.visualization",
+        "bms.manifest": "js/main/bms.manifest",
+        "bms.nwjs": "js/main/bms.nwjs",
 
         "prob.ui": "js/main/prob.ui",
         "prob.common": "js/main/prob.common",
