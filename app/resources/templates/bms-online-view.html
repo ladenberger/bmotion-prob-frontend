@@ -1,0 +1,84 @@
+<div data-bms-visualisation-view class="fullWidthHeight"></div>
+
+<div ng-controller="bmsUiNavigationCtrl as nav">
+
+    <div class="navbar navbar-default navbar-fixed-bottom" role="navigation">
+        <div class="container-fluid">
+            <div class="navbar-header">
+                <a class="navbar-brand" href="">BMotion Studio for ProB</a>
+            </div>
+            <div class="collapse navbar-collapse">
+                <ul class="nav navbar-nav navbar-right" id="bmotion-navigation">
+                    <li><a href="" ng-show="nav.visualizationLoaded()" ng-click="nav.reloadVisualization()"><i
+                            class="glyphicon glyphicon-refresh"></i>
+                        Reload</a>
+                    <li class="dropup" dropdown ng-show="nav.visualizationLoaded()">
+                        <a href="" dropdown-toggle>ProB <span
+                                class="caret"></span></a>
+                        <ul class="dropdown-menu" role="menu">
+                            <li><a href="" ng-click="nav.openDialog('CurrentTrace')"><i
+                                    class="glyphicon glyphicon-indent-left"></i> History</a></li>
+                            <li><a href="" ng-click="nav.openDialog('Events')"><i
+                                    class="glyphicon glyphicon-align-left"></i>
+                                Events</a></li>
+                            <li><a href="" ng-click="nav.openDialog('StateInspector')"><i
+                                    class="glyphicon glyphicon-list-alt"></i> State</a></li>
+                            <li id="bt_CurrentAnimations"><a href=""
+                                                             ng-click="nav.openDialog('CurrentAnimations')"><i
+                                    class="glyphicon glyphicon-th-list"></i> Animations</a></li>
+                            <li id="bt_GroovyConsoleSession"><a href=""
+                                                                ng-click="nav.openDialog('GroovyConsoleSession')"><i
+                                    class="glyphicon glyphicon-phone"></i> Console</a></li>
+                            <li id="bt_ModelCheckingUI"><a href="" ng-click="nav.openDialog('ModelCheckingUI')"><i
+                                    class="glyphicon glyphicon-ok"></i> Model Checking</a></li>
+                        </ul>
+                    </li>
+                    <li class="dropup" dropdown ng-show="nav.visualizationLoaded()">
+                        <a href="" dropdown-toggle>Diagram <span
+                                class="caret"></span></a>
+                        <ul class="dropdown-menu" role="menu">
+                            <li ng-show="nav.isBAnimation()"><a href="" ng-click="nav.openElementProjectionDiagram()"><i
+                                    class="glyphicon glyphicon-random"></i> Element Projection</a></li>
+                            <li><a href="" ng-click="nav.openTraceDiagram()"><i
+                                    class="glyphicon glyphicon glyphicon-road"></i> Trace Diagram</a></li>
+                        </ul>
+                    </li>
+                </ul>
+            </div>
+        </div>
+    </div>
+
+</div>
+
+<div bms-dialog type="CurrentTrace" title="History">
+    <div prob-view></div>
+</div>
+
+<div bms-dialog type="Events" title="Events">
+    <div prob-view></div>
+</div>
+
+<div bms-dialog type="StateInspector" title="State">
+    <div prob-view></div>
+</div>
+
+<div bms-dialog type="CurrentAnimations" title="Animations">
+    <div prob-view></div>
+</div>
+
+<div bms-dialog type="GroovyConsoleSession" title="Console">
+    <div prob-view></div>
+</div>
+
+<div bms-dialog type="ModelCheckingUI" title="ModelChecking">
+    <div prob-view></div>
+</div>
+
+<div ng-controller="bmsElementProjectionModalCtrl">
+</div>
+
+<div ng-controller="bmsTraceDiagramModalCtrl">
+</div>
+
+<div ng-controller="bmsLoadingModalCtrl">
+</div>

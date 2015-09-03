@@ -131,7 +131,7 @@ module.exports = function (grunt) {
                     {
                         expand: true,
                         cwd: 'app/',
-                        src: ['bmotion.json', 'resources/templates/bms-<%= mode %>-ui.html', 'resources/templates/bms-editor.html', 'js/require.js', 'css/bootstrap/fonts/**'],
+                        src: ['bmotion.json', 'resources/templates/bms-<%= mode %>-view.html', 'resources/templates/bms-<%= mode %>-ui.html', 'resources/templates/bms-editor.html', 'js/require.js', 'css/bootstrap/fonts/**'],
                         dest: 'build/<%= mode %>/'
                     }
                 ]
