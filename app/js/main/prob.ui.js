@@ -191,6 +191,10 @@ define(['angular', 'jquery-ui', 'ui-bootstrap', 'bms.config'], function () {
 
                     $scope.postpone = false;
 
+                    $scope.$on('openDialog_GroovyConsoleSession', function () {
+                        $scope.setUrl();
+                    });
+
                     $scope.$on('setProBViewTraceId', function (evt, traceId) {
                         $scope.traceId = traceId;
                     });
@@ -202,23 +206,24 @@ define(['angular', 'jquery-ui', 'ui-bootstrap', 'bms.config'], function () {
 
                     ctrl.onEventListener('open', function () {
                         if ($scope.postpone) {
-                            $scope.setTraceId($scope.traceId);
+                            $scope.setUrl($scope.traceId);
                             $scope.postpone = false;
                         }
                     });
 
-                    $scope.setTraceId = function (traceId) {
-                        if (traceId !== undefined) {
-                            $q.all([bmsConfigService.getConfig(), probMainService.getPort()]).then(function (data) {
-                                iframe.attr("src", 'http://' + data[0].prob.host + ':' + data[1].port + '/sessions/' + ctrl.getType() + '/' + traceId);
-                            });
-                        }
+                    $scope.setUrl = function (postfix) {
+                        $q.all([bmsConfigService.getConfig(), probMainService.getPort()]).then(function (data) {
+                            postfix = postfix ? postfix : '';
+                            iframe.attr("src", 'http://' + data[0].prob.host + ':' + data[1].port + '/sessions/' + ctrl.getType() + '/' + postfix);
+                        });
                     };
 
                     $scope.$watch('traceId', function (newTraceId, oldTraceId) {
                         if (newTraceId && newTraceId !== oldTraceId) {
                             if (ctrl.isOpen()) {
-                                $scope.setTraceId(newTraceId);
+                                if (traceId !== undefined) {
+                                    $scope.setUrl(newTraceId);
+                                }
                             } else {
                                 $scope.postpone = true;
                             }

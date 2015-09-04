@@ -153,10 +153,10 @@ module.exports = function (grunt) {
                         cwd: 'app/',
                         src: ['<%= mode %>.html'],
                         dest: 'build/<%= mode %>/',
-                        filter: 'isFile',
-                        rename: function (dest) {
-                            return dest + 'index.html';
-                        }
+                        filter: 'isFile'
+                        /*rename: function (dest) {
+                         return dest + 'index.html';
+                         }*/
                     }
                 ]
             }

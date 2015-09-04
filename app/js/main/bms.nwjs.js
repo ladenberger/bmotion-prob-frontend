@@ -5,7 +5,7 @@
 define(['angular'], function () {
 
     var module = angular.module('bms.nwjs', [])
-        .factory('MenuService', ['GUI', 'Window', function (GUI, Window) {
+        .factory('bmsMenuService', ['GUI', 'Window', '$rootScope', function (GUI, Window, $rootScope) {
 
             return {
                 buildFileBMenu: function (menu) {
@@ -15,7 +15,12 @@ define(['angular'], function () {
                         submenu: fileMenu
                     }));
                     fileMenu.append(new GUI.MenuItem({
-                        label: 'Open Visualization'
+                        label: 'Open Visualization',
+                        click: function () {
+                            $rootScope.$apply(function () {
+                                $rootScope.$broadcast('openVisualizationViaFileMenu');
+                            });
+                        }
                     }));
                     return fileMenu;
                 },

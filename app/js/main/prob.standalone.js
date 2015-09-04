@@ -2,9 +2,9 @@
  * BMotion Studio for ProB Standalone Module
  *
  */
-define(['socketio', 'angularAMD', 'bms.func', 'bms.manifest', 'bms.config', 'angular', 'prob.graph', 'prob.iframe.template', 'prob.iframe.editor', 'prob.ui', 'prob.common', 'prob.modal', 'angular-route', 'prob.standalone.view', 'bms.nwjs'], function (io, angularAMD, bms) {
+define(['socketio', 'angularAMD', 'bms.func', 'bms.manifest', 'bms.config', 'angular', 'prob.graph', 'prob.iframe.template', 'prob.iframe.editor', 'prob.ui', 'prob.common', 'prob.modal', 'angular-route', 'prob.standalone.view', 'bms.nwjs', 'prob.standalone.menu'], function (io, angularAMD, bms) {
 
-    var module = angular.module('prob.standalone', ['prob.standalone.view', 'bms.manifest', 'bms.config', 'prob.graph', 'prob.iframe.template', 'prob.iframe.editor', 'prob.ui', 'prob.common', 'prob.modal', 'ngRoute', 'bms.nwjs'])
+    var module = angular.module('prob.standalone', ['prob.standalone.view', 'bms.manifest', 'bms.config', 'prob.graph', 'prob.iframe.template', 'prob.iframe.editor', 'prob.ui', 'prob.common', 'prob.modal', 'bms.nwjs', 'prob.standalone.menu', 'ngRoute'])
         .config(['$routeProvider', '$locationProvider', function ($routeProvider) {
             $routeProvider
                 .when('/startServer', {
@@ -31,19 +31,20 @@ define(['socketio', 'angularAMD', 'bms.func', 'bms.manifest', 'bms.config', 'ang
                     redirectTo: '/startServer'
                 });
         }])
-        .run(['editableOptions', 'bmsMainService', 'Menu', 'Window', 'fileDialogService', 'initVisualisation', 'MenuService', function (editableOptions, bmsMainService, Menu, Window, fileDialogService, initVisualisation, MenuService) {
+        .run(['editableOptions', '$rootScope', 'bmsMainService', 'Menu', 'Window', 'fileDialogService', 'initVisualisation', 'bmsMenuService', 'probStandaloneMenuService', function (editableOptions, $rootScope, bmsMainService, Menu, Window, fileDialogService, initVisualisation, bmsMenuService, probStandaloneMenuService) {
 
             bmsMainService.mode = 'ModeStandalone';
             editableOptions.theme = 'bs3'; // bootstrap3 theme. Can be also 'bs2', 'default'
             var menu = Menu.createNewMenu();
-            var fileMenu = MenuService.buildFileBMenu(menu);
-            fileMenu.items[0].click = function () {
+            bmsMenuService.buildFileBMenu(menu);
+            probStandaloneMenuService.buildProBDebugMenu(menu);
+            Window.menu = menu;
+
+            $rootScope.$on('openVisualizationViaFileMenu', function () {
                 fileDialogService.open().then(function (manifestFilePath) {
                     initVisualisation(manifestFilePath);
                 });
-            };
-            MenuService.buildDebugMenu(menu);
-            Window.menu = menu;
+            });
 
         }])
         .factory('initVisualisation', ['$q', '$location', 'ws', 'bmsManifestService', 'bmsMainService', 'bmsModalService', 'GUI', function ($q, $location, ws, bmsManifestService, bmsMainService, bmsModalService, GUI) {

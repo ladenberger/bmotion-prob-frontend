@@ -14,6 +14,7 @@ requirejs.config({
         "prob.integrated": "js/main/prob.integrated",
         "prob.standalone": "js/main/prob.standalone",
         "prob.standalone.view": "js/main/prob.standalone.view",
+        "prob.standalone.menu": "js/main/prob.standalone.menu",
 
         // Common modules
         "bms.common": "js/main/bms.common",
