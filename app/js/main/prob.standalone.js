@@ -8,7 +8,7 @@ define(['socketio', 'angularAMD', 'bms.func', 'bms.manifest', 'bms.config', 'ang
         .config(['$routeProvider', '$locationProvider', function ($routeProvider) {
             $routeProvider
                 .when('/startServer', {
-                    template: '<div ng-controller="bmsLoadingModalCtrl"></div>',
+                    template: '',
                     controller: 'bmsStartServerController'
                 })
                 .when('/welcome', {
@@ -74,7 +74,7 @@ define(['socketio', 'angularAMD', 'bms.func', 'bms.manifest', 'bms.config', 'ang
 
             return function (manifestFilePath) {
 
-                bmsModalService.startLoading("Initialising session ...");
+                bmsModalService.startLoading("Initialising visualisation ...");
 
                 bmsManifestService.validate(manifestFilePath).then(function (manifestData) {
 
@@ -125,7 +125,7 @@ define(['socketio', 'angularAMD', 'bms.func', 'bms.manifest', 'bms.config', 'ang
             }
 
         }])
-        .controller('bmsStartServerController', ['$scope', 'Menu', 'bmsModalService', '$location', 'bmsSocketService', '$q', 'bmsConfigService', 'Window', 'GUI', function ($scope, Menu, bmsModalService, $location, bmsSocketService, $q, bmsConfigService, Window, GUI) {
+        .controller('bmsStartServerController', ['$scope', 'Menu', 'bmsModalService', '$location', 'bmsSocketService', '$q', 'bmsConfigService', 'Window', 'GUI', 'ws', function ($scope, Menu, bmsModalService, $location, bmsSocketService, $q, bmsConfigService, Window, GUI, ws) {
 
             var win = GUI.Window.get();
             win.title = "BMotion Studio for ProB";
@@ -190,6 +190,62 @@ define(['socketio', 'angularAMD', 'bms.func', 'bms.manifest', 'bms.config', 'ang
                 return defer.promise;
             };
 
+            var checkProbCli = function () {
+
+                var defer = $q.defer();
+
+                bmsModalService.setMessage("Check ProB cli ...");
+
+                ws.emit('checkProBCli', {}, function (d) {
+
+                    var version = d.version;
+
+                    if (version === null) {
+                        var dialogMessage = "You have no ProB binaries installed in your home directory. " +
+                            "Press \"Ok\" to download a compatible version. " +
+                            "Make sure that you have a working internet connection.\n";
+                        bmsModalService.openErrorDialog(dialogMessage)
+                            .then(function () {
+                                bmsModalService.startLoading("Downloading ProB Cli ...");
+                                downloadProBCli().then(function (version) {
+                                    defer.resolve(version);
+                                });
+                            }, function () {
+                                defer.reject();
+                            });
+                    } else {
+                        defer.resolve();
+                    }
+
+                });
+
+                return defer.promise;
+
+            };
+
+            var downloadProBCli = function () {
+                var defer = $q.defer();
+                ws.emit('downloadProBCli', {}, function (r) {
+                    defer.resolve(r.version);
+                });
+                return defer.promise;
+            };
+
+            var finishLoading = function (version) {
+                var defer = $q.defer();
+                if (version) {
+                    bmsModalService.openDialog(version)
+                        .then(function () {
+                            defer.resolve();
+                        }, function () {
+                            defer.resolve();
+                        });
+                } else {
+                    defer.resolve();
+                }
+                return defer.promise;
+            };
+
             bmsModalService.startLoading("Check if BMotion Studio for ProB Server exists ...");
             checkIfConnectionExists()
                 .then(function (connected) {
@@ -199,8 +255,17 @@ define(['socketio', 'angularAMD', 'bms.func', 'bms.manifest', 'bms.config', 'ang
                     return updateConfig(obj);
                 })
                 .then(function () {
+                    return checkProbCli();
+                })
+                .then(function (version) {
+                    return finishLoading(version);
+                })
+                .then(function () {
                     bmsModalService.endLoading();
                     $location.path('/welcome');
+                }, function () {
+                    var win = GUI.Window.get();
+                    win.close(true);
                 });
 
         }])

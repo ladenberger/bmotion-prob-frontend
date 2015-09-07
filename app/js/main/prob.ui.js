@@ -221,7 +221,7 @@ define(['angular', 'jquery-ui', 'ui-bootstrap', 'bms.config'], function () {
                     $scope.$watch('traceId', function (newTraceId, oldTraceId) {
                         if (newTraceId && newTraceId !== oldTraceId) {
                             if (ctrl.isOpen()) {
-                                if (traceId !== undefined) {
+                                if (newTraceId) {
                                     $scope.setUrl(newTraceId);
                                 }
                             } else {
