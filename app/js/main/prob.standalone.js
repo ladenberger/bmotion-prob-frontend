@@ -158,7 +158,7 @@ define(['socketio', 'angularAMD', 'bms.func', 'bms.manifest', 'bms.config', 'ang
                     var spawn = require('child_process').spawn;
                     var separator = process.platform === 'win32' ? ';' : ':';
                     //var server = spawn('java', ['-Xmx1024m', '-cp', './libs/libs/*' + separator + './libs/bmotion-prob-standalone.jar', "-Dprob.home=./cli/", 'Start', '-standalone', '-local']);
-                    var server = spawn('java', ['-Xmx1024m', '-cp', 'libs/libs/*' + separator + 'libs/bmotion-prob-standalone.jar', 'Start', '-standalone', '-local']);
+                    var server = spawn('java', ['-Xmx1024m', '-cp', './libs/libs/*' + separator + './libs/bmotion-prob-standalone.jar', 'Start', '-standalone', '-local']);
                     server.stdout.on('data', function (data) {
                         try {
                             var json = JSON.parse(data.toString('utf8'));
