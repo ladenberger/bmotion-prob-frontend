@@ -156,7 +156,10 @@ define(['socketio', 'angularAMD', 'bms.func', 'bms.manifest', 'bms.config', 'ang
                 if (!connected) {
                     bmsModalService.setMessage("Start BMotion for ProB Server ...");
                     var exec = require('child_process').exec;
-                    var binaryPath = process.cwd();
+                    var path = require('path');
+                    var nwPath = process.execPath;
+                    var binaryPath = path.dirname(nwPath);
+                    console.log(binaryPath)
                     var separator = process.platform === 'win32' ? ';' : ':';
                     //var server = spawn('java', ['-Xmx1024m', '-cp', './libs/libs/*' + separator + './libs/bmotion-prob-standalone.jar', "-Dprob.home=./cli/", 'Start', '-standalone', '-local']);
                     //var server = exec('java', ['-Xmx1024m', '-cp', './libs/libs/*' + separator + './libs/bmotion-prob-standalone.jar', 'Start', '-standalone', '-local']);
