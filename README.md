@@ -5,18 +5,30 @@
 
 ## Build
 
-In order to build the application, you need to install <a href="https://nodejs.org/">Node.js</a> and <a href="https://github.com/gruntjs/grunt-cli">grunt-cli</a>.
-
-Grunt-cli can be installed via <a href="https://github.com/npm/npm">npm</a>:
+Run the following command for building the standalone version of BMotion Studio for ProB, where xxx is the target platform:
 
 ```
-$ npm install -g grunt-cli 
+gradle clean standalone_xxx
 ```
 
-Run the following command for building the application:
+The following values are allowed for xxx: linux-x64, linux-ia32, darwin-x64, win32-ia32, win32-x64.
+
+Or just run the following command for building the standalone version for all platforms:
 
 ```
-$ npm run build
+gradle clean standalone_all
 ```
 
-The build script will produce zip files. The files are located in the build folder.
+The build script will produce a zipped standalone version for all platforms. The zip files are located in the build/dist folder.
+
+## No Gradle installed?
+
+If you don't have gradle installed, you can use the gradlew script provided. For instance, use
+
+```
+./gradlew clean standalone_linux-x64
+```
+
+to build the standalone version for linux x64.
+
+This should build the application without a gradle installation on your computer.
