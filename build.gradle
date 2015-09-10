@@ -41,7 +41,7 @@ task npmDeps(type: Exec) {
 }
 
 task grunt_standalone_all(dependsOn: [npmDeps], type: GruntTask) {
-    gruntArgs = "standalone_all"
+    gruntArgs = "standalone_all --force"
 }
 
 targets.each() { target ->
@@ -60,7 +60,7 @@ targets.each() { target ->
     }
 
     task "grunt_standalone_${target}"(dependsOn: [npmDeps], type: GruntTask) {
-        gruntArgs = "standalone_${target}"
+        gruntArgs = "standalone_${target} --force"
     }
 
     task "standalone_${target}"(dependsOn: ["assemble_${target}", "zip_${target}"]) {}
@@ -74,8 +74,6 @@ task standalone_all(dependsOn: [tasks.withType(Copy).matching { task -> task.nam
 class GruntTask extends Exec {
     private String gruntExecutable = Os.isFamily(Os.FAMILY_WINDOWS) ? "grunt.cmd" : "grunt"
     private String switches = "--no-color"
-
-    String gruntArgs = "--force"
 
     public GruntTask() {
         super()
