@@ -12,7 +12,7 @@ define(['bms.electron', 'prob.standalone.menu', 'bms.visualization'], function (
         }])
         .controller('bmsStandaloneViewCtrl', ['$scope', '$routeParams', 'electronWindow', 'electronMenu', 'electronMenuService', 'probStandaloneMenuService', 'bmsVisualizationService', function ($scope, $routeParams, electronWindow, electronMenu, electronMenuService, probStandaloneMenuService, bmsVisualizationService) {
             var winId = parseInt($routeParams.win);
-            var title = 'BMotion Studio for ProB: ' + $routeParams.view;
+            var title = 'BMotion Studio for ProB (' + $routeParams.view + ')';
             $scope.$on('visualizationLoaded', function (evt, visId) {
                 var win = electronWindow.fromId(winId);
                 win.setTitle(title);
@@ -27,8 +27,8 @@ define(['bms.electron', 'prob.standalone.menu', 'bms.visualization'], function (
         }])
         .controller('bmsStandaloneRootViewCtrl', ['$scope', '$routeParams', 'electronWindow', 'electronMenu', 'electronMenuService', 'probStandaloneMenuService', 'bmsVisualizationService', function ($scope, $routeParams, electronWindow, electronMenu, electronMenuService, probStandaloneMenuService, bmsVisualizationService) {
             var winId = parseInt($routeParams.win);
-            var view = $routeParams.view ? $routeParams.view : '';
-            var title = 'BMotion Studio for ProB: ' + view;
+            var view = $routeParams.view ? '(' + $routeParams.view + ')' : '';
+            var title = 'BMotion Studio for ProB ' + view;
             $scope.$on('visualizationLoaded', function (evt, visId) {
                 var win = electronWindow.fromId(winId);
                 win.setTitle(title);
