@@ -1,4 +1,4 @@
-# BMotion Studio for ProB Frontend
+# BMotion Studio for ProB
 
 [![Build Status](https://travis-ci.org/ladenberger/bmotion-prob-frontend.svg?branch=develop)](https://travis-ci.org/ladenberger/bmotion-prob-frontend)
 [![Built with Grunt](https://cdn.gruntjs.com/builtwith.png)](http://gruntjs.com/)
