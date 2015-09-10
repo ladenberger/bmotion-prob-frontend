@@ -2,7 +2,7 @@
  * BMotion Studio for ProB UI Module
  *
  */
-define(['angular', 'jquery-ui', 'ui-bootstrap', 'bms.config'], function () {
+define(['jquery', 'angular', 'jquery-ui', 'ui-bootstrap', 'bms.config'], function ($) {
 
     var module = angular.module('prob.ui', ['ui.bootstrap', 'bms.config'])
         .controller('bmsUiNavigationCtrl', ['$scope', '$rootScope', 'bmsUIService', 'bmsVisualizationService', function ($scope, $rootScope, bmsUIService, bmsVisualizationService) {

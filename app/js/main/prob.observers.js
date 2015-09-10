@@ -2,7 +2,7 @@
  * BMotion Studio for ProB Observer Module
  *
  */
-define(['bms.func', 'angular', 'qtip'], function (bms) {
+define(['bms.func', 'jquery', 'angular', 'qtip'], function (bms, $) {
 
     return angular.module('prob.observers', ['bms.common'])
         .service('bmsObserverService', ['$q', '$injector', 'trigger', function ($q, $injector, trigger) {
@@ -565,16 +565,15 @@ define(['bms.func', 'angular', 'qtip'], function (bms) {
                         var container = $('<div class="qtiplinks"></div>');
                         var ul = $('<ul style="display:table-cell;"></ul>');
                         angular.forEach(data.events, function (v) {
-                            var spanClass = 'glyphicon glyphicon-remove-circle';
-                            var label = options.label(v, origin);
-                            var labelElement = label;
+                            var iconSpan = $('<span aria-hidden="true"></span>');
+                            var iconClass = 'glyphicon glyphicon-remove-circle';
                             if (v.canExecute) {
-                                spanClass = 'glyphicon glyphicon-ok-circle cursor-pointer';
-                                labelElement = label;
+                                iconClass = 'glyphicon glyphicon-ok-circle cursor-pointer';
                             }
-                            var link = $(labelElement).addClass(spanClass);
+                            iconSpan.addClass(iconClass);
+                            var labelSpan = $(options.label(v, origin));
                             if (v.canExecute) {
-                                link.click(function () {
+                                labelSpan.click(function () {
                                     ev.executeEvent({
                                         id: options.id,
                                         traceId: traceId,
@@ -590,7 +589,11 @@ define(['bms.func', 'angular', 'qtip'], function (bms) {
                                     })
                                 });
                             }
-                            ul.append($('<li></li>').addClass(v.canExecute ? 'enabled' : 'disabled').append(link));
+                            ul.append($('<li></li>')
+                                .addClass(v.canExecute ? 'enabled' : 'disabled')
+                                .addClass('cursor-pointer')
+                                .append(iconSpan)
+                                .append(labelSpan));
                         });
                         container.append(ul);
                         defer.resolve(container);

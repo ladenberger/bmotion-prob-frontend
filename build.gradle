@@ -1,0 +1,89 @@
+import org.apache.tools.ant.taskdefs.condition.Os
+import org.gradle.api.tasks.Exec
+
+def bmotionVersion = '0.2.2-SNAPSHOT'
+def appVersion = '0.2.2'
+def targets = ["linux-ia32", "linux-x64", "darwin-x64", "win32-ia32"]
+
+apply plugin: 'java'
+apply plugin: 'maven'
+
+repositories {
+    mavenCentral()
+    maven {
+        name "sonatype snapshots"
+        url "https://oss.sonatype.org/content/repositories/snapshots"
+    }
+    maven {
+        name "cobra"
+        url "http://cobra.cs.uni-duesseldorf.de/artifactory/repo"
+    }
+}
+
+dependencies {
+    compile group: 'de.hhu.stups', name: 'bmotion-prob', version: bmotionVersion, changing: true
+}
+
+// Extend clean task ...
+clean {
+    delete("build")
+}
+
+task getLibs(dependsOn: jar) << {
+    copy {
+        from configurations.compile
+        into 'build/libs'
+    }
+}
+
+task npmDeps(type: Exec) {
+    commandLine "npm", 'install'
+}
+
+task grunt_standalone_all(dependsOn: [npmDeps], type: GruntTask) {
+    gruntArgs = "standalone_all"
+}
+
+targets.each() { target ->
+
+    task "assemble_${target}"(dependsOn: ["grunt_standalone_${target}", getLibs], type: Copy) {
+        from 'build/libs'
+        into 'build/client/bmotion-prob-' + target + '/libs'
+    }
+
+    task "zip_${target}"(dependsOn: [], type: Zip) {
+        destinationDir = new File('build/dist/' + appVersion)
+        archiveName = 'bmotion-prob-' + appVersion + '-' + target + '.zip'
+        from('build/client/bmotion-prob-' + target) {
+            into "./bmotion-prob-" + appVersion
+        }
+    }
+
+    task "grunt_standalone_${target}"(dependsOn: [npmDeps], type: GruntTask) {
+        gruntArgs = "standalone_${target}"
+    }
+
+    task "standalone_${target}"(dependsOn: ["assemble_${target}", "zip_${target}"]) {}
+
+}
+
+task standalone_all(dependsOn: [tasks.withType(Copy).matching { task -> task.name.startsWith('assemble_') },
+                                tasks.withType(Zip).matching { task -> task.name.startsWith('zip_') }]) << {
+}
+
+class GruntTask extends Exec {
+    private String gruntExecutable = Os.isFamily(Os.FAMILY_WINDOWS) ? "grunt.cmd" : "grunt"
+    private String switches = "--no-color"
+
+    String gruntArgs = ""
+
+    public GruntTask() {
+        super()
+        this.setExecutable(gruntExecutable)
+    }
+
+    public void setGruntArgs(String gruntArgs) {
+        this.args = "$switches $gruntArgs".trim().split(" ") as List
+    }
+}
+

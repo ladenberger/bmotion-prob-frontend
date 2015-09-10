@@ -24,6 +24,7 @@ requirejs.config({
         "bms.visualization": "js/main/bms.visualization",
         "bms.manifest": "js/main/bms.manifest",
         "bms.nwjs": "js/main/bms.nwjs",
+        "bms.electron": "js/main/bms.electron",
 
         "prob.ui": "js/main/prob.ui",
         "prob.common": "js/main/prob.common",
@@ -98,7 +99,7 @@ requirejs.config({
             exports: "cy",
             deps: ["jquery"]
         },
-        "cytoscape.navigator": ['cytoscape'],
+        "cytoscape.navigator": ['cytoscape', 'jquery'],
         "jquery-ui": ["jquery"],
         "angular-route": ["angular"],
         "angular-json-editor": ["json-editor"],

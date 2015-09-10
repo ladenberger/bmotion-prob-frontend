@@ -8,9 +8,7 @@ define(['tv4', 'prob.common'], function (tv4) {
             .factory('bmsManifestService', ['$q', '$http', 'manifestConstants', function ($q, $http, manifestConstants) {
                 return {
                     validate: function (manifestFilePath) {
-
                         var defer = $q.defer();
-
                         var filename = manifestFilePath.replace(/^.*[\\\/]/, '');
                         if (filename === 'bmotion.json') {
                             $http.get(manifestFilePath).success(function (configData) {
@@ -29,13 +27,9 @@ define(['tv4', 'prob.common'], function (tv4) {
                         } else {
                             defer.reject('Invalid file, please open a bmotion.json file!');
                         }
-
                         return defer.promise;
-
                     }
-
                 }
-
             }]);
 
     }

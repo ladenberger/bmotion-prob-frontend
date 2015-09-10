@@ -2,7 +2,7 @@
  * BMotion Studio Config Module
  *
  */
-define(['angular'], function () {
+define(['jquery', 'angular'], function ($) {
 
         return angular.module('bms.config', [])
             .factory('bmsConfigService', ['$q', '$http', function ($q, $http) {

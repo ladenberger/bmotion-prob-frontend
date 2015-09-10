@@ -2,109 +2,89 @@
  * BMotion Studio Node Webkit Module
  *
  */
-define(['angular', 'bms.nwjs'], function () {
+define(['angular', 'bms.electron'], function () {
 
-    var module = angular.module('prob.standalone.menu', ['bms.nwjs'])
-        .factory('probStandaloneMenuService', ['$rootScope', 'GUI', 'bmsMenuService', function ($rootScope, GUI, bmsMenuService) {
+    var module = angular.module('prob.standalone.menu', ['bms.electron'])
+        .factory('probStandaloneMenuService', ['$rootScope', 'electronMenuService', function ($rootScope, electronMenuService) {
 
             return {
-                buildDiagramMenu: function (menu) {
+                buildDiagramMenu: function (menu, vis) {
 
-                    // Diagram menu
-                    var diagramMenu = new GUI.Menu();
-                    diagramMenu.append(new GUI.MenuItem({
+                    var diagramMenu = new electronMenuService.createNewMenu();
+                    diagramMenu.append(electronMenuService.createMenuItem({
+                        label: 'Trace Diagram',
+                        click: function () {
+                            $rootScope.$apply(function () {
+                                $rootScope.$broadcast('openTraceDiagramModal');
+                            });
+                        }
+                    }));
+                    diagramMenu.append(electronMenuService.createMenuItem({
                         label: 'Element Projection Diagram',
                         click: function () {
                             $rootScope.$apply(function () {
                                 $rootScope.$broadcast('openElementProjectionModal');
                             });
                         },
-                        enabled: false
+                        enabled: vis.tool === 'BAnimation'
                     }));
-                    diagramMenu.append(new GUI.MenuItem({
-                        label: 'Trace Diagram',
-                        click: function () {
-                            $rootScope.$apply(function () {
-                                $rootScope.$broadcast('openTraceDiagramModal');
-                            });
-                        },
-                        enabled: false
-                    }));
-                    menu.append(new GUI.MenuItem({
+
+                    menu.append(electronMenuService.createMenuItem({
                         label: 'Diagram',
                         submenu: diagramMenu
                     }));
 
-                    return diagramMenu;
-
                 },
                 buildProBMenu: function (menu) {
 
-                    // Navigation button actions ...
                     var openDialog = function (type) {
                         $rootScope.$apply(function () {
                             $rootScope.$broadcast('openDialog_' + type);
                         });
                     };
 
-                    // ProB menu
-                    var probMenu = new GUI.Menu();
-                    probMenu.append(new GUI.MenuItem({
+                    var probMenu = new electronMenuService.createNewMenu();
+                    probMenu.append(electronMenuService.createMenuItem({
                         label: 'Events',
                         click: function () {
                             openDialog('Events');
-                        },
-                        enabled: false
+                        }
                     }));
-                    probMenu.append(new GUI.MenuItem({
+                    probMenu.append(electronMenuService.createMenuItem({
                         label: 'History',
                         click: function () {
                             openDialog('CurrentTrace');
-                        },
-                        enabled: false
+                        }
                     }));
-                    probMenu.append(new GUI.MenuItem({
+                    probMenu.append(electronMenuService.createMenuItem({
                         label: 'State',
                         click: function () {
                             openDialog('StateInspector');
-                        },
-                        enabled: false
+                        }
                     }));
-                    probMenu.append(new GUI.MenuItem({
+                    probMenu.append(electronMenuService.createMenuItem({
                         label: 'Animations',
                         click: function () {
                             openDialog('CurrentAnimations');
-                        },
-                        enabled: false
+                        }
                     }));
-                    /*probMenu.append(new GUI.MenuItem({
-                     label: 'Console',
-                     click: function () {
-                     openDialog('GroovyConsoleSession');
-                     },
-                     enabled: false
-                     }));*/
-                    probMenu.append(new GUI.MenuItem({
+                    probMenu.append(electronMenuService.createMenuItem({
                         label: 'Model Checking',
                         click: function () {
                             openDialog('ModelCheckingUI');
-                        },
-                        enabled: false
+                        }
                     }));
 
-                    menu.append(new GUI.MenuItem({
+                    menu.append(electronMenuService.createMenuItem({
                         label: 'ProB',
                         submenu: probMenu
                     }));
 
-                    return probMenu;
-
                 },
                 buildProBDebugMenu: function (menu) {
 
-                    var debugMenu = bmsMenuService.buildDebugMenu(menu);
-
-                    debugMenu.append(new GUI.MenuItem({
+                    var debugMenu = electronMenuService.buildDebugMenu(menu);
+                    debugMenu.append(electronMenuService.createMenuItem({
                         label: 'Console',
                         click: function () {
                             $rootScope.$apply(function () {
@@ -112,8 +92,6 @@ define(['angular', 'bms.nwjs'], function () {
                             });
                         }
                     }));
-
-                    return debugMenu;
 
                 },
                 enableAllItems: function (menu) {

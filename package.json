@@ -1,7 +1,5 @@
 {
-  "name": "bmotion-prob-frontend",
-  "version": "0.2.2",
-  "description": "Frontend for BMotion Studio for ProB",
+  "name": "bmotion-prob",
   "repository": {
     "type": "git",
     "url": "https://github.com/ladenberger/bmotion-prob-frontend.git"
@@ -19,14 +17,11 @@
     "grunt-cli": "^0.1.13",
     "grunt-contrib-clean": "^0.6.0",
     "grunt-contrib-compress": "^0.13.0",
-    "grunt-contrib-copy": "^0.8.0",
-    "grunt-contrib-requirejs": "^0.4.4"
+    "grunt-electron": "^2.0.0"
   },
   "scripts": {
     "build": "npm install && grunt",
-    "dist": "grunt dist",
-    "start": "grunt watch",
-    "clean": "grunt clean",
-    "test": "grunt"
+    "dist": "npm install & grunt dist",
+    "clean": "grunt clean"
   }
 }

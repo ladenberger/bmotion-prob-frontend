@@ -13,16 +13,17 @@ define(['ui-bootstrap', 'ui-bootstrap-tpls'], function () {
 
             $scope.close = function () {
                 $modalInstance.close();
+                bmsModalService.currentModalInstance = null;
             };
 
             $scope.ok = function () {
                 bmsModalService.modaDialogDeferred.resolve();
-                bmsModalService.hideDialog();
+                $scope.close();
             };
 
             $scope.cancel = function () {
                 bmsModalService.modaDialogDeferred.reject();
-                bmsModalService.hideDialog();
+                $scope.close();
             };
 
             $modalInstance.setDialog = function (d) {
@@ -34,16 +35,12 @@ define(['ui-bootstrap', 'ui-bootstrap-tpls'], function () {
                 $scope.state = s ? s : $scope.state;
             };
 
-            $scope.$on('closeModal', function () {
-                $modalInstance.close();
-            });
-
         }])
         .service('bmsModalService', ['$rootScope', '$q', '$modal', function ($rootScope, $q, $modal) {
 
-            var modalInstance = null;
-
             var self = this;
+
+            self.currentModalInstance = null;
 
             self.states = {
                 error: {
@@ -62,66 +59,68 @@ define(['ui-bootstrap', 'ui-bootstrap-tpls'], function () {
 
             self.isOpen = false;
 
-            self.open = function () {
+            self.createModal = function () {
+
+                var modalInstance = $modal.open({
+                    template: '<div class="modal-header" style="height:40px;">'
+                    + '<button type="button" class="close" data-dismiss="modal" ng-click="close()">'
+                    + '<span aria-hidden="true">&times;</span><span class="sr-only">Close</span>'
+                    + '</button>'
+                    + '</div>'
+                    + '<div class="modal-body">'
+                    + '<p class="bmotion-img-logo"></p>'
+                    + '<p ng-attr-class="{{state.icon}}"></p>'
+                    + '<div ng-if="message">'
+                    + '<div class="bmotion-alert alert {{state.class}}" role="alert">{{message}}</div>'
+                    + '<div class="modal-footer" ng-show="dialog">'
+                    + '<button class="btn" type="button" ng-click="ok()">OK</button>'
+                    + '<button class="btn" type="button" ng-click="cancel()">Cancel</button>'
+                    + '</div>'
+                    + '</div>',
+                    controller: 'bmsLoadingModalInstanceCtrl',
+                    backdrop: false
+                });
+
+                return modalInstance;
+
+            };
+
+            self.getModal = function () {
 
                 var defer = $q.defer();
 
-                if (!modalInstance || (modalInstance && !self.isOpen)) {
-
-                    modalInstance = $modal.open({
-                        template: '<div class="modal-header" style="height:40px;">'
-                        + '<button type="button" class="close" data-dismiss="modal" ng-click="close()">'
-                        + '<span aria-hidden="true">&times;</span><span class="sr-only">Close</span>'
-                        + '</button>'
-                        + '</div>'
-                        + '<div class="modal-body">'
-                        + '<p class="bmotion-img-logo"></p>'
-                        + '<p ng-attr-class="{{state.icon}}"></p>'
-                        + '<div ng-if="message">'
-                        + '<div class="bmotion-alert alert {{state.class}}" role="alert">{{message}}</div>'
-                        + '<div class="modal-footer" ng-show="dialog">'
-                        + '<button class="btn" type="button" ng-click="ok()">OK</button>'
-                        + '<button class="btn" type="button" ng-click="cancel()">Cancel</button>'
-                        + '</div>'
-                        + '</div>',
-                        controller: 'bmsLoadingModalInstanceCtrl'
-                    });
-
-                    modalInstance.opened.then(function () {
-                        self.isOpen = true;
-                        defer.resolve();
-                    });
-                    modalInstance.result.then(function () {
-                        self.isOpen = false;
-                    });
-
-                } else {
-                    defer.resolve();
-                }
+                if (self.currentModalInstance === null) self.currentModalInstance = self.createModal();
+                self.currentModalInstance.opened.then(function () {
+                    defer.resolve(self.currentModalInstance);
+                });
 
                 return defer.promise;
 
             };
 
             self.reset = function () {
-                self.setDialog(false);
-                self.setMessage("", self.states.default);
+                self.hideDialog();
+                self.removeMessage();
             };
 
             self.hideDialog = function () {
-                self.setDialog(false);
+                if (self.currentModalInstance !== null) self.currentModalInstance.setDialog(false);
+            };
+
+            self.removeMessage = function () {
+                if (self.currentModalInstance !== null) self.currentModalInstance.setMessage("");
             };
 
             self.setDialog = function (b) {
-                self.open().then(function () {
-                    modalInstance.setDialog(b)
-                });
+                if (self.currentModalInstance !== null) self.currentModalInstance.setDialog(b);
             };
 
             self.setMessage = function (msg, s) {
-                self.open().then(function () {
-                    modalInstance.setMessage(msg, s);
-                });
+                if (msg.length > 0) {
+                    self.getModal().then(function (m) {
+                        m.setMessage(msg, s);
+                    });
+                }
             };
 
             self.setDefault = function (msg) {
@@ -133,32 +132,25 @@ define(['ui-bootstrap', 'ui-bootstrap-tpls'], function () {
             };
 
             self.openErrorDialog = function (msg) {
+                return self.openDialog(msg, self.states.error);
+            };
+
+            self.openDialog = function (msg, s) {
 
                 self.modaDialogDeferred = $q.defer();
-
-                self.open().then(function () {
-                    self.setMessage(msg, self.states.error);
-                    modalInstance.setDialog(true);
-                });
-
+                if (msg.length > 0) {
+                    self.getModal().then(function () {
+                        self.setMessage(msg, s ? s : self.states.default);
+                        self.setDialog(true);
+                    });
+                } else {
+                    self.modaDialogDeferred.resolve();
+                }
                 return self.modaDialogDeferred.promise;
 
             };
 
-            self.openDialog = function (msg) {
-
-                self.modaDialogDeferred = $q.defer();
-
-                self.open().then(function () {
-                    self.setMessage(msg, self.states.default);
-                    modalInstance.setDialog(true);
-                });
-
-                return self.modaDialogDeferred.promise;
-
-            };
-
-            self.startLoading = function (msg) {
+            self.loading = function (msg) {
                 self.setMessage(msg, self.states.loading)
             };
 
@@ -168,8 +160,11 @@ define(['ui-bootstrap', 'ui-bootstrap-tpls'], function () {
             };
 
             self.closeModal = function () {
-                $rootScope.$broadcast('closeModal')
-            }
+                if (self.currentModalInstance !== null) {
+                    self.currentModalInstance.close();
+                    self.currentModalInstance = null;
+                }
+            };
 
         }])
         .controller('bmsElementProjectionModalCtrl', ['$scope', '$modal', function ($scope, $modal) {

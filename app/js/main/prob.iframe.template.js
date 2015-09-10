@@ -2,7 +2,7 @@
  * BMotion Studio for ProB IFrame Module
  *
  */
-define(['bms.func', 'prob.common', 'prob.observers', 'prob.modal'], function (bms) {
+define(['bms.func', 'jquery', 'prob.common', 'prob.observers', 'prob.modal'], function (bms, $) {
 
     var module = angular.module('prob.iframe.template', ['prob.common', 'prob.observers', 'prob.modal'])
         .directive('bmsVisualisationView', ['$rootScope', 'bmsVisualizationService', 'bmsObserverService', 'ws', '$injector', 'bmsUIService', 'bmsModalService', 'trigger', function ($rootScope, bmsVisualizationService, bmsObserverService, ws, $injector, bmsUIService, bmsModalService, trigger) {
@@ -141,7 +141,7 @@ define(['bms.func', 'prob.common', 'prob.observers', 'prob.modal'], function (bm
 
                     var initView = function (sessionId, view) {
 
-                        bmsModalService.startLoading("Initialising View ...");
+                        bmsModalService.loading("Initialising View ...");
 
                         $scope.sessionId = sessionId;
 

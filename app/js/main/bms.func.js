@@ -2,7 +2,7 @@
  * BMotion Studio Helper Module
  *
  */
-define(['jquery'], function () {
+define(['jquery'], function ($) {
 
     var api = {
 
