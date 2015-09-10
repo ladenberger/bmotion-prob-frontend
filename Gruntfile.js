@@ -5,7 +5,7 @@ module.exports = function (grunt) {
     var jsBowerLibs = 'js/libs/bower/';
     var appVersion = '0.2.2';
     var electronVersion = '0.32.1';
-    var targets = ["linux-ia32", "linux-x64", "darwin-x64", "win32-ia32"];
+    var targets = ["linux-ia32", "linux-x64", "darwin-x64", "win32-ia32", "win32-x64"];
 
     grunt.initConfig({
         clean: ["build", "cache", "bower_components", "app/js/libs/bower", "app/css/libs/bower"],
@@ -56,6 +56,19 @@ module.exports = function (grunt) {
                     platform: 'win32',
                     icon: 'app/resources/icons/bmsicon.ico',
                     arch: 'ia32',
+                    asar: true,
+                    "app-version": appVersion
+                }
+            },
+            "win32-x64": {
+                options: {
+                    name: 'bmotion-prob',
+                    dir: 'app',
+                    out: 'build/client',
+                    version: electronVersion,
+                    platform: 'win32',
+                    icon: 'app/resources/icons/bmsicon.ico',
+                    arch: 'x64',
                     asar: true,
                     "app-version": appVersion
                 }
