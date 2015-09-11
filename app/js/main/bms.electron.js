@@ -61,7 +61,7 @@ define(['angular', 'prob.modal'], function () {
                                     properties: ['openFile']
                                 },
                                 function (files) {
-                                    $rootScope.$broadcast('startVisualisationViaFileMenu', files[0]);
+                                    if (files) $rootScope.$broadcast('startVisualisationViaFileMenu', files[0]);
                                 });
                         }
                     }));
