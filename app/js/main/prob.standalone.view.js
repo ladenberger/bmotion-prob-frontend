@@ -21,7 +21,6 @@ define(['bms.electron', 'prob.standalone.menu', 'bms.visualization'], function (
                 probStandaloneMenuService.buildProBMenu(menu);
                 probStandaloneMenuService.buildDiagramMenu(menu, bmsVisualizationService.getVisualization(visId));
                 probStandaloneMenuService.buildProBDebugMenu(menu);
-                probStandaloneMenuService.buildProBHelpMenu(menu);
                 win.setMenu(menu);
             });
         }])
