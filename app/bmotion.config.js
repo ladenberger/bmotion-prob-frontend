@@ -43,6 +43,7 @@ requirejs.config({
         "socketio": "js/libs/bower/socket.io-client/socket.io",
         "angular": "js/libs/bower/angular/angular",
         "angular-route": "js/libs/bower/angular-route/angular-route",
+        "angular-sanitize": "js/libs/bower/angular-sanitize/angular-sanitize",
         "angular-json-editor": "js/libs/bower/angular-json-editor/angular-json-editor",
         "json-editor": "js/libs/bower/json-editor/jsoneditor",
 
@@ -93,6 +94,7 @@ requirejs.config({
         "angularAMD": ["angular"],
         "ui-bootstrap": ["angular"],
         "ui-bootstrap-tpls": ["ui-bootstrap"],
+        "angular-sanitize": ["angular"],
         "angular-xeditable": ["angular"],
         "qtip": ["jquery"],
         "cytoscape": {

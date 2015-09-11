@@ -270,13 +270,13 @@ define(['socketio', 'angularAMD', 'bms.func', 'jquery', 'bms.manifest', 'bms.con
                 });
 
         }])
-        .controller('bmsWelcomeController', ['$rootScope', 'electronMenuService', 'electronMenu', 'initVisualisation', 'electronWindow', function ($rootScope, electronMenuService, electronMenu, initVisualisation, electronWindow) {
+        .controller('bmsWelcomeController', ['$rootScope', 'electronMenuService', 'electronMenu', 'initVisualisation', 'electronWindow', 'probStandaloneMenuService', function ($rootScope, electronMenuService, electronMenu, initVisualisation, electronWindow, probStandaloneMenuService) {
 
             var mainWindow = electronWindow.fromId(1);
             var menu = electronMenuService.createNewMenu();
             electronMenuService.buildFileMenu(menu);
             electronMenuService.buildDebugMenu(menu);
-            electronMenuService.buildHelpMenu(menu);
+            probStandaloneMenuService.buildProBHelpMenu(menu);
             mainWindow.setMenu(menu);
 
             $rootScope.$on('startVisualisationViaFileMenu', function (evt, manifestFilePath) {

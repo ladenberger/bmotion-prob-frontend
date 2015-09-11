@@ -103,21 +103,6 @@ define(['angular', 'prob.modal'], function () {
                         submenu: debugMenu
                     }));
                     return debugMenu;
-                },
-                buildHelpMenu: function (menu) {
-                    var helpMenu = new electronMenu();
-                    helpMenu.append(factory.createMenuItem({
-                        label: 'About',
-                        click: function () {
-                            var app = electronRemote.require('app');
-                            bmsModalService.openDialog("BMotion Studio for ProB (v" + app.getVersion() + ")");
-                        }
-                    }));
-                    menu.append(factory.createMenuItem({
-                        label: 'Help',
-                        submenu: helpMenu
-                    }));
-                    return helpMenu;
                 }
 
             };

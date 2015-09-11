@@ -2,10 +2,10 @@
  * BMotion Studio Node Webkit Module
  *
  */
-define(['angular', 'bms.electron'], function () {
+define(['angular', 'bms.electron', 'bms.config'], function () {
 
-    var module = angular.module('prob.standalone.menu', ['bms.electron'])
-        .factory('probStandaloneMenuService', ['$rootScope', 'electronMenuService', function ($rootScope, electronMenuService) {
+    var module = angular.module('prob.standalone.menu', ['bms.electron', 'bms.config'])
+        .factory('probStandaloneMenuService', ['$rootScope', 'electronMenuService', 'bmsConfigService', 'bmsModalService', 'electronRemote', function ($rootScope, electronMenuService, bmsConfigService, bmsModalService, electronRemote) {
 
             return {
                 buildDiagramMenu: function (menu, vis) {
@@ -93,6 +93,25 @@ define(['angular', 'bms.electron'], function () {
                         }
                     }));
 
+                },
+                buildProBHelpMenu: function (menu) {
+                    var helpMenu = new electronMenuService.createNewMenu();
+                    helpMenu.append(electronMenuService.createMenuItem({
+                        label: 'About',
+                        click: function () {
+                            bmsConfigService.getConfig().then(function (config) {
+                                var app = electronRemote.require('app');
+                                bmsModalService.openDialog("<p>BMotion Studio for ProB (version " + app.getVersion() + ")</p>" +
+                                    "<p>ProB 2.0 (version " + config.prob.version + ")</p>" +
+                                    "<p>" + config.prob.revision + "</p>");
+                            });
+                        }
+                    }));
+                    menu.append(electronMenuService.createMenuItem({
+                        label: 'Help',
+                        submenu: helpMenu
+                    }));
+                    return helpMenu;
                 },
                 enableAllItems: function (menu) {
                     if (menu) {

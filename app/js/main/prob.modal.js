@@ -2,9 +2,9 @@
  * BMotion Studio for ProB Modal Module
  *
  */
-define(['ui-bootstrap', 'ui-bootstrap-tpls'], function () {
+define(['ui-bootstrap', 'ui-bootstrap-tpls', 'angular-sanitize'], function () {
 
-    var module = angular.module('prob.modal', ['ui.bootstrap'])
+    var module = angular.module('prob.modal', ['ui.bootstrap', 'ngSanitize'])
         .controller('bmsLoadingModalInstanceCtrl', ['$scope', '$modalInstance', '$q', 'bmsModalService', function ($scope, $modalInstance, $q, bmsModalService) {
 
             $scope.message = "";
@@ -71,7 +71,7 @@ define(['ui-bootstrap', 'ui-bootstrap-tpls'], function () {
                     + '<p class="bmotion-img-logo"></p>'
                     + '<p ng-attr-class="{{state.icon}}"></p>'
                     + '<div ng-if="message">'
-                    + '<div class="bmotion-alert alert {{state.class}}" role="alert">{{message}}</div>'
+                    + '<div class="bmotion-alert alert {{state.class}}" role="alert" ng-bind-html="message"></div>'
                     + '<div class="modal-footer" ng-show="dialog">'
                     + '<button class="btn" type="button" ng-click="ok()">OK</button>'
                     + '<button class="btn" type="button" ng-click="cancel()">Cancel</button>'
