@@ -21,7 +21,7 @@ define(['bms.electron', 'prob.standalone.menu', 'bms.visualization'], function (
                 probStandaloneMenuService.buildProBMenu(menu);
                 probStandaloneMenuService.buildDiagramMenu(menu, bmsVisualizationService.getVisualization(visId));
                 probStandaloneMenuService.buildProBDebugMenu(menu);
-                electronMenuService.buildHelpMenu(menu);
+                probStandaloneMenuService.buildProBHelpMenu(menu);
                 win.setMenu(menu);
             });
         }])
@@ -37,7 +37,7 @@ define(['bms.electron', 'prob.standalone.menu', 'bms.visualization'], function (
                 probStandaloneMenuService.buildProBMenu(menu);
                 probStandaloneMenuService.buildDiagramMenu(menu, bmsVisualizationService.getVisualization(visId));
                 probStandaloneMenuService.buildProBDebugMenu(menu);
-                electronMenuService.buildHelpMenu(menu);
+                probStandaloneMenuService.buildProBHelpMenu(menu);
                 win.setMenu(menu);
             });
         }]);
