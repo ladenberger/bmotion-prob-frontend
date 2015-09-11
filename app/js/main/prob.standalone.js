@@ -111,7 +111,7 @@ define(['socketio', 'angularAMD', 'bms.func', 'jquery', 'bms.manifest', 'bms.con
             }
 
         }])
-        .controller('bmsStartServerController', ['$scope', 'bmsModalService', '$location', 'bmsSocketService', '$q', 'bmsConfigService', 'ws', 'electronWindow', function ($scope, bmsModalService, $location, bmsSocketService, $q, bmsConfigService, ws, electronWindow) {
+        .controller('bmsStartServerController', ['$scope', 'bmsModalService', '$location', 'bmsSocketService', '$q', 'bmsConfigService', 'ws', 'electronWindow', 'electronRemote', function ($scope, bmsModalService, $location, bmsSocketService, $q, bmsConfigService, ws, electronWindow, electronRemote) {
 
             bmsModalService.closeModal();
 
@@ -140,13 +140,12 @@ define(['socketio', 'angularAMD', 'bms.func', 'jquery', 'bms.manifest', 'bms.con
                     bmsModalService.setMessage("Start BMotion for ProB Server ...");
                     var exec = require('child_process').exec;
                     var path = require('path');
-                    var nwPath = process.execPath;
-                    var binaryPath = path.dirname(nwPath);
+                    var appPath = path.dirname(__dirname);
                     var separator = process.platform === 'win32' ? ';' : ':';
                     //var server = spawn('java', ['-Xmx1024m', '-cp', './libs/libs/*' + separator + './libs/bmotion-prob-standalone.jar', "-Dprob.home=./cli/", 'Start', '-standalone', '-local']);
                     //var server = exec('java', ['-Xmx1024m', '-cp', './libs/libs/*' + separator + './libs/bmotion-prob-standalone.jar', 'Start', '-standalone', '-local']);
                     //var server = exec('java -Xmx1024m -cp ' + binaryPath + '/libs/libs/*' + separator + binaryPath + '/libs/bmotion-prob-standalone.jar Start -standalone -local');
-                    var server = exec('java -Xmx1024m -cp ' + binaryPath + '/libs/*' + separator + binaryPath + '/libs/bmotion-prob-0.2.2-SNAPSHOT.jar de.bms.prob.Standalone -standalone -local');
+                    var server = exec('java -Xmx1024m -cp ' + appPath + '/libs/*' + separator + appPath + '/libs/bmotion-prob-0.2.2-SNAPSHOT.jar de.bms.prob.Standalone -standalone -local');
                     //var server = exec('java -Xmx1024m -cp ./libs/libs/*' + separator + './libs/bmotion-prob-standalone.jar -Dprob.home=./cli/ Start -standalone -local');
                     server.stdout.on('data', function (data) {
                         try {

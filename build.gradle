@@ -48,7 +48,11 @@ targets.each() { target ->
 
     task "assemble_${target}"(dependsOn: ["grunt_standalone_${target}", getLibs], type: Copy) {
         from 'build/libs'
-        into 'build/client/bmotion-prob-' + target + '/libs'
+        if (target == "darwin-x64") {
+            into 'build/client/bmotion-prob-' + target + '/bmotion-prob.app/Contents/Resources/libs'
+        } else {
+            into 'build/client/bmotion-prob-' + target + '/resources/libs'
+        }
     }
 
     task "zip_${target}"(dependsOn: [], type: Zip) {
