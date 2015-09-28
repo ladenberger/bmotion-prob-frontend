@@ -5,7 +5,7 @@
 define(['bms.func', 'jquery', 'prob.common', 'prob.observers', 'prob.modal'], function (bms, $) {
 
     var module = angular.module('prob.iframe.template', ['prob.common', 'prob.observers', 'prob.modal'])
-        .directive('bmsVisualisationView', ['$rootScope', 'bmsVisualizationService', 'bmsObserverService', 'ws', '$injector', 'bmsUIService', 'bmsModalService', 'trigger', function ($rootScope, bmsVisualizationService, bmsObserverService, ws, $injector, bmsUIService, bmsModalService, trigger) {
+        .directive('bmsVisualisationView', ['$rootScope', 'bmsVisualizationService', 'bmsObserverService', 'ws', '$injector', 'bmsUIService', 'bmsModalService', 'trigger', '$compile', function ($rootScope, bmsVisualizationService, bmsObserverService, ws, $injector, bmsUIService, bmsModalService, trigger, $compile) {
             return {
                 replace: false,
                 scope: {
@@ -19,6 +19,10 @@ define(['bms.func', 'jquery', 'prob.common', 'prob.observers', 'prob.modal'], fu
 
                     self.data = {};
 
+                    self.attrs = {};
+
+                    $scope.values = {};
+
                     self.checkObserver = function (observer, stateId, cause) {
                         stateId = stateId ? stateId : self.data.stateId;
                         cause = cause ? cause : trigger.TRIGGER_ANIMATION_CHANGED;
@@ -26,7 +30,8 @@ define(['bms.func', 'jquery', 'prob.common', 'prob.observers', 'prob.modal'], fu
                             bmsObserverService.checkObserver($scope.sessionId, $scope.id, observer, self.data.container.contents(), stateId, cause)
                                 .then(function (data) {
                                     if (!bms.isEmpty(data)) {
-                                        $scope.$broadcast('setValue', data);
+                                        //$scope.$broadcast('setValue', data);
+                                        $scope.values = $.extend(true, $scope.values, data);
                                     }
                                 });
                         }
@@ -49,7 +54,8 @@ define(['bms.func', 'jquery', 'prob.common', 'prob.observers', 'prob.modal'], fu
                                     }
                                 });
                                 if (!bms.isEmpty(fvalues)) {
-                                    $scope.$broadcast('changeValues', fvalues);
+                                    //$scope.$broadcast('changeValues', fvalues);
+                                    $scope.values = fvalues;
                                 }
                             });
 
@@ -133,10 +139,20 @@ define(['bms.func', 'jquery', 'prob.common', 'prob.observers', 'prob.modal'], fu
                         self.setupEvents();
                     });
 
+                    $scope.getValue = function (bmsid, attr, defaultValue) {
+                        var returnValue = defaultValue === 'undefined' ? undefined : defaultValue;
+                        var ele = $scope.values[bmsid];
+                        if (ele) {
+                            returnValue = ele[attr] === undefined ? returnValue : ele[attr];
+                        }
+                        return returnValue;
+                    };
+
                 }],
                 link: function ($scope, $element, attrs, ctrl) {
 
                     var iframe = $($element.contents());
+                    var iframeContents;
                     $scope.id = bms.uuid();
 
                     var initView = function (sessionId, view) {
@@ -167,6 +183,7 @@ define(['bms.func', 'jquery', 'prob.common', 'prob.observers', 'prob.modal'], fu
                             if (template) {
                                 iframe.attr('src', ctrl.data.templateFolder + '/' + template).attr('id', $scope.id);
                                 iframe.load(function () {
+                                    iframeContents = $(iframe.contents());
                                     bmsVisualizationService.setCurrentVisualizationId($scope.id);
                                     bmsVisualizationService.addVisualization($scope.id, ctrl.data);
                                     bmsUIService.setProBViewTraceId(ctrl.data.traceId);
@@ -184,6 +201,29 @@ define(['bms.func', 'jquery', 'prob.common', 'prob.observers', 'prob.modal'], fu
                     }, function (d) {
                         if (d[0]) {
                             initView(d[0], d[1]);
+                        }
+                    }, true);
+
+                    $scope.$watch("values", function (values) {
+                        for (bmsid in values) {
+                            var nattrs = values[bmsid];
+                            for (var a in nattrs) {
+                                if (ctrl.attrs[bmsid] === undefined) {
+                                    ctrl.attrs[bmsid] = [];
+                                }
+                                if ($.inArray(a, ctrl.attrs[bmsid])) {
+                                    var orgElement = iframeContents.find('[data-bms-id=' + bmsid + ']');
+                                    var attrDefault = orgElement.attr(a);
+                                    // Special case for class attributes
+                                    if (a === "class" && attrDefault === undefined) {
+                                        attrDefault = ""
+                                    }
+                                    orgElement.attr("ng-attr-" + a,
+                                        "{{getValue('" + bmsid + "','" + a + "','" + attrDefault + "')}}");
+                                    ctrl.attrs[bmsid].push(a);
+                                    $compile(orgElement)($scope);
+                                }
+                            }
                         }
                     }, true);
 

@@ -22,65 +22,6 @@ define(['angularAMD', 'angular', 'jquery'], function (angularAMD) {
             };
             return observerService;
         }])
-        .directive('bmsVisualisation', ['$compile', '$parentScope', function ($compile, $parentScope) {
-            return {
-                scope: {},
-                controller: ['$scope', function ($scope) {
-
-                    $scope.attrs = {};
-
-                    $scope.getValue = function (bmsid, attr, defaultValue) {
-                        var returnValue = defaultValue === 'undefined' ? undefined : defaultValue;
-                        var ele = $scope.values[bmsid];
-                        if (ele) {
-                            returnValue = ele[attr] === undefined ? returnValue : ele[attr];
-                        }
-                        return returnValue;
-                    };
-
-                    // Set only new values
-                    $parentScope.$on('setValue', function (e, value) {
-                        $scope.values = $.extend(true, $scope.values, value);
-                        $scope.$apply();
-                    });
-
-                    // Set and replace all values
-                    $parentScope.$on('changeValues', function (e, values) {
-                        $scope.values = values;
-                        $scope.$apply();
-                    });
-
-                }],
-                link: function ($scope, $element) {
-
-                    var contents = $($element).contents();
-
-                    $scope.$watch('values', function (values) {
-                        for (bmsid in values) {
-                            var nattrs = values[bmsid];
-                            for (var a in nattrs) {
-                                if ($scope.attrs[bmsid] === undefined) {
-                                    $scope.attrs[bmsid] = [];
-                                }
-                                if ($.inArray(a, $scope.attrs[bmsid])) {
-                                    var orgElement = contents.find('[data-bms-id=' + bmsid + ']');
-                                    var attrDefault = orgElement.attr(a);
-                                    // Special case for class attributes
-                                    if (a === "class" && attrDefault === undefined) {
-                                        attrDefault = ""
-                                    }
-                                    orgElement.attr("ng-attr-" + a,
-                                        "{{getValue('" + bmsid + "','" + a + "','" + attrDefault + "')}}");
-                                    $scope.attrs[bmsid].push(a);
-                                    $compile(orgElement)($scope);
-                                }
-                            }
-                        }
-                    }, true);
-
-                }
-            }
-        }])
         .directive('bmsSvg', ['bmsParentService', '$parentScope', '$compile', '$http', function (bmsParentService, $parentScope, $compile, $http) {
             return {
                 replace: false,
