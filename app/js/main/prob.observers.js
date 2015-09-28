@@ -12,11 +12,19 @@ define(['bms.func', 'jquery', 'angular', 'qtip'], function (bms, $) {
             //var hasErrors = false;
             var observerService = {
                 addObserver: function (visId, o) {
+
+                    var observerInstance = $injector.get(o.type, "");
+                    if (observerInstance) {
+                        try {
+                            o.data = observerInstance.getDefaultOptions(o.data);
+                        } catch (err) {
+                        }
+                    }
                     if (observers[visId] === undefined) {
                         observers[visId] = [];
                     }
-                    var no = $.extend({cause: "AnimationChanged"}, o);
-                    observers[visId].push(no);
+                    observers[visId].push(o);
+
                 },
                 addEvent: function (visId, e) {
                     if (events[visId] === undefined) {
@@ -173,7 +181,7 @@ define(['bms.func', 'jquery', 'angular', 'qtip'], function (bms, $) {
             };
             return observerService;
         }])
-        .service('csp-event', ['ws', '$q', 'bmsObserverService', 'bmsVisualizationService', function (ws, $q, bmsObserverService, bmsVisualizationService) {
+        .service('csp-event', ['ws', '$q', 'bmsObserverService', function (ws, $q, bmsObserverService) {
 
             var expressionCache = {};
 
@@ -223,6 +231,12 @@ define(['bms.func', 'jquery', 'angular', 'qtip'], function (bms, $) {
 
             var cspEventObserver = {
 
+                getDefaultOptions: function (options) {
+                    return bms.normalize($.extend({
+                        cause: "AnimationChanged",
+                        observers: []
+                    }, options), []);
+                },
                 apply: function (sessionId, visId, observer, container, options) {
 
                     var defer = $q.defer();
@@ -323,6 +337,14 @@ define(['bms.func', 'jquery', 'angular', 'qtip'], function (bms, $) {
         .service('formula', ['ws', '$q', 'bmsObserverService', function (ws, $q, bmsObserverService) {
 
             var formulaObserver = {
+                getDefaultOptions: function (options) {
+                    return bms.normalize($.extend({
+                        formulas: [],
+                        cause: "AnimationChanged",
+                        trigger: function () {
+                        }
+                    }, options), ["trigger"]);
+                },
                 getFormulas: function (observer) {
                     return observer.data.formulas;
                 },

@@ -2,25 +2,22 @@
  * BMotion Studio for ProB Visualization Module
  *
  */
-define(['bms.func', 'angularAMD', 'angular', 'jquery'], function (bms, angularAMD) {
+define(['angularAMD', 'angular', 'jquery'], function (angularAMD) {
 
     var module = angular.module('prob.template', [])
         .factory('$parentScope', ['$window', function ($window) {
             return $window.parent.angular.element($window.frameElement).scope();
         }])
-        .service('bmsParentService', ['$parentScope', function ($parentScope) {
+        .factory('bmsParentService', ['$parentScope', function ($parentScope) {
             var observerService = {
                 addObserver: function (type, data) {
                     $parentScope.addObserver(type, data);
-                    $parentScope.$apply();
                 },
                 addEvent: function (type, data) {
                     $parentScope.addEvent(type, data);
-                    $parentScope.$apply();
                 },
                 addSvg: function (svg) {
                     $parentScope.addSvg(svg);
-                    $parentScope.$apply();
                 }
             };
             return observerService;
@@ -41,11 +38,13 @@ define(['bms.func', 'angularAMD', 'angular', 'jquery'], function (bms, angularAM
                         return returnValue;
                     };
 
+                    // Set only new values
                     $parentScope.$on('setValue', function (e, value) {
                         $scope.values = $.extend(true, $scope.values, value);
                         $scope.$apply();
                     });
 
+                    // Set and replace all values
                     $parentScope.$on('changeValues', function (e, values) {
                         $scope.values = values;
                         $scope.$apply();
@@ -54,36 +53,28 @@ define(['bms.func', 'angularAMD', 'angular', 'jquery'], function (bms, angularAM
                 }],
                 link: function ($scope, $element) {
 
-                    // Give all elements an internal id
-                    $(document).find('body').find("*").each(function (i, v) {
-                        $(v).attr("data-bms-id", "bms" + bms.uuid());
-                    });
+                    var contents = $($element).contents();
 
-                    $scope.$watch('values', function () {
-
-                        var changed = false;
-                        for (bmsid in $scope.values) {
-                            var nattrs = $scope.values[bmsid];
+                    $scope.$watch('values', function (values) {
+                        for (bmsid in values) {
+                            var nattrs = values[bmsid];
                             for (var a in nattrs) {
                                 if ($scope.attrs[bmsid] === undefined) {
                                     $scope.attrs[bmsid] = [];
                                 }
                                 if ($.inArray(a, $scope.attrs[bmsid])) {
-                                    var orgElement = $($element).contents().find('[data-bms-id=' + bmsid + ']');
-                                    var attrDefault = $(orgElement).attr(a);
+                                    var orgElement = contents.find('[data-bms-id=' + bmsid + ']');
+                                    var attrDefault = orgElement.attr(a);
                                     // Special case for class attributes
                                     if (a === "class" && attrDefault === undefined) {
                                         attrDefault = ""
                                     }
-                                    $(orgElement).attr("ng-attr-" + a,
+                                    orgElement.attr("ng-attr-" + a,
                                         "{{getValue('" + bmsid + "','" + a + "','" + attrDefault + "')}}");
                                     $scope.attrs[bmsid].push(a);
-                                    changed = true;
+                                    $compile(orgElement)($scope);
                                 }
                             }
-                        }
-                        if (changed) {
-                            $compile($element.contents())($scope);
                         }
                     }, true);
 
@@ -113,12 +104,12 @@ define(['bms.func', 'angularAMD', 'angular', 'jquery'], function (bms, angularAM
                     };
                     reloadTemplate();
 
-                    $parentScope.$on('visualizationSaved', function () {
-                        reloadTemplate().then(function () {
-                            $compile(element.contents())($scope);
-                            $parentScope.$broadcast('reloadTemplate');
-                        });
-                    });
+                    /*$parentScope.$on('visualizationSaved', function () {
+                     reloadTemplate().then(function () {
+                     $compile(element.contents())($scope);
+                     $parentScope.$broadcast('reloadTemplate');
+                     });
+                     });*/
 
                 }
             }
@@ -126,43 +117,19 @@ define(['bms.func', 'angularAMD', 'angular', 'jquery'], function (bms, angularAM
 
     angularAMD.bootstrap(module);
 
-    var observeFormula = function (options) {
-        var settings = bms.normalize($.extend({
-            formulas: [],
-            cause: "AnimationChanged",
-            trigger: function () {
-            }
-        }, options), ["trigger"]);
-        var injector = angular.element(document).injector();
-        var bmsObserverService = injector.get('bmsParentService');
-        bmsObserverService.addObserver('formula', settings);
-    };
-
-    var observeCSPEvent = function (options) {
-        var settings = bms.normalize($.extend({
-            cause: "AnimationChanged",
-            observers: []
-        }, options), []);
-        var injector = angular.element(document).injector();
-        var bmsObserverService = injector.get('bmsParentService');
-        bmsObserverService.addObserver('csp-event', settings);
-    };
-
     var observe = function (what, options) {
         setTimeout(function () {
-            if (what === "formula") {
-                observeFormula(options);
-            } else if (what === "csp-event") {
-                observeCSPEvent(options);
-            }
+            var injector = angular.element(document).injector();
+            var bmsParentService = injector.get('bmsParentService');
+            bmsParentService.addObserver(what, options);
         }, 0);
     };
 
     var executeEvent = function (options) {
         setTimeout(function () {
             var injector = angular.element(document).injector();
-            var bmsObserverService = injector.get('bmsParentService');
-            bmsObserverService.addEvent('executeEvent', options);
+            var bmsParentService = injector.get('bmsParentService');
+            bmsParentService.addEvent('executeEvent', options);
         }, 0);
     };
 
