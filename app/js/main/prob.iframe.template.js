@@ -30,7 +30,6 @@ define(['bms.func', 'jquery', 'prob.common', 'prob.observers', 'prob.modal'], fu
                             bmsObserverService.checkObserver($scope.sessionId, $scope.id, observer, self.data.container.contents(), stateId, cause)
                                 .then(function (data) {
                                     if (!bms.isEmpty(data)) {
-                                        //$scope.$broadcast('setValue', data);
                                         $scope.values = $.extend(true, $scope.values, data);
                                     }
                                 });
@@ -54,7 +53,6 @@ define(['bms.func', 'jquery', 'prob.common', 'prob.observers', 'prob.modal'], fu
                                     }
                                 });
                                 if (!bms.isEmpty(fvalues)) {
-                                    //$scope.$broadcast('changeValues', fvalues);
                                     $scope.values = fvalues;
                                 }
                             });
@@ -71,10 +69,6 @@ define(['bms.func', 'jquery', 'prob.common', 'prob.observers', 'prob.modal'], fu
                                 instance.setup($scope.sessionId, $scope.id, evt, self.data.container.contents(), self.data.traceId);
                             }
                         });
-                    };
-
-                    $scope.addSvg = function (svg) {
-                        bmsVisualizationService.addSvg($scope.id, svg);
                     };
 
                     $scope.addObserver = function (type, data) {
@@ -187,6 +181,7 @@ define(['bms.func', 'jquery', 'prob.common', 'prob.observers', 'prob.modal'], fu
                                     bmsVisualizationService.setCurrentVisualizationId($scope.id);
                                     bmsVisualizationService.addVisualization($scope.id, ctrl.data);
                                     bmsUIService.setProBViewTraceId(ctrl.data.traceId);
+                                    $compile(iframeContents)($scope);
                                     bmsModalService.endLoading();
                                     $rootScope.$broadcast('visualizationLoaded', $scope.id, viewObj);
                                 });
@@ -226,6 +221,39 @@ define(['bms.func', 'jquery', 'prob.common', 'prob.observers', 'prob.modal'], fu
                             }
                         }
                     }, true);
+
+                }
+            }
+        }])
+        .directive('bmsSvg', ['$http', 'bmsVisualizationService', function ($http, bmsVisualizationService) {
+            return {
+                replace: false,
+                /*transclude: true,
+                 scope: {
+                 svg: '@bmsSvg',
+                 id: '@id'
+                 },*/
+                controller: ['$scope', function ($scope) {
+                }],
+                link: function ($scope, element, attrs) {
+
+                    var svg = attrs['bmsSvg'];
+                    var vis = bmsVisualizationService.getVisualization($scope.id);
+                    bmsVisualizationService.addSvg($scope.id, svg);
+
+                    var reloadTemplate = function () {
+                        return $http.get(vis.templateFolder + '/' + svg).success(function (svgCode) {
+                            element.html(svgCode);
+                        });
+                    };
+                    reloadTemplate();
+
+                    /*$parentScope.$on('visualizationSaved', function () {
+                     reloadTemplate().then(function () {
+                     $compile(element.contents())($scope);
+                     $parentScope.$broadcast('reloadTemplate');
+                     });
+                     });*/
 
                 }
             }

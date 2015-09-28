@@ -12,7 +12,7 @@ define(['prob.modal', 'bms.common'], function () {
             return {
                 replace: false,
                 scope: {
-                    svg: '@bmsSvg',
+                    svg: '@bmsSvgFile',
                     id: '@bmsVisualisationId',
                     sessionId: '@bmsVisualisationEditor'
                 },

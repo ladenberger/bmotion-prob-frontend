@@ -15,45 +15,9 @@ define(['angularAMD', 'angular', 'jquery'], function (angularAMD) {
                 },
                 addEvent: function (type, data) {
                     $parentScope.addEvent(type, data);
-                },
-                addSvg: function (svg) {
-                    $parentScope.addSvg(svg);
                 }
             };
             return observerService;
-        }])
-        .directive('bmsSvg', ['bmsParentService', '$parentScope', '$compile', '$http', function (bmsParentService, $parentScope, $compile, $http) {
-            return {
-                replace: false,
-                transclude: true,
-                scope: {
-                    svg: '@bmsSvg'
-                },
-                /*,
-                 templateUrl: function (elem, attrs) {
-                 return attrs['bmsSvg'];
-                 },*/
-                controller: ['$scope', function ($scope) {
-                    bmsParentService.addSvg($scope.svg);
-                }],
-                link: function ($scope, element) {
-
-                    var reloadTemplate = function () {
-                        return $http.get($scope.svg).success(function (svg) {
-                            element.html(svg);
-                        });
-                    };
-                    reloadTemplate();
-
-                    /*$parentScope.$on('visualizationSaved', function () {
-                     reloadTemplate().then(function () {
-                     $compile(element.contents())($scope);
-                     $parentScope.$broadcast('reloadTemplate');
-                     });
-                     });*/
-
-                }
-            }
         }]);
 
     angularAMD.bootstrap(module);
@@ -63,6 +27,14 @@ define(['angularAMD', 'angular', 'jquery'], function (angularAMD) {
             var injector = angular.element(document).injector();
             var bmsParentService = injector.get('bmsParentService');
             bmsParentService.addObserver(what, options);
+        }, 0);
+    };
+
+    var registerEvent = function (type, options) {
+        setTimeout(function () {
+            var injector = angular.element(document).injector();
+            var bmsParentService = injector.get('bmsParentService');
+            bmsParentService.addEvent(type, options);
         }, 0);
     };
 
@@ -76,6 +48,7 @@ define(['angularAMD', 'angular', 'jquery'], function (angularAMD) {
 
     return {
         observe: observe,
+        registerEvent: registerEvent,
         executeEvent: executeEvent
     };
 
