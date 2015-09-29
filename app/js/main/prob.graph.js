@@ -279,7 +279,7 @@ define(['jquery', 'bms.visualization', 'prob.observers', 'angular-xeditable'], f
                         };
 
                         // Start compiling ...
-                        var compiled = $compile(element.contents())(newScope);
+                        var compiled = $compile(element)(newScope);
 
                         // Wait for finishing compiling ...
                         $timeout(function () {
