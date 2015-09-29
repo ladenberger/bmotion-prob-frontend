@@ -80,6 +80,14 @@ define(['bms.func', 'jquery', 'angular', 'qtip'], function (bms, $) {
                     }
                     return bmsidCache[visId][selector];
                 },
+                getBmsId: function (element) {
+                    var cbmsid = element.attr("data-bms-id");
+                    if (!cbmsid) {
+                        cbmsid = bms.uuid();
+                        element.attr("data-bms-id", cbmsid);
+                    }
+                    return cbmsid;
+                },
                 checkObserver: function (sessionId, visId, observer, container, stateId, cause, data) {
                     var defer = $q.defer();
                     var observerInstance = $injector.get(observer.type, '');
@@ -354,24 +362,35 @@ define(['bms.func', 'jquery', 'angular', 'qtip'], function (bms, $) {
 
                     var result = options.result;
 
+                    var fvalues = {};
+
                     if (observer.data.trigger !== undefined) {
                         var element = container.find(observer.data.selector);
                         var self = this;
+
                         //var element = container.find("[data-bms-id=" + observer.bmsid + "]");
                         element.each(function () {
-                            observer.data.trigger.call(self, $(this), result);
+
+                            var ele = $(this);
+                            var returnValue = observer.data.trigger.call(self, ele, result);
+                            var bmsid = bmsObserverService.getBmsId(ele);
+                            if (returnValue) fvalues[bmsid] = returnValue;
+
                         });
-                        defer.resolve();
-                    } else if (observer.data.getChanges !== undefined) {
-                        var obj = {};
-                        var rr = observer.data.getChanges.call(this, result);
-                        if (rr) {
-                            var bmsids = bmsObserverService.getBmsIds(visId, observer.data.selector, container);
-                            angular.forEach(bmsids, function (id) {
-                                obj[id] = rr;
-                            });
-                        }
-                        defer.resolve(obj);
+                        defer.resolve(fvalues);
+
+                        /* }
+                         else if (observer.data.getChanges !== undefined) {
+                         var obj = {};
+                         var rr = observer.data.getChanges.call(this, result);
+                         if (rr) {
+                         var bmsids = bmsObserverService.getBmsIds(visId, observer.data.selector, container);
+                         angular.forEach(bmsids, function (id) {
+                         obj[id] = rr;
+                         });
+                         }
+                         defer.resolve(obj);
+                         } */
                     } else {
                         defer.resolve();
                     }
