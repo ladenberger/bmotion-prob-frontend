@@ -5,7 +5,7 @@
 define(['jquery', 'bms.visualization', 'prob.observers', 'angular-xeditable'], function ($) {
 
     return angular.module('prob.graph', ['xeditable', 'bms.visualization', 'prob.observers'])
-        .factory('bmsRenderingService', ['$q', 'ws', '$injector', 'bmsObserverService', 'bmsVisualizationService', '$http', '$templateCache', '$compile', '$rootScope', function ($q, ws, $injector, bmsObserverService, bmsVisualizationService, $http, $templateCache, $compile, $rootScope) {
+        .factory('bmsRenderingService', ['$q', 'ws', '$injector', 'bmsObserverService', 'bmsVisualizationService', '$http', '$templateCache', '$compile', '$rootScope', '$interpolate', '$timeout', function ($q, ws, $injector, bmsObserverService, bmsVisualizationService, $http, $templateCache, $compile, $rootScope, $interpolate, $timeout) {
 
             var renderingService = {
 
@@ -160,7 +160,7 @@ define(['jquery', 'bms.visualization', 'prob.observers', 'angular-xeditable'], f
                         }
                     });
                     $q.all(imgConvert).then(function () {
-                        defer.resolve();
+                        defer.resolve(container);
                     });
                     return defer.promise;
                 },
@@ -181,12 +181,9 @@ define(['jquery', 'bms.visualization', 'prob.observers', 'angular-xeditable'], f
                     var promises = [];
                     angular.forEach(elementObservers, function (obj) {
 
-                        var clonedElement = obj.element.clone(true);
-                        var svgWrapper = $('<svg xmlns="http://www.w3.org/2000/svg" style="background-color:white" xmlns:xlink="http://www.w3.org/1999/xlink" style="background-color:white" width="1000" height="1000" data-bms-graph-element>').html(clonedElement);
-
                         promises.push(function () {
                             var d = $q.defer();
-                            renderingService.getElementSnapshotAsSvg(sessionId, visualizationId, obj.observers, svgWrapper, node, path)
+                            renderingService.getElementSnapshotAsSvg(sessionId, visualizationId, obj, node, path)
                                 .then(function (svg) {
                                     d.resolve(renderingService.getImageCanvasForSvg(svg));
                                 });
@@ -228,10 +225,14 @@ define(['jquery', 'bms.visualization', 'prob.observers', 'angular-xeditable'], f
                     return defer.promise;
 
                 },
-                getElementSnapshotAsSvg: function (sessionId, visualizationId, observers, element, node, path) {
+                getElementSnapshotAsSvg: function (sessionId, visualizationId, obj, node, path) {
 
                     var defer = $q.defer();
                     var results = node.data['results'];
+
+                    var observers = obj.observers;
+                    var clonedElement = obj.element.clone(true);
+                    var element = $('<svg xmlns="http://www.w3.org/2000/svg" style="background-color:white" xmlns:xlink="http://www.w3.org/1999/xlink" style="background-color:white" width="1000" height="1000">').html(clonedElement);
 
                     // Prepare observers
                     var promises = [];
@@ -265,28 +266,35 @@ define(['jquery', 'bms.visualization', 'prob.observers', 'angular-xeditable'], f
                                 $.extend(true, fvalues, value);
                             }
                         });
-                        /*// Set attribute and values
-                         for (bid in fvalues) {
-                         var nattrs = fvalues[bid];
-                         for (a in nattrs) {
-                         var orgElement = svgWrapper.find('[data-bms-id=' + bid + ']');
-                         $(orgElement).attr(a, nattrs[a]);
-                         }
-                         }*/
 
                         var newScope = $rootScope.$new(true);
                         newScope.values = fvalues;
-                        $compile(element)(newScope);
+                        newScope.getValue = function (bmsid, attr, defaultValue) {
+                            var returnValue = defaultValue === 'undefined' ? undefined : defaultValue;
+                            var ele = fvalues[bmsid];
+                            if (ele) {
+                                returnValue = ele[attr] === undefined ? returnValue : ele[attr];
+                            }
+                            return returnValue;
+                        };
 
-                        // Replace image paths with embedded images
-                        renderingService.convertSvgImagePaths(path, element)
-                            .then(function () {
-                                /*if (css !== undefined) {
-                                 svgWrapper.prepend(css);
-                                 }*/
-                                defer.resolve($('<div>').html(element).html());
-                                newScope.$destroy();
-                            });
+                        // Start compiling ...
+                        var compiled = $compile(element.contents())(newScope);
+
+                        // Wait for finishing compiling ...
+                        $timeout(function () {
+                            // Destroy scope
+                            newScope.$destroy();
+                            // Replace image paths with embedded images
+                            var ecompiled = $(compiled);
+                            renderingService.convertSvgImagePaths(path, ecompiled)
+                                .then(function (convertedElement) {
+                                    /*if (css !== undefined) {
+                                     svgWrapper.prepend(css);
+                                     }*/
+                                    defer.resolve($('<div>').html(convertedElement).html());
+                                });
+                        }, 0);
 
                     });
 
@@ -699,45 +707,6 @@ define(['jquery', 'bms.visualization', 'prob.observers', 'angular-xeditable'], f
                 }
             }
 
-        }])
-        .directive('bmsGraphElement', ['$compile', function ($compile) {
-            return {
-                controller: ['$scope', function ($scope) {
-
-                    $scope.getValue = function (bmsid, attr, defaultValue) {
-                        var returnValue = defaultValue === 'undefined' ? undefined : defaultValue;
-                        var ele = $scope.values[bmsid];
-                        if (ele) {
-                            returnValue = ele[attr] === undefined ? returnValue : ele[attr];
-                        }
-                        return returnValue;
-                    };
-
-                }],
-                link: function ($scope, $element) {
-
-                    var contents = $($element).contents();
-
-                    for (bmsid in $scope.values) {
-                        var nattrs = $scope.values[bmsid];
-                        for (var a in nattrs) {
-                            var orgElement = contents.find('[data-bms-id=' + bmsid + ']');
-                            var attrDefault = orgElement.attr(a);
-                            // Special case for class attributes
-                            if (a === "class" && attrDefault === undefined) {
-                                attrDefault = ""
-                            }
-                            if (!orgElement.attr("ng-attr-" + a)) {
-                                orgElement.attr("ng-attr-" + a,
-                                    "{{getValue('" + bmsid + "','" + a + "','" + attrDefault + "')}}");
-                            }
-                        }
-                    }
-
-                    $compile($element.contents())($scope);
-
-                }
-            }
         }]);
 
 });

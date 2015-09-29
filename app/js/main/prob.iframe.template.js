@@ -206,7 +206,7 @@ define(['bms.func', 'jquery', 'prob.common', 'prob.observers', 'prob.modal'], fu
                                 if (ctrl.attrs[bmsid] === undefined) {
                                     ctrl.attrs[bmsid] = [];
                                 }
-                                if ($.inArray(a, ctrl.attrs[bmsid])) {
+                                if (ctrl.attrs[bmsid].indexOf(a) === -1) {
                                     var orgElement = iframeContents.find('[data-bms-id=' + bmsid + ']');
                                     var attrDefault = orgElement.attr(a);
                                     // Special case for class attributes
