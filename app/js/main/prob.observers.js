@@ -2,55 +2,45 @@
  * BMotion Studio for ProB Observer Module
  *
  */
-define(['bms.func', 'jquery', 'angular', 'qtip'], function (bms, $) {
+define(['bms.func', 'jquery', 'angular', 'qtip', 'prob.modal'], function (bms, $) {
 
-    return angular.module('prob.observers', ['bms.common'])
-        .service('bmsObserverService', ['$q', '$injector', 'trigger', function ($q, $injector, trigger) {
+    return angular.module('prob.observers', ['bms.common', 'prob.modal'])
+        .service('bmsObserverService', ['$q', '$injector', 'trigger', 'bmsModalService', function ($q, $injector, trigger, bmsModalService) {
             var observers = {};
             var events = {};
             var bmsidCache = {};
             //var hasErrors = false;
             var observerService = {
-                addObserver: function (visId, o) {
-
-                    var observerInstance = $injector.get(o.type, "");
-                    if (observerInstance) {
-                        try {
-                            o.data = observerInstance.getDefaultOptions(o.data);
-                        } catch (err) {
+                addObserverEvent: function (visId, list, e) {
+                    try {
+                        var instance = $injector.get(e.type, "");
+                        if (typeof instance.getDefaultOptions === "function") {
+                            e.data = instance.getDefaultOptions(e.data);
                         }
+                    } catch (err) {
+                        bmsModalService.setError("Observer or event with type '" + e.type + "' does not exists! (Selector: " + e.data.selector + ")");
+                    } finally {
+                        if (list[visId] === undefined) {
+                            list[visId] = [];
+                        }
+                        list[visId].push(e);
                     }
-                    if (observers[visId] === undefined) {
-                        observers[visId] = [];
-                    }
-                    observers[visId].push(o);
-
+                },
+                addObserver: function (visId, o) {
+                    observerService.addObserverEvent(visId, observers, o);
                 },
                 addEvent: function (visId, e) {
-                    if (events[visId] === undefined) {
-                        events[visId] = [];
-                    }
-                    events[visId].push(e);
+                    observerService.addObserverEvent(visId, events, e);
                 },
                 addObservers: function (visId, obs) {
-                    if (observers[visId] === undefined) {
-                        observers[visId] = [];
-                    }
-                    if (obs) {
-                        $.each(obs, function (i, v) {
-                            observerService.addObserver(visId, v)
-                        });
-                    }
+                    angular.forEach(obs, function (o) {
+                        observerService.addObserver(visId, o)
+                    });
                 },
                 addEvents: function (visId, evts) {
-                    if (events[visId] === undefined) {
-                        events[visId] = [];
-                    }
-                    if (evts) {
-                        $.each(evts, function (i, v) {
-                            observerService.addEvent(visId, v)
-                        });
-                    }
+                    angular.forEach(evts, function (e) {
+                        observerService.addEvent(visId, e)
+                    });
                 },
                 getObservers: function (visId) {
                     return observers[visId];
@@ -59,11 +49,6 @@ define(['bms.func', 'jquery', 'angular', 'qtip'], function (bms, $) {
                     return events[visId];
                 },
                 getBmsIds: function (visId, selector, container) {
-                    /*var bmsid = element.attr("data-bms-id");
-                     if (!bmsid) {
-                     bmsid = bms.uuid();
-                     element.attr("data-bms-id", bmsid);
-                     }*/
                     if (bmsidCache[visId] === undefined) {
                         bmsidCache[visId] = {};
                     }
@@ -80,7 +65,7 @@ define(['bms.func', 'jquery', 'angular', 'qtip'], function (bms, $) {
                     }
                     return bmsidCache[visId][selector];
                 },
-                getBmsId: function (element) {
+                getBmsIdForElement: function (element) {
                     var cbmsid = element.attr("data-bms-id");
                     if (!cbmsid) {
                         cbmsid = bms.uuid();
@@ -90,12 +75,19 @@ define(['bms.func', 'jquery', 'angular', 'qtip'], function (bms, $) {
                 },
                 checkObserver: function (sessionId, visId, observer, container, stateId, cause, data) {
                     var defer = $q.defer();
-                    var observerInstance = $injector.get(observer.type, '');
+                    var observerInstance;
+                    if (!cause) cause = trigger.TRIGGER_ANIMATION_CHANGED;
+                    try {
+                        observerInstance = $injector.get(observer.type, '');
+                    } catch (err) {
+                        bmsModalService.setError("No observer with type '" + observer.type + "' exists! (Selector: " + observer.data.selector + ")");
+                    }
                     if (observerInstance) {
-                        if (!cause) cause = trigger.TRIGGER_ANIMATION_CHANGED;
                         observerInstance.check(sessionId, visId, observer, container, stateId, cause, data).then(function (res) {
                             defer.resolve(res);
                         });
+                    } else {
+                        defer.resolve();
                     }
                     return defer.promise;
                 },
@@ -106,6 +98,7 @@ define(['bms.func', 'jquery', 'angular', 'qtip'], function (bms, $) {
                     var formulaObservers = [];
                     var predicateObservers = [];
                     var promises = [];
+                    var errors = [];
 
                     if (!cause) cause = trigger.TRIGGER_ANIMATION_CHANGED;
                     //observerService.hideErrors(container);
@@ -116,9 +109,11 @@ define(['bms.func', 'jquery', 'angular', 'qtip'], function (bms, $) {
                         } else if (o.type === 'predicate') {
                             predicateObservers.push(o);
                         } else {
-                            var observerInstance = $injector.get(o.type, "");
-                            if (observerInstance) {
+                            try {
+                                var observerInstance = $injector.get(o.type, "");
                                 promises.push(observerInstance.check(sessionId, visId, o, container, stateId, cause, data));
+                            } catch (err) {
+                                errors.push("No observer with type '" + o.type + "' exists! (Selector: " + o.data.selector + ")");
                             }
                         }
                     });
@@ -135,6 +130,10 @@ define(['bms.func', 'jquery', 'angular', 'qtip'], function (bms, $) {
                         // Execute predicate observer at once (performance boost)
                         var observerInstance = $injector.get("predicate", "");
                         promises.push(observerInstance.check(sessionId, visId, predicateObservers, container, stateId, cause, data));
+                    }
+
+                    if (errors.length > 0) {
+                        bmsModalService.setError(errors.join("<br/>"));
                     }
 
                     $q.all(promises).then(function (res) {
@@ -367,30 +366,13 @@ define(['bms.func', 'jquery', 'angular', 'qtip'], function (bms, $) {
                     if (observer.data.trigger !== undefined) {
                         var element = container.find(observer.data.selector);
                         var self = this;
-
-                        //var element = container.find("[data-bms-id=" + observer.bmsid + "]");
                         element.each(function () {
-
                             var ele = $(this);
                             var returnValue = observer.data.trigger.call(self, ele, result);
-                            var bmsid = bmsObserverService.getBmsId(ele);
+                            var bmsid = bmsObserverService.getBmsIdForElement(ele);
                             if (returnValue) fvalues[bmsid] = returnValue;
-
                         });
                         defer.resolve(fvalues);
-
-                        /* }
-                         else if (observer.data.getChanges !== undefined) {
-                         var obj = {};
-                         var rr = observer.data.getChanges.call(this, result);
-                         if (rr) {
-                         var bmsids = bmsObserverService.getBmsIds(visId, observer.data.selector, container);
-                         angular.forEach(bmsids, function (id) {
-                         obj[id] = rr;
-                         });
-                         }
-                         defer.resolve(obj);
-                         } */
                     } else {
                         defer.resolve();
                     }
@@ -406,16 +388,16 @@ define(['bms.func', 'jquery', 'angular', 'qtip'], function (bms, $) {
                     var formulas = [];
                     angular.forEach(observers, function (o) {
                         if (o.data.cause === trigger) {
-                            angular.forEach(o.data.formulas, function (f) {
-                                formulas.push({
+                            formulas = formulas.concat(bms.mapFilter(o.data.formulas, function (f) {
+                                return {
                                     formula: f,
                                     translate: o.data.translate ? o.data.translate : false
-                                });
-                            });
+                                };
+                            }));
                         }
                     });
 
-                    // Evaluate formulas
+                    // Evaluate formulas and apply observers
                     ws.emit("evaluateFormulas", {
                         data: {
                             id: sessionId,
@@ -423,20 +405,19 @@ define(['bms.func', 'jquery', 'angular', 'qtip'], function (bms, $) {
                             stateId: stateId
                         }
                     }, function (data) {
-                        var promises = [];
-                        angular.forEach(observers, function (o) {
+
+                        var promises = bms.mapFilter(observers, function (o) {
                             if (o.data.cause === trigger) {
-                                var ff = [];
-                                angular.forEach(o.data.formulas, function (f) {
-                                    if (data[f]) {
-                                        ff.push(data[f].trans ? data[f].trans : data[f].result);
-                                    }
+                                return formulaObserver.apply(sessionId, visId, o, container, {
+                                    result: bms.mapFilter(o.data.formulas, function (f) {
+                                        if (data[f]) {
+                                            return data[f].trans ? data[f].trans : data[f].result;
+                                        }
+                                    })
                                 });
-                                promises.push(formulaObserver.apply(sessionId, visId, o, container, {
-                                    result: ff
-                                }));
                             }
                         });
+
                         var fvalues = {};
                         $q.all(promises).then(function (data) {
                             angular.forEach(data, function (value) {

@@ -6,6 +6,11 @@ define(['jquery'], function ($) {
 
     var api = {
 
+        mapFilter: function (arr, func) {
+            return arr.map(func).filter(function (x) {
+                return typeof x !== 'undefined';
+            });
+        },
         getUrlParameter: function (sParam) {
             var sPageURL = window.location.search.substring(1);
             var sURLVariables = sPageURL.split('&');
