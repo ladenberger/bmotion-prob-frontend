@@ -31,6 +31,7 @@ define(['bms.func', 'jquery', 'prob.common', 'prob.observers', 'prob.modal'], fu
                                 .then(function (data) {
                                     if (!bms.isEmpty(data)) {
                                         $scope.values = $.extend(true, $scope.values, data);
+                                        $scope.applyValues();
                                     }
                                 });
                         }
@@ -54,6 +55,7 @@ define(['bms.func', 'jquery', 'prob.common', 'prob.observers', 'prob.modal'], fu
                                 });
                                 if (!bms.isEmpty(fvalues)) {
                                     $scope.values = fvalues;
+                                    $scope.applyValues();
                                 }
                             });
 
@@ -63,12 +65,18 @@ define(['bms.func', 'jquery', 'prob.common', 'prob.observers', 'prob.modal'], fu
 
                     self.setupEvents = function () {
                         var events = bmsObserverService.getEvents($scope.id);
-                        events.forEach(function (evt) {
-                            var instance = $injector.get(evt.type, "");
-                            if (instance) {
-                                instance.setup($scope.sessionId, $scope.id, evt, self.data.container.contents(), self.data.traceId);
-                            }
+                        angular.forEach(events, function (evt) {
+                            self.setupEvent(evt);
                         });
+                    };
+
+                    self.setupEvent = function (evt) {
+                        try {
+                            var instance = $injector.get(evt.type, "");
+                            instance.setup($scope.sessionId, $scope.id, evt, self.data.container.contents(), self.data.traceId);
+                        } catch (err) {
+                            bmsModalService.setError("No event with type '" + evt.type + "' exists! (Selector: " + evt.data.selector + ")");
+                        }
                     };
 
                     $scope.addObserver = function (type, data) {
@@ -129,6 +137,8 @@ define(['bms.func', 'jquery', 'prob.common', 'prob.observers', 'prob.modal'], fu
                     });
 
                     $scope.$on('reloadTemplate', function () {
+                        bmsObserverService.clearBmsIdCache($scope.id);
+                        self.attrs = {};
                         self.checkObservers();
                         self.setupEvents();
                     });
@@ -142,7 +152,8 @@ define(['bms.func', 'jquery', 'prob.common', 'prob.observers', 'prob.modal'], fu
                         return returnValue;
                     };
 
-                }],
+                }
+                ],
                 link: function ($scope, $element, attrs, ctrl) {
 
                     var iframe = $($element.contents());
@@ -199,7 +210,8 @@ define(['bms.func', 'jquery', 'prob.common', 'prob.observers', 'prob.modal'], fu
                         }
                     }, true);
 
-                    $scope.$watch("values", function (values) {
+                    $scope.applyValues = function () {
+                        var values = $scope.values;
                         for (bmsid in values) {
                             var nattrs = values[bmsid];
                             for (var a in nattrs) {
@@ -220,12 +232,14 @@ define(['bms.func', 'jquery', 'prob.common', 'prob.observers', 'prob.modal'], fu
                                 }
                             }
                         }
-                    }, true);
+                    };
 
                 }
             }
-        }])
-        .directive('bmsSvg', ['$http', 'bmsVisualizationService', function ($http, bmsVisualizationService) {
+        }
+        ])
+        .
+        directive('bmsSvg', ['$http', 'bmsVisualizationService', '$rootScope', function ($http, bmsVisualizationService, $rootScope) {
             return {
                 replace: false,
                 /*transclude: true,
@@ -248,12 +262,11 @@ define(['bms.func', 'jquery', 'prob.common', 'prob.observers', 'prob.modal'], fu
                     };
                     reloadTemplate();
 
-                    /*$parentScope.$on('visualizationSaved', function () {
-                     reloadTemplate().then(function () {
-                     $compile(element.contents())($scope);
-                     $parentScope.$broadcast('reloadTemplate');
-                     });
-                     });*/
+                    $scope.$on('visualizationSaved', function () {
+                        reloadTemplate().then(function () {
+                            $rootScope.$broadcast('reloadTemplate');
+                        });
+                    });
 
                 }
             }

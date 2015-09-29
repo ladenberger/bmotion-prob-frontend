@@ -5464,6 +5464,7 @@ $.SvgCanvas = function (container, config) {
             out.push("<");
             out.push(elem.nodeName);
             if (elem.id === 'svgcontent') {
+                var svgRootId = methodDraw.getSvgRootId();
                 // Process root element separately
                 var res = getResolution();
 
@@ -5486,6 +5487,7 @@ $.SvgCanvas = function (container, config) {
                 }
 
                 out.push(' width="' + res.w + '" height="' + res.h + '"' + vb + ' xmlns="' + svgns + '"');
+                if (svgRootId) out.push(' id="' + svgRootId + '"');
 
                 var nsuris = {};
 

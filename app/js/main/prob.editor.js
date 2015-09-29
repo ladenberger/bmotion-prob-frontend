@@ -26,6 +26,7 @@ define(['angularAMD', 'angular', 'jquery.jgraduate', 'jpicker',
             var self = this;
             bmsParentService.init().then(function (obj) {
                 methodDraw.setVisualization(obj.vis);
+                methodDraw.setSvgRootId(obj.rootId);
                 self.svg = obj.svg;
                 if (obj.content) methodDraw.loadFromString(obj.content);
             });

@@ -2,7 +2,7 @@
  * BMotion Studio for ProB Editor Module
  *
  */
-define(['prob.modal', 'bms.common'], function () {
+define(['jquery','prob.modal', 'bms.common'], function ($) {
 
     var module = angular.module('prob.iframe.editor', ['prob.modal', 'bms.common'])
         .factory('fs', function () {
@@ -29,7 +29,8 @@ define(['prob.modal', 'bms.common'], function () {
                                 defer.resolve({
                                     svg: $scope.svg,
                                     content: svg,
-                                    vis: vis
+                                    vis: vis,
+                                    rootId: $(svg).attr('id')
                                 });
                             }).error(function (error) {
                                 bmsModalService.setError("Some error occurred while requesting file " + $scope.svg);

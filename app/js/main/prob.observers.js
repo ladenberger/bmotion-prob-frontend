@@ -65,6 +65,11 @@ define(['bms.func', 'jquery', 'angular', 'qtip', 'prob.modal'], function (bms, $
                     }
                     return bmsidCache[visId][selector];
                 },
+                clearBmsIdCache: function (visId) {
+                    if (bmsidCache[visId]) {
+                        bmsidCache[visId] = {};
+                    }
+                },
                 getBmsIdForElement: function (element) {
                     var cbmsid = element.attr("data-bms-id");
                     if (!cbmsid) {

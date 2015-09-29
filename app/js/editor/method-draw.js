@@ -33,6 +33,7 @@ define(["jquery", "touch", "jquery.hotkeys", "jquery.bbq",
         var Editor = {};
         var is_ready = false;
         var visualization;
+        var svgRootId;
         curConfig = {
             canvas_expansion: 1,
             dimensions: [580, 400],
@@ -109,6 +110,14 @@ define(["jquery", "touch", "jquery.hotkeys", "jquery.bbq",
 
         Editor.setVisualization = function (vis) {
             visualization = vis;
+        };
+
+        Editor.setSvgRootId = function(id) {
+            svgRootId = id;
+        };
+
+        Editor.getSvgRootId = function() {
+            return svgRootId;
         };
 
         // Extension mechanisms must call setCustomHandlers with two functions: opts.open and opts.save
