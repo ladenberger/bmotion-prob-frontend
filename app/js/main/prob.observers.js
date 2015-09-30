@@ -459,6 +459,9 @@ define(['bms.func', 'jquery', 'angular', 'qtip', 'prob.modal'], function (bms, $
                 getDefaultOptions: function (options) {
                     return bms.normalize($.extend({
                         expression: "",
+                        convert: function (id) {
+                            return "#" + id.value;
+                        },
                         transform: {},
                         cause: "AnimationChanged"
                     }, options), ["convert"]);
@@ -481,7 +484,8 @@ define(['bms.func', 'jquery', 'angular', 'qtip', 'prob.modal'], function (bms, $
                             });
                         }
                         angular.forEach(fset, function (sid) {
-                            var bmsids = bmsObserverService.getBmsIds(visId, sid, container);
+                            var element = container.find(observer.data.selector);
+                            var bmsids = bmsObserverService.getBmsIds(visId, sid, element);
                             angular.forEach(bmsids, function (id) {
                                 if (fvalues[id] === undefined) {
                                     fvalues[id] = {};
