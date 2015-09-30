@@ -30,6 +30,16 @@ define(['angular'], function () {
                     addSvg: function (id, svg) {
                         if (!visualizations[id]['svg']) visualizations[id]['svg'] = [];
                         if (visualizations[id]['svg'].indexOf(svg) === -1) visualizations[id]['svg'].push(svg);
+                    },
+                    addListener: function (id, what, callback) {
+                        if (!visualizations[id]['listener']) visualizations[id]['listener'] = [];
+                        if (!visualizations[id]['listener'][what]) visualizations[id]['listener'][what] = [];
+                        var obj = {
+                            callback: callback,
+                            executed: false
+                        };
+                        visualizations[id]['listener'][what].push(obj);
+                        return obj;
                     }
                 }
             }]);

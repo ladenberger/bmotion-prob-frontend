@@ -346,7 +346,7 @@ define(['bms.func', 'jquery', 'angular', 'qtip', 'prob.modal'], function (bms, $
             return cspEventObserver;
 
         }])
-        .service('formula', ['ws', '$q', 'bmsObserverService', function (ws, $q, bmsObserverService) {
+        .service('formula', ['ws', '$q', 'bmsObserverService', 'bmsModalService', function (ws, $q, bmsObserverService, bmsModalService) {
 
             var formulaObserver = {
                 getDefaultOptions: function (options) {
@@ -369,15 +369,24 @@ define(['bms.func', 'jquery', 'angular', 'qtip', 'prob.modal'], function (bms, $
                     var fvalues = {};
 
                     if (observer.data.trigger !== undefined) {
-                        var element = container.find(observer.data.selector);
+
+                        var selector = observer.data.selector;
                         var self = this;
-                        element.each(function () {
-                            var ele = $(this);
-                            var returnValue = observer.data.trigger.call(self, ele, result);
-                            var bmsid = bmsObserverService.getBmsIdForElement(ele);
-                            if (returnValue) fvalues[bmsid] = returnValue;
-                        });
-                        defer.resolve(fvalues);
+                        if (selector) {
+                            var element = container.find(observer.data.selector);
+                            element.each(function () {
+                                var ele = $(this);
+                                var returnValue = observer.data.trigger.call(self, ele, result);
+                                var bmsid = bmsObserverService.getBmsIdForElement(ele);
+                                if (returnValue) fvalues[bmsid] = returnValue;
+                            });
+                            defer.resolve(fvalues);
+                        } else {
+                            // TODO: We need a more meaningful error message
+                            bmsModalService.setError("Please specify a selector!");
+                            defer.resolve();
+                        }
+
                     } else {
                         defer.resolve();
                     }
@@ -441,6 +450,86 @@ define(['bms.func', 'jquery', 'angular', 'qtip', 'prob.modal'], function (bms, $
             };
 
             return formulaObserver;
+
+        }])
+        .service('bset', ['ws', '$q', 'bmsObserverService', function (ws, $q, bmsObserverService) {
+
+            var bsetObserver = {
+
+                getDefaultOptions: function (options) {
+                    return bms.normalize($.extend({
+                        expression: "",
+                        transform: {},
+                        cause: "AnimationChanged"
+                    }, options), ["convert"]);
+                },
+                getFormulas: function (observer) {
+                    return observer.data.expression;
+                },
+                apply: function (sessionId, visId, observer, container, options) {
+
+                    var defer = $q.defer();
+
+                    var fset = options.result;
+                    if (fset.length > 0) {
+
+                        var fvalues = {};
+
+                        if (observer.data.convert) {
+                            fset = fset.map(function (id) {
+                                return observer.data.convert(id);
+                            });
+                        }
+                        angular.forEach(fset, function (sid) {
+                            var bmsids = bmsObserverService.getBmsIds(visId, sid, container);
+                            angular.forEach(bmsids, function (id) {
+                                if (fvalues[id] === undefined) {
+                                    fvalues[id] = {};
+                                }
+                                for (attr in observer.data.transform) {
+                                    fvalues[id][attr] = observer.data.transform[attr];
+                                }
+                            });
+                            defer.resolve(fvalues);
+                        });
+                        /*var fsel = "#" + fset.join(",#");
+                         var element = container.find(observer.data.selector);
+                         var elements = element.find(fsel);
+                         observer.data.trigger(elements);*/
+                    }
+                    defer.resolve();
+
+                    return defer.promise;
+
+                },
+                check: function (sessionId, visId, observer, container, stateId, trigger) {
+
+                    var defer = $q.defer();
+
+                    if (observer.data.cause === trigger) {
+                        // Evaluate formulas and apply observers
+                        ws.emit("evaluateFormulas", {
+                            data: {
+                                id: sessionId,
+                                formulas: [{formula: observer.data.expression, translate: true}],
+                                stateId: stateId
+                            }
+                        }, function (data) {
+                            bsetObserver.apply(sessionId, visId, observer, container, {
+                                result: data[observer.data.expression].trans
+                            }).then(function (d) {
+                                defer.resolve(d);
+                            });
+                        });
+                    }
+
+                    return defer.promise;
+
+                }
+
+            };
+
+            return bsetObserver;
 
         }])
         .service('refinement', ['ws', '$q', 'bmsVisualizationService', function (ws, $q, bmsVisualizationService) {

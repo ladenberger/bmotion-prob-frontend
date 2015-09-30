@@ -63,6 +63,19 @@ define(['bms.func', 'jquery', 'prob.common', 'prob.observers', 'prob.modal'], fu
 
                     };
 
+                    self.triggerListeners = function (cause) {
+                        var vis = bmsVisualizationService.getVisualization($scope.id);
+                        if (vis.listener) {
+                            angular.forEach(vis.listener[cause], function (l) {
+                                if (!l.executed) {
+                                    l.callback();
+                                    // Init listener should be called only once
+                                    if (cause === "ModelInitialised") l.executed = true;
+                                }
+                            });
+                        }
+                    };
+
                     self.setupEvents = function () {
                         var events = bmsObserverService.getEvents($scope.id);
                         angular.forEach(events, function (evt) {
@@ -123,16 +136,55 @@ define(['bms.func', 'jquery', 'prob.common', 'prob.observers', 'prob.modal'], fu
                         }
                     };
 
+                    $scope.eval = function (options) {
+
+                        var options = bms.normalize($.extend({
+                            formulas: [],
+                            translate: false,
+                            trigger: function () {
+                            }
+                        }, options), ["trigger"]);
+
+                        ws.emit('evaluateFormulas', {
+                                data: {
+                                    id: $scope.sessionId,
+                                    formulas: options.formulas.map(function (f) {
+                                        return {
+                                            formula: f,
+                                            translate: options.translate
+                                        }
+                                    })
+                                }
+                            }, function (r) {
+                                options.trigger(bms.mapFilter(options.formulas, function (f) {
+                                    return r[f].trans !== undefined ? r[f].trans : r[f].result;
+                                }));
+                            }
+                        );
+
+                    };
+
+                    $scope.on = function (what, callback) {
+                        var listener = bmsVisualizationService.addListener($scope.id, what, callback);
+                        if (what === "ModelInitialised" && self.data.initialised) {
+                            // Init listener should be called only once
+                            listener.callback();
+                            listener.executed = true;
+                        }
+                    };
+
                     ws.on('checkObserver', function (cause, s) {
-                        var stateId = s.stateId;
-                        var traceId = s.traceId;
-                        self.data.stateId = stateId;
-                        self.data.traceID = traceId;
+                        self.data.stateId = s.stateId;
+                        self.data.traceId = s.traceId;
                         if (cause === trigger.TRIGGER_MODEL_INITIALISED) {
                             self.data.initialised = true;
                         }
-                        if (self.data.traceId == traceId) {
-                            self.checkObservers(stateId, cause);
+                        if (cause === trigger.TRIGGER_MODEL_SETUP_CONSTANTS) {
+                            self.data.setupConstants = true;
+                        }
+                        if (self.data.traceId == s.traceId) {
+                            self.checkObservers(s.stateId, cause);
+                            self.triggerListeners(cause);
                         }
                     });
 
@@ -274,4 +326,5 @@ define(['bms.func', 'jquery', 'prob.common', 'prob.observers', 'prob.modal'], fu
 
     return module;
 
-});
+})
+;

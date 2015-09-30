@@ -2,7 +2,7 @@
  * BMotion Studio for ProB Visualization Module
  *
  */
-define(['angularAMD', 'angular', 'jquery'], function (angularAMD) {
+define(['angularAMD', 'angular', 'jquery'], function (angularAMD, angular) {
 
     var module = angular.module('prob.template', [])
         .factory('$parentScope', ['$window', function ($window) {
@@ -10,11 +10,17 @@ define(['angularAMD', 'angular', 'jquery'], function (angularAMD) {
         }])
         .factory('bmsParentService', ['$parentScope', function ($parentScope) {
             var observerService = {
-                addObserver: function (type, data) {
-                    $parentScope.addObserver(type, data);
+                addObserver: function (type, options) {
+                    $parentScope.addObserver(type, options);
                 },
-                addEvent: function (type, data) {
-                    $parentScope.addEvent(type, data);
+                addEvent: function (type, options) {
+                    $parentScope.addEvent(type, options);
+                },
+                eval: function (options) {
+                    $parentScope.eval(options);
+                },
+                on: function (what, callback) {
+                    $parentScope.on(what, callback);
                 }
             };
             return observerService;
@@ -46,10 +52,31 @@ define(['angularAMD', 'angular', 'jquery'], function (angularAMD) {
         }, 0);
     };
 
+    var eval = function (options) {
+        setTimeout(function () {
+            var injector = angular.element(document).injector();
+            var bmsParentService = injector.get('bmsParentService');
+            bmsParentService.eval(options);
+        }, 0);
+    };
+
+    var on = function (what, callback) {
+        setTimeout(function () {
+            var injector = angular.element(document).injector();
+            var bmsParentService = injector.get('bmsParentService');
+            bmsParentService.on(what, callback);
+        }, 0);
+    };
+
     return {
         observe: observe,
         registerEvent: registerEvent,
-        executeEvent: executeEvent
+        executeEvent: executeEvent,
+        eval: eval,
+        on: on,
+        init: function (callback) {
+            on("ModelInitialised", callback);
+        }
     };
 
 });
