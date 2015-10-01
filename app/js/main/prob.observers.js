@@ -14,16 +14,16 @@ define(['bms.func', 'jquery', 'angular', 'qtip', 'prob.modal'], function (bms, $
                 addObserverEvent: function (visId, list, e) {
                     try {
                         var instance = $injector.get(e.type, "");
-                        if (typeof instance.getDefaultOptions === "function") {
-                            e.data = instance.getDefaultOptions(e.data);
-                        }
                     } catch (err) {
                         bmsModalService.setError("Observer or event with type '" + e.type + "' does not exists! (Selector: " + e.data.selector + ")");
                     } finally {
-                        if (list[visId] === undefined) {
-                            list[visId] = [];
+                        if (instance && (typeof instance.getDefaultOptions === "function")) {
+                            e.data = instance.getDefaultOptions(e.data);
+                            if (list[visId] === undefined) {
+                                list[visId] = [];
+                            }
+                            list[visId].push(e);
                         }
-                        list[visId].push(e);
                     }
                 },
                 addObserver: function (visId, o) {
@@ -86,13 +86,14 @@ define(['bms.func', 'jquery', 'angular', 'qtip', 'prob.modal'], function (bms, $
                         observerInstance = $injector.get(observer.type, '');
                     } catch (err) {
                         bmsModalService.setError("No observer with type '" + observer.type + "' exists! (Selector: " + observer.data.selector + ")");
-                    }
-                    if (observerInstance) {
-                        observerInstance.check(sessionId, visId, observer, container, stateId, cause, data).then(function (res) {
-                            defer.resolve(res);
-                        });
-                    } else {
-                        defer.resolve();
+                    } finally {
+                        if (observerInstance) {
+                            observerInstance.check(sessionId, visId, observer, container, stateId, cause, data).then(function (res) {
+                                defer.resolve(res);
+                            });
+                        } else {
+                            defer.resolve();
+                        }
                     }
                     return defer.promise;
                 },
@@ -116,9 +117,12 @@ define(['bms.func', 'jquery', 'angular', 'qtip', 'prob.modal'], function (bms, $
                         } else {
                             try {
                                 var observerInstance = $injector.get(o.type, "");
-                                promises.push(observerInstance.check(sessionId, visId, o, container, stateId, cause, data));
                             } catch (err) {
                                 errors.push("No observer with type '" + o.type + "' exists! (Selector: " + o.data.selector + ")");
+                            } finally {
+                                if (observerInstance) {
+                                    promises.push(observerInstance.check(sessionId, visId, o, container, stateId, cause, data));
+                                }
                             }
                         }
                     });
