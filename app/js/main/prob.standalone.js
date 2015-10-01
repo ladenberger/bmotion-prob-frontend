@@ -47,7 +47,10 @@ define(['socketio', 'angularAMD', 'bms.func', 'jquery', 'bms.manifest', 'bms.con
                     template: 'template.html',
                     name: 'MyVisualization',
                     tool: 'BAnimation',
-                    manifest: manifestFilePath
+                    manifest: manifestFilePath,
+                    prob: {
+                        preferences: {}
+                    }
                 }, manifestData);
 
                 ws.emit('initSession', {data: visualisationData}, function (r) {

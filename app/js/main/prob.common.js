@@ -48,6 +48,14 @@ define(['bms.socket'], function () {
                                 "required": ["id", "template"]
                             }
                         },
+                        "prob": {
+                            "type": "object",
+                            "properties": {
+                                "preferences": {
+                                    "type": "object"
+                                }
+                            }
+                        },
                         "model": {
                             "type": "string",
                             "description": "Path to model (e.g. Event-B machine, CSP model)"
