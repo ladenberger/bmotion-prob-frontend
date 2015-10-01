@@ -348,7 +348,7 @@ define(['jquery', 'bms.visualization', 'prob.observers', 'angular-xeditable'], f
                             var e = $(this);
                             var eo = {
                                 element: e,
-                                observers: e.data('observers')
+                                observers: e.data('observers') ? e.data('observers') : []
                             };
                             var eleChildren = e.children();
                             if (eleChildren.length > 0) {
