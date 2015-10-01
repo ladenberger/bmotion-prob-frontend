@@ -358,7 +358,12 @@ define(['bms.func', 'jquery', 'angular', 'qtip', 'prob.modal'], function (bms, $
                     }, options), ["trigger"]);
                 },
                 getFormulas: function (observer) {
-                    return observer.data.formulas;
+                    return observer.data.formulas.map(function (f) {
+                        return {
+                            formula: f,
+                            translate: observer.data.translate
+                        }
+                    });
                 },
                 apply: function (sessionId, visId, observer, container, options) {
 
@@ -467,23 +472,27 @@ define(['bms.func', 'jquery', 'angular', 'qtip', 'prob.modal'], function (bms, $
                     }, options), ["convert"]);
                 },
                 getFormulas: function (observer) {
-                    return observer.data.expression;
+                    return [{
+                        formula: observer.data.expression,
+                        translate: true
+                    }];
                 },
                 apply: function (sessionId, visId, observer, container, options) {
 
                     var defer = $q.defer();
 
-                    var fset = options.result;
-                    if (fset.length > 0) {
+                    var values = options.result[0];
+
+                    if (values.length > 0) {
 
                         var fvalues = {};
 
                         if (observer.data.convert) {
-                            fset = fset.map(function (id) {
+                            values = values.map(function (id) {
                                 return observer.data.convert(id);
                             });
                         }
-                        angular.forEach(fset, function (sid) {
+                        angular.forEach(values, function (sid) {
                             var element = container.find(observer.data.selector);
                             var bmsids = bmsObserverService.getBmsIds(visId, sid, element);
                             angular.forEach(bmsids, function (id) {
@@ -520,7 +529,7 @@ define(['bms.func', 'jquery', 'angular', 'qtip', 'prob.modal'], function (bms, $
                             }
                         }, function (data) {
                             bsetObserver.apply(sessionId, visId, observer, container, {
-                                result: data[observer.data.expression].trans
+                                result: [data[observer.data.expression].trans]
                             }).then(function (d) {
                                 defer.resolve(d);
                             });

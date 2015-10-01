@@ -237,17 +237,21 @@ define(['jquery', 'bms.visualization', 'prob.observers', 'angular-xeditable'], f
                     // Prepare observers
                     var promises = [];
                     angular.forEach(observers, function (o) {
-                            var observerInstance = $injector.get(o.type, "");
+                            try {
+                                var observerInstance = $injector.get(o.type, "");
+                            } catch (err) {
+                                // TODO: Return error
+                            }
                             if (observerInstance) {
-                                try {
-                                    var result = observerInstance.getFormulas(o).map(function (formula) {
-                                        return results[formula].result;
+                                if (typeof observerInstance.getFormulas === "function") {
+                                    var result = observerInstance.getFormulas(o).map(function (f) {
+                                        return f.translate ? results[f.formula].trans : results[f.formula].result;
                                     });
                                     promises.push(observerInstance.apply(sessionId, visualizationId, o, element, {
                                             result: result
                                         }
                                     ));
-                                } catch (err) {
+                                } else {
                                     promises.push(observerInstance.apply(sessionId, visualizationId, o, element, {
                                         stateId: node.data.id
                                     }));
@@ -362,18 +366,21 @@ define(['jquery', 'bms.visualization', 'prob.observers', 'angular-xeditable'], f
                         var formulas = [];
                         angular.forEach(elementObservers, function (oe) {
                             angular.forEach(oe.observers, function (o) {
-                                var observerInstance = $injector.get(o.type, "");
-                                if (observerInstance) {
-                                    try {
-                                        observerInstance.getFormulas(o).forEach(function (f) {
-                                            var index = formulas.indexOf(f);
-                                            if (index === -1) {
-                                                formulas.push(f);
-                                            }
+                                try {
+                                    var observerInstance = $injector.get(o.type, "");
+                                } catch (err) {
+                                    // TODO: Return some error
+                                }
+                                if (observerInstance && (typeof observerInstance.getFormulas === "function")) {
+                                    observerInstance.getFormulas(o).forEach(function (f) {
+                                        var exists = false;
+                                        angular.forEach(formulas, function (ef) {
+                                            if (ef.formula === f.formula) exists = true;
                                         });
-                                    } catch (err) {
-
-                                    }
+                                        if (!exists) {
+                                            formulas.push(f);
+                                        }
+                                    });
                                 }
                             });
                         });

@@ -20,7 +20,8 @@ html, body {
 .tabset, .tab-content, .tab-pane, .tabbable {
     height: 100%;
     width: 100%;
-    padding-bottom: 46px;
+    padding-bottom: 23px;
+    margin:0;
 }
 
 .modal-vertical-centered {
