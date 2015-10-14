@@ -44,8 +44,10 @@ requirejs.config({
         "angular": "js/libs/bower/angular/angular",
         "angular-route": "js/libs/bower/angular-route/angular-route",
         "angular-sanitize": "js/libs/bower/angular-sanitize/angular-sanitize",
-        "angular-json-editor": "js/libs/bower/angular-json-editor/angular-json-editor",
-        "json-editor": "js/libs/bower/json-editor/jsoneditor",
+        //"codemirror": "js/libs/bower/codemirror/lib/codemirror",
+        "codemirror-javascript": "js/libs/bower/codemirror/mode/javascript/javascript",
+        "angular-ui-codemirror": "js/libs/bower/angular-ui-codemirror/ui-codemirror",
+        "code-mirror": "js/libs/ext/requirejs-codemirror/code-mirror",
 
         "ui-bootstrap": "js/libs/bower/angular-bootstrap/ui-bootstrap",
         "ui-bootstrap-tpls": "js/libs/bower/angular-bootstrap/ui-bootstrap-tpls",
@@ -96,6 +98,9 @@ requirejs.config({
         "ui-bootstrap-tpls": ["ui-bootstrap"],
         "angular-sanitize": ["angular"],
         "angular-xeditable": ["angular"],
+        //"codemirror-javascript": ["codemirror"],
+        //"angular-ui-codemirror": ["angular", "codemirror"],
+        "angular-ui-codemirror": ["angular", "code-mirror"],
         "qtip": ["jquery"],
         "cytoscape": {
             exports: "cy",
@@ -104,7 +109,6 @@ requirejs.config({
         "cytoscape.navigator": ['cytoscape', 'jquery'],
         "jquery-ui": ["jquery"],
         "angular-route": ["angular"],
-        "angular-json-editor": ["json-editor"],
         "jpicker": ["jquery.jgraduate"],
         "jquery.jgraduate": ["jquery"],
         "jquery.contextMenu": ["jquery"],
@@ -128,5 +132,20 @@ requirejs.config({
             "select", "draw", "path", "dialog", "svgcanvas",
             "jquery.browser"
         ]
+    },
+    cm: {
+        // baseUrl to CodeMirror dir
+        baseUrl: './',
+        // path to CodeMirror lib
+        path: 'js/libs/bower/codemirror/lib/codemirror',
+        // path to CodeMirror css file
+        css: 'css/libs/bower/codemirror/codemirror.css',
+        // define themes
+        themes: {
+        },
+        modes: {
+            // modes dir structure
+            path: 'js/libs/bower/codemirror/mode/{mode}/{mode}'
+        }
     }
 });

@@ -2,20 +2,20 @@
 
     <div ng-show="vis.sessionId" class="fullWidthHeight" ng-controller="bmsTabsCtrl as bmsTabs">
 
-        <tabset class="fullWidthHeight">
-            <tab select="bmsTabs.selectSimulatorTab()" heading="Simulator">
+        <uib-tabset class="fullWidthHeight">
+            <uib-tab select="bmsTabs.selectSimulatorTab()" heading="Simulator">
                 <div data-bms-visualisation-session="{{vis.sessionId}}"
                      data-bms-visualisation-view="{{vis.view}}"
                      class="fullWidthHeight"></div>
-            </tab>
-            <tab select="bmsTabs.selectEditorTab(svg)" ng-show="bmsTabs.hasSvg() && bmsTabs.visualizationLoaded()"
+            </uib-tab>
+            <uib-tab select="bmsTabs.selectEditorTab(svg)" ng-show="bmsTabs.hasSvg() && bmsTabs.visualizationLoaded()"
                  ng-repeat="svg in bmsTabs.getSvg()"
-                 heading="Editor ({{svg}})">
+                 heading="Editor: {{svg}}">
                 <div data-bms-visualisation-editor="{{vis.sessionId}}"
                      data-bms-visualisation-id="{{bmsTabs.getCurrentVisualizationId()}}" data-bms-svg-file="{{svg}}"
                      class="fullWidthHeight"></div>
-            </tab>
-        </tabset>
+            </uib-tab>
+        </uib-tabset>
 
     </div>
 

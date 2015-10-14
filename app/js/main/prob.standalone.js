@@ -331,9 +331,9 @@ define(['socketio', 'angularAMD', 'bms.func', 'jquery', 'bms.manifest', 'bms.con
             };
 
             self.selectSimulatorTab = function () {
-                if (self.lastTab === 'editor') {
-                    $rootScope.$broadcast('saveVisualization', self.currentSvg);
-                }
+                /*if (self.lastTab === 'editor') {
+                 $rootScope.$broadcast('saveVisualization', self.currentSvg);
+                 }*/
                 self.lastTab = 'simulator';
                 $rootScope.$broadcast('showDialog');
             };

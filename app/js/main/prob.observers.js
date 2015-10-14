@@ -2,52 +2,13 @@
  * BMotion Studio for ProB Observer Module
  *
  */
-define(['bms.func', 'jquery', 'angular', 'qtip', 'prob.modal'], function (bms, $) {
+define(['bms.func', 'jquery', 'angular', 'qtip', 'prob.modal'], function (bms, $, angular) {
 
     return angular.module('prob.observers', ['bms.common', 'prob.modal'])
         .service('bmsObserverService', ['$q', '$injector', 'trigger', 'bmsModalService', function ($q, $injector, trigger, bmsModalService) {
-            var observers = {};
-            var events = {};
             var bmsidCache = {};
             //var hasErrors = false;
             var observerService = {
-                addObserverEvent: function (visId, list, e) {
-                    try {
-                        var instance = $injector.get(e.type, "");
-                    } catch (err) {
-                        bmsModalService.setError("Observer or event with type '" + e.type + "' does not exists! (Selector: " + e.data.selector + ")");
-                    } finally {
-                        if (instance && (typeof instance.getDefaultOptions === "function")) {
-                            e.data = instance.getDefaultOptions(e.data);
-                            if (list[visId] === undefined) {
-                                list[visId] = [];
-                            }
-                            list[visId].push(e);
-                        }
-                    }
-                },
-                addObserver: function (visId, o) {
-                    observerService.addObserverEvent(visId, observers, o);
-                },
-                addEvent: function (visId, e) {
-                    observerService.addObserverEvent(visId, events, e);
-                },
-                addObservers: function (visId, obs) {
-                    angular.forEach(obs, function (o) {
-                        observerService.addObserver(visId, o)
-                    });
-                },
-                addEvents: function (visId, evts) {
-                    angular.forEach(evts, function (e) {
-                        observerService.addEvent(visId, e)
-                    });
-                },
-                getObservers: function (visId) {
-                    return observers[visId];
-                },
-                getEvents: function (visId) {
-                    return events[visId];
-                },
                 getBmsIds: function (visId, selector, container) {
                     if (bmsidCache[visId] === undefined) {
                         bmsidCache[visId] = {};
@@ -385,9 +346,17 @@ define(['bms.func', 'jquery', 'angular', 'qtip', 'prob.modal'], function (bms, $
                             var element = container.find(observer.data.selector);
                             element.each(function () {
                                 var ele = $(this);
-                                var returnValue = observer.data.trigger.call(self, ele, result);
-                                var bmsid = bmsObserverService.getBmsIdForElement(ele);
-                                if (returnValue) fvalues[bmsid] = returnValue;
+                                if (typeof observer.data.trigger === 'function') {
+                                    var returnValue = observer.data.trigger.call(self, ele, result);
+                                    var bmsid = bmsObserverService.getBmsIdForElement(ele);
+                                    if (returnValue) fvalues[bmsid] = returnValue;
+                                } else {
+                                    // Whenever the function comes from json, we need to convert
+                                    // the string function to a real javascript function
+                                    // TODO: We need to handle errors while converting the string function to a reals javascript function
+                                    var func = new Function('origin', 'values', observer.data.trigger);
+                                    func(ele, result)
+                                }
                             });
                             defer.resolve(fvalues);
                         } else {
@@ -601,6 +570,12 @@ define(['bms.func', 'jquery', 'angular', 'qtip', 'prob.modal'], function (bms, $
 
             var predicateObserver = {
 
+                getDefaultOptions: function (options) {
+                    return bms.normalize($.extend({
+                        predicate: "",
+                        cause: "AnimationChanged"
+                    }, options), []);
+                },
                 getFormulas: function (observer) {
                     return [observer.data.predicate];
                 },

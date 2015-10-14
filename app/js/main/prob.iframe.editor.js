@@ -2,7 +2,7 @@
  * BMotion Studio for ProB Editor Module
  *
  */
-define(['jquery','prob.modal', 'bms.common'], function ($) {
+define(['jquery', 'prob.modal', 'bms.common'], function ($) {
 
     var module = angular.module('prob.iframe.editor', ['prob.modal', 'bms.common'])
         .factory('fs', function () {
@@ -18,6 +18,13 @@ define(['jquery','prob.modal', 'bms.common'], function ($) {
                 },
                 template: '<iframe src="editor.html" class="editorIframe"></iframe>',
                 controller: ['$scope', '$rootScope', function ($scope, $rootScope) {
+
+                    $scope.addObserver = function (type, data) {
+                        bmsVisualizationService.addObserver($scope.id, {
+                            type: type,
+                            data: data
+                        }, 'json');
+                    };
 
                     $scope.init = function () {
 

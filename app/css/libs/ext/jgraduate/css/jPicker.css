@@ -157,7 +157,6 @@ table#svg_editor .jPicker {
 #svg_editor .jPicker td.Radio {
     margin: 0;
     padding: 0;
-    width: 31px;
 }
 #svg_editor .jPicker td.Radio input {
     margin: 0 5px 0 0;
@@ -169,7 +168,6 @@ table#svg_editor .jPicker {
     margin: 0;
     padding: 0;
     text-align: left;
-    width: 70px;
 }
 #svg_editor .jPicker tr.Hex td.Text {
     width: 100px;

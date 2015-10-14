@@ -85,7 +85,15 @@ module.exports = function (grunt) {
                         var renamedType = type;
                         switch (type) {
                             case 'js':
-                                renamedType = path.join(jsBowerLibs, component);
+                                if (component === 'codemirror') {
+                                    if (source.indexOf('javascript', this.length - 'javascript'.length) !== -1) {
+                                        renamedType = 'js/libs/bower/codemirror/mode/javascript';
+                                    } else {
+                                        renamedType = 'js/libs/bower/codemirror/lib';
+                                    }
+                                } else {
+                                    renamedType = path.join(jsBowerLibs, component);
+                                }
                                 break;
                             case 'css':
                                 renamedType = component === 'bootstrap' ? 'css/bootstrap/css' : path.join(cssBowerLibs, component);
@@ -97,6 +105,7 @@ module.exports = function (grunt) {
                         return renamedType;
                     },
                     targetDir: 'app'
+                    //,cleanBowerDir: true
                 }
             }
         }

@@ -36,7 +36,7 @@ define(['ui-bootstrap', 'ui-bootstrap-tpls', 'angular-sanitize'], function () {
             };
 
         }])
-        .service('bmsModalService', ['$rootScope', '$q', '$modal', function ($rootScope, $q, $modal) {
+        .service('bmsModalService', ['$rootScope', '$q', '$uibModal', function ($rootScope, $q, $uibModal) {
 
             var self = this;
 
@@ -61,7 +61,7 @@ define(['ui-bootstrap', 'ui-bootstrap-tpls', 'angular-sanitize'], function () {
 
             self.createModal = function () {
 
-                var modalInstance = $modal.open({
+                var modalInstance = $uibModal.open({
                     template: '<div class="modal-header" style="height:40px;">'
                     + '<button type="button" class="close" data-dismiss="modal" ng-click="close()">'
                     + '<span aria-hidden="true">&times;</span><span class="sr-only">Close</span>'
@@ -167,12 +167,12 @@ define(['ui-bootstrap', 'ui-bootstrap-tpls', 'angular-sanitize'], function () {
             };
 
         }])
-        .controller('bmsElementProjectionModalCtrl', ['$scope', '$modal', function ($scope, $modal) {
+        .controller('bmsElementProjectionModalCtrl', ['$scope', '$uibModal', function ($scope, $uibModal) {
 
             var modalInstance = null;
 
             $scope.open = function () {
-                modalInstance = $modal.open({
+                modalInstance = $uibModal.open({
                     windowClass: 'full-screen',
                     animation: false,
                     template: '<div class="modal-header">'
@@ -212,12 +212,12 @@ define(['ui-bootstrap', 'ui-bootstrap-tpls', 'angular-sanitize'], function () {
             };
 
         }])
-        .controller('bmsTraceDiagramModalCtrl', ['$scope', '$modal', function ($scope, $modal) {
+        .controller('bmsTraceDiagramModalCtrl', ['$scope', '$uibModal', function ($scope, $uibModal) {
 
             var modalInstance = null;
 
             $scope.open = function () {
-                modalInstance = $modal.open({
+                modalInstance = $uibModal.open({
                     windowClass: 'full-screen',
                     animation: false,
                     template: '<div class="modal-header">'

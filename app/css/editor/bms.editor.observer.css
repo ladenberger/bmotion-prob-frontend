@@ -1,0 +1,123 @@
+.observer-box {
+    margin-bottom: 1px;
+    width: 280px;
+    padding: 6px;
+    font-size: 12px;
+    -webkit-box-shadow: inset 1px 1px 2px white, 1px 1px 1px rgba(0, 0, 0, 0.3);
+    moz-box-shadow: inset 1px 1px 2px white, 1px 1px 1px rgba(0, 0, 0, 0.3);
+    box-shadow: inset 1px 1px 2px white, 1px 1px 1px rgba(0, 0, 0, 0.3);
+    border-radius: 3px;
+    -moz-border-radius: 3px;
+    -webkit-border-radius: 3px
+}
+
+.observer-menu {
+    text-align:center;
+}
+
+.observer-menu a:hover {
+    text-decoration: none;
+}
+
+.observer-content {
+    background-color: #E8E8E8;
+    padding-left: 8px;
+}
+
+.observer-content a:link {
+    color: darkblue;
+}
+
+.observer-content a:hover {
+    text-decoration: none;
+    font-style: italic;
+}
+
+.observer-content button {
+    cursor: pointer;
+}
+
+.observer-content table td {
+    padding: 2px;
+}
+
+.observer-content table td,
+.observer-content table th {
+    text-align: right;
+}
+
+.observer-content table td + td {
+    text-align: left;
+}
+
+.observer-formula-cell table td,
+.observer-formula-cell table th {
+    text-align: left;
+}
+
+.observer-header {
+    background-color: #E0E0E0;
+    margin-top: 5px;
+    padding-top: 8px;
+    padding-bottom: 4px;
+}
+
+.observer-header a:link {
+    color: black;
+}
+
+.observer-header span {
+    font-weight: bold;
+}
+
+.observer-header .label-type {
+    text-transform: uppercase;
+}
+
+.observer-formula-menu {
+    display: block;
+    cursor: pointer;
+}
+
+.observer-highlight {
+    background-color: lightyellow;
+}
+
+.modal-js-editor .modal-header {
+    padding: 10px 10px 0 10px;
+    border-bottom: 0;
+}
+
+.modal-js-editor .modal-footer {
+    border-top: 0;
+    padding: 0px;
+}
+
+.modal-js-editor .modal-body {
+    padding: 10px;
+}
+
+.modal-js-editor .modal-title {
+    font-size: 14px;
+}
+
+.js-editor {
+    border: 1px solid darkgray;
+}
+
+.editable-click, a.editable-click {
+    colsor: darkblue;
+}
+
+input[type="text"].editable-input.editable-has-buttons {
+    font-size: 12px;
+    width: 100px;
+}
+
+input[type="checkbox"].editable-input.editable-has-buttons {
+    border: 0;
+}
+
+.editable {
+    overflow: hidden;
+}

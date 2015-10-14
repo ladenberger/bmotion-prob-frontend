@@ -56,10 +56,17 @@ html, body {
 .full-screen button span {
 }
 
+.modal-header {
+    border-bottom: 0;
+}
+
 .full-screen .modal-header {
     padding: 0;
     margin: 0;
-    border-bottom: 0;
+}
+
+.modal-footer {
+    border-top:0;
 }
 
 .bms-editor .modal-header {

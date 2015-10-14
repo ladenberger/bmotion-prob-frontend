@@ -522,6 +522,7 @@ define(["jquery", "touch", "jquery.hotkeys", "jquery.bbq",
                 if (svgCanvas.elementsAreSame(multiselected)) selectedElement = multiselected[0]
                 if (selectedElement != null) {
                     $('#multiselected_panel').hide()
+                    $('.idLabel').show();
                     updateToolbar();
                     if (multiselected.length) {//multiselected elements are the same
                         $('#tools_top').addClass('multiselected')
@@ -1569,6 +1570,7 @@ define(["jquery", "touch", "jquery.hotkeys", "jquery.bbq",
 
                 if (multiselected) {
                     $('#multiselected_panel').show();
+                    $('.idLabel').hide();
                     $('.action_multi_selected').removeClass('disabled');
                     menu_items
                         .enableContextMenuItems('#group')

@@ -5,7 +5,7 @@
 define(['bms.func', 'jquery', 'prob.common', 'prob.observers', 'prob.modal'], function (bms, $) {
 
     var module = angular.module('prob.iframe.template', ['prob.common', 'prob.observers', 'prob.modal'])
-        .directive('bmsVisualisationView', ['$rootScope', 'bmsVisualizationService', 'bmsObserverService', 'ws', '$injector', 'bmsUIService', 'bmsModalService', 'trigger', '$compile', function ($rootScope, bmsVisualizationService, bmsObserverService, ws, $injector, bmsUIService, bmsModalService, trigger, $compile) {
+        .directive('bmsVisualisationView', ['$rootScope', 'bmsVisualizationService', 'bmsObserverService', 'ws', '$injector', 'bmsUIService', 'bmsModalService', 'trigger', '$compile', '$http', function ($rootScope, bmsVisualizationService, bmsObserverService, ws, $injector, bmsUIService, bmsModalService, trigger, $compile, $http) {
             return {
                 replace: false,
                 scope: {
@@ -16,6 +16,16 @@ define(['bms.func', 'jquery', 'prob.common', 'prob.observers', 'prob.modal'], fu
                 controller: ['$scope', function ($scope) {
 
                     var self = this;
+
+                    var shouldAdd = function (type, data) {
+                        var shouldAdd = true;
+                        if (data.refinement) {
+                            if ($.inArray(data.refinement, self.data.refinements) == -1) {
+                                shouldAdd = false;
+                            }
+                        }
+                        return shouldAdd;
+                    };
 
                     self.data = {};
 
@@ -37,9 +47,22 @@ define(['bms.func', 'jquery', 'prob.common', 'prob.observers', 'prob.modal'], fu
                         }
                     };
 
-                    self.checkObservers = function (stateId, cause) {
+                    self.checkJsonObservers = function (stateId, cause) {
+                        self.checkObservers(stateId, cause, 'json');
+                    };
 
-                        var observers = bmsObserverService.getObservers($scope.id);
+                    self.checkJsObservers = function (stateId, cause) {
+                        self.checkObservers(stateId, cause, 'js');
+                    };
+
+                    self.checkAllObservers = function (stateId, cause) {
+                        self.checkObservers(stateId, cause);
+                    };
+
+                    self.checkObservers = function (stateId, cause, list) {
+
+                        var observers = bmsVisualizationService.getObservers($scope.id, list);
+
                         stateId = stateId ? stateId : self.data.stateId;
                         cause = cause ? cause : trigger.TRIGGER_ANIMATION_CHANGED;
 
@@ -93,42 +116,25 @@ define(['bms.func', 'jquery', 'prob.common', 'prob.observers', 'prob.modal'], fu
                     };
 
                     $scope.addObserver = function (type, data) {
-
-                        var shouldAdd = true;
-                        if (data.refinement) {
-                            if ($.inArray(data.refinement, self.data.refinements) == -1) {
-                                shouldAdd = false;
-                            }
-                        }
-                        if (shouldAdd) {
-
+                        if (shouldAdd(type, data)) {
                             var observer = {
                                 type: type,
                                 data: data
                             };
-
-                            bmsObserverService.addObserver($scope.id, observer);
-
+                            bmsVisualizationService.addObserver($scope.id, observer, 'js');
                             if (self.data.stateId !== 'root' && self.data.initialised) {
                                 self.checkObserver(observer, self.data.stateId, data.cause);
                             }
-
                         }
                     };
 
                     $scope.addEvent = function (type, data) {
-                        var shouldAdd = true;
-                        if (data.refinement) {
-                            if ($.inArray(data.refinement, self.data.refinements) == -1) {
-                                shouldAdd = false;
-                            }
-                        }
-                        if (shouldAdd) {
+                        if (shouldAdd(type, data)) {
                             var event = {
                                 type: type,
                                 data: data
                             };
-                            bmsObserverService.addEvent($scope.id, event);
+                            bmsVisualizationService.addEvent($scope.id, event, 'js');
                             var instance = $injector.get(type, "");
                             if (instance) {
                                 instance.setup($scope.sessionId, $scope.id, event, self.data.container.contents(), self.data.traceId);
@@ -183,7 +189,7 @@ define(['bms.func', 'jquery', 'prob.common', 'prob.observers', 'prob.modal'], fu
                             self.data.setupConstants = true;
                         }
                         if (self.data.traceId == s.traceId) {
-                            self.checkObservers(s.stateId, cause);
+                            self.checkAllObservers(s.stateId, cause);
                             self.triggerListeners(cause);
                         }
                     });
@@ -218,11 +224,35 @@ define(['bms.func', 'jquery', 'prob.common', 'prob.observers', 'prob.modal'], fu
 
                         $scope.sessionId = sessionId;
 
+                        // Get data from server
                         ws.emit('initView', {data: {id: sessionId}}, function (r) {
 
                             ctrl.data = $.extend(r, {
-                                container: iframe
+                                container: iframe,
+                                observers: {
+                                    json: [],
+                                    js: []
+                                },
+                                events: {
+                                    json: [],
+                                    js: []
+                                }
                             });
+
+                            // Get observer data from observers.json file
+                            $http.get(ctrl.data.templateFolder + '/observers.json')
+                                .success(function (data) {
+                                    // TODO: We need to validate the observers.json schema!
+                                    angular.forEach(data.observers, function (o) {
+                                        bmsVisualizationService.addObserver($scope.id, o, 'json');
+                                    });
+                                })
+                                .error(function (data, status, headers, config) {
+                                    // TODO: Do we need an error message? The observers.json file should be optional!
+                                });
+
+                            // Get event data from events.json file
+                            // TODO: Implement me!
 
                             var template;
                             var viewObj;
@@ -237,16 +267,24 @@ define(['bms.func', 'jquery', 'prob.common', 'prob.observers', 'prob.modal'], fu
                                 template = ctrl.data.template;
                             }
 
+                            bmsVisualizationService.setCurrentVisualizationId($scope.id);
+                            bmsVisualizationService.addVisualization($scope.id, ctrl.data);
+                            bmsUIService.setProBViewTraceId(ctrl.data.traceId);
+
                             if (template) {
+                                // Set and load html template file
                                 iframe.attr('src', ctrl.data.templateFolder + '/' + template).attr('id', $scope.id);
                                 iframe.load(function () {
+
                                     iframeContents = $(iframe.contents());
-                                    bmsVisualizationService.setCurrentVisualizationId($scope.id);
-                                    bmsVisualizationService.addVisualization($scope.id, ctrl.data);
-                                    bmsUIService.setProBViewTraceId(ctrl.data.traceId);
                                     $compile(iframeContents)($scope);
                                     bmsModalService.endLoading();
                                     $rootScope.$broadcast('visualizationLoaded', $scope.id, viewObj);
+
+                                    if (ctrl.data.stateId !== 'root' && ctrl.data.initialised) {
+                                        ctrl.checkJsonObservers(ctrl.data.stateId);
+                                    }
+
                                 });
                             }
 

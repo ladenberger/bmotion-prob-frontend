@@ -1,0 +1,41 @@
+<div ng-controller="bmsObserverFormulaCtrl">
+    <table>
+        <tr>
+            <td>Selector:</td>
+            <td><a href="#" editable-text="observer.data.selector">{{ observer.data.selector || "selector" }}</a>
+            </td>
+        </tr>
+        <tr>
+            <td valign="top"><span class="observer-formula-menu" ng-mouseover="showFormulaMenu()"
+                                   ng-mouseleave="hideFormulaMenu()" ng-click="addFormula()"><i
+                    ng-class="{'fa fa-plus': isFormulaMenu, '': !isFormulaMenu}"></i>{{ isFormulaMenu ? " Add" : "Formulas:" }}</span>
+            </td>
+            <td class="observer-formula-cell">
+                <table>
+                    <tr ng-repeat="formula in observer.data.formulas track by $index">
+                        <td>
+                            <a href="#" editable-text="observer.data.formulas[$index]"
+                               onshow="showAddButtons($index)" onhide="hideAddButtons($index)">{{formula || "formula"
+                                }}</a>
+                        </td>
+                        <td>
+                            <button ng-click="removeFormula($index)" ng-show="addButtonsStatus[$index]"
+                                    title="Remove Formula"><i class="fa fa-trash-o"></i></button>
+                        </td>
+                    </tr>
+                </table>
+            </td>
+        </tr>
+        <tr>
+            <td>Translate?</td>
+            <td><a href="#" editable-checkbox="observer.data.translate">
+                <li ng-class="{'fa fa-check-square-o': observer.data.translate, 'fa fa-square-o': !observer.data.translate}"></li>
+            </a></td>
+        </tr>
+        <tr>
+            <td valign="top">Trigger:</td>
+            <td><a href="#" ng-click="openJsEditor('trigger', observer)"><i class="fa fa-file-text-o"></i> Func</a>
+            </td>
+        </tr>
+    </table>
+</div>

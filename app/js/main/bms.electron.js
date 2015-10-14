@@ -30,7 +30,7 @@ define(['angular', 'prob.modal'], function () {
             };
             return factory;
         }])
-        .factory('electronMenuService', ['$rootScope', 'electronRemote', 'electronMenu', 'electronDialog', 'bmsModalService', function ($rootScope, electronRemote, electronMenu, electronDialog, bmsModalService) {
+        .factory('electronMenuService', ['$rootScope', 'electronRemote', 'electronMenu', 'electronDialog', function ($rootScope, electronRemote, electronMenu, electronDialog) {
 
             var MenuItem = electronRemote.require('menu-item');
 

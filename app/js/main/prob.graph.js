@@ -326,7 +326,7 @@ define(['jquery', 'bms.visualization', 'prob.observers', 'angular-xeditable'], f
                         var vis = bmsVisualizationService.getVisualization(visualizationId);
                         var container = vis.container.contents();
                         var elements = container.find(selector);
-                        var observers = bmsObserverService.getObservers(visualizationId);
+                        var observers = bmsVisualizationService.getObservers(visualizationId);
 
                         // (1) Attach observers to elements
                         angular.forEach(observers, function (o) {
