@@ -16,13 +16,13 @@
             {{ isMenu ? " Add" : "Events:" }}
         </div>
         <div class="col-md-9">
-            <div ng-repeat="event in event.data.events track by $index">
+            <div ng-repeat="e in event.data.events track by $index">
 
                 <div ng-click="rowform.$show()" ng-class="{'editable-click': !rowform.$visible, '': rowform.$visible}">
-                    <span editable-text="event.name" e-name="name" e-form="rowform">{{event.name || "event"}}</span>
+                    <span editable-text="e.name" e-name="name" e-form="rowform">{{e.name || "event"}}</span>
                     <br ng-show="rowform.$visible"/>
-                <span editable-text="event.predicate" e-name="predicate"
-                      e-form="rowform">({{event.predicate || ""}})</span>
+                <span editable-text="e.predicate" e-name="predicate"
+                      e-form="rowform">({{e.predicate || ""}})</span>
                 </div>
 
                 <div ng-show="rowform.$visible" class="observer-form-buttons">

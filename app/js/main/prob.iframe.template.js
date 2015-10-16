@@ -104,8 +104,14 @@ define(['angular', 'bms.func', 'jquery', 'prob.common', 'prob.observers', 'prob.
                         };
 
                         self.setupEvents = function () {
-                            var events = bmsObserverService.getEvents($scope.id);
-                            angular.forEach(events, function (evt) {
+                            angular.forEach(bmsVisualizationService.getEvents($scope.id), function (evt) {
+                                self.setupEvent(evt);
+                            });
+                        };
+
+                        self.setupJsonEvents = function () {
+                            angular.forEach(bmsVisualizationService.getJsonEvents($scope.id), function (evt) {
+                                console.log(evt)
                                 self.setupEvent(evt);
                             });
                         };
@@ -258,7 +264,7 @@ define(['angular', 'bms.func', 'jquery', 'prob.common', 'prob.observers', 'prob.
                             return defer.promise;
                         };
 
-                        var checkObservers = function (stateId, isInitialised) {
+                        var checkJsonObservers = function (stateId, isInitialised) {
 
                             var defer = $q.defer();
 
@@ -266,6 +272,20 @@ define(['angular', 'bms.func', 'jquery', 'prob.common', 'prob.observers', 'prob.
                                 if (stateId !== 'root' && isInitialised) {
                                     ctrl.checkJsonObservers(stateId);
                                 }
+                            }, 0);
+
+                            defer.resolve();
+
+                            return defer.promise;
+
+                        };
+
+                        var setupJsonEvents = function () {
+
+                            var defer = $q.defer();
+
+                            $timeout(function () {
+                                ctrl.setupJsonEvents();
                             }, 0);
 
                             defer.resolve();
@@ -358,7 +378,12 @@ define(['angular', 'bms.func', 'jquery', 'prob.common', 'prob.observers', 'prob.
                                                     return loadTemplate($scope.id, templateFolder, viewData.template)
                                                 })
                                                 .then(function () {
-                                                    checkObservers(serverData.stateId, serverData.initialised);
+                                                    return setupJsonEvents();
+                                                })
+                                                .then(function () {
+                                                    return checkJsonObservers(serverData.stateId, serverData.initialised);
+                                                })
+                                                .then(function () {
                                                     $rootScope.$broadcast('visualizationLoaded', $scope.id, viewData);
                                                     bmsModalService.endLoading();
                                                 });

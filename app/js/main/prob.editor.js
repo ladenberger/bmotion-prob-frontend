@@ -202,7 +202,10 @@ define(['angularAMD', 'code-mirror!javascript', 'angular', 'jquery.jgraduate', '
             };
 
             $scope.addEvent = function () {
-                $scope.event.data.events.push("");
+                $scope.event.data.events.push({
+                    name: "",
+                    predicate: ""
+                });
             };
 
             $scope.removeEvent = function (index) {
