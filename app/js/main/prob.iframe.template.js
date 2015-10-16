@@ -111,7 +111,6 @@ define(['angular', 'bms.func', 'jquery', 'prob.common', 'prob.observers', 'prob.
 
                         self.setupJsonEvents = function () {
                             angular.forEach(bmsVisualizationService.getJsonEvents($scope.id), function (evt) {
-                                console.log(evt)
                                 self.setupEvent(evt);
                             });
                         };
