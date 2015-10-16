@@ -112,11 +112,11 @@ define(["jquery", "touch", "jquery.hotkeys", "jquery.bbq",
             visualization = vis;
         };
 
-        Editor.setSvgRootId = function(id) {
+        Editor.setSvgRootId = function (id) {
             svgRootId = id;
         };
 
-        Editor.getSvgRootId = function() {
+        Editor.getSvgRootId = function () {
             return svgRootId;
         };
 
@@ -392,12 +392,12 @@ define(["jquery", "touch", "jquery.hotkeys", "jquery.bbq",
 
 
             // This puts the correct shortcuts in the menus
-            if (!isMac) {
-                $('.shortcut').each(function () {
-                    var text = $(this).text();
-                    $(this).text(text.split("⌘").join("Ctrl+"))
-                });
-            }
+            /*if (!isMac) {
+             $('.shortcut').each(function () {
+             var text = $(this).text();
+             $(this).text(text.split("⌘").join("Ctrl+"))
+             });
+             }*/
 
             // This sets up alternative dialog boxes. They mostly work the same way as
             // their UI counterparts, expect instead of returning the result, a callback

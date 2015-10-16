@@ -42,43 +42,40 @@
 
     <div id="menu_bar">
 
-        <!--div class="menu">
-            <div id="tool_savedata" class="menu_title" ng-click="ctrl.save()">Save</div>
-        </div-->
+        <div class="menu">
+            <div id="tool_savedata" class="menu_title" ng-click="ctrl.save()"><i class="fa fa-floppy-o"></i> Save</div>
+        </div>
 
         <div class="menu">
-            <div class="menu_title">Edit</div>
+            <div class="menu_title"><i class="fa fa-pencil"></i> Edit</div>
             <div class="menu_list" id="edit_menu">
-                <div class="menu_item" id="tool_undo">Undo <span class="shortcut">⌘Z</span></div>
-                <div class="menu_item" id="tool_redo">Redo <span class="shortcut">⌘Y</span></div>
+                <div class="menu_item" id="tool_undo">Undo <span class="shortcut">Ctrl+Z</span></div>
+                <div class="menu_item" id="tool_redo">Redo <span class="shortcut">Ctrl+Y</span></div>
                 <div class="separator"></div>
-                <div class="menu_item action_selected disabled" id="tool_cut">Cut <span class="shortcut">⌘X</span></div>
-                <div class="menu_item action_selected disabled" id="tool_copy">Copy <span class="shortcut">⌘C</span>
+                <div class="menu_item action_selected disabled" id="tool_cut">Cut <span class="shortcut">Ctrl+X</span>
                 </div>
-                <div class="menu_item action_selected disabled" id="tool_paste">Paste <span class="shortcut">⌘V</span>
+                <div class="menu_item action_selected disabled" id="tool_copy">Copy <span class="shortcut">Ctrl+C</span>
+                </div>
+                <div class="menu_item action_selected disabled" id="tool_paste">Paste <span
+                        class="shortcut">Ctrl+V</span>
                 </div>
                 <div class="menu_item action_selected disabled" id="tool_clone">Duplicate <span
-                        class="shortcut">⌘D</span></div>
-                <div class="menu_item action_selected disabled" id="tool_delete">Delete <span>⌫</span></div>
+                        class="shortcut">Ctrl+D</span></div>
+                <div class="menu_item action_selected disabled" id="tool_delete">Delete</div>
             </div>
         </div>
 
         <div class="menu">
-            <div class="menu_title">Object</div>
+            <div class="menu_title"><i class="fa fa-cube"></i> Object</div>
             <div class="menu_list" id="object_menu">
-                <div class="menu_item action_selected disabled" id="tool_move_top">Bring to Front <span
-                        class="shortcut">⌘⇧↑</span></div>
-                <div class="menu_item action_selected disabled" id="tool_move_up">Bring Forward <span class="shortcut">⌘↑</span>
+                <div class="menu_item action_selected disabled" id="tool_move_top">Bring to Front</div>
+                <div class="menu_item action_selected disabled" id="tool_move_up">Bring Forward
                 </div>
-                <div class="menu_item action_selected disabled" id="tool_move_down">Send Backward <span
-                        class="shortcut">⌘↓</span></div>
-                <div class="menu_item action_selected disabled" id="tool_move_bottom">Send to Back <span
-                        class="shortcut">⌘⇧↓</span></div>
+                <div class="menu_item action_selected disabled" id="tool_move_down">Send Backward</div>
+                <div class="menu_item action_selected disabled" id="tool_move_bottom">Send to Back</div>
                 <div class="separator"></div>
-                <div class="menu_item action_multi_selected disabled" id="tool_group">Group Elements <span
-                        class="shortcut">⌘G</span></div>
-                <div class="menu_item action_group_selected disabled" id="tool_ungroup">Ungroup Elements <span
-                        class="shortcut">⌘⇧G</span></div>
+                <div class="menu_item action_multi_selected disabled" id="tool_group">Group Elements</div>
+                <div class="menu_item action_group_selected disabled" id="tool_ungroup">Ungroup Elements</div>
                 <div class="separator"></div>
                 <div class="menu_item action_path_convert_selected disabled" id="tool_topath">Convert to Path</div>
                 <div class="menu_item action_path_selected disabled" id="tool_reorient">Reorient path</div>
@@ -86,7 +83,7 @@
         </div>
 
         <div class="menu">
-            <div class="menu_title">View</div>
+            <div class="menu_title"><i class="fa fa-bars"></i> View</div>
             <div class="menu_list" id="view_menu">
                 <div class="menu_item push_button_pressed" id="tool_rulers">View Rulers</div>
                 <div class="menu_item" id="tool_wireframe">View Wireframe</div>
@@ -538,7 +535,7 @@
 
             </li>
             <li>
-                <input type="radio" name="tabs" id="tab2"/>
+                <input type="radio" name="tabs" id="tab2" checked/>
                 <label for="tab2" class="tab_label">Observers</label>
 
                 <div id="tab-content2" class="tab-content">
@@ -559,14 +556,14 @@
                         </div>
 
                         <div ng-repeat="observer in data track by $index">
-                            <div ng-controller="bmsObserverObjectCtrl">
+                            <div ng-controller="bmsElementObjectCtrl">
                                 <div ng-class="{'observer-header observer-box observer-highlight': selected, 'observer-header observer-box': !selected}">
                                     <span class="label-type">{{observer.type}}: </span>
                                     <span class="label-selector">{{observer.data.selector}}</span>
 
-                                    <div style="float:right" ng-mouseover="showObserverMenu()"
-                                         ng-mouseleave="hideObserverMenu()">
-                                        <div ng-show="isObserverMenu" class="observer-menu">
+                                    <div style="float:right" ng-mouseover="showMenu()"
+                                         ng-mouseleave="hideMenu()">
+                                        <div ng-show="isMenu" class="observer-menu">
                                             <a href="#" ng-click="duplicateObserver($index)" title="Duplicate Observer"><i
                                                     class="fa fa-files-o"></i></a>
                                             <!--a href="#" confirmed-click="removeObserver($index)"
@@ -578,7 +575,7 @@
                                                     class="fa fa-trash-o"></i></a>
                                             <!--a href="#" title="Collapse Observer"> <i class="fa fa-minus-square-o"></i></a-->
                                         </div>
-                                        <div ng-hide="isObserverMenu">
+                                        <div ng-hide="isMenu">
                                             <i class="fa fa-eye"></i>
                                         </div>
                                     </div>
@@ -593,11 +590,57 @@
                 </div>
             </li>
             <li>
-                <input type="radio" name="tabs" id="tab3"/>
+                <input type="radio" name="tabs" id="tab3" />
                 <label for="tab3" class="tab_label">Events</label>
 
                 <div id="tab-content3" class="tab-content">
-                    Test
+
+                    <div ng-controller="bmsEventsViewCtrl">
+
+                        <div class="observer-menu">
+                            <a href="#" uib-popover-template="dynamicPopover.templateUrl" popover-trigger="focus"
+                               popover-placement="bottom"><i class="fa fa-plus"></i> Add Event</a>
+                            <script type="text/ng-template" id="eventsMenuTemplate.html">
+                                <div>
+                                    <a href="#" ng-click="addExecuteEventEvent()"><i class="fa fa-eye"></i> Execute Event
+                                        Handler</a><br/>
+                                </div>
+                            </script>
+                        </div>
+
+                        <div ng-repeat="event in data track by $index">
+                            <div ng-controller="bmsElementObjectCtrl">
+                                <div ng-class="{'observer-header observer-box observer-highlight': selected, 'observer-header observer-box': !selected}">
+                                    <span class="label-type">{{event.type}}: </span>
+                                    <span class="label-selector">{{event.data.selector}}</span>
+
+                                    <div style="float:right" ng-mouseover="showMenu()"
+                                         ng-mouseleave="hideMenu()">
+                                        <div ng-show="isMenu" class="observer-menu">
+                                            <a href="#" ng-click="duplicateEvent($index)" title="Duplicate Event"><i
+                                                    class="fa fa-files-o"></i></a>
+                                            <!--a href="#" confirmed-click="removeObserver($index)"
+                                               ng-confirm-click="Do you really want to remove this observer?"
+                                               title="Remove Observer"><i
+                                                    class="fa fa-trash-o"></i></a-->
+                                            <a href="#" ng-click="removeEvent($index)"
+                                               title="Remove Event"><i
+                                                    class="fa fa-trash-o"></i></a>
+                                            <!--a href="#" title="Collapse Observer"> <i class="fa fa-minus-square-o"></i></a-->
+                                        </div>
+                                        <div ng-hide="isMenu">
+                                            <i class="fa fa-eye"></i>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div ng-class="{'observer-content observer-box  observer-highlight': selected, 'observer-content observer-box ': !selected}"
+                                     ng-include="getIncludeFile(event.type)"></div>
+                            </div>
+                        </div>
+                        <!--button ng-click="showJson()">JSON</button-->
+
+                    </div>
+
                 </div>
             </li>
         </ul>

@@ -1,41 +1,60 @@
 <div ng-controller="bmsObserverFormulaCtrl">
-    <table>
-        <tr>
-            <td>Selector:</td>
-            <td><a href="#" editable-text="observer.data.selector">{{ observer.data.selector || "selector" }}</a>
-            </td>
-        </tr>
-        <tr>
-            <td valign="top"><span class="observer-formula-menu" ng-mouseover="showFormulaMenu()"
-                                   ng-mouseleave="hideFormulaMenu()" ng-click="addFormula()"><i
-                    ng-class="{'fa fa-plus': isFormulaMenu, '': !isFormulaMenu}"></i>{{ isFormulaMenu ? " Add" : "Formulas:" }}</span>
-            </td>
-            <td class="observer-formula-cell">
-                <table>
-                    <tr ng-repeat="formula in observer.data.formulas track by $index">
-                        <td>
-                            <a href="#" editable-text="observer.data.formulas[$index]"
-                               onshow="showAddButtons($index)" onhide="hideAddButtons($index)">{{formula || "formula"
-                                }}</a>
-                        </td>
-                        <td>
-                            <button ng-click="removeFormula($index)" ng-show="addButtonsStatus[$index]"
-                                    title="Remove Formula"><i class="fa fa-trash-o"></i></button>
-                        </td>
-                    </tr>
-                </table>
-            </td>
-        </tr>
-        <tr>
-            <td>Translate?</td>
-            <td><a href="#" editable-checkbox="observer.data.translate">
-                <li ng-class="{'fa fa-check-square-o': observer.data.translate, 'fa fa-square-o': !observer.data.translate}"></li>
-            </a></td>
-        </tr>
-        <tr>
-            <td valign="top">Trigger:</td>
-            <td><a href="#" ng-click="openJsEditor('trigger', observer)"><i class="fa fa-file-text-o"></i> Func</a>
-            </td>
-        </tr>
-    </table>
+
+    <div class="row fixed-height">
+        <div class="col-md-3">Selector:</div>
+        <div class="col-md-9">
+            <span editable-text="observer.data.selector">{{ observer.data.selector || "selector" }}</span>
+        </div>
+    </div>
+    <div class="row fixed-height">
+        <div class="col-md-3 observer-formula-menu"
+             ng-mouseover="showMenu()"
+             ng-mouseleave="hideMenu()"
+             ng-click="addFormula()">
+            <i ng-class="{'fa fa-plus': isMenu, '': !isMenu}"></i>
+            {{ isMenu ? " Add" : "Formulas:" }}
+        </div>
+        <div class="col-md-9">
+            <div ng-repeat="formula in observer.data.formulas track by $index">
+
+                <div ng-class="{'editable-click': !rowform.$visible, '': rowform.$visible}" ng-click="rowform.$show()">
+                       <span editable-text="observer.data.formulas[$index]"
+                             e-name="formula" e-form="rowform">
+                           {{formula || "formula"}}
+                       </span>
+                </div>
+                <div ng-show="rowform.$visible" class="observer-form-buttons">
+                    <form editable-form name="rowform">
+                        <button type="submit" ng-disabled="rowform.$waiting" title="Save Formula"><i
+                                class="fa fa-floppy-o"></i>
+                        </button>
+                        <button type="button" ng-disabled="rowform.$waiting" ng-click="rowform.$cancel()"><i
+                                class="fa fa-ban" title="Cancel Editing Formula"></i></button>
+                    </form>
+                    <div>
+                        <button ng-click="removeFormula($index)"
+                                title="Remove Formula"><i class="fa fa-trash-o"></i></button>
+                    </div>
+                </div>
+
+            </div>
+
+        </div>
+    </div>
+    <div class="row fixed-height">
+        <div class="col-md-3">Translate:</div>
+        <div class="col-md-9">
+            <span editable-checkbox="observer.data.translate">
+                <span ng-class="{'fa fa-check-square-o': observer.data.translate, 'fa fa-square-o': !observer.data.translate}"></span>
+            </span>
+        </div>
+    </div>
+    <div class="row fixed-height">
+        <div class="col-md-3">Trigger:</div>
+        <div class="col-md-9">
+            <span class="editable-click" ng-click="openJsEditor('trigger', observer)"><i
+                    class="fa fa-file-text-o"></i> Func</span>
+        </div>
+    </div>
+
 </div>

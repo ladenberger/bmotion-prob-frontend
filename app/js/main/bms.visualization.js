@@ -7,10 +7,19 @@ define(['angular', 'jquery', 'prob.modal'], function (angular, $) {
         return angular.module('bms.visualization', ['prob.modal'])
             .factory('bmsVisualizationService', ['bmsModalService', '$injector', function (bmsModalService, $injector) {
                 var currentVisualization,
-                    visualizations = {};
+                    visualizations = {},
+                    disabledTabs = {};
 
                 var visualizationService = {
 
+                    getDisabledTabs: function () {
+                        return disabledTabs;
+                    },
+                    disableTab: function (id, reason) {
+                        if (disabledTabs[id] === undefined) disabledTabs[id] = {};
+                        disabledTabs[id]['status'] = true;
+                        disabledTabs[id]['reason'] = reason;
+                    },
                     addVisualization: function (visId, data) {
                         visualizations[visId] = data;
                     },
@@ -18,6 +27,9 @@ define(['angular', 'jquery', 'prob.modal'], function (angular, $) {
                         return visualizations;
                     },
                     getVisualization: function (visId) {
+                        if (visualizations[visId] === undefined) {
+                            visualizations[visId] = {};
+                        }
                         return visualizations[visId];
                     },
                     setCurrentVisualizationId: function (visId) {
@@ -50,11 +62,13 @@ define(['angular', 'jquery', 'prob.modal'], function (angular, $) {
                             bmsModalService.setError("Observer or event with type '" + e.type + "' does not exists! (Selector: " + e.data.selector + ")");
                         } finally {
                             if (instance && (typeof instance.getDefaultOptions === "function")) {
-                                var vis = visualizations[visId];
-                                if (vis) {
-                                    e.data = instance.getDefaultOptions(e.data);
-                                    vis[list][origin].push(e);
-                                }
+                                e.data = instance.getDefaultOptions(e.data);
+                            }
+                            var vis = visualizations[visId];
+                            if (vis) {
+                                if (vis[list] === undefined) vis[list] = {};
+                                if (vis[list][origin] === undefined) vis[list][origin] = [];
+                                vis[list][origin].push(e);
                             }
                         }
                     },
@@ -80,9 +94,15 @@ define(['angular', 'jquery', 'prob.modal'], function (angular, $) {
                     getJsObservers: function (visId) {
                         return visualizationService.getObservers(visId, 'js');
                     },
+                    getJsonEvents: function (visId) {
+                        return visualizationService.getEvents(visId, 'json');
+                    },
+                    getJsEvents: function (visId) {
+                        return visualizationService.getEvents(visId, 'js');
+                    },
                     getObservers: function (visId, list) {
                         var vis = visualizationService.getVisualization(visId);
-                        if (!list) {
+                        if (vis && vis['observers'] && !list) {
                             // If no list was passed, return all available observers
                             return $.extend([], vis['observers']['js'], vis['observers']['json']);
                         } else {
@@ -91,7 +111,7 @@ define(['angular', 'jquery', 'prob.modal'], function (angular, $) {
                     },
                     getEvents: function (visId, list) {
                         var vis = visualizationService.getVisualization(visId);
-                        if (!list) {
+                        if (vis && vis['events'] && !list) {
                             // If no list was passed, return all available events
                             return $.extend([], vis['events']['js'], vis['events']['json']);
                         } else {

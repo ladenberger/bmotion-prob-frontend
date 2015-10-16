@@ -3,16 +3,21 @@
     <div ng-show="vis.sessionId" class="fullWidthHeight" ng-controller="bmsTabsCtrl as bmsTabs">
 
         <uib-tabset class="fullWidthHeight">
-            <uib-tab select="bmsTabs.selectSimulatorTab()" heading="Simulator">
+            <uib-tab select="bmsTabs.selectSimulatorTab()"
+                     heading="Simulator">
                 <div data-bms-visualisation-session="{{vis.sessionId}}"
                      data-bms-visualisation-view="{{vis.view}}"
                      class="fullWidthHeight"></div>
             </uib-tab>
-            <uib-tab select="bmsTabs.selectEditorTab(svg)" ng-show="bmsTabs.hasSvg() && bmsTabs.visualizationLoaded()"
-                 ng-repeat="svg in bmsTabs.getSvg()"
-                 heading="Editor: {{svg}}">
+            <uib-tab select="bmsTabs.selectEditorTab(svg)"
+                     ng-show="bmsTabs.hasSvg() && bmsTabs.visualizationLoaded()"
+                     ng-repeat="svg in bmsTabs.getSvg()"
+                     heading="Editor: {{svg}}"
+                     disable="bmsTabs.isDisabled(svg)"
+                     ng-click="!bmsTabs.isDisabled(svg) || bmsTabs.whyDisabled(svg)">
                 <div data-bms-visualisation-editor="{{vis.sessionId}}"
-                     data-bms-visualisation-id="{{bmsTabs.getCurrentVisualizationId()}}" data-bms-svg-file="{{svg}}"
+                     data-bms-visualisation-id="{{bmsTabs.getCurrentVisualizationId()}}"
+                     data-bms-svg-file="{{svg}}"
                      class="fullWidthHeight"></div>
             </uib-tab>
         </uib-tabset>

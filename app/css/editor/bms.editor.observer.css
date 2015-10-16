@@ -12,10 +12,18 @@
 }
 
 .observer-menu {
-    text-align:center;
+    text-align: center;
+}
+
+.observer-menu a {
+    color: darkblue;
 }
 
 .observer-menu a:hover {
+    font-style: italic;
+}
+
+.observer-menu a:hover, .observer-menu a:focus {
     text-decoration: none;
 }
 
@@ -24,35 +32,67 @@
     padding-left: 8px;
 }
 
-.observer-content a:link {
-    color: darkblue;
+.observer-content .fixed-height {
+    min-height: 25px;
 }
 
-.observer-content a:hover {
+.editable-empty, .editable-empty:hover, .editable-empty:focus, a.editable-empty, a.editable-empty:hover, a.editable-empty:focus {
+    font-style: normal;
+    color: black;
+}
+
+.editable-click {
+    display: block;
+    margin-top: 1px;
+    color: black;
+    padding: 1px 3px 1px 3px;
+    border: 1px solid #E8E8E8;
+    clear: both;
+}
+
+.editable-click:hover {
+    display: block;
+    margin-top: 1px;
+    color: black;
+    padding: 1px 3px 1px 3px;
+    border: 1px solid darkgray;
+    border-radius: 3px;
+    -moz-border-radius: 3px;
+    -webkit-border-radius: 3px text-decoration : none;
     text-decoration: none;
-    font-style: italic;
+    font-style: normal;
+}
+
+.editable-click:hover:after {
+    font-family: "FontAwesome";
+    content: "\f040";
+    float:right
+}
+
+.editable-wrap {
+    margin-left: 2px;
+}
+
+input[type="text"].editable-input.editable-has-buttons {
+    font-size: 12px;
+    width: 128px;
+    height: 20px;
+    margin: 0;
+    padding: 0;
+}
+
+input[type="checkbox"].editable-input.editable-has-buttons {
+    border: 0;
+    margin: 3px 0 0 0;
+    padding: 0;
+}
+
+.editable {
+    overflow: hidden;
 }
 
 .observer-content button {
     cursor: pointer;
-}
-
-.observer-content table td {
-    padding: 2px;
-}
-
-.observer-content table td,
-.observer-content table th {
-    text-align: right;
-}
-
-.observer-content table td + td {
-    text-align: left;
-}
-
-.observer-formula-cell table td,
-.observer-formula-cell table th {
-    text-align: left;
 }
 
 .observer-header {
@@ -75,7 +115,6 @@
 }
 
 .observer-formula-menu {
-    display: block;
     cursor: pointer;
 }
 
@@ -105,19 +144,7 @@
     border: 1px solid darkgray;
 }
 
-.editable-click, a.editable-click {
-    colsor: darkblue;
-}
-
-input[type="text"].editable-input.editable-has-buttons {
-    font-size: 12px;
-    width: 100px;
-}
-
-input[type="checkbox"].editable-input.editable-has-buttons {
-    border: 0;
-}
-
-.editable {
-    overflow: hidden;
+.observer-form-buttons div, .observer-form-buttons form {
+    float: left;
+    padding: 2px;
 }

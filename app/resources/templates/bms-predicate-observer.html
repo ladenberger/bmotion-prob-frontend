@@ -1,14 +1,16 @@
-<div class="observer observer-predicate">
-    <table cellspacing="3" cellpadding="3">
-        <tr>
-            <td>Selector:</td>
-            <td><a href="#" editable-text="observer.data.selector">{{ observer.data.selector || "selector" }}</a>
-            </td>
-        </tr>
-        <tr>
-            <td>Predicate:</td>
-            <td><a href="#" editable-text="observer.data.predicate">{{ observer.data.predicate || "predicate" }}</a>
-            </td>
-        </tr>
-    </table>
+<div>
+
+    <div class="row fixed-height">
+        <div class="col-md-3">Selector:</div>
+        <div class="col-md-9">
+            <span editable-text="observer.data.selector">{{ observer.data.selector || "selector" }}</span>
+        </div>
+    </div>
+    <div class="row fixed-height">
+        <div class="col-md-3">Predicate:</div>
+        <div class="col-md-9">
+            <span editable-text="observer.data.predicate">{{ observer.data.predicate || "predicate" }}</span>
+        </div>
+    </div>
+
 </div>
