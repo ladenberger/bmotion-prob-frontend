@@ -346,16 +346,19 @@ define(['bms.func', 'jquery', 'angular', 'qtip', 'prob.modal'], function (bms, $
                             var element = container.find(observer.data.selector);
                             element.each(function () {
                                 var ele = $(this);
+                                var returnValue;
                                 if (typeof observer.data.trigger === 'function') {
-                                    var returnValue = observer.data.trigger.call(self, ele, result);
-                                    var bmsid = bmsObserverService.getBmsIdForElement(ele);
-                                    if (returnValue) fvalues[bmsid] = returnValue;
+                                    returnValue = observer.data.trigger.call(self, ele, result);
                                 } else {
                                     // Whenever the function comes from json, we need to convert
                                     // the string function to a real javascript function
                                     // TODO: We need to handle errors while converting the string function to a reals javascript function
                                     var func = new Function('origin', 'values', observer.data.trigger);
-                                    func(ele, result)
+                                    returnValue = func(ele, result)
+                                }
+                                if (returnValue) {
+                                    var bmsid = bmsObserverService.getBmsIdForElement(ele);
+                                    fvalues[bmsid] = returnValue;
                                 }
                             });
                             defer.resolve(fvalues);
