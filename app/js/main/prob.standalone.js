@@ -394,5 +394,4 @@ define(['angular', 'socketio', 'angularAMD', 'bms.func', 'jquery', 'bms.manifest
             }]);
         return angularAMD.bootstrap(module);
 
-    })
-;
+    });

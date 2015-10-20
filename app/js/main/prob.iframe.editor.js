@@ -21,6 +21,9 @@ define(['jquery', 'prob.modal', 'bms.common'], function ($) {
                     template: '<iframe src="editor.html" class="editorIframe"></iframe>',
                     controller: ['$scope', '$rootScope', function ($scope, $rootScope) {
 
+                        // Parent API (called from prob.template)
+                        // --------------------------------------
+
                         $scope.addObserver = function (type, data) {
                             bmsVisualizationService.addObserver($scope.id, {
                                 type: type,
@@ -38,6 +41,8 @@ define(['jquery', 'prob.modal', 'bms.common'], function ($) {
                         $scope.disableEditor = function (reason) {
                             bmsVisualizationService.disableTab($scope.svg, reason);
                         };
+
+                        // --------------------------------------
 
                         $scope.bmsModalService = bmsModalService;
 
@@ -126,7 +131,7 @@ define(['jquery', 'prob.modal', 'bms.common'], function ($) {
                                     .then(function () {
                                         bmsModalService.endLoading("");
                                         bmsModalService.openDialog("The visualization has been saved successfully.");
-                                        //$rootScope.$broadcast('visualizationSaved');
+                                        $rootScope.$broadcast('visualizationSaved');
                                     }, function (error) {
                                         bmsModalService.openErrorDialog(error);
                                     });

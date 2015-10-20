@@ -104,7 +104,7 @@ define(['angular', 'jquery', 'prob.modal'], function (angular, $) {
                         var vis = visualizationService.getVisualization(visId);
                         if (vis && vis['observers'] && !list) {
                             // If no list was passed, return all available observers
-                            return $.extend([], vis['observers']['js'], vis['observers']['json']);
+                            return vis['observers']['js'].concat(vis['observers']['json']);
                         } else {
                             return vis['observers'][list];
                         }
