@@ -1,21 +1,21 @@
 <div ng-controller="bmsExecuteEventCtrl">
 
     <div class="row fixed-height">
-        <div class="col-md-3">Selector:</div>
-        <div class="col-md-9">
+        <div class="col-xs-3">Selector:</div>
+        <div class="col-xs-9">
             <span editable-text="event.data.selector">{{ event.data.selector || "selector" }}</span>
         </div>
     </div>
 
     <div class="row fixed-height">
-        <div class="col-md-3 observer-formula-menu"
+        <div class="col-xs-3 observer-formula-menu"
              ng-mouseover="showMenu()"
              ng-mouseleave="hideMenu()"
              ng-click="addEvent()">
             <i ng-class="{'fa fa-plus': isMenu, '': !isMenu}"></i>
             {{ isMenu ? " Add" : "Events:" }}
         </div>
-        <div class="col-md-9">
+        <div class="col-xs-9">
             <div ng-repeat="e in event.data.events track by $index">
 
                 <div ng-click="rowform.$show()" ng-class="{'editable-click': !rowform.$visible, '': rowform.$visible}">
@@ -44,8 +44,8 @@
     </div>
 
     <div class="row fixed-height">
-        <div class="col-md-3">Tooltip:</div>
-        <div class="col-md-9">
+        <div class="col-xs-3">Tooltip:</div>
+        <div class="col-xs-9">
             <span editable-checkbox="event.data.tooltip">
                 <span ng-class="{'fa fa-check-square-o': event.data.tooltip, 'fa fa-square-o': !event.data.tooltip}"></span>
             </span>
@@ -53,8 +53,8 @@
     </div>
 
     <div class="row fixed-height">
-        <div class="col-md-3">Label:</div>
-        <div class="col-md-9">
+        <div class="col-xs-3">Label:</div>
+        <div class="col-xs-9">
             <span class="editable-click" ng-click="openJsEditor('label', event)"><i
                     class="fa fa-file-text-o"></i> Func</span>
         </div>

@@ -379,8 +379,10 @@ define(['angular', 'bms.func', 'jquery', 'prob.common', 'prob.observers', 'prob.
 
                                     return loadManifestData(templateFolder)
                                         .then(function (manifestData) {
-                                            ctrl.data.manifest = manifestData;
-                                            return loadViewData(view, manifestData);
+                                            ctrl.data.manifest = $.extend(manifestData, {
+                                                tool: 'BAnimation'
+                                            });
+                                            return loadViewData(view, ctrl.data.manifest);
                                         })
                                         .then(function (viewData) {
                                             ctrl.data.view = viewData;
