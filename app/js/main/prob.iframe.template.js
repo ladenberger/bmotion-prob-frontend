@@ -369,12 +369,17 @@ define(['angular', 'bms.func', 'jquery', 'prob.common', 'prob.observers', 'prob.
                                         observers: {
                                             json: [],
                                             js: []
+                                        },
+                                        events: {
+                                            json: [],
+                                            js: []
                                         }
                                     });
                                     var templateFolder = serverData['templateFolder'];
 
                                     return loadManifestData(templateFolder)
                                         .then(function (manifestData) {
+                                            ctrl.data.manifest = manifestData;
                                             return loadViewData(view, manifestData);
                                         })
                                         .then(function (viewData) {

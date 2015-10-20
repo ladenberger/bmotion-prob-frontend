@@ -545,12 +545,18 @@
                         <div class="observer-menu">
                             <a href="#" uib-popover-template="dynamicPopover.templateUrl" popover-trigger="focus"
                                popover-placement="bottom"><i class="fa fa-plus"></i> Add Observer</a>
-                            <script type="text/ng-template" id="observerMenuTemplate.html">
+                            <script type="text/ng-template" id="observerMenuBAnimationTemplate.html">
                                 <div>
                                     <a href="#" ng-click="addFormulaObserver()"><i class="fa fa-eye"></i> Formula
                                         Observer</a><br/>
                                     <a href="#" ng-click="addPredicateObserver()"><i class="fa fa-eye"></i> Predicate
                                         Observer</a>
+                                </div>
+                            </script>
+                            <script type="text/ng-template" id="observerMenuCSPAnimationTemplate.html">
+                                <div>
+                                    <a href="#" ng-click="addCSPEventObserver()"><i class="fa fa-eye"></i> CSP-Event
+                                        Observer</a><br/>
                                 </div>
                             </script>
                         </div>
@@ -590,7 +596,7 @@
                 </div>
             </li>
             <li>
-                <input type="radio" name="tabs" id="tab3" />
+                <input type="radio" name="tabs" id="tab3"/>
                 <label for="tab3" class="tab_label">Events</label>
 
                 <div id="tab-content3" class="tab-content">
@@ -602,7 +608,8 @@
                                popover-placement="bottom"><i class="fa fa-plus"></i> Add Event</a>
                             <script type="text/ng-template" id="eventsMenuTemplate.html">
                                 <div>
-                                    <a href="#" ng-click="addExecuteEventEvent()"><i class="fa fa-eye"></i> Execute Event
+                                    <a href="#" ng-click="addExecuteEventEvent()"><i class="fa fa-eye"></i> Execute
+                                        Event
                                         Handler</a><br/>
                                 </div>
                             </script>

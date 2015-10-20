@@ -213,12 +213,64 @@ define(['angularAMD', 'code-mirror!javascript', 'angular', 'jquery.jgraduate', '
             };
 
         }])
+        .controller('bmsObserverCspEventCtrl', ['$scope', function ($scope) {
+
+            $scope.isObserverMenu = false;
+            $scope.actionMenu = {};
+
+            $scope.showObserverMenu = function () {
+                $scope.isObserverMenu = true;
+            };
+
+            $scope.hideObserverMenu = function () {
+                $scope.isObserverMenu = false;
+            };
+
+            $scope.isActionMenu = function (index) {
+                return $scope.actionMenu[index] ? $scope.actionMenu[index] : false;
+            };
+
+            $scope.showActionMenu = function (index) {
+                $scope.actionMenu[index] = true;
+            };
+
+            $scope.hideActionMenu = function (index) {
+                $scope.actionMenu[index] = false;
+            };
+
+            $scope.addTransformer = function () {
+                $scope.observer.data.observers.push({
+                    exp: "",
+                    actions: []
+                });
+            };
+
+            $scope.addAction = function (o) {
+                o['actions'].push({
+                    selector: "",
+                    attr: "",
+                    value: ""
+                });
+            };
+
+            $scope.removeTransformer = function (index) {
+                $scope.observer.data.observers.splice(index, 1);
+            };
+
+            $scope.removeAction = function (o, index) {
+                o['actions'].splice(index, 1);
+            };
+
+        }])
         .controller('bmsObserverViewCtrl', ['$scope', 'bmsEditorCommonService', 'bmsParentService',
             function ($scope, bmsEditorCommonService, bmsParentService) {
 
-                $scope.dynamicPopover = {
-                    templateUrl: 'observerMenuTemplate.html'
-                };
+                bmsEditorCommonService.isInitialised.promise.then(function () {
+                    var tool = bmsEditorCommonService.getVisualization()['manifest']['tool'];
+                    $scope.dynamicPopover = {
+                        templateUrl: 'observerMenu' + tool + 'Template.html'
+                    };
+                });
 
                 $scope.getIncludeFile = function (type) {
                     return 'resources/templates/bms-' + type + '-observer.html';
@@ -237,6 +289,13 @@ define(['angularAMD', 'code-mirror!javascript', 'angular', 'jquery.jgraduate', '
 
                 $scope.addPredicateObserver = function () {
                     bmsParentService.addObserver("predicate", {selector: ""});
+                };
+
+                $scope.addCSPEventObserver = function () {
+                    bmsParentService.addObserver("csp-event", {
+                        selector: "",
+                        observers: []
+                    });
                 };
 
                 $scope.duplicateObserver = function (index) {
