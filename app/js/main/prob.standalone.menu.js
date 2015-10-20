@@ -26,7 +26,7 @@ define(['angular', 'bms.electron', 'bms.config'], function () {
                                 $rootScope.$broadcast('openElementProjectionModal');
                             });
                         },
-                        enabled: vis.tool === 'BAnimation'
+                        enabled: vis['manifest']['tool'] === 'BAnimation'
                     }));
 
                     menu.append(electronMenuService.createMenuItem({
