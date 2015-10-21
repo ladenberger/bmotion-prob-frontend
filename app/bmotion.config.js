@@ -141,8 +141,7 @@ requirejs.config({
         // path to CodeMirror css file
         css: 'css/libs/bower/codemirror/codemirror.css',
         // define themes
-        themes: {
-        },
+        themes: {},
         modes: {
             // modes dir structure
             path: 'js/libs/bower/codemirror/mode/{mode}/{mode}'

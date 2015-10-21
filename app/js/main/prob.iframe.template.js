@@ -265,26 +265,30 @@ define(['angular', 'bms.func', 'jquery', 'prob.common', 'prob.observers', 'prob.
                         var loadServerData = function (sessionId) {
                             var defer = $q.defer();
                             // Get data from server
-                            ws.emit('initView', {data: {id: sessionId}}, function (serverData) {
-                                defer.resolve(serverData);
+                            ws.emit('initView', {data: {id: sessionId}}, function (data) {
+                                if (data.errors) {
+                                    defer.reject(data.errors);
+                                } else {
+                                    defer.resolve(data);
+                                }
                             });
                             return defer.promise;
                         };
 
                         var loadManifestData = function (templateFolder) {
-
                             var defer = $q.defer();
-
                             $http.get(templateFolder + '/bmotion.json')
                                 .success(function (manifestData) {
                                     defer.resolve(manifestData);
                                 })
-                                .error(function () {
-                                    // TODO: Handle error ...
+                                .error(function (data, status, headers, config) {
+                                    if (status === 404) {
+                                        defer.reject("File not found: " + config.url);
+                                    } else {
+                                        defer.reject("Some error occurred while requesting file " + config.url);
+                                    }
                                 });
-
                             return defer.promise;
-
                         };
 
                         var loadViewData = function (view, manifestData) {
@@ -364,7 +368,7 @@ define(['angular', 'bms.func', 'jquery', 'prob.common', 'prob.observers', 'prob.
                             loadServerData(sessionId)
                                 .then(function (serverData) {
 
-                                    bmsUIService.setProBViewTraceId(serverData.traceId);
+                                    bmsUIService.setProBViewTraceId(serverData['traceId']);
                                     ctrl.data = $.extend(ctrl.data, serverData, {
                                         observers: {
                                             json: [],
@@ -379,10 +383,13 @@ define(['angular', 'bms.func', 'jquery', 'prob.common', 'prob.observers', 'prob.
 
                                     return loadManifestData(templateFolder)
                                         .then(function (manifestData) {
-                                            ctrl.data.manifest = $.extend(manifestData, {
+                                            ctrl.data.manifest = $.extend({
                                                 tool: 'BAnimation'
-                                            });
+                                            }, manifestData);
                                             return loadViewData(view, ctrl.data.manifest);
+                                        },
+                                        function (error) {
+                                            bmsModalService.openErrorDialog(error);
                                         })
                                         .then(function (viewData) {
                                             ctrl.data.view = viewData;
@@ -398,6 +405,8 @@ define(['angular', 'bms.func', 'jquery', 'prob.common', 'prob.observers', 'prob.
                                                     bmsModalService.endLoading();
                                                 });
                                         });
+                                }, function (errors) {
+                                    bmsModalService.openErrorDialog(errors);
                                 });
 
                         };

@@ -4,7 +4,7 @@
  */
 define(['bms.func', 'jquery', 'angular', 'qtip', 'prob.modal'], function (bms, $, angular) {
 
-    return angular.module('prob.observers', ['bms.common', 'prob.modal'])
+    return angular.module('prob.observers', ['prob.modal'])
         .service('bmsObserverService', ['$q', '$injector', 'trigger', 'bmsModalService', function ($q, $injector, trigger, bmsModalService) {
             var bmsidCache = {};
             //var hasErrors = false;
