@@ -2,9 +2,9 @@
  * BMotion Studio for ProB Graph Module
  *
  */
-define(['jquery', 'bms.visualization', 'prob.observers', 'angular-xeditable'], function ($) {
+define(['jquery', 'bms.visualization', 'prob.observers'], function ($) {
 
-    return angular.module('prob.graph', ['xeditable', 'bms.visualization', 'prob.observers'])
+    return angular.module('prob.graph', ['bms.visualization', 'prob.observers'])
         .factory('bmsRenderingService', ['$q', 'ws', '$injector', 'bmsObserverService', 'bmsVisualizationService', '$http', '$templateCache', '$compile', '$rootScope', '$interpolate', '$timeout', function ($q, ws, $injector, bmsObserverService, bmsVisualizationService, $http, $templateCache, $compile, $rootScope, $interpolate, $timeout) {
 
             var renderingService = {

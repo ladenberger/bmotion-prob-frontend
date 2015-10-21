@@ -33,14 +33,12 @@ define(['angular', 'socketio', 'angularAMD', 'bms.func', 'bms.common', 'jquery',
                             redirectTo: '/startServer'
                         });
                 }])
-            .run(['editableOptions', '$rootScope', 'bmsMainService',
-                function (editableOptions, $rootScope, bmsMainService) {
-
+            .run(['$rootScope', 'bmsMainService',
+                function ( $rootScope, bmsMainService) {
                     bmsMainService.mode = 'ModeStandalone';
-                    editableOptions.theme = 'bs3'; // bootstrap3 theme. Can be also 'bs2', 'default'
-
+                    //editableOptions.theme = 'bs3'; // bootstrap3 theme. Can be also 'bs2', 'default'
                 }])
-            .factory('initVisualizationService', ['$location', 'bmsInitVisualizationService', 'bmsManifestService', 'bmsMainService', 'bmsModalService', 'electronWindow', 'electronWindowService',
+            .factory('initVisualizationService', ['$location', 'bmsInitSessionService', 'bmsManifestService', 'bmsMainService', 'bmsModalService', 'electronWindow', 'electronWindowService',
                 function ($location, bmsInitSessionService, bmsManifestService, bmsMainService, bmsModalService, electronWindow, electronWindowService) {
 
                     return function (manifestFilePath) {

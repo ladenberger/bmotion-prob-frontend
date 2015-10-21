@@ -6,10 +6,9 @@ define(['angularAMD', 'angular', 'prob.graph', 'prob.iframe.template', 'prob.ui'
     function (angularAMD, angular) {
 
         var module = angular.module('prob.online', ['prob.graph', 'prob.iframe.template', 'prob.ui', 'prob.modal', 'bms.manifest', 'bms.common', 'ngRoute'])
-            .run(['editableOptions', 'bmsMainService',
-                function (editableOptions, bmsMainService) {
+            .run(['bmsMainService',
+                function (bmsMainService) {
                     bmsMainService.mode = 'ModeOnline';
-                    editableOptions.theme = 'bs3'; // bootstrap3 theme. Can be also 'bs2', 'default'
                 }])
             .config(['$routeProvider', '$locationProvider',
                 function ($routeProvider) {
@@ -114,20 +113,24 @@ define(['angularAMD', 'angular', 'prob.graph', 'prob.iframe.template', 'prob.ui'
                     self.view = $routeParams.view;
                     self.sessionId = $routeParams.sessionId;
                 }])
-            .directive('bmsVisualization', ['initVisualizationService',
-                function (initVisualizationService) {
+            .directive('bmsVisualization', ['initVisualizationService', '$routeParams',
+                function (initVisualizationService, $routeParams) {
                     return {
                         replace: true,
                         scope: {},
-                        template: '<div ng-view class="fullWidthHeight"></div>',
                         controller: ['$scope', function ($scope) {
                         }],
-                        link: function ($scope, element, attrs, ctrl) {
-                            var path = attrs['bmsVisualization'];
-                            if (path) {
-                                initVisualizationService(path);
-                            } else {
-                                bmsModalService.setMessage("Please provide path to bmotion.json file.");
+                        link: function ($scope, element, attrs) {
+                            element.attr('class', 'fullWidthHeight');
+                            var view = $routeParams.view;
+                            var sessionId = $routeParams.sessionId;
+                            if (!sessionId && !view) {
+                                var path = attrs['bmsVisualization'];
+                                if (path) {
+                                    initVisualizationService(path);
+                                } else {
+                                    bmsModalService.setMessage("Please provide path to bmotion.json file.");
+                                }
                             }
                         }
                     }

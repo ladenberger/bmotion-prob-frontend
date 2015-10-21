@@ -33,10 +33,8 @@ requirejs.config({
         "prob.observers": "js/main/prob.observers",
 
         // IFrame directive modules
-        "prob.iframe.editor": "js/main/prob.iframe.editor",
         "prob.iframe.template": "js/main/prob.iframe.template",
         "prob.template": "js/main/prob.template",
-        "prob.editor": "js/main/prob.editor",
 
         // Third party modules
         "jquery": "js/libs/bower/jquery/jquery",
@@ -44,50 +42,49 @@ requirejs.config({
         "angular": "js/libs/bower/angular/angular",
         "angular-route": "js/libs/bower/angular-route/angular-route",
         "angular-sanitize": "js/libs/bower/angular-sanitize/angular-sanitize",
-        //"codemirror": "js/libs/bower/codemirror/lib/codemirror",
-        "codemirror-javascript": "js/libs/bower/codemirror/mode/javascript/javascript",
-        "angular-ui-codemirror": "js/libs/bower/angular-ui-codemirror/ui-codemirror",
-        "code-mirror": "js/libs/ext/requirejs-codemirror/code-mirror",
-
         "ui-bootstrap": "js/libs/bower/angular-bootstrap/ui-bootstrap",
         "ui-bootstrap-tpls": "js/libs/bower/angular-bootstrap/ui-bootstrap-tpls",
         "angularAMD": "js/libs/bower/angularAMD/angularAMD",
-
         "jquery-ui": "js/libs/ext/jquery-ui/jquery-ui",
 
         "qtip": "js/libs/bower/qtip2/jquery.qtip",
         "tv4": "js/libs/bower/tv4/tv4",
-        "angular-xeditable": "js/libs/bower/angular-xeditable/xeditable",
         "cytoscape": "js/libs/bower/cytoscape/cytoscape",
         "cytoscape.navigator": "js/libs/ext/cytoscape.navigator/cytoscape.js-navigator",
 
         // Editor dependencies
-        "jquery.contextMenu": "js/libs/ext/contextmenu/jquery.contextMenu",
-        "jquery.jgraduate": "js/libs/ext/jgraduate/jquery.jgraduate.min",
-        "jpicker": "js/libs/ext/jgraduate/jpicker.min",
-        "jquery.svgicons": "js/libs/ext/jquery.svgicons",
-        "jquery.bbq": "js/libs/ext/jquerybbq/jquery.ba-bbq",
-        "jquery.browser": "js/libs/bower/jquery.browser/jquery.browser",
-        "jquery.hotkeys": "js/libs/ext/js-hotkeys/jquery.hotkeys.min",
-        "jquery.draginput": "js/libs/ext/jquery-draginput",
-        "mousewheel": "js/libs/ext/mousewheel",
-        "taphold": "js/libs/ext/taphold",
-        "touch": "js/libs/ext/touch",
-        "requestanimationframe": "js/libs/ext/requestanimationframe",
-        "browser": "js/editor/browser",
-        "contextmenu": "js/editor/contextmenu",
-        "dialog": "js/editor/dialog",
-        "draw": "js/editor/draw",
-        "history": "js/editor/history",
-        "math": "js/editor/math",
-        "method-draw": "js/editor/method-draw",
-        "path": "js/editor/path",
-        "sanitize": "js/editor/sanitize",
-        "select": "js/editor/select",
-        "svgcanvas": "js/editor/svgcanvas",
-        "svgtransformlist": "js/editor/svgtransformlist",
-        "svgutils": "js/editor/svgutils",
-        "units": "js/editor/units"
+        "angular-xeditable": "editor/js/libs/bower/angular-xeditable/xeditable",
+        "prob.iframe.editor": "editor/js/prob.iframe.editor",
+        "prob.editor": "editor/js/prob.editor",
+        "codemirror-javascript": "editor/js/libs/bower/codemirror/mode/javascript/javascript",
+        "angular-ui-codemirror": "editor/js/libs/bower/angular-ui-codemirror/ui-codemirror",
+        "code-mirror": "editor/js/libs/ext/requirejs-codemirror/code-mirror",
+        "jquery.contextMenu": "editor/js/libs/ext/contextmenu/jquery.contextMenu",
+        "jquery.jgraduate": "editor/js/libs/ext/jgraduate/jquery.jgraduate.min",
+        "jpicker": "editor/js/libs/ext/jgraduate/jpicker.min",
+        "jquery.svgicons": "editor/js/libs/ext/jquery.svgicons",
+        "jquery.bbq": "editor/js/libs/ext/jquerybbq/jquery.ba-bbq",
+        "jquery.browser": "editor/js/libs/bower/jquery.browser/jquery.browser",
+        "jquery.hotkeys": "editor/js/libs/ext/js-hotkeys/jquery.hotkeys.min",
+        "jquery.draginput": "editor/js/libs/ext/jquery-draginput",
+        "mousewheel": "editor/js/libs/ext/mousewheel",
+        "taphold": "editor/js/libs/ext/taphold",
+        "touch": "editor/js/libs/ext/touch",
+        "requestanimationframe": "editor/js/libs/ext/requestanimationframe",
+        "browser": "editor/js/browser",
+        "contextmenu": "editor/js/contextmenu",
+        "dialog": "editor/js/dialog",
+        "draw": "editor/js/draw",
+        "history": "editor/js/history",
+        "math": "editor/js/math",
+        "method-draw": "editor/js/method-draw",
+        "path": "editor/js/path",
+        "sanitize": "editor/js/sanitize",
+        "select": "editor/js/select",
+        "svgcanvas": "editor/js/svgcanvas",
+        "svgtransformlist": "editor/js/svgtransformlist",
+        "svgutils": "editor/js/svgutils",
+        "units": "editor/js/units"
     },
     shim: {
         "socketio": {"exports": "io"},
@@ -137,14 +134,14 @@ requirejs.config({
         // baseUrl to CodeMirror dir
         baseUrl: './',
         // path to CodeMirror lib
-        path: 'js/libs/bower/codemirror/lib/codemirror',
+        path: 'editor/js/libs/bower/codemirror/lib/codemirror',
         // path to CodeMirror css file
         css: 'css/libs/bower/codemirror/codemirror.css',
         // define themes
         themes: {},
         modes: {
             // modes dir structure
-            path: 'js/libs/bower/codemirror/mode/{mode}/{mode}'
+            path: 'editor/js/libs/bower/codemirror/mode/{mode}/{mode}'
         }
     }
 });
