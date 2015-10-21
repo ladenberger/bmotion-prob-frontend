@@ -139,6 +139,20 @@ module.exports = function (grunt) {
                     cssIn: "app/css/bms.main.css",
                     out: "build/online/css/bms.main.css"
                 }
+            },
+            'js-template': {
+                options: {
+                    mainConfigFile: "app/bmotion.config.js",
+                    baseUrl: "app",
+                    removeCombined: true,
+                    findNestedDependencies: true,
+                    name: "bmotion.template",
+                    out: "build/template/bmotion.template.js",
+                    //optimize: 'none',
+                    skipDirOptimize: true,
+                    keepBuildDir: false,
+                    noBuildTxt: true
+                }
             }
         },
         copy: {
@@ -147,7 +161,7 @@ module.exports = function (grunt) {
                     {
                         expand: true,
                         cwd: 'app/',
-                        src: ['css/**', 'images/**', 'js/require.js'],
+                        src: ['css/**', 'images/**', 'js/require.js', 'bmotion.json'],
                         dest: 'build/online/'
                     }
                 ]
@@ -167,6 +181,7 @@ module.exports = function (grunt) {
     grunt.registerTask('build', ['standalone_all']);
 
     grunt.registerTask('online', ['prepare', 'requirejs:js-online', 'requirejs:css-online', 'copy:online']);
+    grunt.registerTask('template', ['prepare', 'requirejs:js-template']);
 
     targets.forEach(function (target) {
         grunt.registerTask('standalone_' + target, '', function () {
