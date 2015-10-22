@@ -64,6 +64,7 @@ define(['angular', 'socketio', 'angularAMD', 'bms.func', 'bms.common', 'jquery',
                                                 if (i === 0) {
                                                     // TODO: I assume that the main window has always the id "1"
                                                     $location.path('/root/' + sessionId + '/1/' + view.id);
+                                                    newWindow = mainWindow;
                                                     //win.title = 'BMotion Studio for ProB: ' + viewName;
                                                 } else {
                                                     var newWindow = electronWindowService.createNewWindow();
