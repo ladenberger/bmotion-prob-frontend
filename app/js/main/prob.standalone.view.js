@@ -16,7 +16,7 @@ define(['bms.electron', 'prob.standalone.menu', 'bms.visualization'], function (
             $scope.$on('visualizationLoaded', function (evt, visId) {
                 var win = electronWindow.fromId(winId);
                 win.setTitle(title);
-                win.setAlwaysOnTop(true);
+                //win.setAlwaysOnTop(true);
                 var menu = electronMenuService.createNewMenu();
                 probStandaloneMenuService.buildProBMenu(menu);
                 probStandaloneMenuService.buildDiagramMenu(menu, bmsVisualizationService.getVisualization(visId));
