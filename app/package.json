@@ -1,5 +1,5 @@
 {
   "version": "0.2.3",
   "name": "bmotion-prob",
-  "main": "./main.js"
+  "main": "./bmotion.main.js"
 }

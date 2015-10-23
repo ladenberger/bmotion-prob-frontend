@@ -2,10 +2,10 @@
  * BMotion Studio for ProB Standalone Module
  *
  */
-define(['angularAMD', 'angular', 'prob.graph', 'prob.iframe.template', 'prob.ui', 'bms.manifest', 'prob.modal', 'bms.common', 'angular-route'],
+define(['angularAMD', 'angular', 'prob.graph', 'prob.iframe.template', 'prob.ui', 'bms.manifest', 'prob.modal', 'bms.common', 'bms.session', 'angular-route'],
     function (angularAMD, angular) {
 
-        var module = angular.module('prob.online', ['prob.graph', 'prob.iframe.template', 'prob.ui', 'prob.modal', 'bms.manifest', 'bms.common', 'ngRoute'])
+        var module = angular.module('prob.online', ['prob.graph', 'prob.iframe.template', 'prob.ui', 'prob.modal', 'bms.manifest', 'bms.common', 'bms.session', 'ngRoute'])
             .run(['bmsMainService',
                 function (bmsMainService) {
                     bmsMainService.mode = 'ModeOnline';

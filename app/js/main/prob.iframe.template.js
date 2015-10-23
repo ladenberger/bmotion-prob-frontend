@@ -5,8 +5,8 @@
 define(['angular', 'bms.func', 'jquery', 'prob.common', 'prob.observers', 'prob.modal'], function (angular, bms, $) {
 
     var module = angular.module('prob.iframe.template', ['prob.common', 'prob.observers', 'prob.modal'])
-        .directive('bmsVisualisationView', ['$rootScope', 'bmsVisualizationService', 'bmsObserverService', 'ws', '$injector', 'bmsUIService', 'bmsModalService', 'trigger', '$compile', '$http', '$timeout', '$q',
-            function ($rootScope, bmsVisualizationService, bmsObserverService, ws, $injector, bmsUIService, bmsModalService, trigger, $compile, $http, $timeout, $q) {
+        .directive('bmsVisualisationView', ['$rootScope', 'bmsVisualizationService', 'bmsObserverService', 'ws', '$injector', 'bmsModalService', 'trigger', '$compile', '$http', '$timeout', '$q',
+            function ($rootScope, bmsVisualizationService, bmsObserverService, ws, $injector, bmsModalService, trigger, $compile, $http, $timeout, $q) {
                 return {
                     replace: false,
                     scope: {
@@ -367,8 +367,7 @@ define(['angular', 'bms.func', 'jquery', 'prob.common', 'prob.observers', 'prob.
 
                             loadServerData(sessionId)
                                 .then(function (serverData) {
-
-                                    bmsUIService.setProBViewTraceId(serverData['traceId']);
+                                    $rootScope.$broadcast('setProBViewTraceId', serverData['traceId']);
                                     ctrl.data = $.extend(ctrl.data, serverData, {
                                         observers: {
                                             json: [],

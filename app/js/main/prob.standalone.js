@@ -2,10 +2,10 @@
  * BMotion Studio for ProB Standalone Module
  *
  */
-define(['angular', 'socketio', 'angularAMD', 'bms.func', 'bms.common', 'jquery', 'bms.manifest', 'bms.config', 'prob.graph', 'prob.iframe.template', 'prob.iframe.editor', 'prob.ui', 'prob.common', 'prob.modal', 'angular-route', 'prob.standalone.view', 'bms.electron', 'prob.standalone.menu'],
+define(['angular', 'socketio', 'angularAMD', 'bms.func', 'bms.common', 'bms.session', 'jquery', 'bms.manifest', 'bms.config', 'prob.graph', 'prob.iframe.template', 'prob.iframe.editor', 'prob.ui', 'prob.common', 'prob.modal', 'angular-route', 'prob.standalone.view', 'bms.electron', 'prob.standalone.menu'],
     function (angular, io, angularAMD, bms, $) {
 
-        var module = angular.module('prob.standalone', ['prob.standalone.view', 'bms.manifest', 'bms.config', 'bms.common', 'prob.graph', 'prob.iframe.template', 'prob.iframe.editor', 'prob.ui', 'prob.common', 'prob.modal', 'bms.electron', 'prob.standalone.menu', 'ngRoute'])
+        var module = angular.module('prob.standalone', ['prob.standalone.view', 'bms.manifest', 'bms.config', 'bms.common', 'bms.session', 'prob.graph', 'prob.iframe.template', 'prob.iframe.editor', 'prob.ui', 'prob.common', 'prob.modal', 'bms.electron', 'prob.standalone.menu', 'ngRoute'])
             .config(['$routeProvider', '$locationProvider',
                 function ($routeProvider) {
                     $routeProvider
@@ -88,8 +88,8 @@ define(['angular', 'socketio', 'angularAMD', 'bms.func', 'bms.common', 'jquery',
                     }
 
                 }])
-            .controller('bmsStartServerController', ['$scope', 'bmsModalService', '$location', 'bmsSocketService', '$q', 'bmsConfigService', 'ws', 'electronWindow',
-                function ($scope, bmsModalService, $location, bmsSocketService, $q, bmsConfigService, ws, electronWindow) {
+            .controller('bmsStartServerController', ['$rootScope', '$scope', 'bmsModalService', '$location', 'bmsSocketService', '$q', 'bmsConfigService', 'ws', 'electronWindow',
+                function ($rootScope, $scope, bmsModalService, $location, bmsSocketService, $q, bmsConfigService, ws, electronWindow) {
 
                     bmsModalService.closeModal();
 
@@ -122,12 +122,10 @@ define(['angular', 'socketio', 'angularAMD', 'bms.func', 'bms.common', 'jquery',
                             var exec = require('child_process').exec;
                             var path = require('path');
                             var appPath = path.dirname(__dirname);
-                            var separator = process.platform === 'win32' ? ';' : ':';
-                            //var server = spawn('java', ['-Xmx1024m', '-cp', './libs/libs/*' + separator + './libs/bmotion-prob-standalone.jar', "-Dprob.home=./cli/", 'Start', '-standalone', '-local']);
-                            //var server = exec('java', ['-Xmx1024m', '-cp', './libs/libs/*' + separator + './libs/bmotion-prob-standalone.jar', 'Start', '-standalone', '-local']);
-                            //var server = exec('java -Xmx1024m -cp ' + binaryPath + '/libs/libs/*' + separator + binaryPath + '/libs/bmotion-prob-standalone.jar Start -standalone -local');
+                            var isWin = /^win/.test(process.platform);
+                            var separator = isWin ? ';' : ':';
                             var server = exec('java -Xmx1024m -cp ' + appPath + '/libs/*' + separator + appPath + '/libs/bmotion-prob-0.2.2-SNAPSHOT.jar -Dprob.home=' + probBinary + ' de.bms.prob.Standalone -standalone -local');
-                            //var server = exec('java -Xmx1024m -cp ./libs/libs/*' + separator + './libs/bmotion-prob-standalone.jar -Dprob.home=./cli/ Start -standalone -local');
+                            //electron.send(server.pid);
                             server.stdout.on('data', function (data) {
                                 try {
                                     var json = JSON.parse(data.toString('utf8'));
@@ -145,7 +143,6 @@ define(['angular', 'socketio', 'angularAMD', 'bms.func', 'bms.common', 'jquery',
                             server.on('close', function (code) {
                                 console.log('BMotion Studio for ProB Server process exited with code ' + code);
                             });
-
 
                         } else {
                             defer.resolve();
@@ -168,17 +165,11 @@ define(['angular', 'socketio', 'angularAMD', 'bms.func', 'bms.common', 'jquery',
 
                             if (version === null) {
                                 defer.reject("No ProB binaries found at " + configData['prob']['binary'] + ".");
-                                /*dialogMessage = "You have no ProB binaries installed in your home directory. " +
-                                 "Press \"Ok\" to download a compatible version. " +
-                                 "Make sure that you have a working internet connection.";*/
                             } else if (revision !== configData['prob']['revision']) {
                                 defer.reject("The ProB binary at " + configData['prob']['binary'] + " [version " + version + "] " +
                                     "may not be compatible with this version of BMotion Studio for ProB. " +
                                     "Please make sure that you have installed the correct version of the " +
                                     "Prob binary [version " + configData['prob']['version'] + " (" + configData['prob']['revision'] + ")].");
-                                /*dialogMessage = "The ProB binary in your home directory may not be compatible with this version of BMotion Studio for ProB. " +
-                                 "Press \"Ok\" to download a compatible version. Make sure that you have a working internet connection. " +
-                                 "If you press \"Cancel\" we cannot guarantee that the plug-in will work correctly.";*/
                             } else {
                                 defer.resolve();
                             }
@@ -240,8 +231,10 @@ define(['angular', 'socketio', 'angularAMD', 'bms.func', 'bms.common', 'jquery',
                      return defer.promise;
                      };*/
 
-                }])
-            .controller('bmsWelcomeController', ['$rootScope', 'electronMenuService', 'electronMenu', 'initVisualizationService', 'electronWindow', 'probStandaloneMenuService',
+                }
+            ])
+            .
+            controller('bmsWelcomeController', ['$rootScope', 'electronMenuService', 'electronMenu', 'initVisualizationService', 'electronWindow', 'probStandaloneMenuService',
                 function ($rootScope, electronMenuService, electronMenu, initVisualizationService, electronWindow, probStandaloneMenuService) {
 
                     var mainWindow = electronWindow.fromId(1);

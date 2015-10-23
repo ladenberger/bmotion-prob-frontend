@@ -5,7 +5,7 @@
 define(['jquery', 'angular', 'jquery-ui', 'ui-bootstrap', 'bms.config'], function ($) {
 
     var module = angular.module('prob.ui', ['ui.bootstrap', 'bms.config'])
-        .controller('bmsUiNavigationCtrl', ['$scope', '$rootScope', 'bmsUIService', 'bmsVisualizationService', function ($scope, $rootScope, bmsUIService, bmsVisualizationService) {
+        .controller('bmsUiNavigationCtrl', ['$scope', '$rootScope', 'bmsVisualizationService', function ($scope, $rootScope, bmsVisualizationService) {
 
             var self = this;
 
@@ -28,7 +28,7 @@ define(['jquery', 'angular', 'jquery-ui', 'ui-bootstrap', 'bms.config'], functio
                 var id = bmsVisualizationService.getCurrentVisualizationId();
                 if (id) {
                     document.getElementById(id).contentDocument.location.reload(true);
-                    bmsUIService.reloadVisualisation(id);
+                    $rootScope.$broadcast('reloadVisualisation', id);
                 }
             };
 

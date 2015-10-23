@@ -18,6 +18,7 @@ requirejs.config({
 
         // Common modules
         "bms.common": "js/main/bms.common",
+        "bms.session": "js/main/bms.session",
         "bms.func": "js/main/bms.func",
         "bms.socket": "js/main/bms.socket",
         "bms.config": "js/main/bms.config",
@@ -95,8 +96,6 @@ requirejs.config({
         "ui-bootstrap-tpls": ["ui-bootstrap"],
         "angular-sanitize": ["angular"],
         "angular-xeditable": ["angular"],
-        //"codemirror-javascript": ["codemirror"],
-        //"angular-ui-codemirror": ["angular", "codemirror"],
         "angular-ui-codemirror": ["angular", "code-mirror"],
         "qtip": ["jquery"],
         "cytoscape": {

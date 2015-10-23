@@ -98,7 +98,16 @@ targets.each() { target, cliTarget ->
         download_cspm(cliTarget)
     }
 
-    task "assemble_${target}"(dependsOn: ["grunt_standalone_${target}", getLibs], type: Copy) {
+    task "copyConfigFile_${target}"(dependsOn: ["grunt_standalone_${target}"], type: Copy) {
+        from 'bmotion.json'
+        if (target == "darwin-x64") {
+            into 'build/client/bmotion-prob-' + target + '/bmotion-prob.app/Contents/Resources'
+        } else {
+            into 'build/client/bmotion-prob-' + target + '/resources'
+        }
+    }
+
+    task "copyLibs_${target}"(dependsOn: ["grunt_standalone_${target}", getLibs], type: Copy) {
         from 'build/libs'
         if (target == "darwin-x64") {
             into 'build/client/bmotion-prob-' + target + '/bmotion-prob.app/Contents/Resources/libs'
@@ -107,7 +116,7 @@ targets.each() { target, cliTarget ->
         }
     }
 
-    task "zip_${target}"(dependsOn: ["downloadCli_${target}"], type: Zip) {
+    task "zip_${target}"(dependsOn: ["copyLibs_${target}", "copyConfigFile_${target}", "downloadCli_${target}"], type: Zip) {
         destinationDir = new File('build/dist/' + appVersion)
         archiveName = 'bmotion-prob-' + appVersion + '-' + target + '.zip'
         from('build/client/bmotion-prob-' + target) {
@@ -122,7 +131,7 @@ targets.each() { target, cliTarget ->
         gruntArgs = "standalone_${target} --force"
     }
 
-    task "standalone_${target}"(dependsOn: ["assemble_${target}", "zip_${target}"]) {}
+    task "standalone_${target}"(dependsOn: ["zip_${target}"]) {}
 
 }
 
