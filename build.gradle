@@ -2,8 +2,55 @@ import org.apache.tools.ant.taskdefs.condition.Os
 import org.gradle.api.tasks.Exec
 
 def bmotionVersion = '0.2.3-SNAPSHOT'
+def probVersion = 'milestone-28'
 def appVersion = '0.2.3'
-def targets = ["linux-ia32", "linux-x64", "darwin-x64", "win32-ia32", "win32-x64"]
+def targets = ["linux-ia32": "linux32", "linux-x64": "linux64", "darwin-x64": "leopard64", "win32-ia32": "win32", "win32-x64": "win64"]
+
+// ----------------------------------------
+// Helper methods ...
+// ----------------------------------------
+def download(String address, String target) {
+    def file = new FileOutputStream(target)
+    def out = new BufferedOutputStream(file)
+    out << new URL(address).openStream()
+    out.close()
+}
+
+def download_cspm(String target) {
+    def String downloadFile = target
+    def String postfix = ""
+    if (target == "win32") {
+        downloadFile = "windows"
+        postfix = ".exe"
+    }
+    def String url = "http://nightly.cobra.cs.uni-duesseldorf.de/cspmf/cspmf-" + downloadFile
+    println "Downloading cspm for " + target + " ..."
+    def String dir = "build/resources/cli/" + target + "_cli/cli/lib/cspmf" + postfix
+    download(url, dir)
+    new File(dir).setExecutable(true)
+    println " done."
+}
+
+def download_cli(target, probVersion) {
+    def downloadFile = target
+    def String dir = "build/resources/cli/" + target + "_cli/cli"
+    def d = new File(dir)
+    delete file(d)
+    d.mkdirs();
+    def url = "http://nightly.cobra.cs.uni-duesseldorf.de/tmp/" + probVersion + "/probcli_" + downloadFile + ".zip"
+    //def nwurl = "http://nightly.cobra.cs.uni-duesseldorf.de/cli/probcli_"+downloadFile+".zip"
+    println "Downloading cli for " + target + " ..."
+    def String targetzip = dir + "probcli.zip"
+    download(url, targetzip)
+    println " done."
+    FileTree zip = zipTree(targetzip)
+    println "Unzipping " + zip
+    copy {
+        from zip
+        into dir
+    }
+    delete file(targetzip)
+}
 
 apply plugin: 'java'
 apply plugin: 'maven'
@@ -44,7 +91,12 @@ task grunt_standalone_all(dependsOn: [npmDeps], type: GruntTask) {
     gruntArgs = "standalone_all --force"
 }
 
-targets.each() { target ->
+targets.each() { target, cliTarget ->
+
+    task "downloadCli_${target}" << {
+        download_cli(cliTarget, probVersion)
+        download_cspm(cliTarget)
+    }
 
     task "assemble_${target}"(dependsOn: ["grunt_standalone_${target}", getLibs], type: Copy) {
         from 'build/libs'
@@ -55,10 +107,13 @@ targets.each() { target ->
         }
     }
 
-    task "zip_${target}"(dependsOn: [], type: Zip) {
+    task "zip_${target}"(dependsOn: ["downloadCli_${target}"], type: Zip) {
         destinationDir = new File('build/dist/' + appVersion)
         archiveName = 'bmotion-prob-' + appVersion + '-' + target + '.zip'
         from('build/client/bmotion-prob-' + target) {
+            into "./bmotion-prob-" + appVersion
+        }
+        from('build/resources/cli/' + cliTarget + '_cli') {
             into "./bmotion-prob-" + appVersion
         }
     }

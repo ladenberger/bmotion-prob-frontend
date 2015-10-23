@@ -5,6 +5,7 @@
   },
   "prob": {
     "host": "localhost",
+    "binary": "./cli/",
     "version": "milestone-28",
     "revision": "79a072304b5b92d3fc46615588bef6874136e59b"
   }

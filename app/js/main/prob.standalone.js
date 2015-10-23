@@ -34,7 +34,7 @@ define(['angular', 'socketio', 'angularAMD', 'bms.func', 'bms.common', 'jquery',
                         });
                 }])
             .run(['$rootScope', 'bmsMainService',
-                function ( $rootScope, bmsMainService) {
+                function ($rootScope, bmsMainService) {
                     bmsMainService.mode = 'ModeStandalone';
                     //editableOptions.theme = 'bs3'; // bootstrap3 theme. Can be also 'bs2', 'default'
                 }])
@@ -88,8 +88,8 @@ define(['angular', 'socketio', 'angularAMD', 'bms.func', 'bms.common', 'jquery',
                     }
 
                 }])
-            .controller('bmsStartServerController', ['$scope', 'bmsModalService', '$location', 'bmsSocketService', '$q', 'bmsConfigService', 'ws', 'electronWindow', 'electronRemote',
-                function ($scope, bmsModalService, $location, bmsSocketService, $q, bmsConfigService, ws, electronWindow, electronRemote) {
+            .controller('bmsStartServerController', ['$scope', 'bmsModalService', '$location', 'bmsSocketService', '$q', 'bmsConfigService', 'ws', 'electronWindow',
+                function ($scope, bmsModalService, $location, bmsSocketService, $q, bmsConfigService, ws, electronWindow) {
 
                     bmsModalService.closeModal();
 
@@ -112,10 +112,13 @@ define(['angular', 'socketio', 'angularAMD', 'bms.func', 'bms.common', 'jquery',
                         return defer.promise;
                     };
 
-                    var startServer = function (connected) {
+                    var startServer = function (connected, configData) {
+
                         var defer = $q.defer();
+
                         if (!connected) {
-                            bmsModalService.setMessage("Start BMotion for ProB Server ...");
+
+                            var probBinary = configData['prob']['binary'];
                             var exec = require('child_process').exec;
                             var path = require('path');
                             var appPath = path.dirname(__dirname);
@@ -123,12 +126,15 @@ define(['angular', 'socketio', 'angularAMD', 'bms.func', 'bms.common', 'jquery',
                             //var server = spawn('java', ['-Xmx1024m', '-cp', './libs/libs/*' + separator + './libs/bmotion-prob-standalone.jar', "-Dprob.home=./cli/", 'Start', '-standalone', '-local']);
                             //var server = exec('java', ['-Xmx1024m', '-cp', './libs/libs/*' + separator + './libs/bmotion-prob-standalone.jar', 'Start', '-standalone', '-local']);
                             //var server = exec('java -Xmx1024m -cp ' + binaryPath + '/libs/libs/*' + separator + binaryPath + '/libs/bmotion-prob-standalone.jar Start -standalone -local');
-                            var server = exec('java -Xmx1024m -cp ' + appPath + '/libs/*' + separator + appPath + '/libs/bmotion-prob-0.2.2-SNAPSHOT.jar de.bms.prob.Standalone -standalone -local');
+                            var server = exec('java -Xmx1024m -cp ' + appPath + '/libs/*' + separator + appPath + '/libs/bmotion-prob-0.2.2-SNAPSHOT.jar -Dprob.home=' + probBinary + ' de.bms.prob.Standalone -standalone -local');
                             //var server = exec('java -Xmx1024m -cp ./libs/libs/*' + separator + './libs/bmotion-prob-standalone.jar -Dprob.home=./cli/ Start -standalone -local');
                             server.stdout.on('data', function (data) {
                                 try {
                                     var json = JSON.parse(data.toString('utf8'));
-                                    if (json) defer.resolve(json);
+                                    if (json) {
+                                        configData['socket']['port'] = json['port'];
+                                        defer.resolve();
+                                    }
                                 } catch (err) {
                                     console.log(data.toString('utf8'));
                                 }
@@ -139,25 +145,17 @@ define(['angular', 'socketio', 'angularAMD', 'bms.func', 'bms.common', 'jquery',
                             server.on('close', function (code) {
                                 console.log('BMotion Studio for ProB Server process exited with code ' + code);
                             });
+
+
                         } else {
                             defer.resolve();
                         }
+
                         return defer.promise;
+
                     };
 
-                    var updateConfig = function (obj) {
-                        var defer = $q.defer();
-                        bmsConfigService.getConfig().then(function (config) {
-                            if (obj) {
-                                //config.socket.host = obj.host;
-                                config.socket.port = obj.port;
-                            }
-                            defer.resolve();
-                        });
-                        return defer.promise;
-                    };
-
-                    var checkProbCli = function () {
+                    var checkProbCli = function (configData) {
 
                         var defer = $q.defer();
 
@@ -167,84 +165,80 @@ define(['angular', 'socketio', 'angularAMD', 'bms.func', 'bms.common', 'jquery',
 
                             var version = d.version;
                             var revision = d.revision;
-                            var dialogMessage;
 
-                            bmsConfigService.getConfig().then(function (config) {
-                                if (version === null) {
-                                    dialogMessage = "You have no ProB binaries installed in your home directory. " +
-                                        "Press \"Ok\" to download a compatible version. " +
-                                        "Make sure that you have a working internet connection.";
-                                } else if (revision !== config.prob.revision) {
-                                    dialogMessage = "The ProB binary in your home directory may not be compatible with this version of BMotion Studio for ProB. " +
-                                        "Press \"Ok\" to download a compatible version. Make sure that you have a working internet connection. " +
-                                        "If you press \"Cancel\" we cannot guarantee that the plug-in will work correctly.";
-                                } else {
-                                    defer.resolve();
-                                }
-                                if (dialogMessage) {
-                                    bmsModalService.openErrorDialog(dialogMessage)
-                                        .then(function () {
-                                            bmsModalService.loading("Downloading ProB Cli ...");
-                                            downloadProBCli().then(function (version) {
-                                                defer.resolve(version);
+                            if (version === null) {
+                                defer.reject("No ProB binaries found at " + configData['prob']['binary'] + ".");
+                                /*dialogMessage = "You have no ProB binaries installed in your home directory. " +
+                                 "Press \"Ok\" to download a compatible version. " +
+                                 "Make sure that you have a working internet connection.";*/
+                            } else if (revision !== configData['prob']['revision']) {
+                                defer.reject("The ProB binary at " + configData['prob']['binary'] + " [version " + version + "] " +
+                                    "may not be compatible with this version of BMotion Studio for ProB. " +
+                                    "Please make sure that you have installed the correct version of the " +
+                                    "Prob binary [version " + configData['prob']['version'] + " (" + configData['prob']['revision'] + ")].");
+                                /*dialogMessage = "The ProB binary in your home directory may not be compatible with this version of BMotion Studio for ProB. " +
+                                 "Press \"Ok\" to download a compatible version. Make sure that you have a working internet connection. " +
+                                 "If you press \"Cancel\" we cannot guarantee that the plug-in will work correctly.";*/
+                            } else {
+                                defer.resolve();
+                            }
+
+                        });
+
+                        return defer.promise;
+
+                    };
+
+                    var initBMotionStudio = function () {
+
+                        var defer = $q.defer();
+
+                        bmsModalService.loading("Starting BMotion Studio for ProB ...");
+
+                        bmsConfigService.getConfig()
+                            .then(function (configData) {
+                                checkIfConnectionExists()
+                                    .then(function (connected) {
+                                        startServer(connected, configData)
+                                            .then(function () {
+                                                return checkProbCli(configData);
+                                            })
+                                            .then(function () {
+                                                defer.resolve();
+                                            }, function (error) {
+                                                defer.reject(error);
                                             });
-                                        }, function () {
-                                            defer.reject();
-                                        });
-                                }
+                                    });
+                            }, function (error) {
+                                defer.reject(error);
                             });
 
-                        });
-
                         return defer.promise;
 
                     };
 
-                    var downloadProBCli = function () {
-                        var defer = $q.defer();
-                        bmsConfigService.getConfig().then(function (config) {
-                            ws.emit('downloadProBCli', {data: {version: config.prob.version}}, function (r) {
-                                defer.resolve(r.version);
-                            });
-                        });
-                        return defer.promise;
-                    };
-
-                    var finishLoading = function (version) {
-                        var defer = $q.defer();
-                        if (version) {
-                            bmsModalService.openDialog(version)
-                                .then(function () {
-                                    defer.resolve();
-                                }, function () {
-                                    defer.resolve();
-                                });
-                        } else {
-                            defer.resolve();
-                        }
-                        return defer.promise;
-                    };
-
-                    bmsModalService.loading("Check if BMotion Studio for ProB Server exists ...");
-                    checkIfConnectionExists()
-                        .then(function (connected) {
-                            return startServer(connected);
-                        })
-                        .then(function (obj) {
-                            return updateConfig(obj);
-                        })
-                        .then(function () {
-                            return checkProbCli();
-                        })
-                        .then(function (version) {
-                            return finishLoading(version);
-                        })
+                    initBMotionStudio()
                         .then(function () {
                             bmsModalService.endLoading();
                             $location.path('/welcome');
-                        }, function () {
-                            electronWindow.fromId(1).close();
+                        }, function (error) {
+                            bmsModalService.openErrorDialog(error)
+                                .then(function () {
+                                    electronWindow.fromId(1).close();
+                                }, function () {
+                                    electronWindow.fromId(1).close();
+                                });
                         });
+
+                    /*var downloadProBCli = function () {
+                     var defer = $q.defer();
+                     bmsConfigService.getConfig().then(function (config) {
+                     ws.emit('downloadProBCli', {data: {version: config.prob.version}}, function (r) {
+                     defer.resolve(r.version);
+                     });
+                     });
+                     return defer.promise;
+                     };*/
 
                 }])
             .controller('bmsWelcomeController', ['$rootScope', 'electronMenuService', 'electronMenu', 'initVisualizationService', 'electronWindow', 'probStandaloneMenuService',
