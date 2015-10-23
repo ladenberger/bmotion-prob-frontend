@@ -19,7 +19,7 @@ def download(String address, String target) {
 def download_cspm(String target) {
     def String downloadFile = target
     def String postfix = ""
-    if (target == "win32") {
+    if (target == "win32" || target == "win64") {
         downloadFile = "windows"
         postfix = ".exe"
     }
