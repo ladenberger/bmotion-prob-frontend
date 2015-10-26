@@ -656,22 +656,33 @@ define(['bms.func', 'jquery', 'angular', 'qtip', 'prob.modal'], function (bms, $
 
             var ev = {
 
-                executeEvent: function (data, origin) {
-                    var settings = bms.normalize($.extend({
+                getDefaultOptions: function (options) {
+                    return bms.normalize($.extend({
                         events: [],
+                        tooltip: true,
+                        label: function (event) {
+                            var predicateStr = event.predicate ? '(' + event.predicate + ')' : '';
+                            return '<span aria-hidden="true"> ' + event.name + predicateStr + '</span>';
+                        },
                         callback: function () {
                         }
-                    }, data), ["callback"], origin);
+                    }, options), ["callback", "label", "predicate"]);
+                },
+                executeEvent: function (data, origin) {
+                    var settings = bms.normalize(data, ["callback"], origin);
                     ws.emit("executeEvent", {data: settings}, function (result) {
                         settings.callback.call(this, result)
                     });
                     return settings
                 },
-                getTooltipContent: function (options, origin, api) {
+                getTooltipContent: function (options, origin, api, sessionId, traceId) {
                     var defer = $q.defer();
-                    var traceId = options.traceId;
                     ws.emit('initTooltip', {
-                        data: bms.normalize(options, ["callback", "label"], origin)
+                        data: bms.normalize({
+                            id: sessionId,
+                            traceId: traceId,
+                            events: options.events
+                        }, [], origin)
                     }, function (data) {
                         var container = $('<div class="qtiplinks"></div>');
                         var ul = $('<ul style="display:table-cell;"></ul>');
@@ -682,20 +693,32 @@ define(['bms.func', 'jquery', 'angular', 'qtip', 'prob.modal'], function (bms, $
                                 iconClass = 'glyphicon glyphicon-ok-circle cursor-pointer';
                             }
                             iconSpan.addClass(iconClass);
-                            var labelSpan = $(options.label(v, origin));
+
+                            var labelSpan;
+                            if (typeof options.label === 'function') {
+                                labelSpan = $(options.label(v, origin));
+                            } else {
+                                // Whenever the function comes from json, we need to convert
+                                // the string function to a real javascript function
+                                // TODO: We need to handle errors while converting the string function to a reals javascript function
+                                var func = new Function('event', 'origin', options.label);
+                                labelSpan = $(func(v, origin));
+                            }
+
                             if (v.canExecute) {
                                 labelSpan.click(function () {
                                     ev.executeEvent({
-                                        id: options.id,
+                                        id: sessionId,
                                         traceId: traceId,
                                         events: [v],
                                         callback: function () {
-                                            api.set('content.text', function (event, api) {
-                                                return ev.getTooltipContent(options, event.target, api)
+                                            api.hide();
+                                            /*api.set('content.text', function (event, api) {
+                                                return ev.getTooltipContent(options, event.target, api, sessionId, traceId)
                                                     .then(function (container) {
                                                         return container;
                                                     });
-                                            });
+                                            });*/
                                         }
                                     })
                                 });
@@ -711,59 +734,116 @@ define(['bms.func', 'jquery', 'angular', 'qtip', 'prob.modal'], function (bms, $
                     });
                     return defer.promise;
                 },
+                initTooltip: function (element, options, show, hide, sessionId, traceId) {
+
+                    return element.qtip({ // Grab some elements to apply the tooltip to
+                        content: {
+                            text: function (event, api) {
+                                return ev.getTooltipContent(options, event.target, api, sessionId, traceId)
+                                    .then(function (container) {
+                                        return container;
+                                    });
+                            }
+                        },
+                        position: {
+                            my: 'bottom left',
+                            at: 'top right',
+                            effect: false,
+                            viewport: $(window)
+                        },
+                        show: show,
+                        hide: hide,
+                        style: {
+                            classes: 'qtip-light qtip-bootstrap'
+                        }
+                    });
+
+                },
                 setup: function (sessionId, visId, event, container, traceId) {
+
                     var defer = $q.defer();
 
-                    var options = $.extend({
-                        id: sessionId,
-                        events: [],
-                        tooltip: true,
-                        traceId: traceId,
-                        label: function (event) {
-                            var predicateStr = event.predicate ? '(' + event.predicate + ')' : '';
-                            return '<span aria-hidden="true"> ' + event.name + predicateStr + '</span>';
-                        },
-                        callback: function () {
-                        }
-                    }, event.data);
+                    var options = ev.getDefaultOptions(event.data);
+                    var el = $(container).find(options.selector);
+                    el.each(function (i2, v) {
 
-                    if (options.events.length > 0) {
+                        var e = $(v);
+                        e.css('cursor', 'pointer');
+                        var tooltip = ev.initTooltip(e, options, {
+                            delay: 1500
+                        }, {
+                            fixed: true,
+                            delay: 400
+                        }, sessionId, traceId);
+                        var api = tooltip.qtip('api');
+                        e.click(function () {
 
-                        var el = $(container).find(options.selector);
-                        el.each(function (i2, v) {
-                            var e = $(v);
-                            e.css('cursor', 'pointer');
-                            e.qtip({ // Grab some elements to apply the tooltip to
-                                content: {
-                                    text: function (event, api) {
-                                        return ev.getTooltipContent(options, event.target, api)
-                                            .then(function (container) {
-                                                return container;
-                                            });
+                            if (options.events.length === 1) {
+                                // If one event is enabled, execute it
+                                // TODO: What is if the event is disabled?
+                                ev.executeEvent({
+                                    id: sessionId,
+                                    traceId: traceId,
+                                    events: [options.events[0]],
+                                    callback: function () {
+                                        api.hide();
+                                        /*api.set('content.text', function (event, api) {
+                                         return ev.getTooltipContent(options, event.target, api, sessionId, traceId)
+                                         .then(function (container) {
+                                         return container;
+                                         });
+                                         });*/
                                     }
-                                },
-                                position: {
-                                    my: 'bottom left',
-                                    at: 'top right',
-                                    effect: false,
-                                    viewport: $(window)
-                                },
-                                show: 'click',
-                                hide: {
-                                    fixed: true,
-                                    delay: 400
-                                },
-                                style: {
-                                    classes: 'qtip-light qtip-bootstrap'
-                                }
-                            });
+                                }, e);
+                            } else {
+
+                                ws.emit('initTooltip', {
+                                    data: bms.normalize({
+                                        id: sessionId,
+                                        traceId: traceId,
+                                        events: options.events
+                                    }, [], e)
+                                }, function (data) {
+
+                                    var enabledEvents = [];
+
+                                    angular.forEach(data['events'], function (event) {
+                                        if (event['canExecute']) enabledEvents.push(event);
+                                    });
+
+                                    if (enabledEvents.length === 1) {
+                                        // If only one events is enabled of the list of events, execute it
+                                        ev.executeEvent({
+                                            id: sessionId,
+                                            traceId: traceId,
+                                            events: [enabledEvents[0]],
+                                            callback: function () {
+                                                api.hide();
+                                                /*api.set('content.text', function (event, api) {
+                                                 return ev.getTooltipContent(options, event.target, api, sessionId, traceId)
+                                                 .then(function (container) {
+                                                 return container;
+                                                 });
+                                                 });*/
+                                            }
+                                        }, e);
+                                    } else {
+                                        // Else show a popup displaying the available events
+                                        api.show();
+                                    }
+
+                                });
+
+                            }
+
                         });
 
-                    }
+                    });
 
                     defer.resolve();
 
                     return defer.promise;
+
                 }
             };
 

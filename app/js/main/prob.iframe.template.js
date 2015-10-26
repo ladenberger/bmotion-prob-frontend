@@ -293,12 +293,19 @@ define(['angular', 'bms.func', 'jquery', 'prob.common', 'prob.observers', 'prob.
 
                         var loadViewData = function (view, manifestData) {
                             var defer = $q.defer();
-                            angular.forEach(manifestData['views'], function (v) {
-                                if (v['id'] === view) {
-                                    defer.resolve(v);
-                                }
-                            });
-                            defer.reject();
+                            var views = manifestData['views'];
+                            if (views) {
+                                angular.forEach(manifestData['views'], function (v) {
+                                    if (v['id'] === view) {
+                                        defer.resolve(v);
+                                    }
+                                });
+                            } else {
+                                defer.resolve({
+                                    id: 'root',
+                                    template: manifestData['template']
+                                });
+                            }
                             return defer.promise;
                         };
 
