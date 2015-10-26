@@ -712,13 +712,12 @@ define(['bms.func', 'jquery', 'angular', 'qtip', 'prob.modal'], function (bms, $
                                         traceId: traceId,
                                         events: [v],
                                         callback: function () {
-                                            api.hide();
                                             /*api.set('content.text', function (event, api) {
-                                                return ev.getTooltipContent(options, event.target, api, sessionId, traceId)
-                                                    .then(function (container) {
-                                                        return container;
-                                                    });
-                                            });*/
+                                             return ev.getTooltipContent(options, event.target, api, sessionId, traceId)
+                                             .then(function (container) {
+                                             return container;
+                                             });
+                                             });*/
                                         }
                                     })
                                 });
@@ -751,11 +750,24 @@ define(['bms.func', 'jquery', 'angular', 'qtip', 'prob.modal'], function (bms, $
                             effect: false,
                             viewport: $(window)
                         },
-                        show: show,
+                        events: {
+                            show: function (event, api) {
+                                var qtipDisable = element.data('qtip-disable') ? element.data('qtip-disable') : false;
+                                if (event['originalEvent']['type'] === "mouseover" && qtipDisable) {
+                                    event.preventDefault();
+                                }
+                            }
+                        },
+                        show: {
+                            delay: 1200,
+                            event: 'mouseover'
+                        },
                         hide: hide,
                         style: {
                             classes: 'qtip-light qtip-bootstrap'
                         }
+                    }).click(function () {
+
                     });
 
                 },
@@ -770,72 +782,56 @@ define(['bms.func', 'jquery', 'angular', 'qtip', 'prob.modal'], function (bms, $
                         var e = $(v);
                         e.css('cursor', 'pointer');
                         var tooltip = ev.initTooltip(e, options, {
-                            delay: 1500
+                            delay: 1500,
+                            event: 'click mouseenter'
                         }, {
                             fixed: true,
                             delay: 400
                         }, sessionId, traceId);
                         var api = tooltip.qtip('api');
-                        e.click(function () {
 
-                            if (options.events.length === 1) {
-                                // If one event is enabled, execute it
-                                // TODO: What is if the event is disabled?
-                                ev.executeEvent({
+                        e.click(function (event) {
+
+                            ws.emit('initTooltip', {
+                                data: bms.normalize({
                                     id: sessionId,
                                     traceId: traceId,
-                                    events: [options.events[0]],
-                                    callback: function () {
-                                        api.hide();
-                                        /*api.set('content.text', function (event, api) {
-                                         return ev.getTooltipContent(options, event.target, api, sessionId, traceId)
-                                         .then(function (container) {
-                                         return container;
-                                         });
-                                         });*/
-                                    }
-                                }, e);
-                            } else {
+                                    events: options.events
+                                }, [], e)
+                            }, function (data) {
 
-                                ws.emit('initTooltip', {
-                                    data: bms.normalize({
-                                        id: sessionId,
-                                        traceId: traceId,
-                                        events: options.events
-                                    }, [], e)
-                                }, function (data) {
+                                var enabledEvents = [];
 
-                                    var enabledEvents = [];
-
-                                    angular.forEach(data['events'], function (event) {
-                                        if (event['canExecute']) enabledEvents.push(event);
-                                    });
-
-                                    if (enabledEvents.length === 1) {
-                                        // If only one events is enabled of the list of events, execute it
-                                        ev.executeEvent({
-                                            id: sessionId,
-                                            traceId: traceId,
-                                            events: [enabledEvents[0]],
-                                            callback: function () {
-                                                api.hide();
-                                                /*api.set('content.text', function (event, api) {
-                                                 return ev.getTooltipContent(options, event.target, api, sessionId, traceId)
-                                                 .then(function (container) {
-                                                 return container;
-                                                 });
-                                                 });*/
-                                            }
-                                        }, e);
-                                    } else {
-                                        // Else show a popup displaying the available events
-                                        api.show();
-                                    }
-
+                                angular.forEach(data['events'], function (event) {
+                                    if (event['canExecute']) enabledEvents.push(event);
                                 });
 
-                            }
+                                if (enabledEvents.length === 1) {
+                                    // If only one events is enabled of the list of events, execute it
+                                    ev.executeEvent({
+                                        id: sessionId,
+                                        traceId: traceId,
+                                        events: [enabledEvents[0]],
+                                        callback: function () {
+                                            /*api.set('content.text', function (event, api) {
+                                             return ev.getTooltipContent(options, event.target, api, sessionId, traceId)
+                                             .then(function (container) {
+                                             return container;
+                                             });
+                                             });*/
+                                        }
+                                    }, e);
+                                } else {
+                                    // Else show a popup displaying the available events
+                                    api.show('click');
+                                }
 
+                                e.data('qtip-disable', true);
+
+                            });
+
+                        }).mouseout(function () {
+                            e.data('qtip-disable', false);
                         });
 
                     });
