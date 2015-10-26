@@ -204,7 +204,7 @@ svgedit.utilities.text2xml = function(sXML) {
 	var out;
 	try{
 		var dXML = (window.DOMParser)?new DOMParser():new ActiveXObject("Microsoft.XMLDOM");
-		dXML.async = false;
+		dXML.async = true;
 	} catch(e){ 
 		throw new Error("XML Parser could not be instantiated"); 
 	};
@@ -594,7 +594,7 @@ svgedit.utilities.assignAttributes = function(node, attrs, suspendLength, unitCh
 	if(!suspendLength) suspendLength = 0;
 	// Opera has a problem with suspendRedraw() apparently
 	var handle = null;
-	if (!svgedit.browser.isOpera()) svgroot_.suspendRedraw(suspendLength);
+	//if (!svgedit.browser.isOpera()) svgroot_.suspendRedraw(suspendLength);
 
 	for (var i in attrs) {
 		var ns = (i.substr(0,4) === "xml:" ? XMLNS : 
@@ -610,7 +610,7 @@ svgedit.utilities.assignAttributes = function(node, attrs, suspendLength, unitCh
 		
 	}
 	
-	if (!svgedit.browser.isOpera()) svgroot_.unsuspendRedraw(handle);
+	//if (!svgedit.browser.isOpera()) svgroot_.unsuspendRedraw(handle);
 };
 
 // Function: cleanupElement
@@ -619,7 +619,7 @@ svgedit.utilities.assignAttributes = function(node, attrs, suspendLength, unitCh
 // Parameters:
 // element - DOM element to clean up
 svgedit.utilities.cleanupElement = function(element) {
-	var handle = svgroot_.suspendRedraw(60);
+	//var handle = svgroot_.suspendRedraw(60);
 	var defaults = {
 		'fill-opacity':1,
 		'stop-opacity':1,
@@ -641,7 +641,7 @@ svgedit.utilities.cleanupElement = function(element) {
 		}
 	}
 	
-	svgroot_.unsuspendRedraw(handle);
+	//svgroot_.unsuspendRedraw(handle);
 };
 
 

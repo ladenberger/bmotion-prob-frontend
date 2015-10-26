@@ -65,6 +65,11 @@ define(['angularAMD', 'code-mirror!javascript', 'angular', 'jquery.jgraduate', '
 
                     var code = el.data[fn];
 
+                    if ($.isFunction(code)) {
+                        var entire = code.toString(); // this part may fail!
+                        code = entire.substring(entire.indexOf("{") + 1, entire.lastIndexOf("}"));
+                    }
+
                     var modalInstance = $uibModal.open({
                         template: '<div class="modal-js-editor">'
                         + '<div class="modal-header">'

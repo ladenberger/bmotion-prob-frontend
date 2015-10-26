@@ -112,6 +112,10 @@ define(["jquery", "touch", "jquery.hotkeys", "jquery.bbq",
             visualization = vis;
         };
 
+        Editor.getVisualization = function () {
+            return visualization;
+        };
+
         Editor.setSvgRootId = function (id) {
             svgRootId = id;
         };
@@ -1339,9 +1343,8 @@ define(["jquery", "touch", "jquery.hotkeys", "jquery.bbq",
 
             var setImageURL = Editor.setImageURL = function (url) {
                 if (!url) url = default_img_url;
-                var furl = url.replace(visualization.templateFolder, "");
-                svgCanvas.setImageURL(furl);
-                $('#image_url').val(furl);
+                svgCanvas.setImageURL(url);
+                $('#image_url').val(url.replace(visualization['templateFolder'] + '/', ""));
             };
 
             var setInputWidth = function (elem) {
@@ -1735,7 +1738,7 @@ define(["jquery", "touch", "jquery.hotkeys", "jquery.bbq",
                 var elem = selectedElement;
                 var val = $(this).val();
                 svgCanvas.clearSelection();
-                $(elem).attr("xlink:href", visualization.templateFolder + val);
+                $(elem).attr("xlink:href", visualization['templateFolder'] + '/' + val);
                 svgCanvas.addToSelection([elem], true);
             });
 

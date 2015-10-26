@@ -222,7 +222,7 @@ svgedit.select.Selector.prototype.resize = function() {
 		nbaw = (maxx-minx);
 		nbah = (maxy-miny);
 	}
-	var sr_handle = svgFactory_.svgRoot().suspendRedraw(100);
+	//var sr_handle = svgFactory_.svgRoot().suspendRedraw(100);
 
 	var dstr = 'M' + nbax + ',' + nbay
 				+ ' L' + (nbax+nbaw) + ',' + nbay
@@ -271,7 +271,7 @@ svgedit.select.Selector.prototype.resize = function() {
 		  mgr.rotateGrips[dir].setAttribute('cy', coords[1]);
 	  }
 
-	svgFactory_.svgRoot().unsuspendRedraw(sr_handle);
+	//svgFactory_.svgRoot().unsuspendRedraw(sr_handle);
 };
 
 

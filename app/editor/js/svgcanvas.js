@@ -3019,7 +3019,7 @@ $.SvgCanvas = function (container, config) {
                 case "line":
                     // Opera has a problem with suspendRedraw() apparently
                     var handle = null;
-                    if (!window.opera) svgroot.suspendRedraw(1000);
+                    //if (!window.opera) svgroot.suspendRedraw(1000);
 
                     if (curConfig.gridSnapping) {
                         x = snapToGrid(x);
@@ -3037,7 +3037,7 @@ $.SvgCanvas = function (container, config) {
 
                     shape.setAttributeNS(null, "x2", x2);
                     shape.setAttributeNS(null, "y2", y2);
-                    if (!window.opera) svgroot.unsuspendRedraw(handle);
+                    //if (!window.opera) svgroot.unsuspendRedraw(handle);
                     break;
                 case "foreignObject":
                 // fall through
@@ -3095,7 +3095,7 @@ $.SvgCanvas = function (container, config) {
 
                     // Opera has a problem with suspendRedraw() apparently
                     handle = null;
-                    if (!window.opera) svgroot.suspendRedraw(1000);
+                    //if (!window.opera) svgroot.suspendRedraw(1000);
                     if (curConfig.gridSnapping) {
                         x = snapToGrid(x);
                         cx = snapToGrid(cx);
@@ -3119,7 +3119,7 @@ $.SvgCanvas = function (container, config) {
                     shape.setAttributeNS(null, "ry", ry);
                     shape.setAttributeNS(null, "cx", cx);
                     shape.setAttributeNS(null, "cy", cy);
-                    if (!window.opera) svgroot.unsuspendRedraw(handle);
+                    //if (!window.opera) svgroot.unsuspendRedraw(handle);
                     break;
                 case "fhellipse":
                 case "fhrect":
@@ -6106,6 +6106,7 @@ $.SvgCanvas = function (container, config) {
                 var image = this;
                 preventClickDefault(image);
                 var val = getHref(this);
+
                 if (val.indexOf('data:') === 0) {
                     // Check if an SVG-edit data URI
                     var m = val.match(/svgedit_url=(.*?);/);
@@ -6115,6 +6116,11 @@ $.SvgCanvas = function (container, config) {
                             image.setAttributeNS(xlinkns, 'xlink:href', url);
                         }).attr('src', url);
                     }
+                } else {
+                    // adapt image path
+                    var vis = methodDraw.getVisualization(val);
+                    val = vis['templateFolder'] + '/' + val;
+                    $(this).attr('xlink:href', val);
                 }
                 // Add to encodableImages if it loads
                 canvas.embedImage(val);
@@ -7018,7 +7024,7 @@ $.SvgCanvas = function (container, config) {
             }
         }
         if (x != w || y != h) {
-            var handle = svgroot.suspendRedraw(1000);
+            //var handle = svgroot.suspendRedraw(1000);
             if (!batchCmd) {
                 batchCmd = new BatchCommand("Change Image Dimensions");
             }
@@ -7037,7 +7043,7 @@ $.SvgCanvas = function (container, config) {
             batchCmd.addSubCommand(new ChangeElementCommand(svgcontent, {"viewBox": ["0 0", w, h].join(' ')}));
 
             addCommandToHistory(batchCmd);
-            svgroot.unsuspendRedraw(handle);
+            // svgroot.unsuspendRedraw(handle);
             background = document.getElementById("canvas_background");
             if (background) {
                 background.setAttribute("x", -1)
@@ -8172,7 +8178,7 @@ $.SvgCanvas = function (container, config) {
 // newValue - String or number with the new attribute value
 // elems - The DOM elements to apply the change to
     var changeSelectedAttributeNoUndo = this.changeSelectedAttributeNoUndo = function (attr, newValue, elems) {
-        var handle = svgroot.suspendRedraw(1000);
+        //var handle = svgroot.suspendRedraw(1000);
         if (current_mode == 'pathedit') {
             // Editing node
             pathActions.moveNode(attr, newValue);
@@ -8247,7 +8253,7 @@ $.SvgCanvas = function (container, config) {
                 }
             } // if oldValue != newValue
         } // for each elem
-        svgroot.unsuspendRedraw(handle);
+        //svgroot.unsuspendRedraw(handle);
     };
 
 // Function: changeSelectedAttribute
