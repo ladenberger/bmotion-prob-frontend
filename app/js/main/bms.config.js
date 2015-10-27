@@ -13,10 +13,12 @@ define(['jquery', 'angular', 'tv4', 'bms.common'], function ($, angular, tv4) {
                         "type": "object",
                         "properties": {
                             "host": {
-                                "type": "string"
+                                "type": "string",
+                                "description": "Host name of websocket server."
                             },
                             "port": {
-                                "type": "string"
+                                "type": "string",
+                                "description": "Port of websocket server."
                             }
                         }
                     },

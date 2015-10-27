@@ -23,9 +23,9 @@ define(['angularAMD', 'angular', 'prob.graph', 'prob.iframe.template', 'prob.ui'
                             + '</div>',
                             controller: 'bmsOnlineHomeCtrl'
                         })
-                        .when('/:sessionId/:view', {
+                        .when('/:sessionId/:view/:file', {
                             template: '<div ng-controller="bmsVisualizationCtrl as vis" class="fullWidthHeight">'
-                            + '<div data-bms-visualisation-session="{{vis.sessionId}}" data-bms-visualisation-view="{{vis.view}}" class="fullWidthHeight"></div>'
+                            + '<div data-bms-visualisation-session="{{vis.sessionId}}" data-bms-visualisation-view="{{vis.view}}"  data-bms-visualisation-file="{{vis.file}}" class="fullWidthHeight"></div>'
                             + '</div>'
                             + '<div ng-controller="bmsUiNavigationCtrl as nav">'
                             + '<div class="navbar navbar-default navbar-fixed-bottom" role="navigation">'
@@ -110,6 +110,7 @@ define(['angularAMD', 'angular', 'prob.graph', 'prob.iframe.template', 'prob.ui'
                     var self = this;
                     self.view = $routeParams.view;
                     self.sessionId = $routeParams.sessionId;
+                    self.file = $routeParams.file;
                 }])
             .directive('bmsVisualization', ['initVisualizationService', '$routeParams',
                 function (initVisualizationService, $routeParams) {
@@ -127,7 +128,7 @@ define(['angularAMD', 'angular', 'prob.graph', 'prob.iframe.template', 'prob.ui'
                                 if (path) {
                                     initVisualizationService(path);
                                 } else {
-                                    bmsModalService.setMessage("Please provide path to bmotion.json file.");
+                                    bmsModalService.setMessage("Please provide path to BMotion Studio manifest file.");
                                 }
                             }
                         }
@@ -147,7 +148,8 @@ define(['angularAMD', 'angular', 'prob.graph', 'prob.iframe.template', 'prob.ui'
                                         // TODO: Handle multiple views in online mode!
                                         var views = manifestData.views;
                                         var view = views[0];
-                                        $location.path('/' + sessionId + '/' + view.id);
+                                        var filename = manifestFilePath.replace(/^.*[\\\/]/, '');
+                                        $location.path('/' + sessionId + '/' + view.id + '/' + filename);
                                         bmsModalService.endLoading();
                                     }, function (errors) {
                                         bmsModalService.openErrorDialog(errors);

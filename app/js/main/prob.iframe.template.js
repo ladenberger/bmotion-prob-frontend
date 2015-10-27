@@ -275,9 +275,9 @@ define(['angular', 'bms.func', 'jquery', 'prob.common', 'prob.observers', 'prob.
                             return defer.promise;
                         };
 
-                        var loadManifestData = function (templateFolder) {
+                        var loadManifestData = function (path) {
                             var defer = $q.defer();
-                            $http.get(templateFolder + '/bmotion.json')
+                            $http.get(path)
                                 .success(function (manifestData) {
                                     defer.resolve(manifestData);
                                 })
@@ -365,12 +365,13 @@ define(['angular', 'bms.func', 'jquery', 'prob.common', 'prob.observers', 'prob.
 
                         };
 
-                        var initView = function (sessionId, view) {
+                        var initView = function (sessionId, view, file) {
 
                             bmsModalService.loading("Initialising View ...");
 
                             ctrl.sessionId = sessionId;
                             ctrl.view = view;
+                            ctrl.file = file;
 
                             loadServerData(sessionId)
                                 .then(function (serverData) {
@@ -387,7 +388,7 @@ define(['angular', 'bms.func', 'jquery', 'prob.common', 'prob.observers', 'prob.
                                     });
                                     var templateFolder = serverData['templateFolder'];
 
-                                    return loadManifestData(templateFolder)
+                                    return loadManifestData(templateFolder + '/' + file)
                                         .then(function (manifestData) {
                                             ctrl.data.manifest = $.extend({
                                                 tool: 'BAnimation'
@@ -418,7 +419,7 @@ define(['angular', 'bms.func', 'jquery', 'prob.common', 'prob.observers', 'prob.
                         };
 
                         // Initialise view ...
-                        initView(attrs['bmsVisualisationSession'], attrs['bmsVisualisationView']);
+                        initView(attrs['bmsVisualisationSession'], attrs['bmsVisualisationView'], attrs['bmsVisualisationFile']);
 
                     }
                 }

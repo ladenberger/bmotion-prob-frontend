@@ -17,15 +17,15 @@ define(['angular', 'socketio', 'angularAMD', 'bms.func', 'bms.common', 'bms.sess
                             templateUrl: 'resources/templates/bms-standalone-ui.html',
                             controller: 'bmsWelcomeController'
                         })
-                        .when('/root/:sessionId/:win/:view', {
+                        .when('/root/:sessionId/:win/:view/:file', {
                             templateUrl: 'resources/templates/bms-standalone-view.html',
                             controller: 'bmsStandaloneRootViewCtrl'
                         })
-                        .when('/root/:sessionId/:win', {
+                        .when('/root/:sessionId/:win/:file', {
                             templateUrl: 'resources/templates/bms-standalone-view.html',
                             controller: 'bmsStandaloneRootViewCtrl'
                         })
-                        .when('/:sessionId/:win/:view', {
+                        .when('/:sessionId/:win/:view/:file', {
                             templateUrl: 'resources/templates/bms-standalone-view.html',
                             controller: 'bmsStandaloneViewCtrl'
                         })
@@ -86,17 +86,18 @@ define(['angular', 'socketio', 'angularAMD', 'bms.func', 'bms.common', 'bms.sess
                                                     w.close();
                                                 });
                                             });
+                                            var filename = manifestFilePath.replace(/^.*[\\\/]/, '');
                                             // Open a new window for each view
                                             angular.forEach(views, function (view, i) {
                                                 //var viewName = view.name ? view.name : view.id;
                                                 if (i === 0) {
                                                     // TODO: I assume that the main window has always the id "1"
-                                                    $location.path('/root/' + sessionId + '/1/' + view.id);
+                                                    $location.path('/root/' + sessionId + '/1/' + view.id + '/' + filename);
                                                     newWindow = mainWindow;
                                                     //win.title = 'BMotion Studio for ProB: ' + viewName;
                                                 } else {
                                                     var newWindow = electronWindowService.createNewWindow();
-                                                    newWindow.loadUrl('file://' + __dirname + '/standalone.html#/' + sessionId + '/' + newWindow.id + '/' + view.id);
+                                                    newWindow.loadUrl('file://' + __dirname + '/standalone.html#/' + sessionId + '/' + newWindow.id + '/' + view.id + '/' + filename);
                                                     aWindows.push(newWindow);
                                                 }
                                                 if (view.width && view.height) newWindow.setSize(view.width, view.height);

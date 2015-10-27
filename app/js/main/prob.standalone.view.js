@@ -10,6 +10,7 @@ define(['bms.electron', 'bms.visualization', 'ng-electron'], function () {
                 var self = this;
                 self.view = $routeParams.view;
                 self.sessionId = $routeParams.sessionId;
+                self.file = $routeParams.file;
             }])
         .controller('bmsStandaloneViewCtrl', ['$scope', '$routeParams', 'electronWindow', 'electron',
             function ($scope, $routeParams, electronWindow, electron) {
