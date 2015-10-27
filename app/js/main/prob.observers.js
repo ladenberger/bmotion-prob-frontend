@@ -734,7 +734,7 @@ define(['bms.func', 'jquery', 'angular', 'qtip', 'prob.modal'], function (bms, $
                     });
                     return defer.promise;
                 },
-                initTooltip: function (element, options, show, hide, sessionId, traceId) {
+                initTooltip: function (element, options, sessionId, traceId) {
 
                     return element.qtip({ // Grab some elements to apply the tooltip to
                         content: {
@@ -763,7 +763,10 @@ define(['bms.func', 'jquery', 'angular', 'qtip', 'prob.modal'], function (bms, $
                             delay: 1200,
                             event: 'mouseover'
                         },
-                        hide: hide,
+                        hide: {
+                            fixed: true,
+                            delay: 400
+                        },
                         style: {
                             classes: 'qtip-light qtip-bootstrap'
                         }
@@ -782,13 +785,7 @@ define(['bms.func', 'jquery', 'angular', 'qtip', 'prob.modal'], function (bms, $
 
                         var e = $(v);
                         e.css('cursor', 'pointer');
-                        var tooltip = ev.initTooltip(e, options, {
-                            delay: 1500,
-                            event: 'click mouseenter'
-                        }, {
-                            fixed: true,
-                            delay: 400
-                        }, sessionId, traceId);
+                        var tooltip = ev.initTooltip(e, options, sessionId, traceId);
                         var api = tooltip.qtip('api');
 
                         e.click(function (event) {
@@ -814,6 +811,7 @@ define(['bms.func', 'jquery', 'angular', 'qtip', 'prob.modal'], function (bms, $
                                         traceId: traceId,
                                         events: [enabledEvents[0]],
                                         callback: function () {
+                                            api.hide();
                                             /*api.set('content.text', function (event, api) {
                                              return ev.getTooltipContent(options, event.target, api, sessionId, traceId)
                                              .then(function (container) {

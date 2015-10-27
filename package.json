@@ -22,5 +22,8 @@
   "scripts": {
     "build": "npm install && grunt",
     "clean": "grunt clean"
+  },
+  "dependencies": {
+    "diskdb": "^0.1.14"
   }
 }

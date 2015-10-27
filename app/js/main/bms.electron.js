@@ -2,17 +2,14 @@
  * BMotion Studio Node Webkit Module
  *
  */
-define(['angular', 'prob.modal'], function () {
+define(['angular', 'prob.modal', 'ng-electron'], function () {
 
-    var module = angular.module('bms.electron', ['prob.modal'])
+    var module = angular.module('bms.electron', ['prob.modal', 'ngElectron'])
         .factory('electronRemote', function () {
             return require('remote');
         })
         .factory('electronWindow', ['electronRemote', function (electronRemote) {
             return electronRemote.require('browser-window');
-        }])
-        .factory('electronMenu', ['electronRemote', function (electronRemote) {
-            return electronRemote.require('menu');
         }])
         .factory('electronDialog', ['electronRemote', function (electronRemote) {
             return electronRemote.require('dialog');
@@ -29,86 +26,6 @@ define(['angular', 'prob.modal'], function () {
                 }
             };
             return factory;
-        }])
-        .factory('electronMenuService', ['$rootScope', 'electronRemote', 'electronMenu', 'electronDialog', function ($rootScope, electronRemote, electronMenu, electronDialog) {
-
-            var MenuItem = electronRemote.require('menu-item');
-
-            var factory = {
-
-                createMenuItem: function (options) {
-                    return new MenuItem(options);
-                },
-                createNewMenu: function () {
-                    return new electronMenu();
-                },
-                buildFileMenu: function (menu) {
-                    var fileMenu = new electronMenu();
-                    fileMenu.append(factory.createMenuItem({
-                        label: 'Open Visualization',
-                        accelerator: (function () {
-                            if (process.platform == 'darwin')
-                                return 'Alt+Command+O';
-                            else
-                                return 'Ctrl+Shift+O';
-                        })(),
-                        click: function () {
-                            electronDialog.showOpenDialog(
-                                {
-                                    filters: [
-                                        {name: 'BMotion Studio File', extensions: ['json']}
-                                    ],
-                                    properties: ['openFile']
-                                },
-                                function (files) {
-                                    if (files) $rootScope.$broadcast('startVisualisationViaFileMenu', files[0]);
-                                });
-                        }
-                    }));
-                    menu.append(factory.createMenuItem({
-                        label: 'File',
-                        submenu: fileMenu
-                    }));
-                },
-                buildDebugMenu: function (menu) {
-                    var debugMenu = new electronMenu();
-                    debugMenu.append(factory.createMenuItem({
-                        label: 'Toggle Developer',
-                        accelerator: (function () {
-                            if (process.platform == 'darwin')
-                                return 'Alt+Command+I';
-                            else
-                                return 'Ctrl+Shift+I';
-                        })(),
-                        click: function (item, focusedWindow) {
-                            if (focusedWindow)
-                                focusedWindow.toggleDevTools();
-                        }
-                    }));
-                    debugMenu.append(factory.createMenuItem({
-                        label: 'Reload',
-                        accelerator: (function () {
-                            if (process.platform == 'darwin')
-                                return 'F5';
-                            else
-                                return 'F5';
-                        })(),
-                        click: function (item, focusedWindow) {
-                            if (focusedWindow)
-                                focusedWindow.reload();
-                        }
-                    }));
-                    menu.append(factory.createMenuItem({
-                        label: 'Debug',
-                        submenu: debugMenu
-                    }));
-                    return debugMenu;
-                }
-
-            };
-
-            return factory;
-
         }]);
 
     return module;

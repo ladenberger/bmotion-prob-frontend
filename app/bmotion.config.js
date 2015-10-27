@@ -14,7 +14,6 @@ requirejs.config({
         "prob.integrated": "js/main/prob.integrated",
         "prob.standalone": "js/main/prob.standalone",
         "prob.standalone.view": "js/main/prob.standalone.view",
-        "prob.standalone.menu": "js/main/prob.standalone.menu",
 
         // Common modules
         "bms.common": "js/main/bms.common",
@@ -47,6 +46,7 @@ requirejs.config({
         "ui-bootstrap-tpls": "js/libs/bower/angular-bootstrap/ui-bootstrap-tpls",
         "angularAMD": "js/libs/bower/angularAMD/angularAMD",
         "jquery-ui": "js/libs/ext/jquery-ui/jquery-ui",
+        "ng-electron": "js/libs/bower/ng-electron/ng-electron",
 
         "qtip": "js/libs/bower/qtip2/jquery.qtip",
         "tv4": "js/libs/bower/tv4/tv4",
@@ -97,6 +97,7 @@ requirejs.config({
         "angular-sanitize": ["angular"],
         "angular-xeditable": ["angular"],
         "angular-ui-codemirror": ["angular", "code-mirror"],
+        "ng-electron": ["angular"],
         "qtip": ["jquery"],
         "cytoscape": {
             exports: "cy",

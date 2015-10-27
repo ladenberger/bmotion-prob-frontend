@@ -2,10 +2,10 @@
  * BMotion Studio for ProB Standalone Module
  *
  */
-define(['angular', 'socketio', 'angularAMD', 'bms.func', 'bms.common', 'bms.session', 'jquery', 'bms.manifest', 'bms.config', 'prob.graph', 'prob.iframe.template', 'prob.iframe.editor', 'prob.ui', 'prob.common', 'prob.modal', 'angular-route', 'prob.standalone.view', 'bms.electron', 'prob.standalone.menu'],
+define(['angular', 'socketio', 'angularAMD', 'bms.func', 'bms.common', 'bms.session', 'jquery', 'bms.manifest', 'bms.config', 'prob.graph', 'prob.iframe.template', 'prob.iframe.editor', 'prob.ui', 'prob.common', 'prob.modal', 'angular-route', 'prob.standalone.view', 'bms.electron', 'ng-electron'],
     function (angular, io, angularAMD, bms, $) {
 
-        var module = angular.module('prob.standalone', ['prob.standalone.view', 'bms.manifest', 'bms.config', 'bms.common', 'bms.session', 'prob.graph', 'prob.iframe.template', 'prob.iframe.editor', 'prob.ui', 'prob.common', 'prob.modal', 'bms.electron', 'prob.standalone.menu', 'ngRoute'])
+        var module = angular.module('prob.standalone', ['prob.standalone.view', 'bms.manifest', 'bms.config', 'bms.common', 'bms.session', 'prob.graph', 'prob.iframe.template', 'prob.iframe.editor', 'prob.ui', 'prob.common', 'prob.modal', 'bms.electron', 'ngRoute', 'ngElectron'])
             .config(['$routeProvider', '$locationProvider',
                 function ($routeProvider) {
                     $routeProvider
@@ -33,10 +33,38 @@ define(['angular', 'socketio', 'angularAMD', 'bms.func', 'bms.common', 'bms.sess
                             redirectTo: '/startServer'
                         });
                 }])
-            .run(['$rootScope', 'bmsMainService',
-                function ($rootScope, bmsMainService) {
+            .run(['$rootScope', 'bmsMainService', 'bmsConfigService', 'bmsModalService', 'initVisualizationService',
+                function ($rootScope, bmsMainService, bmsConfigService, bmsModalService, initVisualizationService) {
+
                     bmsMainService.mode = 'ModeStandalone';
                     //editableOptions.theme = 'bs3'; // bootstrap3 theme. Can be also 'bs2', 'default'
+
+                    // Delegate calls from electron main process
+                    $rootScope.$on('electron-host', function (evt, data) {
+                        if (data.type === 'startVisualisationViaFileMenu') {
+                            initVisualizationService(data.data);
+                        } else if (data.type === 'openDialog') {
+                            $rootScope.$apply(function () {
+                                $rootScope.$broadcast('openDialog_' + data.data);
+                            });
+                        } else if (data.type === 'openTraceDiagramModal') {
+                            $rootScope.$apply(function () {
+                                $rootScope.$broadcast('openTraceDiagramModal');
+                            });
+                        } else if (data.type === 'openElementProjectionModal') {
+                            $rootScope.$apply(function () {
+                                $rootScope.$broadcast('openElementProjectionModal');
+                            });
+                        } else if (data.type === 'openHelp') {
+                            bmsConfigService.getConfig()
+                                .then(function (config) {
+                                    bmsModalService.openDialog("<p>BMotion Studio for ProB (version " + data.data + ")</p>" +
+                                        "<p>ProB 2.0 (version " + config.prob.version + ")</p>" +
+                                        "<p>" + config.prob.revision + "</p>");
+                                });
+                        }
+                    });
+
                 }])
             .factory('initVisualizationService', ['$location', 'bmsInitSessionService', 'bmsManifestService', 'bmsMainService', 'bmsModalService', 'electronWindow', 'electronWindowService',
                 function ($location, bmsInitSessionService, bmsManifestService, bmsMainService, bmsModalService, electronWindow, electronWindowService) {
@@ -233,21 +261,11 @@ define(['angular', 'socketio', 'angularAMD', 'bms.func', 'bms.common', 'bms.sess
 
                 }
             ])
-            .
-            controller('bmsWelcomeController', ['$rootScope', 'electronMenuService', 'electronMenu', 'initVisualizationService', 'electronWindow', 'probStandaloneMenuService',
-                function ($rootScope, electronMenuService, electronMenu, initVisualizationService, electronWindow, probStandaloneMenuService) {
-
-                    var mainWindow = electronWindow.fromId(1);
-                    var menu = electronMenuService.createNewMenu();
-                    electronMenuService.buildFileMenu(menu);
-                    electronMenuService.buildDebugMenu(menu);
-                    probStandaloneMenuService.buildProBHelpMenu(menu);
-                    mainWindow.setMenu(menu);
-
-                    $rootScope.$on('startVisualisationViaFileMenu', function (evt, manifestFilePath) {
-                        if (manifestFilePath) initVisualizationService(manifestFilePath);
+            .controller('bmsWelcomeController', ['electron',
+                function (electron) {
+                    electron.send({
+                        type: "buildWelcomeMenu"
                     });
-
                 }])
             .controller('bmsDropZoneCtrl', ['initVisualizationService', 'electronDialog',
                 function (initVisualizationService, electronDialog) {

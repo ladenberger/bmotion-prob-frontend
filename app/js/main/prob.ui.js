@@ -109,12 +109,12 @@ define(['jquery', 'angular', 'jquery-ui', 'ui-bootstrap', 'bms.config'], functio
                         dialog.first().css("width", (newwidth) + "px").css("height", (newheight - 38) + "px");
                     };
 
-                    $scope.$on('visualizationLoaded', function (evt, visId, viewObj) {
+                    $scope.$on('visualizationLoaded', function (evt, visualization) {
                         var autoOpen;
-                        if (viewObj) {
-                            autoOpen = viewObj.autoOpen;
+                        if (visualization['view']) {
+                            autoOpen = visualization['view']['autoOpen'];
                         } else {
-                            var vis = bmsVisualizationService.getVisualization(visId);
+                            var vis = bmsVisualizationService.getVisualization(visualization['id']);
                             autoOpen = vis.autoOpen;
                         }
                         if (autoOpen && $.inArray($scope.type, autoOpen) > -1) {

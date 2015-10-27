@@ -407,7 +407,7 @@ define(['angular', 'bms.func', 'jquery', 'prob.common', 'prob.observers', 'prob.
                                                     return initJsonEvents($scope.id, templateFolder, viewData)
                                                 })
                                                 .then(function () {
-                                                    $rootScope.$broadcast('visualizationLoaded', $scope.id, viewData);
+                                                    $rootScope.$broadcast('visualizationLoaded', ctrl.data);
                                                     bmsModalService.endLoading();
                                                 });
                                         });
