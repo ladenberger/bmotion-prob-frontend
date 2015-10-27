@@ -87,6 +87,14 @@ task npmDeps(type: Exec) {
     commandLine "npm", 'install'
 }
 
+task cleanNodeModules(type: Delete) {
+    delete("node_modules")
+}
+
+task npmProductionDeps(dependsOn: [cleanNodeModules], type: Exec) {
+    commandLine "npm", 'install', '--production'
+}
+
 task grunt_standalone_all(dependsOn: [npmDeps], type: GruntTask) {
     gruntArgs = "standalone_all --force"
 }
@@ -116,7 +124,16 @@ targets.each() { target, cliTarget ->
         }
     }
 
-    task "zip_${target}"(dependsOn: ["copyLibs_${target}", "copyConfigFile_${target}", "downloadCli_${target}"], type: Zip) {
+    task "copyNodeModules_${target}"(dependsOn: ["grunt_standalone_${target}", "npmProductionDeps"], type: Copy) {
+        from 'node_modules'
+        if (target == "darwin-x64") {
+            into 'build/client/bmotion-prob-' + target + '/bmotion-prob.app/Contents/Resources/node_modules'
+        } else {
+            into 'build/client/bmotion-prob-' + target + '/resources/node_modules'
+        }
+    }
+
+    task "zip_${target}"(dependsOn: ["copyLibs_${target}", "copyNodeModules_${target}", "copyConfigFile_${target}", "downloadCli_${target}"], type: Zip) {
         destinationDir = new File('build/dist/' + appVersion)
         archiveName = 'bmotion-prob-' + appVersion + '-' + target + '.zip'
         from('build/client/bmotion-prob-' + target) {

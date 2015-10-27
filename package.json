@@ -19,10 +19,6 @@
     "grunt-contrib-requirejs": "^0.4.4",
     "grunt-electron": "^2.0.0"
   },
-  "scripts": {
-    "build": "npm install && grunt",
-    "clean": "grunt clean"
-  },
   "dependencies": {
     "diskdb": "^0.1.14"
   }
