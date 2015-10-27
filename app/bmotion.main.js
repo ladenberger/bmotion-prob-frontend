@@ -200,6 +200,8 @@ var buildWelcomeMenu = function (mainMenu) {
 
 app.on('ready', function () {
 
+    var viewWindows;
+
     mainWindow = new BrowserWindow({
         height: 600,
         width: 800,
@@ -207,6 +209,21 @@ app.on('ready', function () {
         icon: __dirname + '/resources/icons/bmsicon16x16.png'
     });
     mainWindow.loadUrl('file://' + __dirname + '/standalone.html#/startServer');
+
+    var closeViewWindows = function () {
+        // Close all views of running visualization
+        // if main window was closed
+        if (viewWindows) {
+            viewWindows.forEach(function (w) {
+                var win = BrowserWindow.fromId(w);
+                if (win) win.close();
+            });
+        }
+    };
+
+    mainWindow.on('close', function () {
+        closeViewWindows();
+    });
 
     var mainMenu = new Menu();
     buildDebugMenu(mainMenu);
@@ -223,6 +240,10 @@ app.on('ready', function () {
             var win = BrowserWindow.fromId(data['win']);
             buildProBMenu(mainMenu, data['tool'], data['addMenu']);
             win.setMenu(mainMenu);
+        } else if (data.type === 'setWindows') {
+            viewWindows = data.data;
+        } else if (data.type === 'cleanUp') {
+            closeViewWindows();
         }
     });
 

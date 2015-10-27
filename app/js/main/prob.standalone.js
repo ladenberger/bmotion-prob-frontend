@@ -66,12 +66,16 @@ define(['angular', 'socketio', 'angularAMD', 'bms.func', 'bms.common', 'bms.sess
                     });
 
                 }])
-            .factory('initVisualizationService', ['$location', 'bmsInitSessionService', 'bmsManifestService', 'bmsMainService', 'bmsModalService', 'electronWindow', 'electronWindowService',
-                function ($location, bmsInitSessionService, bmsManifestService, bmsMainService, bmsModalService, electronWindow, electronWindowService) {
+            .factory('initVisualizationService', ['$location', 'bmsInitSessionService', 'bmsManifestService', 'bmsMainService', 'bmsModalService', 'electronWindow', 'electronWindowService', 'electron',
+                function ($location, bmsInitSessionService, bmsManifestService, bmsMainService, bmsModalService, electronWindow, electronWindowService, electron) {
 
                     return function (manifestFilePath) {
 
                         bmsModalService.loading("Initialising visualisation ...");
+
+                        electron.send({
+                            type: "cleanUp"
+                        });
 
                         bmsManifestService.validate(manifestFilePath)
                             .then(function (manifestData) {
@@ -81,26 +85,23 @@ define(['angular', 'socketio', 'angularAMD', 'bms.func', 'bms.common', 'bms.sess
                                         if (views) {
                                             var aWindows = [];
                                             var mainWindow = electronWindow.fromId(1);
-                                            mainWindow.on('close', function () {
-                                                angular.forEach(aWindows, function (w) {
-                                                    w.close();
-                                                });
-                                            });
                                             var filename = manifestFilePath.replace(/^.*[\\\/]/, '');
                                             // Open a new window for each view
                                             angular.forEach(views, function (view, i) {
-                                                //var viewName = view.name ? view.name : view.id;
                                                 if (i === 0) {
                                                     // TODO: I assume that the main window has always the id "1"
                                                     $location.path('/root/' + sessionId + '/1/' + view.id + '/' + filename);
                                                     newWindow = mainWindow;
-                                                    //win.title = 'BMotion Studio for ProB: ' + viewName;
                                                 } else {
                                                     var newWindow = electronWindowService.createNewWindow();
                                                     newWindow.loadUrl('file://' + __dirname + '/standalone.html#/' + sessionId + '/' + newWindow.id + '/' + view.id + '/' + filename);
-                                                    aWindows.push(newWindow);
+                                                    aWindows.push(newWindow.id);
                                                 }
                                                 if (view.width && view.height) newWindow.setSize(view.width, view.height);
+                                            });
+                                            electron.send({
+                                                type: "setWindows",
+                                                data: aWindows
                                             });
                                         } else {
                                             // Delegate to template view
