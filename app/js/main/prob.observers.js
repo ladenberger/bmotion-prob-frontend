@@ -712,6 +712,7 @@ define(['bms.func', 'jquery', 'angular', 'qtip', 'prob.modal'], function (bms, $
                                         traceId: traceId,
                                         events: [v],
                                         callback: function () {
+                                            api.hide();
                                             /*api.set('content.text', function (event, api) {
                                              return ev.getTooltipContent(options, event.target, api, sessionId, traceId)
                                              .then(function (container) {
