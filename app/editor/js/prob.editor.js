@@ -54,6 +54,9 @@ define(['angularAMD', 'code-mirror!javascript', 'angular', 'jquery.jgraduate', '
                 disableEditor: function (reason) {
                     $parentScope.disableEditor(reason);
                 },
+                openDialog: function (msg, cb) {
+                    $parentScope.openDialog(msg, cb);
+                },
                 bmsModalService: $parentScope.bmsModalService
             };
         }])
@@ -164,33 +167,37 @@ define(['angularAMD', 'code-mirror!javascript', 'angular', 'jquery.jgraduate', '
             });
 
         }])
-        .controller('bmsObserverFormulaCtrl', ['$scope', 'bmsJsEditorService', function ($scope, bmsJsEditorService) {
+        .controller('bmsObserverFormulaCtrl', ['$scope', 'bmsJsEditorService',
+            function ($scope, bmsJsEditorService) {
 
-            $scope.isMenu = false;
-
-            $scope.openJsEditor = function (fn, el) {
-                bmsJsEditorService.openJsEditor(fn, el);
-            };
-
-            $scope.showMenu = function () {
-                $scope.isMenu = true;
-            };
-
-            $scope.hideMenu = function () {
                 $scope.isMenu = false;
-            };
 
-            $scope.addFormula = function () {
-                $scope.observer.data.formulas.push("");
-            };
+                $scope.openJsEditor = function (fn, el) {
+                    bmsJsEditorService.openJsEditor(fn, el);
+                };
 
-            $scope.removeFormula = function (index) {
-                $scope.observer.data.formulas.splice(index, 1);
-            };
+                $scope.showMenu = function () {
+                    $scope.isMenu = true;
+                };
 
+                $scope.hideMenu = function () {
+                    $scope.isMenu = false;
+                };
 
-        }])
-        .controller('bmsExecuteEventCtrl', ['$scope', 'bmsJsEditorService', function ($scope, bmsJsEditorService) {
+                $scope.addFormula = function () {
+                    $scope.observer.data.formulas.push("");
+                };
+
+                $scope.removeFormula = function (index) {
+                    electronDialogService.showErrorBox();
+                    $scope.observer.data.formulas.splice(index, 1);
+                };
+
+            }
+
+        ])
+        .
+        controller('bmsExecuteEventCtrl', ['$scope', 'bmsJsEditorService', function ($scope, bmsJsEditorService) {
 
             $scope.isMenu = false;
 
@@ -267,8 +274,8 @@ define(['angularAMD', 'code-mirror!javascript', 'angular', 'jquery.jgraduate', '
             };
 
         }])
-        .controller('bmsObserverViewCtrl', ['$scope', 'bmsEditorCommonService', 'bmsParentService',
-            function ($scope, bmsEditorCommonService, bmsParentService) {
+        .controller('bmsObserverViewCtrl', ['$scope', 'bmsEditorCommonService', 'bmsParentService', '$rootScope',
+            function ($scope, bmsEditorCommonService, bmsParentService, $rootScope) {
 
                 bmsEditorCommonService.isInitialised.promise.then(function () {
                     var tool = bmsEditorCommonService.getVisualization()['manifest']['tool'];
@@ -282,7 +289,13 @@ define(['angularAMD', 'code-mirror!javascript', 'angular', 'jquery.jgraduate', '
                 };
 
                 $scope.removeObserver = function (index) {
-                    $scope.data.splice(index, 1);
+                    bmsParentService.openDialog("Do you really want to delete this observer?", function (response) {
+                        if (response === 0) {
+                            $rootScope.$apply(function () {
+                                $scope.data.splice(index, 1);
+                            });
+                        }
+                    });
                 };
 
                 $scope.addFormulaObserver = function () {
@@ -317,8 +330,8 @@ define(['angularAMD', 'code-mirror!javascript', 'angular', 'jquery.jgraduate', '
                 });
 
             }])
-        .controller('bmsEventsViewCtrl', ['$scope', 'bmsEditorCommonService', 'bmsParentService',
-            function ($scope, bmsEditorCommonService, bmsParentService) {
+        .controller('bmsEventsViewCtrl', ['$scope', 'bmsEditorCommonService', 'bmsParentService', '$rootScope',
+            function ($scope, bmsEditorCommonService, bmsParentService, $rootScope) {
 
                 $scope.dynamicPopover = {
                     templateUrl: 'eventsMenuTemplate.html'
@@ -329,7 +342,13 @@ define(['angularAMD', 'code-mirror!javascript', 'angular', 'jquery.jgraduate', '
                 };
 
                 $scope.removeEvent = function (index) {
-                    $scope.data.splice(index, 1);
+                    bmsParentService.openDialog("Do you really want to delete this event?", function (response) {
+                        if (response === 0) {
+                            $rootScope.$apply(function () {
+                                $scope.data.splice(index, 1);
+                            });
+                        }
+                    });
                 };
 
                 $scope.addExecuteEventEvent = function () {

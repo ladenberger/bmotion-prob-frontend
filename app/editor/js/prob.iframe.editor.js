@@ -2,14 +2,14 @@
  * BMotion Studio for ProB Editor Module
  *
  */
-define(['jquery', 'prob.modal', 'bms.common'], function ($) {
+define(['jquery', 'prob.modal', 'bms.common', 'ng-electron'], function ($) {
 
-    var module = angular.module('prob.iframe.editor', ['prob.modal', 'bms.common'])
+    var module = angular.module('prob.iframe.editor', ['prob.modal', 'bms.common', 'ngElectron'])
         .factory('fs', function () {
             return require('fs');
         })
-        .directive('bmsVisualisationEditor', ['bmsVisualizationService', 'bmsModalService', 'bmsMainService', '$q', '$http', 'fs', '$rootScope',
-            function (bmsVisualizationService, bmsModalService, bmsMainService, $q, $http, fs, $rootScope) {
+        .directive('bmsVisualisationEditor', ['bmsVisualizationService', 'bmsModalService', 'bmsMainService', '$q', '$http', 'fs', '$rootScope', 'electron',
+            function (bmsVisualizationService, bmsModalService, bmsMainService, $q, $http, fs, $rootScope, electron) {
                 return {
                     replace: false,
                     scope: {
@@ -40,6 +40,15 @@ define(['jquery', 'prob.modal', 'bms.common'], function ($) {
 
                         $scope.disableEditor = function (reason) {
                             bmsVisualizationService.disableTab($scope.svg, reason);
+                        };
+
+                        $scope.openDialog = function (msg, cb) {
+                            electron.dialog.showMessageBox({
+                                title: "Please confirm",
+                                type: "info",
+                                buttons: ["Ok", "Cancel"],
+                                message: msg,
+                            }, cb);
                         };
 
                         // --------------------------------------
