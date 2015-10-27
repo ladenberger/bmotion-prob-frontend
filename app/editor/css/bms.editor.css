@@ -38,21 +38,21 @@ html, body {
 ::-webkit-scrollbar {
     width: 5px;
     height: 5px;
-    background: #444;
+    background: #E8E8E8;
 }
 
 ::-webkit-scrollbar-track {
     border-radius: 10px;
-    background: #444;
+    background: #E8E8E8;
 }
 
 ::-webkit-scrollbar-thumb {
     border-radius: 10px;
-    background: #666;
+    background: darkgray;
 }
 
 ::-webkit-scrollbar-corner {
-    background: #444;
+    background: #E8E8E8;
 }
 
 #browser-not-supported {
