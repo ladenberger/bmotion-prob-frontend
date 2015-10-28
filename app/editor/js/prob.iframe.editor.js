@@ -2,12 +2,9 @@
  * BMotion Studio for ProB Editor Module
  *
  */
-define(['jquery', 'prob.modal', 'bms.common', 'ng-electron'], function ($) {
+define(['prob.modal', 'bms.common', 'bms.nodejs', 'ng-electron'], function () {
 
-    var module = angular.module('prob.iframe.editor', ['prob.modal', 'bms.common', 'ngElectron'])
-        .factory('fs', function () {
-            return require('fs');
-        })
+    var module = angular.module('prob.iframe.editor', ['prob.modal', 'bms.common', 'bms.nodejs', 'ngElectron'])
         .directive('bmsVisualisationEditor', ['bmsVisualizationService', 'bmsModalService', 'bmsMainService', '$q', '$http', 'fs', '$rootScope', 'electron',
             function (bmsVisualizationService, bmsModalService, bmsMainService, $q, $http, fs, $rootScope, electron) {
                 return {
@@ -95,7 +92,7 @@ define(['jquery', 'prob.modal', 'bms.common', 'ng-electron'], function ($) {
                             var defer = $q.defer();
                             var jsonObservers = {observers: bmsVisualizationService.getJsonObservers($scope.id)};
                             var jsonString = JSON.stringify(jsonObservers, null, "    ");
-                            var observersViewPath = viewData['observers'] ? viewData['observers'] : 'views/' + viewData['id'] + '.observers.json';
+                            var observersViewPath = viewData['observers'] ? viewData['observers'] : viewData['id'] + '.observers.json';
                             fs.writeFile(templateFolder + '/' + observersViewPath, jsonString,
                                 function (err) {
                                     if (err) {
@@ -111,7 +108,7 @@ define(['jquery', 'prob.modal', 'bms.common', 'ng-electron'], function ($) {
                             var defer = $q.defer();
                             var jsonEvents = {events: bmsVisualizationService.getJsonEvents($scope.id)};
                             var jsonString = JSON.stringify(jsonEvents, null, "    ");
-                            var eventsViewPath = viewData['events'] ? viewData['events'] : 'views/' + viewData['id'] + '.events.json';
+                            var eventsViewPath = viewData['events'] ? viewData['events'] : viewData['id'] + '.events.json';
                             fs.writeFile(templateFolder + '/' + eventsViewPath, jsonString,
                                 function (err) {
                                     if (err) {

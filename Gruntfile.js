@@ -165,6 +165,16 @@ module.exports = function (grunt) {
                         dest: 'build/online/'
                     }
                 ]
+            },
+            template: {
+                files: [
+                    {
+                        expand: true,
+                        cwd: 'template/',
+                        src: ['**'],
+                        dest: 'build/template/'
+                    }
+                ]
             }
         }
     });
@@ -181,7 +191,7 @@ module.exports = function (grunt) {
     grunt.registerTask('build', ['standalone_all']);
 
     grunt.registerTask('online', ['prepare', 'requirejs:js-online', 'requirejs:css-online', 'copy:online']);
-    grunt.registerTask('template', ['prepare', 'requirejs:js-template']);
+    grunt.registerTask('template', ['prepare', 'requirejs:js-template', 'copy:template']);
 
     targets.forEach(function (target) {
         grunt.registerTask('standalone_' + target, '', function () {

@@ -134,7 +134,16 @@ targets.each() { target, cliTarget ->
         }
     }
 
-    task "zip_${target}"(dependsOn: ["copyLibs_${target}", "copyConfigFile_${target}", "copyNodeModules_${target}", "downloadCli_${target}"], type: Zip) {
+    task "copyTemplate_${target}"(dependsOn: ["grunt_standalone_${target}"], type: Copy) {
+        from 'build/template'
+        if (target == "darwin-x64") {
+            into 'build/client/bmotion-prob-' + target + '/bmotion-prob.app/Contents/Resources/template'
+        } else {
+            into 'build/client/bmotion-prob-' + target + '/resources/template'
+        }
+    }
+
+    task "zip_${target}"(dependsOn: ["copyLibs_${target}", "copyConfigFile_${target}", "copyNodeModules_${target}", "copyTemplate_${target}", "downloadCli_${target}"], type: Zip) {
         destinationDir = new File('build/dist/' + appVersion)
         archiveName = 'bmotion-prob-' + appVersion + '-' + target + '.zip'
         from('build/client/bmotion-prob-' + target) {
@@ -146,7 +155,7 @@ targets.each() { target, cliTarget ->
     }
 
     task "grunt_standalone_${target}"(dependsOn: [npmDeps], type: GruntTask) {
-        gruntArgs = "standalone_${target} --force"
+        gruntArgs = "template standalone_${target} --force"
     }
 
     task "standalone_${target}"(dependsOn: ["zip_${target}"]) {}

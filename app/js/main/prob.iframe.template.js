@@ -324,7 +324,7 @@ define(['angular', 'bms.func', 'jquery', 'prob.common', 'prob.observers', 'prob.
 
                             var defer = $q.defer();
 
-                            var eventsViewPath = viewData['events'] ? viewData['events'] : 'views/' + viewData['id'] + '.events.json';
+                            var eventsViewPath = viewData['events'] ? viewData['events'] : viewData['id'] + '.events.json';
                             $http.get(templateFolder + '/' + eventsViewPath)
                                 .success(function (data) {
                                     // TODO: We need to validate the schema of the view data json file!
@@ -347,7 +347,7 @@ define(['angular', 'bms.func', 'jquery', 'prob.common', 'prob.observers', 'prob.
                             var defer = $q.defer();
 
                             // Get observer data from observers.json file
-                            var observersViewPath = viewData['observers'] ? viewData['observers'] : 'views/' + viewData['id'] + '.observers.json';
+                            var observersViewPath = viewData['observers'] ? viewData['observers'] : viewData['id'] + '.observers.json';
                             $http.get(templateFolder + '/' + observersViewPath)
                                 .success(function (data) {
                                     // TODO: We need to validate the schema of the view data json file!

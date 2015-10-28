@@ -3,6 +3,8 @@
 var app = require('app');
 var BrowserWindow = require('browser-window');
 var angular = require('./js/libs/bower/ng-electron/ng-bridge');
+var ncp = require('ncp').ncp;
+ncp.limit = 16;
 
 // Quit when all windows are closed and no other one is listening to this.
 app.on('window-all-closed', function () {
@@ -95,6 +97,7 @@ var buildFileMenu = function (mainMenu) {
         click: function () {
             Dialog.showOpenDialog(
                 {
+                    title: 'Open BMotion Studio Visualization',
                     filters: [
                         {name: 'BMotion Studio File', extensions: ['json']}
                     ],
@@ -108,6 +111,23 @@ var buildFileMenu = function (mainMenu) {
                         }, mainWindow);
                     }
                 });
+        }
+    }));
+    fileMenu.append(new MenuItem({
+        label: 'New Visualization',
+        accelerator: (function () {
+            if (process.platform == 'darwin')
+                return 'Alt+Command+N';
+            else
+                return 'Ctrl+Shift+N';
+        })(),
+        click: function () {
+
+            angular.send({
+                type: 'createNewVisualization'
+            }, mainWindow);
+
+
         }
     }));
     mainMenu.append(new MenuItem({

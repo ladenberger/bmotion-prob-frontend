@@ -72,7 +72,7 @@ define(['tv4', 'angular'], function (tv4, angular) {
                                 "description": "Specify the ProB views which should be opened automatically when starting the visualization. The following views are available: CurrentTrace, Events, StateInspector, CurrentAnimations, GroovyConsoleSession, ModelCheckingUI."
                             }
                         },
-                        "required": ["model"]
+                        "required": []
                     },
                     validate: function (manifestFilePath) {
                         var defer = $q.defer();

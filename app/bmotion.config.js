@@ -25,6 +25,7 @@ requirejs.config({
         "bms.manifest": "js/main/bms.manifest",
         "bms.nwjs": "js/main/bms.nwjs",
         "bms.electron": "js/main/bms.electron",
+        "bms.nodejs": "js/main/bms.nodejs",
 
         "prob.ui": "js/main/prob.ui",
         "prob.common": "js/main/prob.common",
@@ -42,6 +43,7 @@ requirejs.config({
         "angular": "js/libs/bower/angular/angular",
         "angular-route": "js/libs/bower/angular-route/angular-route",
         "angular-sanitize": "js/libs/bower/angular-sanitize/angular-sanitize",
+        "angular-bootstrap-show-errors": "js/libs/bower/angular-bootstrap-show-errors/showErrors",
         "ui-bootstrap": "js/libs/bower/angular-bootstrap/ui-bootstrap",
         "ui-bootstrap-tpls": "js/libs/bower/angular-bootstrap/ui-bootstrap-tpls",
         "angularAMD": "js/libs/bower/angularAMD/angularAMD",
@@ -95,6 +97,7 @@ requirejs.config({
         "ui-bootstrap": ["angular"],
         "ui-bootstrap-tpls": ["ui-bootstrap"],
         "angular-sanitize": ["angular"],
+        "angular-bootstrap-show-errors": ["angular"],
         "angular-xeditable": ["angular"],
         "angular-ui-codemirror": ["angular", "code-mirror"],
         "ng-electron": ["angular"],

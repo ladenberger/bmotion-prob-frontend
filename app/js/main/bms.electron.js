@@ -2,9 +2,9 @@
  * BMotion Studio Node Webkit Module
  *
  */
-define(['angular', 'prob.modal', 'ng-electron'], function () {
+define(['angular'], function (angular) {
 
-    var module = angular.module('bms.electron', ['prob.modal', 'ngElectron'])
+    var module = angular.module('bms.electron', [])
         .factory('electronRemote', function () {
             return require('remote');
         })

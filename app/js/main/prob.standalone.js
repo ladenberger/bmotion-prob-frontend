@@ -2,10 +2,10 @@
  * BMotion Studio for ProB Standalone Module
  *
  */
-define(['angular', 'socketio', 'angularAMD', 'bms.func', 'bms.common', 'bms.session', 'jquery', 'bms.manifest', 'bms.config', 'prob.graph', 'prob.iframe.template', 'prob.iframe.editor', 'prob.ui', 'prob.common', 'prob.modal', 'angular-route', 'prob.standalone.view', 'bms.electron', 'ng-electron'],
-    function (angular, io, angularAMD, bms, $) {
+define(['angular', 'jquery', 'socketio', 'angularAMD', 'bms.func', 'bms.common', 'bms.session', 'bms.manifest', 'bms.config', 'prob.graph', 'prob.iframe.template', 'prob.iframe.editor', 'prob.ui', 'prob.common', 'prob.modal', 'angular-route', 'prob.standalone.view', 'bms.electron', 'bms.nodejs', 'ng-electron'],
+    function (angular, $, io, angularAMD, bms) {
 
-        var module = angular.module('prob.standalone', ['prob.standalone.view', 'bms.manifest', 'bms.config', 'bms.common', 'bms.session', 'prob.graph', 'prob.iframe.template', 'prob.iframe.editor', 'prob.ui', 'prob.common', 'prob.modal', 'bms.electron', 'ngRoute', 'ngElectron'])
+        var module = angular.module('prob.standalone', ['prob.standalone.view', 'bms.manifest', 'bms.config', 'bms.common', 'bms.session', 'prob.graph', 'prob.iframe.template', 'prob.iframe.editor', 'prob.ui', 'prob.common', 'prob.modal', 'bms.electron', 'bms.nodejs', 'ngRoute', 'ngElectron'])
             .config(['$routeProvider', '$locationProvider',
                 function ($routeProvider) {
                     $routeProvider
@@ -33,8 +33,8 @@ define(['angular', 'socketio', 'angularAMD', 'bms.func', 'bms.common', 'bms.sess
                             redirectTo: '/startServer'
                         });
                 }])
-            .run(['$rootScope', 'bmsMainService', 'bmsConfigService', 'bmsModalService', 'initVisualizationService',
-                function ($rootScope, bmsMainService, bmsConfigService, bmsModalService, initVisualizationService) {
+            .run(['$rootScope', 'bmsMainService', 'bmsConfigService', 'bmsModalService', 'initVisualizationService', 'createVisualizationService',
+                function ($rootScope, bmsMainService, bmsConfigService, bmsModalService, initVisualizationService, createVisualizationService) {
 
                     bmsMainService.mode = 'ModeStandalone';
                     //editableOptions.theme = 'bs3'; // bootstrap3 theme. Can be also 'bs2', 'default'
@@ -62,8 +62,87 @@ define(['angular', 'socketio', 'angularAMD', 'bms.func', 'bms.common', 'bms.sess
                                         "<p>ProB 2.0 (version " + config.prob.version + ")</p>" +
                                         "<p>" + config.prob.revision + "</p>");
                                 });
+                        } else if (data.type === 'showError') {
+                            bmsMainService.openErrorDialog(data.data);
+                        } else if (data.type === 'createNewVisualization') {
+                            createVisualizationService();
                         }
                     });
+
+                }])
+            .factory('createVisualizationService', ['$uibModal', 'electronDialog', 'fs', 'path', 'ncp', 'initVisualizationService',
+                function ($uibModal, electronDialog, fs, path, ncp, initVisualizationService) {
+
+                    return function () {
+
+                        var modalInstance = $uibModal.open({
+                            templateUrl: 'resources/templates/bms-create-visualization.html',
+                            controller: function ($scope, $modalInstance) {
+
+                                $scope.close = function () {
+                                    $modalInstance.close();
+                                };
+
+                                $scope.ok = function () {
+
+                                    $scope.$broadcast('show-errors-check-validity');
+
+                                    if ($scope.userForm.$valid) {
+                                        $modalInstance.close($scope.view);
+                                    }
+
+                                };
+
+                                $scope.cancel = function () {
+                                    $modalInstance.dismiss('cancel');
+                                };
+
+                            },
+                            resolve: {},
+                            backdrop: false
+                        });
+                        modalInstance.result.then(function (view) {
+
+                            view.template = 'index.html';
+                            var manifest = {
+                                views: [
+                                    view
+                                ]
+                            };
+
+                            electronDialog.showOpenDialog(
+                                {
+                                    title: 'Please select a folder where the BMotion Studio visualization should be saved.',
+                                    properties: ['openDirectory', 'createDirectory']
+                                },
+                                function (files) {
+                                    if (files) {
+                                        var folder = files[0];
+                                        var appPath = path.dirname(__dirname);
+                                        var templateFolder = appPath + '/template';
+                                        ncp(templateFolder, folder, function (err) {
+                                            if (err) {
+                                                bmsModalService.openErrorDialog(err);
+                                            } else {
+                                                var jsonString = JSON.stringify(manifest, null, "    ");
+                                                var manifestFile = view.id + '.json';
+                                                fs.writeFile(folder + '/' + manifestFile, jsonString,
+                                                    function (err) {
+                                                        if (err) {
+                                                            bmsModalService.openErrorDialog("An error occurred while writing BMotion Studio manifest file " + manifestFile + ": " + err);
+                                                        } else {
+                                                            initVisualizationService(folder + '/' + manifestFile);
+                                                        }
+                                                    });
+                                            }
+                                        });
+                                    }
+                                });
+
+                        }, function () {
+                        });
+
+                    }
 
                 }])
             .factory('initVisualizationService', ['$location', 'bmsInitSessionService', 'bmsManifestService', 'bmsMainService', 'bmsModalService', 'electronWindow', 'electronWindowService', 'electron',

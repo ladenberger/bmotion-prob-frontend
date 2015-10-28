@@ -226,3 +226,11 @@ html, body {
 .cursor-pointer {
     cursor: pointer;
 }
+
+.form-group .help-block {
+    display: none;
+}
+
+.form-group.has-error .help-block {
+    display: block;
+}

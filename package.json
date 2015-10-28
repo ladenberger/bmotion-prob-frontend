@@ -20,6 +20,7 @@
     "grunt-electron": "^2.0.0"
   },
   "dependencies": {
-    "diskdb": "^0.1.14"
+    "diskdb": "^0.1.14",
+    "ncp": "^2.0.0"
   }
 }
