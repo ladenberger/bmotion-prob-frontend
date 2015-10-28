@@ -151,6 +151,20 @@ input[type="checkbox"].editable-input.editable-has-buttons {
 
 .modal-js-editor .modal-title {
     font-size: 14px;
+    margin-bottom: 5px;
+}
+
+.modal-js-editor .well {
+    margin: 0;
+}
+
+.modal-js-editor .col-xs-2 {
+    text-align: right;
+    font-weight: bold;
+}
+
+.modal-js-editor .well div {
+    padding: 5px;
 }
 
 .js-editor {
@@ -216,4 +230,8 @@ input[type="checkbox"].editable-input.editable-has-buttons {
 
 .csp-event-action {
     margin-bottom: 10px;
+}
+
+.cursor-pointer {
+    cursor: pointer;
 }

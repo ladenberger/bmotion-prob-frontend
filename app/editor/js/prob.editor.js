@@ -5,9 +5,9 @@
 define(['angularAMD', 'code-mirror!javascript', 'angular', 'jquery.jgraduate', 'jpicker',
     'jquery.draginput', 'mousewheel', 'taphold', 'requestanimationframe',
     'method-draw', 'angular-ui-codemirror', 'angular-xeditable', 'ui-bootstrap',
-    'ui-bootstrap-tpls'], function (angularAMD, CodeMirror) {
+    'ui-bootstrap-tpls', 'angular-sanitize'], function (angularAMD, CodeMirror) {
 
-    var module = angular.module('prob.editor', ['ui.codemirror', 'xeditable', 'ui.bootstrap'])
+    var module = angular.module('prob.editor', ['ui.codemirror', 'xeditable', 'ui.bootstrap', 'ngSanitize'])
         .run(function (editableOptions, editableThemes) {
             window.CodeMirror = CodeMirror;
             editableOptions.theme = 'default';
@@ -64,7 +64,7 @@ define(['angularAMD', 'code-mirror!javascript', 'angular', 'jquery.jgraduate', '
 
             return {
 
-                openJsEditor: function (fn, el) {
+                openJsEditor: function (fn, el, doc) {
 
                     var code = el.data[fn];
 
@@ -74,19 +74,14 @@ define(['angularAMD', 'code-mirror!javascript', 'angular', 'jquery.jgraduate', '
                     }
 
                     var modalInstance = $uibModal.open({
-                        template: '<div class="modal-js-editor">'
-                        + '<div class="modal-header">'
-                        + '<h3 class="modal-title">JavaScript Editor</h3>'
-                        + '</div>'
-                        + '<div class="modal-body">'
-                        + '<div class="js-editor" ui-codemirror="editorOptions" ng-model="code"></div>'
-                        + '<div class="modal-footer">'
-                        + '<button class="btn" type="button" ng-click="ok()">OK</button>'
-                        + '<button class="btn" type="button" ng-click="cancel()">Cancel</button>'
-                        + '</div></div></div>',
-                        controller: function ($scope, $modalInstance, code) {
+                        templateUrl: 'templates/bms-js-editor.html',
+                        controller: function ($scope, $modalInstance, code, doc) {
 
                             $scope.code = code;
+
+                            $scope.doc = doc;
+
+                            $scope.isCollapsed = true;
 
                             $modalInstance.setRefresh = function (b) {
                                 $scope.refresh = b;
@@ -120,6 +115,9 @@ define(['angularAMD', 'code-mirror!javascript', 'angular', 'jquery.jgraduate', '
                         resolve: {
                             code: function () {
                                 return code;
+                            },
+                            doc: function () {
+                                return doc;
                             }
                         },
                         backdrop: false
@@ -173,7 +171,28 @@ define(['angularAMD', 'code-mirror!javascript', 'angular', 'jquery.jgraduate', '
                 $scope.isMenu = false;
 
                 $scope.openJsEditor = function (fn, el) {
-                    bmsJsEditorService.openJsEditor(fn, el);
+                    var doc = {
+                        description: 'The trigger function will be called after every state change with its ' +
+                        '<i>origin</i> reference set to the graphical element that the observer is attached to ' +
+                        'and the <i>values</i> of the formulas. The <i>origin</i> is a jQuery selector element. ' +
+                        'Consult the <a href="http://api.jquery.com/" target="_blank">jQuery API</a> for more ' +
+                        'information regarding accessing or manipulating the <i>origin</i> ' +
+                        '(e.g. <a href="http://api.jquery.com/category/attributes/" target="_blank">set and get attributes</a>).' +
+                        'The <i>values</i> parameter contains the values of ' +
+                        'the defined formulas in an array, e.g. use <i>values[0]</i> to obtain the result of ' +
+                        'the first formula.',
+                        parameter: [
+                            {
+                                name: 'origin',
+                                description: 'The reference set to the graphical element that the observer is attached to.'
+                            },
+                            {
+                                name: 'values',
+                                description: 'Contains the values of the defined formulas in an array, e.g. use <i>values[0]</i> to obtain the result of the first formula.'
+                            }
+                        ]
+                    };
+                    bmsJsEditorService.openJsEditor(fn, el, doc);
                 };
 
                 $scope.showMenu = function () {
@@ -202,7 +221,30 @@ define(['angularAMD', 'code-mirror!javascript', 'angular', 'jquery.jgraduate', '
             $scope.isMenu = false;
 
             $scope.openJsEditor = function (fn, el) {
-                bmsJsEditorService.openJsEditor(fn, el);
+
+                var doc = {
+                    description: 'The label function returns a custom label to be shown in the ' +
+                    'tooltip when hovering the graphical element that the execute event handler ' +
+                    'is attached to. You can also return an HTML element.',
+                    parameter: [
+                        {
+                            name: 'origin',
+                            description: 'The reference set to the graphical element that the execute ' +
+                            'event handler is attached to. The <i>origin</i> is a jQuery selector element. ' +
+                            'Consult the <a href="http://api.jquery.com/" target="_blank">jQuery API</a> for more ' +
+                            'information about accessing or manipulating the <i>origin</i>.'
+                        },
+                        {
+                            name: 'event',
+                            description: 'An object containing the information of the respective event. ' +
+                            'Use <i>event.name</i> to obtain the name of the event and <i>event.predicate</i> ' +
+                            'to obtain the predicate of the event respectively.'
+                        }
+                    ]
+                };
+
+                bmsJsEditorService.openJsEditor(fn, el, doc);
+
             };
 
             $scope.showMenu = function () {
