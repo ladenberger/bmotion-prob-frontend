@@ -9,6 +9,7 @@
   "bugs": {
     "url": "https://github.com/ladenberger/bmotion-prob-frontend/issues"
   },
+  "description": "BMotion Studio for ProB",
   "homepage": "https://github.com/ladenberger/bmotion-prob-frontend",
   "devDependencies": {
     "grunt": "^0.4.5",
