@@ -583,7 +583,16 @@ define(['bms.func', 'jquery', 'angular', 'qtip', 'prob.modal'], function (bms, $
             return refinementObserver;
 
         }]).
-        service('predicate', ['ws', '$q', function (ws, $q) {
+        service('predicate', ['ws', '$q', 'bmsObserverService', function (ws, $q, bmsObserverService) {
+
+            var helper = function (obj, element) {
+                if (Object.prototype.toString.call(obj) === '[object Object]') {
+                    return obj;
+                } else if (bms.isFunction(obj)) {
+                    obj.call(this, element);
+                    return {};
+                }
+            };
 
             var predicateObserver = {
 
@@ -594,29 +603,47 @@ define(['bms.func', 'jquery', 'angular', 'qtip', 'prob.modal'], function (bms, $
                     }, options);
                 },
                 getFormulas: function (observer) {
-                    return [observer.data.predicate];
+                    return [{
+                        formula: observer.data.predicate,
+                        translate: false
+                    }];
                 },
                 apply: function (sessionId, visId, observer, container, options) {
+
                     var defer = $q.defer();
-                    var result = options.result;
-                    var rr = {};
-                    if (result[0] === "TRUE") {
-                        rr = bms.objFunc(observer.data.true, container, observer);
-                    } else if (result[0] === "FALSE") {
-                        rr = bms.objFunc(observer.data.false, container, observer);
+                    var selector = observer.data.selector;
+                    if (selector) {
+                        var fvalues = {};
+                        var result = options.result;
+                        var element = container.find(observer.data.selector);
+                        element.each(function () {
+                            var ele = $(this);
+                            var returnValue;
+                            if (result[0] === "TRUE") {
+                                returnValue = helper(observer.data.true, ele);
+                            } else if (result[0] === "FALSE") {
+                                returnValue = helper(observer.data.false, ele);
+                            }
+                            if (returnValue) {
+                                var bmsid = bmsObserverService.getBmsIdForElement(ele);
+                                fvalues[bmsid] = returnValue;
+                            }
+                        });
+                        defer.resolve(fvalues);
+                    } else {
+                        // TODO: We need a more meaningful error message
+                        bmsModalService.setError("Please specify a selector!");
+                        defer.resolve();
                     }
-                    var obj = {};
-                    if (rr) {
-                        obj[observer.bmsid] = rr;
-                    }
-                    defer.resolve(obj);
+
                     return defer.promise;
+
                 },
-                check: function (id, observers, container, stateId, trigger) {
+                check: function (sessionId, visId, observer, container, stateId, trigger) {
                     var defer = $q.defer();
                     var promises = [];
                     //var startWebsocket = new Date().getTime();
-
+                    var observers = Object.prototype.toString.call(observer) !== '[object Array]' ? [observer] : observer;
                     // Collect formulas
                     var formulas = [];
                     angular.forEach(observers, function (o) {
@@ -627,10 +654,9 @@ define(['bms.func', 'jquery', 'angular', 'qtip', 'prob.modal'], function (bms, $
                             });
                         }
                     });
-
                     ws.emit("evaluateFormulas", {
                         data: {
-                            id: id,
+                            id: sessionId,
                             formulas: formulas,
                             stateId: stateId
                         }
@@ -643,7 +669,9 @@ define(['bms.func', 'jquery', 'angular', 'qtip', 'prob.modal'], function (bms, $
                             if (o.data.cause === trigger) {
                                 var r = data[o.data.predicate];
                                 if (r) {
-                                    promises.push(predicateObserver.apply(o, container, [r.result]));
+                                    promises.push(predicateObserver.apply(sessionId, visId, o, container, {
+                                        result: [r.result]
+                                    }));
                                 }
                             }
                         });

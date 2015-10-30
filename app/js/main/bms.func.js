@@ -66,19 +66,7 @@ define(['jquery'], function ($) {
         uuid: function () {
             return api._s4() + api._s4() + '-' + api._s4() + '-' + api._s4() + '-' +
                 api._s4() + '-' + api._s4() + api._s4() + api._s4();
-        },
-        objFunc: function (obj, container, observer) {
-            if (Object.prototype.toString.call(obj) === '[object Object]') {
-                return obj;
-            } else if (api.isFunction(obj)) {
-                var el = container.find(observer.data.selector);
-                el.each(function (i, v) {
-                    obj.call(this, $(v))
-                });
-                return null;
-            }
         }
-
     };
 
     return api;
