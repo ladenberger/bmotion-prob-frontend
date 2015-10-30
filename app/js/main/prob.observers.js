@@ -531,12 +531,13 @@ define(['bms.func', 'jquery', 'angular', 'qtip', 'prob.modal'], function (bms, $
                         disable: {}
                     }, options);
                 },
-                apply: function (sessionId, visId, observer, container, options) {
+                apply: function (sessionId, visId, observer, container) {
 
                     var defer = $q.defer();
 
                     var obj = {};
-                    var refinements = options.refinements;
+                    var vis = bmsVisualizationService.getVisualization(visId);
+                    var refinements = vis.refinements;
 
                     if (refinements) {
 
@@ -571,11 +572,8 @@ define(['bms.func', 'jquery', 'angular', 'qtip', 'prob.modal'], function (bms, $
                     var defer = $q.defer();
 
                     //TODO: Check refinement observer only once!
-                    var vis = bmsVisualizationService.getVisualization(visId);
-                    defer.resolve(refinementObserver.apply(sessionId, visId, observer, container, {
-                            refinements: vis['refinements']
-                        }
-                    ));
+
+                    defer.resolve(refinementObserver.apply(sessionId, visId, observer, container));
 
                     return defer.promise;
 
@@ -584,8 +582,7 @@ define(['bms.func', 'jquery', 'angular', 'qtip', 'prob.modal'], function (bms, $
 
             return refinementObserver;
 
-        }])
-        .
+        }]).
         service('predicate', ['ws', '$q', function (ws, $q) {
 
             var predicateObserver = {
@@ -599,8 +596,9 @@ define(['bms.func', 'jquery', 'angular', 'qtip', 'prob.modal'], function (bms, $
                 getFormulas: function (observer) {
                     return [observer.data.predicate];
                 },
-                apply: function (observer, container, result) {
+                apply: function (sessionId, visId, observer, container, options) {
                     var defer = $q.defer();
+                    var result = options.result;
                     var rr = {};
                     if (result[0] === "TRUE") {
                         rr = bms.objFunc(observer.data.true, container, observer);
