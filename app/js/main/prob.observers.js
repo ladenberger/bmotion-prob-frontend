@@ -459,7 +459,7 @@ define(['bms.func', 'jquery', 'angular', 'qtip', 'prob.modal'], function (bms, $
 
                     var values = options.result[0];
 
-                    if (values.length > 0) {
+                    if (values && values.length > 0) {
 
                         var fvalues = {};
 
