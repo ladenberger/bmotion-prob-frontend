@@ -521,35 +521,49 @@ define(['bms.func', 'jquery', 'angular', 'qtip', 'prob.modal'], function (bms, $
             return bsetObserver;
 
         }])
-        .service('refinement', ['ws', '$q', 'bmsVisualizationService', function (ws, $q, bmsVisualizationService) {
+        .service('refinement', ['ws', '$q', 'bmsVisualizationService', 'bmsObserverService', function (ws, $q, bmsVisualizationService, bmsObserverService) {
 
             return {
-                check: function (observer, container, stateId, trigger, data) {
+                getDefaultOptions: function (options) {
+                    return $.extend({
+                        refinements: [],
+                        enable: {},
+                        disable: {}
+                    }, options);
+                },
+                check: function (sessionId, visId, observer, container, stateId, trigger) {
 
                     var defer = $q.defer();
 
                     //TODO: Check refinement observer only once!
-                    var vis = bmsVisualizationService.getVisualization(data.visId);
-                    var refinements = vis.refinements;
+                    var vis = bmsVisualizationService.getVisualization(visId);
+                    var refinements = vis['refinements'];
+                    var obj = {};
 
                     if (refinements) {
-                        var obj = {};
-                        var rr;
 
-                        $.each(observer.data.refinements, function (i, v) {
-                            if ($.inArray(v, refinements) > -1) {
-                                rr = observer.data.enable;
-                            } else {
-                                rr = observer.data.disable;
+                        var el = container.find(observer.data.selector);
+                        el.each(function (i, v) {
+                            var rr;
+                            var e = $(v);
+                            var normalized = bms.normalize(observer.data, [], e);
+                            var orefs = Object.prototype.toString.call(normalized['refinements']) !== '[object Array]' ? [normalized['refinements']] : normalized['refinements'];
+                            angular.forEach(orefs, function (v) {
+                                if ($.inArray(v, refinements) > -1) {
+                                    rr = normalized['enable'];
+                                } else {
+                                    rr = normalized['disable'];
+                                }
+                            });
+                            if (rr) {
+                                var bmsid = bmsObserverService.getBmsIdForElement(e);
+                                obj[bmsid] = rr;
                             }
                         });
 
-                        if (rr) {
-                            obj[observer.bmsid] = rr
-                        }
-
-                        defer.resolve(obj);
                     }
+
+                    defer.resolve(obj);
 
                     return defer.promise;
 
@@ -559,36 +573,24 @@ define(['bms.func', 'jquery', 'angular', 'qtip', 'prob.modal'], function (bms, $
         }])
         .service('predicate', ['ws', '$q', function (ws, $q) {
 
-            var observePredicateHelper = function (tf, element, observer) {
-                if (Object.prototype.toString.call(tf) === '[object Object]') {
-                    return tf;
-                } else if (bms.isFunction(tf)) {
-                    var el = observer.element ? $(observer.element) : element.find(observer.data.selector);
-                    el.each(function (i, v) {
-                        tf.call(this, $(v))
-                    });
-                    return null;
-                }
-            };
-
             var predicateObserver = {
 
                 getDefaultOptions: function (options) {
-                    return bms.normalize($.extend({
+                    return $.extend({
                         predicate: "",
                         cause: "AnimationChanged"
-                    }, options), []);
+                    }, options);
                 },
                 getFormulas: function (observer) {
                     return [observer.data.predicate];
                 },
-                apply: function (observer, element, result) {
+                apply: function (observer, container, result) {
                     var defer = $q.defer();
                     var rr = {};
                     if (result[0] === "TRUE") {
-                        rr = observePredicateHelper(observer.data.true, element, observer);
+                        rr = bms.objFunc(observer.data.true, container, observer);
                     } else if (result[0] === "FALSE") {
-                        rr = observePredicateHelper(observer.data.false, element, observer);
+                        rr = bms.objFunc(observer.data.false, container, observer);
                     }
                     var obj = {};
                     if (rr) {
