@@ -271,6 +271,29 @@ define(['jquery', 'bms.visualization', 'prob.observers'], function ($) {
                             }
                         });
 
+                        var attrs = {};
+
+                        // Apply values
+                        for (bmsid in fvalues) {
+                            if (attrs[bmsid] === undefined) {
+                                attrs[bmsid] = [];
+                            }
+                            var nattrs = fvalues[bmsid];
+                            for (var a in nattrs) {
+                                if (attrs[bmsid].indexOf(a) === -1) {
+                                    var orgElement = element.find('[data-bms-id=' + bmsid + ']');
+                                    var attrDefault = orgElement.attr(a);
+                                    // Special case for class attributes
+                                    if (a === "class" && attrDefault === undefined) {
+                                        attrDefault = ""
+                                    }
+                                    orgElement
+                                        .attr("ng-attr-" + a, "{{getValue('" + bmsid + "','" + a + "','" + attrDefault + "')}}");
+                                    attrs[bmsid].push(a);
+                                }
+                            }
+                        }
+
                         var newScope = $rootScope.$new(true);
                         newScope.values = fvalues;
                         newScope.getValue = function (bmsid, attr, defaultValue) {
