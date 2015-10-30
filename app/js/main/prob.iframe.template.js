@@ -66,10 +66,11 @@ define(['angular', 'bms.func', 'jquery', 'prob.common', 'prob.observers', 'prob.
 
                             var observers = bmsVisualizationService.getObservers($scope.id, list);
 
-                            stateId = stateId ? stateId : self.data.stateId;
-                            cause = cause ? cause : trigger.TRIGGER_ANIMATION_CHANGED;
+                            var stateId = stateId ? stateId : self.data.stateId;
+                            var cause = cause ? cause : trigger.TRIGGER_ANIMATION_CHANGED;
+                            var initialised = self.data.initialised ? self.data.initialised : false;
 
-                            if (observers && stateId && cause) {
+                            if (observers && stateId && cause && initialised) {
 
                                 // Collect values from observers
                                 bmsObserverService.checkObservers($scope.sessionId, $scope.id, observers, self.data.container.contents(), stateId, cause)
