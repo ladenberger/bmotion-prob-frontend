@@ -523,7 +523,7 @@ define(['bms.func', 'jquery', 'angular', 'qtip', 'prob.modal'], function (bms, $
         }])
         .service('refinement', ['ws', '$q', 'bmsVisualizationService', 'bmsObserverService', function (ws, $q, bmsVisualizationService, bmsObserverService) {
 
-            return {
+            var refinementObserver = {
                 getDefaultOptions: function (options) {
                     return $.extend({
                         refinements: [],
@@ -531,14 +531,12 @@ define(['bms.func', 'jquery', 'angular', 'qtip', 'prob.modal'], function (bms, $
                         disable: {}
                     }, options);
                 },
-                check: function (sessionId, visId, observer, container, stateId, trigger) {
+                apply: function (sessionId, visId, observer, container, options) {
 
                     var defer = $q.defer();
 
-                    //TODO: Check refinement observer only once!
-                    var vis = bmsVisualizationService.getVisualization(visId);
-                    var refinements = vis['refinements'];
                     var obj = {};
+                    var refinements = options.refinements;
 
                     if (refinements) {
 
@@ -567,11 +565,28 @@ define(['bms.func', 'jquery', 'angular', 'qtip', 'prob.modal'], function (bms, $
 
                     return defer.promise;
 
+                },
+                check: function (sessionId, visId, observer, container, stateId, trigger) {
+
+                    var defer = $q.defer();
+
+                    //TODO: Check refinement observer only once!
+                    var vis = bmsVisualizationService.getVisualization(visId);
+                    defer.resolve(refinementObserver.apply(sessionId, visId, observer, container, {
+                            refinements: vis['refinements']
+                        }
+                    ));
+
+                    return defer.promise;
+
                 }
-            }
+            };
+
+            return refinementObserver;
 
         }])
-        .service('predicate', ['ws', '$q', function (ws, $q) {
+        .
+        service('predicate', ['ws', '$q', function (ws, $q) {
 
             var predicateObserver = {
 
@@ -848,4 +863,5 @@ define(['bms.func', 'jquery', 'angular', 'qtip', 'prob.modal'], function (bms, $
 
         }]);
 
-});
+})
+;
