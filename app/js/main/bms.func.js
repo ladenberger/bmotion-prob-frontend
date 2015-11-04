@@ -66,6 +66,14 @@ define(['jquery'], function ($) {
         uuid: function () {
             return api._s4() + api._s4() + '-' + api._s4() + '-' + api._s4() + '-' +
                 api._s4() + '-' + api._s4() + api._s4() + api._s4();
+        },
+        callOrReturn: function (subject, element) {
+            if (Object.prototype.toString.call(subject) === '[object Object]') {
+                return subject;
+            } else if (api.isFunction(subject)) {
+                // TODO: Check if return value is a valid transformer object
+                return subject.call(this, element);
+            }
         }
     };
 

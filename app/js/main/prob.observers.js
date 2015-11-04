@@ -438,14 +438,13 @@ define(['bms.func', 'jquery', 'angular', 'qtip', 'prob.modal'], function (bms, $
             var bsetObserver = {
 
                 getDefaultOptions: function (options) {
-                    return bms.normalize($.extend({
+                    return $.extend({
                         expression: "",
                         convert: function (id) {
                             return "#" + id.value;
                         },
-                        transform: {},
-                        cause: "AnimationChanged"
-                    }, options), ["convert"]);
+                        transform: {}
+                    }, options);
                 },
                 getFormulas: function (observer) {
                     return [{
@@ -537,21 +536,22 @@ define(['bms.func', 'jquery', 'angular', 'qtip', 'prob.modal'], function (bms, $
 
                     var obj = {};
                     var vis = bmsVisualizationService.getVisualization(visId);
-                    var refinements = vis.refinements;
+                    var visRefinements = vis.refinements;
 
-                    if (refinements) {
+                    if (visRefinements) {
 
                         var el = container.find(observer.data.selector);
                         el.each(function (i, v) {
                             var rr;
                             var e = $(v);
-                            var normalized = bms.normalize(observer.data, [], e);
-                            var orefs = Object.prototype.toString.call(normalized['refinements']) !== '[object Array]' ? [normalized['refinements']] : normalized['refinements'];
-                            angular.forEach(orefs, function (v) {
-                                if ($.inArray(v, refinements) > -1) {
-                                    rr = normalized['enable'];
+                            var refs = bms.callOrReturn(observer.data["refinements"], e);
+                            var observerRefinements = Object.prototype.toString.call(refs) !== '[object Array]' ? [refs] : refs;
+                            // TODO: Maybe an intersection of both arrays (visRefinements and observerRefinements) would be more efficient.
+                            angular.forEach(observerRefinements, function (v) {
+                                if ($.inArray(v, visRefinements) > -1) {
+                                    rr = bms.callOrReturn(observer.data['enable'], e);
                                 } else {
-                                    rr = normalized['disable'];
+                                    rr = bms.callOrReturn(observer.data['disable'], e);
                                 }
                             });
                             if (rr) {
@@ -585,20 +585,13 @@ define(['bms.func', 'jquery', 'angular', 'qtip', 'prob.modal'], function (bms, $
         }]).
         service('predicate', ['ws', '$q', 'bmsObserverService', function (ws, $q, bmsObserverService) {
 
-            var helper = function (obj, element) {
-                if (Object.prototype.toString.call(obj) === '[object Object]') {
-                    return obj;
-                } else if (bms.isFunction(obj)) {
-                    obj.call(this, element);
-                    return {};
-                }
-            };
-
             var predicateObserver = {
 
                 getDefaultOptions: function (options) {
                     return $.extend({
                         predicate: "",
+                        true: {},
+                        false: {},
                         cause: "AnimationChanged"
                     }, options);
                 },
@@ -619,10 +612,11 @@ define(['bms.func', 'jquery', 'angular', 'qtip', 'prob.modal'], function (bms, $
                         element.each(function () {
                             var ele = $(this);
                             var returnValue;
+                            //var normalized = bms.normalize(observer.data, [], ele);
                             if (result[0] === "TRUE") {
-                                returnValue = helper(observer.data.true, ele);
+                                returnValue = bms.callOrReturn(observer.data.true);
                             } else if (result[0] === "FALSE") {
-                                returnValue = helper(observer.data.false, ele);
+                                returnValue = bms.callOrReturn(observer.data.false);
                             }
                             if (returnValue) {
                                 var bmsid = bmsObserverService.getBmsIdForElement(ele);
