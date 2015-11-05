@@ -161,10 +161,10 @@ define(['angular', 'jquery', 'socketio', 'angularAMD', 'bms.func', 'bms.common',
                                 bmsInitSessionService(manifestFilePath, manifestData)
                                     .then(function (sessionId) {
                                         var views = manifestData.views;
+                                        var filename = manifestFilePath.replace(/^.*[\\\/]/, '');
                                         if (views) {
                                             var aWindows = [];
                                             var mainWindow = electronWindow.fromId(1);
-                                            var filename = manifestFilePath.replace(/^.*[\\\/]/, '');
                                             // Open a new window for each view
                                             angular.forEach(views, function (view, i) {
                                                 if (i === 0) {
@@ -184,7 +184,7 @@ define(['angular', 'jquery', 'socketio', 'angularAMD', 'bms.func', 'bms.common',
                                             });
                                         } else {
                                             // Delegate to template view
-                                            $location.path('/root/' + sessionId + '/1');
+                                            $location.path('/root/' + sessionId + '/1/' + filename);
                                         }
                                         bmsModalService.endLoading();
                                     }, function (errors) {
