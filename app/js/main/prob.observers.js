@@ -106,9 +106,10 @@ define(['bms.func', 'jquery', 'angular', 'qtip', 'prob.modal'], function (bms, $
                         bmsModalService.setError(errors.join("<br/>"));
                     }
 
-                    $q.all(promises).then(function (res) {
-                        defer.resolve(res);
-                    });
+                    $q.all(promises)
+                        .then(function (res) {
+                            defer.resolve(res);
+                        });
 
                     return defer.promise;
 
@@ -315,12 +316,12 @@ define(['bms.func', 'jquery', 'angular', 'qtip', 'prob.modal'], function (bms, $
 
             var formulaObserver = {
                 getDefaultOptions: function (options) {
-                    return bms.normalize($.extend({
+                    return $.extend({
                         formulas: [],
                         cause: "AnimationChanged",
                         trigger: function () {
                         }
-                    }, options), ["trigger"]);
+                    }, options);
                 },
                 getFormulas: function (observer) {
                     return observer.data.formulas.map(function (f) {
@@ -354,7 +355,7 @@ define(['bms.func', 'jquery', 'angular', 'qtip', 'prob.modal'], function (bms, $
                                     // the string function to a real javascript function
                                     // TODO: We need to handle errors while converting the string function to a reals javascript function
                                     var func = new Function('origin', 'values', observer.data.trigger);
-                                    returnValue = func(ele, result)
+                                    returnValue = func(ele, result);
                                 }
                                 if (returnValue) {
                                     var bmsid = bmsObserverService.getBmsIdForElement(ele);
@@ -443,7 +444,8 @@ define(['bms.func', 'jquery', 'angular', 'qtip', 'prob.modal'], function (bms, $
                         convert: function (id) {
                             return "#" + id.value;
                         },
-                        transform: {}
+                        transform: {},
+                        cause: "AnimationChanged"
                     }, options);
                 },
                 getFormulas: function (observer) {
@@ -509,6 +511,8 @@ define(['bms.func', 'jquery', 'angular', 'qtip', 'prob.modal'], function (bms, $
                                 defer.resolve(d);
                             });
                         });
+                    } else {
+                        defer.resolve();
                     }
 
                     return defer.promise;
@@ -582,8 +586,8 @@ define(['bms.func', 'jquery', 'angular', 'qtip', 'prob.modal'], function (bms, $
 
             return refinementObserver;
 
-        }]).
-        service('predicate', ['ws', '$q', 'bmsObserverService', function (ws, $q, bmsObserverService) {
+        }])
+        .service('predicate', ['ws', '$q', 'bmsObserverService', function (ws, $q, bmsObserverService) {
 
             var predicateObserver = {
 
