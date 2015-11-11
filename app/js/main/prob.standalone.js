@@ -2,10 +2,10 @@
  * BMotion Studio for ProB Standalone Module
  *
  */
-define(['angular', 'jquery', 'socketio', 'angularAMD', 'bms.func', 'bms.common', 'bms.session', 'bms.manifest', 'bms.config', 'prob.graph', 'prob.iframe.template', 'prob.iframe.editor', 'prob.ui', 'prob.common', 'prob.modal', 'angular-route', 'prob.standalone.view', 'bms.electron', 'bms.nodejs', 'ng-electron'],
+define(['angular', 'jquery', 'socketio', 'angularAMD', 'bms.func', 'bms.common', 'bms.session', 'bms.manifest', 'bms.config', 'prob.graph', 'prob.iframe.template', 'prob.iframe.editor', 'prob.ui', 'prob.common', 'prob.modal', 'angular-route', 'prob.standalone.vis.view', 'prob.standalone.model.view', 'bms.electron', 'bms.nodejs', 'ng-electron'],
     function (angular, $, io, angularAMD, bms) {
 
-        var module = angular.module('prob.standalone', ['prob.standalone.view', 'bms.manifest', 'bms.config', 'bms.common', 'bms.session', 'prob.graph', 'prob.iframe.template', 'prob.iframe.editor', 'prob.ui', 'prob.common', 'prob.modal', 'bms.electron', 'bms.nodejs', 'ngRoute', 'ngElectron'])
+        var module = angular.module('prob.standalone', ['prob.standalone.vis.view', 'prob.standalone.model.view', 'bms.manifest', 'bms.config', 'bms.common', 'bms.session', 'prob.graph', 'prob.iframe.template', 'prob.iframe.editor', 'prob.ui', 'prob.common', 'prob.modal', 'bms.electron', 'bms.nodejs', 'ngRoute', 'ngElectron'])
             .config(['$routeProvider', '$locationProvider',
                 function ($routeProvider) {
                     $routeProvider
@@ -17,24 +17,28 @@ define(['angular', 'jquery', 'socketio', 'angularAMD', 'bms.func', 'bms.common',
                             templateUrl: 'resources/templates/bms-standalone-ui.html',
                             controller: 'bmsWelcomeController'
                         })
-                        .when('/root/:sessionId/:win/:view/:file', {
-                            templateUrl: 'resources/templates/bms-standalone-view.html',
+                        .when('/vis/root/:sessionId/:win/:view/:file', {
+                            templateUrl: 'resources/templates/bms-standalone-vis-view.html',
                             controller: 'bmsStandaloneRootViewCtrl'
                         })
-                        .when('/root/:sessionId/:win/:file', {
-                            templateUrl: 'resources/templates/bms-standalone-view.html',
+                        .when('/vis/root/:sessionId/:win/:file', {
+                            templateUrl: 'resources/templates/bms-standalone-vis-view.html',
                             controller: 'bmsStandaloneRootViewCtrl'
                         })
-                        .when('/:sessionId/:win/:view/:file', {
-                            templateUrl: 'resources/templates/bms-standalone-view.html',
+                        .when('/vis/:sessionId/:win/:view/:file', {
+                            templateUrl: 'resources/templates/bms-standalone-vis-view.html',
                             controller: 'bmsStandaloneViewCtrl'
+                        })
+                        .when('/model/:sessionId/:win/:tool', {
+                            templateUrl: 'resources/templates/bms-standalone-model-view.html',
+                            controller: 'bmsModelViewCtrl'
                         })
                         .otherwise({
                             redirectTo: '/startServer'
                         });
                 }])
-            .run(['$rootScope', 'bmsMainService', 'bmsConfigService', 'bmsModalService', 'initVisualizationService', 'createVisualizationService',
-                function ($rootScope, bmsMainService, bmsConfigService, bmsModalService, initVisualizationService, createVisualizationService) {
+            .run(['$rootScope', 'bmsMainService', 'bmsConfigService', 'bmsModalService', 'initVisualizationService', 'createVisualizationService', 'initFormalModelOnlyService',
+                function ($rootScope, bmsMainService, bmsConfigService, bmsModalService, initVisualizationService, createVisualizationService, initFormalModelOnlyService) {
 
                     bmsMainService.mode = 'ModeStandalone';
                     //editableOptions.theme = 'bs3'; // bootstrap3 theme. Can be also 'bs2', 'default'
@@ -43,6 +47,8 @@ define(['angular', 'jquery', 'socketio', 'angularAMD', 'bms.func', 'bms.common',
                     $rootScope.$on('electron-host', function (evt, data) {
                         if (data.type === 'startVisualisationViaFileMenu') {
                             initVisualizationService(data.data);
+                        } else if (data.type === 'startFormalModelOnlyViaFileMenu') {
+                            initFormalModelOnlyService(data.data);
                         } else if (data.type === 'openDialog') {
                             $rootScope.$apply(function () {
                                 $rootScope.$broadcast('openDialog_' + data.data);
@@ -145,8 +151,28 @@ define(['angular', 'jquery', 'socketio', 'angularAMD', 'bms.func', 'bms.common',
                     }
 
                 }])
-            .factory('initVisualizationService', ['$location', 'bmsInitSessionService', 'bmsManifestService', 'bmsMainService', 'bmsModalService', 'electronWindow', 'electronWindowService', 'electron',
-                function ($location, bmsInitSessionService, bmsManifestService, bmsMainService, bmsModalService, electronWindow, electronWindowService, electron) {
+            .factory('initFormalModelOnlyService', ['bmsSessionService', 'bmsModalService', '$location',
+                function (bmsSessionService, bmsModalService, $location) {
+
+                    return function (modelPath) {
+
+                        bmsModalService.loading("Initialising Formal Model ...");
+
+                        var filename = modelPath.replace(/^.*[\\\/]/, '');
+                        var fileExtension = filename.split('.').pop();
+                        var tool = fileExtension === 'csp' ? 'CSPAnimation' : 'BAnimation';
+
+                        bmsSessionService.initFormalModelOnlySession(modelPath, tool, {preferences: {}})
+                            .then(function (sessionId) {
+                                $location.path('/model/' + sessionId + '/1/' + tool);
+                                bmsModalService.endLoading();
+                            });
+
+                    }
+
+                }])
+            .factory('initVisualizationService', ['$location', '$routeParams', 'bmsSessionService', 'bmsManifestService', 'bmsMainService', 'bmsModalService', 'electronWindow', 'electronWindowService', 'electron',
+                function ($location, $routeParams, bmsSessionService, bmsManifestService, bmsMainService, bmsModalService, electronWindow, electronWindowService, electron) {
 
                     return function (manifestFilePath) {
 
@@ -158,10 +184,21 @@ define(['angular', 'jquery', 'socketio', 'angularAMD', 'bms.func', 'bms.common',
 
                         bmsManifestService.validate(manifestFilePath)
                             .then(function (manifestData) {
-                                bmsInitSessionService(manifestFilePath, manifestData)
+                                return bmsManifestService.normalize(manifestData);
+                            }, function (errors) {
+                                bmsModalService.openErrorDialog(errors);
+                            })
+                            .then(function (normalizedManifestData) {
+
+                                // Destroy current session in standalone mode (if exists)
+                                if($routeParams.sessionId) {
+                                    bmsSessionService.destroy($routeParams.sessionId);
+                                }
+
+                                bmsSessionService.InitVisualizationSession(normalizedManifestData['model'], normalizedManifestData['tool'], normalizedManifestData['prob'], manifestFilePath)
                                     .then(function (sessionId) {
-                                        var views = manifestData.views;
                                         var filename = manifestFilePath.replace(/^.*[\\\/]/, '');
+                                        var views = normalizedManifestData['views'];
                                         if (views) {
                                             var aWindows = [];
                                             var mainWindow = electronWindow.fromId(1);
@@ -169,11 +206,11 @@ define(['angular', 'jquery', 'socketio', 'angularAMD', 'bms.func', 'bms.common',
                                             angular.forEach(views, function (view, i) {
                                                 if (i === 0) {
                                                     // TODO: I assume that the main window has always the id "1"
-                                                    $location.path('/root/' + sessionId + '/1/' + view.id + '/' + filename);
+                                                    $location.path('/vis/root/' + sessionId + '/1/' + view.id + '/' + filename);
                                                     newWindow = mainWindow;
                                                 } else {
                                                     var newWindow = electronWindowService.createNewWindow();
-                                                    newWindow.loadUrl('file://' + __dirname + '/standalone.html#/' + sessionId + '/' + newWindow.id + '/' + view.id + '/' + filename);
+                                                    newWindow.loadUrl('file://' + __dirname + '/standalone.html#/vis/' + sessionId + '/' + newWindow.id + '/' + view.id + '/' + filename);
                                                     aWindows.push(newWindow.id);
                                                 }
                                                 if (view.width && view.height) newWindow.setSize(view.width, view.height);
@@ -184,14 +221,13 @@ define(['angular', 'jquery', 'socketio', 'angularAMD', 'bms.func', 'bms.common',
                                             });
                                         } else {
                                             // Delegate to template view
-                                            $location.path('/root/' + sessionId + '/1/' + filename);
+                                            $location.path('/vis/root/' + sessionId + '/1/' + filename);
                                         }
                                         bmsModalService.endLoading();
                                     }, function (errors) {
                                         bmsModalService.openErrorDialog(errors);
                                     });
-                            }, function (error) {
-                                bmsModalService.openErrorDialog(error);
+
                             });
 
                     }
@@ -355,7 +391,7 @@ define(['angular', 'jquery', 'socketio', 'angularAMD', 'bms.func', 'bms.common',
                         electronDialog.showOpenDialog(
                             {
                                 filters: [
-                                    {name: 'BMotion Studio File', extensions: ['json']}
+                                    {name: 'BMotion Studio Visualization', extensions: ['json']}
                                 ],
                                 properties: ['openFile']
                             },

@@ -4,7 +4,7 @@
  */
 define(['bms.electron', 'bms.visualization', 'ng-electron'], function () {
 
-    var module = angular.module('prob.standalone.view', ['bms.electron', 'bms.visualization', 'ngElectron'])
+    var module = angular.module('prob.standalone.vis.view', ['bms.electron', 'bms.visualization', 'ngElectron'])
         .controller('bmsVisualizationCtrl', ['$scope', '$location', '$routeParams',
             function ($scope, $location, $routeParams) {
                 var self = this;
@@ -20,7 +20,7 @@ define(['bms.electron', 'bms.visualization', 'ng-electron'], function () {
                     var win = electronWindow.fromId(winId);
                     win.setTitle(title);
                     electron.send({
-                        type: "buildProBMenu",
+                        type: "buildVisualizationMenu",
                         tool: visualization['manifest']['tool'],
                         addMenu: false,
                         win: winId
@@ -36,7 +36,7 @@ define(['bms.electron', 'bms.visualization', 'ng-electron'], function () {
                     var win = electronWindow.fromId(winId);
                     win.setTitle(title);
                     electron.send({
-                        type: "buildProBMenu",
+                        type: "buildVisualizationMenu",
                         tool: visualization['manifest']['tool'],
                         addMenu: true,
                         win: winId

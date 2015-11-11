@@ -5,8 +5,8 @@
 define(['angular', 'bms.func', 'jquery', 'prob.common', 'prob.observers', 'prob.modal'], function (angular, bms, $) {
 
     var module = angular.module('prob.iframe.template', ['prob.common', 'prob.observers', 'prob.modal'])
-        .directive('bmsVisualisationView', ['$rootScope', 'bmsVisualizationService', 'bmsObserverService', 'ws', '$injector', 'bmsModalService', 'trigger', '$compile', '$http', '$timeout', '$q',
-            function ($rootScope, bmsVisualizationService, bmsObserverService, ws, $injector, bmsModalService, trigger, $compile, $http, $timeout, $q) {
+        .directive('bmsVisualisationView', ['$rootScope', 'bmsVisualizationService', 'bmsObserverService', 'ws', '$injector', 'bmsModalService', 'trigger', '$compile', '$http', '$timeout', '$q', 'loadServerData',
+            function ($rootScope, bmsVisualizationService, bmsObserverService, ws, $injector, bmsModalService, trigger, $compile, $http, $timeout, $q, loadServerData) {
                 return {
                     replace: false,
                     scope: {
@@ -193,7 +193,6 @@ define(['angular', 'bms.func', 'jquery', 'prob.common', 'prob.observers', 'prob.
                         };
 
                         // --------------------------------------
-
                         ws.on('checkObserver', function (cause, s) {
                             self.data.stateId = s.stateId;
                             self.data.traceId = s.traceId;
@@ -207,6 +206,10 @@ define(['angular', 'bms.func', 'jquery', 'prob.common', 'prob.observers', 'prob.
                                 self.checkAllObservers(s.stateId, cause);
                                 self.triggerListeners(cause);
                             }
+                        });
+
+                        $scope.$on('$destroy', function () {
+                            ws.removeAllListeners("checkObserver");
                         });
 
                         $scope.reloadTemplate = function () {
@@ -261,19 +264,6 @@ define(['angular', 'bms.func', 'jquery', 'prob.common', 'prob.observers', 'prob.
                                     }
                                 }
                             }
-                        };
-
-                        var loadServerData = function (sessionId) {
-                            var defer = $q.defer();
-                            // Get data from server
-                            ws.emit('initView', {data: {id: sessionId}}, function (data) {
-                                if (data.errors) {
-                                    defer.reject(data.errors);
-                                } else {
-                                    defer.resolve(data);
-                                }
-                            });
-                            return defer.promise;
                         };
 
                         var loadManifestData = function (path) {

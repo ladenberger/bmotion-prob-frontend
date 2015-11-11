@@ -5,55 +5,56 @@
 define(['jquery', 'angular', 'jquery-ui', 'ui-bootstrap', 'bms.config'], function ($) {
 
     var module = angular.module('prob.ui', ['ui.bootstrap', 'bms.config'])
-        .controller('bmsUiNavigationCtrl', ['$scope', '$rootScope', 'bmsVisualizationService', function ($scope, $rootScope, bmsVisualizationService) {
+        .controller('bmsUiNavigationCtrl', ['$scope', '$rootScope', 'bmsVisualizationService',
+            function ($scope, $rootScope, bmsVisualizationService) {
 
-            var self = this;
+                var self = this;
 
-            // Navigation button actions ...
-            self.openDialog = function (type) {
-                $rootScope.$broadcast('openDialog_' + type);
-            };
+                // Navigation button actions ...
+                self.openDialog = function (type) {
+                    $rootScope.$broadcast('openDialog_' + type);
+                };
 
-            self.visualizationLoaded = function () {
-                return bmsVisualizationService.getCurrentVisualizationId() !== undefined;
-            };
+                self.visualizationLoaded = function () {
+                    return bmsVisualizationService.getCurrentVisualizationId() !== undefined;
+                };
 
-            self.isBAnimation = function () {
-                var vis = bmsVisualizationService.getCurrentVisualization();
-                //console.log(vis)
-                return vis && vis['manifest'] && vis['manifest']['tool'] === 'BAnimation';
-            };
+                self.isBAnimation = function () {
+                    var vis = bmsVisualizationService.getCurrentVisualization();
+                    //console.log(vis)
+                    return vis && vis['manifest'] && vis['manifest']['tool'] === 'BAnimation';
+                };
 
-            self.reloadVisualization = function () {
-                var id = bmsVisualizationService.getCurrentVisualizationId();
-                if (id) {
-                    document.getElementById(id).contentDocument.location.reload(true);
-                    $rootScope.$broadcast('reloadVisualisation', id);
+                self.reloadVisualization = function () {
+                    var id = bmsVisualizationService.getCurrentVisualizationId();
+                    if (id) {
+                        document.getElementById(id).contentDocument.location.reload(true);
+                        $rootScope.$broadcast('reloadVisualisation', id);
+                    }
+                };
+
+                self.editVisualization = function (svgid) {
+                    $rootScope.$broadcast('openEditorModal', bmsVisualizationService.getCurrentVisualizationId(), svgid);
+                };
+
+                self.openElementProjectionDiagram = function () {
+                    $rootScope.$broadcast('openElementProjectionModal');
+                };
+
+                self.openTraceDiagram = function () {
+                    $rootScope.$broadcast('openTraceDiagramModal');
+                };
+
+                self.hasSvg = function () {
+                    return self.getSvg() !== undefined;
+                };
+
+                self.getSvg = function () {
+                    var vis = bmsVisualizationService.getCurrentVisualization();
+                    if (vis) return vis.svg;
                 }
-            };
 
-            self.editVisualization = function (svgid) {
-                $rootScope.$broadcast('openEditorModal', bmsVisualizationService.getCurrentVisualizationId(), svgid);
-            };
-
-            self.openElementProjectionDiagram = function () {
-                $rootScope.$broadcast('openElementProjectionModal');
-            };
-
-            self.openTraceDiagram = function () {
-                $rootScope.$broadcast('openTraceDiagramModal');
-            };
-
-            self.hasSvg = function () {
-                return self.getSvg() !== undefined;
-            };
-
-            self.getSvg = function () {
-                var vis = bmsVisualizationService.getCurrentVisualization();
-                if (vis) return vis.svg;
-            }
-
-        }])
+            }])
         .directive('bmsDialog', ['bmsVisualizationService', '$timeout', function (bmsVisualizationService, $timeout) {
             return {
                 scope: {
@@ -149,20 +150,26 @@ define(['jquery', 'angular', 'jquery-ui', 'ui-bootstrap', 'bms.config'], functio
 
                     var d = $(element);
 
+                    $scope.$on('$destroy', function () {
+                        if (d.hasClass('ui-dialog-content')) {
+                            d.dialog("destroy");
+                        }
+                    });
+
                     $scope.$watch(function () {
                         return ctrl.state;
                     }, function (newVal) {
                         d.dialog(newVal);
                     });
 
-                    $(element).first().css("overflow", "hidden");
-                    $(element).dialog({
+                    d.first().css("overflow", "hidden");
+                    d.dialog({
                         resizeStop: function () {
-                            ctrl.fixSize($(element), 0, 0);
+                            ctrl.fixSize(d, 0, 0);
                             ctrl.propagateEvent('resizeStop');
                         },
                         open: function () {
-                            ctrl.fixSize($(element), 0, 0);
+                            ctrl.fixSize(d, 0, 0);
                             ctrl.propagateEvent('open');
                         },
                         close: function () {

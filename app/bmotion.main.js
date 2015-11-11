@@ -99,7 +99,7 @@ var buildFileMenu = function (mainMenu) {
                 {
                     title: 'Open BMotion Studio Visualization',
                     filters: [
-                        {name: 'BMotion Studio File', extensions: ['json']}
+                        {name: 'BMotion Studio Visualization', extensions: ['json']}
                     ],
                     properties: ['openFile']
                 },
@@ -130,6 +130,28 @@ var buildFileMenu = function (mainMenu) {
 
         }
     }));
+    fileMenu.append(new MenuItem({type: 'separator'}));
+    fileMenu.append(new MenuItem({
+        label: 'Open Formal Model',
+        click: function () {
+            Dialog.showOpenDialog(
+                {
+                    title: 'Please select a formal model.',
+                    filters: [
+                        {name: 'Formal Model (*.mch, *.csp, *.bcm, *.bcc)', extensions: ['mch', 'csp', 'bcm', 'bcc']}
+                    ],
+                    properties: ['openFile']
+                },
+                function (files) {
+                    if (files) {
+                        angular.send({
+                            type: 'startFormalModelOnlyViaFileMenu',
+                            data: files[0]
+                        }, mainWindow);
+                    }
+                });
+        }
+    }));
     mainMenu.append(new MenuItem({
         label: 'File',
         submenu: fileMenu,
@@ -138,9 +160,62 @@ var buildFileMenu = function (mainMenu) {
 
 };
 
-var buildProBMenu = function (mainMenu, tool, addMenu) {
+var buildDiagramMenu = function (mainMenu, tool) {
 
-    if (addMenu) buildFileMenu(mainMenu);
+    // Diagram menu
+    var diagramMenu = new Menu();
+    diagramMenu.append(new MenuItem({
+        label: 'Trace Diagram',
+        click: function () {
+            angular.send({
+                type: 'openTraceDiagramModal'
+            });
+        }
+    }));
+    diagramMenu.append(new MenuItem({
+        label: 'Element Projection Diagram',
+        click: function () {
+            angular.send({
+                type: 'openElementProjectionModal'
+            });
+        },
+        enabled: tool === 'BAnimation'
+    }));
+
+    mainMenu.append(new MenuItem({
+        label: 'Diagram',
+        submenu: diagramMenu
+    }));
+
+};
+
+var buildVisualizationMenu = function (mainMenu, tool, addFileHelpMenu) {
+
+    if (addFileHelpMenu) buildFileMenu(mainMenu);
+
+    buildProBMenu(mainMenu);
+
+    buildDiagramMenu(mainMenu, tool);
+
+    buildDebugMenu(mainMenu);
+
+    if (addFileHelpMenu) buildHelpMenu(mainMenu);
+
+};
+
+var buildModelMenu = function (mainMenu) {
+
+    buildFileMenu(mainMenu);
+
+    buildProBMenu(mainMenu);
+
+    buildDebugMenu(mainMenu);
+
+    buildHelpMenu(mainMenu);
+
+};
+
+var buildProBMenu = function (mainMenu) {
 
     // ProB Menu
     var probMenu = new Menu();
@@ -180,35 +255,6 @@ var buildProBMenu = function (mainMenu, tool, addMenu) {
         submenu: probMenu,
         visible: false
     }));
-
-    // Diagram menu
-    var diagramMenu = new Menu();
-    diagramMenu.append(new MenuItem({
-        label: 'Trace Diagram',
-        click: function () {
-            angular.send({
-                type: 'openTraceDiagramModal'
-            });
-        }
-    }));
-    diagramMenu.append(new MenuItem({
-        label: 'Element Projection Diagram',
-        click: function () {
-            angular.send({
-                type: 'openElementProjectionModal'
-            });
-        },
-        enabled: tool === 'BAnimation'
-    }));
-
-    mainMenu.append(new MenuItem({
-        label: 'Diagram',
-        submenu: diagramMenu
-    }));
-
-    buildDebugMenu(mainMenu);
-
-    if (addMenu) buildHelpMenu(mainMenu);
 
 };
 
@@ -259,6 +305,16 @@ app.on('ready', function () {
             var mainMenu = new Menu();
             var win = BrowserWindow.fromId(data['win']);
             buildProBMenu(mainMenu, data['tool'], data['addMenu']);
+            win.setMenu(mainMenu);
+        } else if (data.type === 'buildVisualizationMenu') {
+            var mainMenu = new Menu();
+            var win = BrowserWindow.fromId(data['win']);
+            buildVisualizationMenu(mainMenu, data['tool'], data['addMenu']);
+            win.setMenu(mainMenu);
+        } else if (data.type === 'buildModelMenu') {
+            var mainMenu = new Menu();
+            var win = BrowserWindow.fromId(data['win']);
+            buildModelMenu(mainMenu, data['tool'], data['addMenu']);
             win.setMenu(mainMenu);
         } else if (data.type === 'setWindows') {
             viewWindows = data.data;

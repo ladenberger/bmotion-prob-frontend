@@ -64,6 +64,11 @@ define(['socketio', 'angular', 'bms.config', 'prob.modal'], function (io) {
                                 });
                             });
                         });
+                    },
+                    removeAllListeners: function (evet) {
+                        bmsSocketService.socket().then(function (socket) {
+                            socket.removeAllListeners(evet);
+                        });
                     }
                 };
             }]);

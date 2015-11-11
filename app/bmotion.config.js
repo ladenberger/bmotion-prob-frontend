@@ -13,7 +13,8 @@ requirejs.config({
         "prob.online": "js/main/prob.online",
         "prob.integrated": "js/main/prob.integrated",
         "prob.standalone": "js/main/prob.standalone",
-        "prob.standalone.view": "js/main/prob.standalone.view",
+        "prob.standalone.vis.view": "js/main/prob.standalone.vis.view",
+        "prob.standalone.model.view": "js/main/prob.standalone.model.view",
 
         // Common modules
         "bms.common": "js/main/bms.common",
