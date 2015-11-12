@@ -40,17 +40,39 @@ var buildHelpMenu = function (mainMenu) {
     }));
     mainMenu.append(new MenuItem({
         label: 'Help',
+        role: 'help',
         submenu: helpMenu
     }));
 
 };
 
-var buildDebugMenu = function (mainMenu) {
+var buildViewMenu = function (mainMenu) {
 
     // Debug menu
-    var debugMenu = new Menu();
-    debugMenu.append(new MenuItem({
-        label: 'Toggle Developer',
+    var viewMenu = new Menu();
+    viewMenu.append(new MenuItem({
+        label: 'Reload',
+        accelerator: 'CmdOrCtrl+R',
+        click: function (item, focusedWindow) {
+            if (focusedWindow)
+                focusedWindow.reload();
+        }
+    }));
+    viewMenu.append(new MenuItem({
+        label: 'Toggle Full Screen',
+        accelerator: (function () {
+            if (process.platform == 'darwin')
+                return 'Ctrl+Command+F';
+            else
+                return 'F11';
+        })(),
+        click: function (item, focusedWindow) {
+            if (focusedWindow)
+                focusedWindow.setFullScreen(!focusedWindow.isFullScreen());
+        }
+    }));
+    viewMenu.append(new MenuItem({
+        label: 'Toggle Developer Tools',
         accelerator: (function () {
             if (process.platform == 'darwin')
                 return 'Alt+Command+I';
@@ -62,22 +84,9 @@ var buildDebugMenu = function (mainMenu) {
                 focusedWindow.toggleDevTools();
         }
     }));
-    debugMenu.append(new MenuItem({
-        label: 'Reload',
-        accelerator: (function () {
-            if (process.platform == 'darwin')
-                return 'F5';
-            else
-                return 'F5';
-        })(),
-        click: function (item, focusedWindow) {
-            if (focusedWindow)
-                focusedWindow.reload();
-        }
-    }));
     mainMenu.append(new MenuItem({
-        label: 'Debug',
-        submenu: debugMenu
+        label: 'View',
+        submenu: viewMenu
     }));
 
 };
@@ -90,9 +99,9 @@ var buildFileMenu = function (mainMenu) {
         label: 'Open Visualization',
         accelerator: (function () {
             if (process.platform == 'darwin')
-                return 'Alt+Command+O';
+                return 'Command+O';
             else
-                return 'Ctrl+Shift+O';
+                return 'Shift+O';
         })(),
         click: function () {
             Dialog.showOpenDialog(
@@ -126,9 +135,9 @@ var buildFileMenu = function (mainMenu) {
         label: 'New Visualization',
         accelerator: (function () {
             if (process.platform == 'darwin')
-                return 'Alt+Command+N';
+                return 'Command+N';
             else
-                return 'Ctrl+Shift+N';
+                return 'Shift+N';
         })(),
         click: function () {
 
@@ -200,27 +209,39 @@ var buildDiagramMenu = function (mainMenu, tool) {
 
 var buildVisualizationMenu = function (mainMenu, tool, addFileHelpMenu) {
 
+    if (process.platform == 'darwin') {
+        buildOsxMenu(mainMenu);
+    }
+
     if (addFileHelpMenu) buildFileMenu(mainMenu);
 
     buildProBMenu(mainMenu);
 
     buildDiagramMenu(mainMenu, tool);
 
-    buildDebugMenu(mainMenu);
+    buildViewMenu(mainMenu);
 
     if (addFileHelpMenu) buildHelpMenu(mainMenu);
+
+    buildWindowMenu(mainMenu);
 
 };
 
 var buildModelMenu = function (mainMenu) {
 
+    if (process.platform == 'darwin') {
+        buildOsxMenu(mainMenu);
+    }
+
     buildFileMenu(mainMenu);
 
     buildProBMenu(mainMenu);
 
-    buildDebugMenu(mainMenu);
+    buildViewMenu(mainMenu);
 
     buildHelpMenu(mainMenu);
+
+    buildWindowMenu(mainMenu);
 
 };
 
@@ -268,9 +289,99 @@ var buildProBMenu = function (mainMenu) {
 };
 
 var buildWelcomeMenu = function (mainMenu) {
+    if (process.platform == 'darwin') {
+        buildOsxMenu(mainMenu);
+    }
     buildFileMenu(mainMenu);
-    buildDebugMenu(mainMenu);
+    buildViewMenu(mainMenu);
     buildHelpMenu(mainMenu);
+    buildWindowMenu(mainMenu);
+};
+
+var buildOsxMenu = function (mainMenu) {
+
+    var name = require('app').getName();
+
+    // OSX Menu
+    var osxMenu = new Menu();
+    osxMenu.append(new MenuItem({
+        label: 'About ' + name,
+        role: 'about'
+    }));
+    osxMenu.append(new MenuItem({type: 'separator'}));
+    osxMenu.append(new MenuItem({
+        label: 'Services',
+        role: 'services',
+        submenu: []
+    }));
+    osxMenu.append(new MenuItem({type: 'separator'}));
+    osxMenu.append(new MenuItem({
+        label: 'Hide ' + name,
+        accelerator: 'Command+H',
+        role: 'hide'
+    }));
+    osxMenu.append(new MenuItem({
+        label: 'Hide Others',
+        accelerator: 'Command+Shift+H',
+        role: 'hideothers'
+    }));
+    osxMenu.append(new MenuItem({
+        label: 'Show All',
+        role: 'unhide'
+    }));
+    osxMenu.append(new MenuItem({type: 'separator'}));
+    osxMenu.append(new MenuItem({
+        label: 'Quit',
+        accelerator: 'Command+Q',
+        click: function (item, focusedWindow) {
+            if (focusedWindow)
+                focusedWindow.close();
+        }
+    }));
+
+    mainMenu.append(new MenuItem({
+        label: name,
+        submenu: osxMenu
+    }));
+
+};
+
+var buildWindowMenu = function (mainMenu) {
+
+    var windowMenu = new Menu();
+    windowMenu.append(new MenuItem({
+        label: 'Minimize',
+        accelerator: 'CmdOrCtrl+M',
+        role: 'minimize',
+        click: function (item, focusedWindow) {
+            if (focusedWindow)
+                focusedWindow.minimize();
+        }
+    }));
+    windowMenu.append(new MenuItem({
+        label: 'Close',
+        accelerator: 'CmdOrCtrl+W',
+        role: 'close',
+        click: function (item, focusedWindow) {
+            if (focusedWindow)
+                focusedWindow.close();
+        }
+    }));
+
+    if (process.platform == 'darwin') {
+        windowMenu.append(new MenuItem({type: 'separator'}));
+        windowMenu.append(new MenuItem({
+            label: 'Bring All to Front',
+            role: 'front'
+        }));
+    }
+
+    mainMenu.append(new MenuItem({
+        label: 'Window',
+        role: 'window',
+        submenu: windowMenu
+    }));
+
 };
 
 app.on('ready', function () {
@@ -301,8 +412,12 @@ app.on('ready', function () {
     });
 
     var mainMenu = new Menu();
-    buildDebugMenu(mainMenu);
+    if (process.platform == 'darwin') {
+        buildOsxMenu(mainMenu);
+    }
+    buildViewMenu(mainMenu);
     buildHelpMenu(mainMenu);
+    buildWindowMenu(mainMenu);
     mainWindow.setMenu(mainMenu);
 
     angular.listen(function (data) {
