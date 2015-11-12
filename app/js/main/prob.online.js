@@ -142,11 +142,14 @@ define(['angularAMD', 'angular', 'prob.graph', 'prob.iframe.template', 'prob.ui'
                             redirectTo: '/'
                         });
                 }])
-            .controller('bmsOnlineHomeCtrl', ['$scope', 'initVisualizationService', '$routeParams', 'bmsModalService',
-                function ($scope, initVisualizationService, $routeParams, bmsModalService) {
+            .controller('bmsOnlineHomeCtrl', ['$scope', 'initVisualizationService', '$routeParams', 'initModelService',
+                function ($scope, initVisualizationService, $routeParams, initModelService) {
                     var path = $routeParams['path'];
+                    var model = $routeParams['model'];
                     if (path) {
                         initVisualizationService(path);
+                    } else if (model) {
+                        initModelService(model);
                     }
                     else {
                         bmsModalService.setMessage("Please provide path to bmotion.json file.<br/>Append \"\?path=[relative path to bmotion.json file]\" to URL.");
