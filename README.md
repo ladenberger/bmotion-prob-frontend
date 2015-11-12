@@ -5,7 +5,7 @@
 
 ## Build
 
-Run the following command for building the standalone version of BMotion Studio for ProB, where xxx is the target platform:
+Run the following command for building BMotion Studio for ProB, where xxx is the target platform:
 
 ```
 gradle clean standalone_xxx
@@ -13,13 +13,13 @@ gradle clean standalone_xxx
 
 The following values are allowed for xxx: linux-x64, linux-ia32, darwin-x64, win32-ia32, win32-x64.
 
-Or just run the following command for building the standalone version for all platforms:
+Or just run the following command for building for all platforms:
 
 ```
 gradle clean standalone_all
 ```
 
-The build script will produce a zipped standalone version for all platforms. The zip files are located in the build/dist folder.
+The build script will produce a zip for all platforms. The zip files are located in the build/dist folder.
 
 ## No Gradle installed?
 
@@ -29,6 +29,6 @@ If you don't have gradle installed, you can use the gradlew script provided. For
 ./gradlew clean standalone_linux-x64
 ```
 
-to build the standalone version for linux x64.
+to build for linux x64.
 
 This should build the application without a gradle installation on your computer.
