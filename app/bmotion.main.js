@@ -384,6 +384,15 @@ var buildWindowMenu = function (mainMenu) {
 
 };
 
+var buildStandardMenu = function (mainMenu) {
+    if (process.platform == 'darwin') {
+        buildOsxMenu(mainMenu);
+    }
+    buildViewMenu(mainMenu);
+    buildHelpMenu(mainMenu);
+    buildWindowMenu(mainMenu);
+};
+
 app.on('ready', function () {
 
     var viewWindows;
@@ -412,34 +421,30 @@ app.on('ready', function () {
     });
 
     var mainMenu = new Menu();
-    if (process.platform == 'darwin') {
-        buildOsxMenu(mainMenu);
-    }
-    buildViewMenu(mainMenu);
-    buildHelpMenu(mainMenu);
-    buildWindowMenu(mainMenu);
+    buildStandardMenu(mainMenu);
     mainWindow.setMenu(mainMenu);
+    Menu.setApplicationMenu(mainMenu);
 
     angular.listen(function (data) {
         if (data.type === 'buildWelcomeMenu') {
             var mainMenu = new Menu();
             buildWelcomeMenu(mainMenu);
             mainWindow.setMenu(mainMenu);
-        } else if (data.type === 'buildProBMenu') {
-            var mainMenu = new Menu();
-            var win = BrowserWindow.fromId(data['win']);
-            buildProBMenu(mainMenu, data['tool'], data['addMenu']);
-            win.setMenu(mainMenu);
+            Menu.setApplicationMenu(mainMenu);
         } else if (data.type === 'buildVisualizationMenu') {
             var mainMenu = new Menu();
             var win = BrowserWindow.fromId(data['win']);
             buildVisualizationMenu(mainMenu, data['tool'], data['addMenu']);
             win.setMenu(mainMenu);
+            if (data['win'] === 1) {
+                Menu.setApplicationMenu(mainMenu);
+            }
         } else if (data.type === 'buildModelMenu') {
             var mainMenu = new Menu();
             var win = BrowserWindow.fromId(data['win']);
             buildModelMenu(mainMenu, data['tool'], data['addMenu']);
             win.setMenu(mainMenu);
+            Menu.setApplicationMenu(mainMenu);
         } else if (data.type === 'setWindows') {
             viewWindows = data.data;
         } else if (data.type === 'cleanUp') {
