@@ -25,7 +25,7 @@ def download_cspm(String target) {
     }
     def String url = "http://nightly.cobra.cs.uni-duesseldorf.de/cspmf/cspmf-" + downloadFile
     println "Downloading cspm for " + target + " ..."
-    def String dir = "build/resources/cli/" + target + "_cli/cli/lib/cspmf" + postfix
+    def String dir = "build/cli/" + target + "_cli/cli/lib/cspmf" + postfix
     download(url, dir)
     new File(dir).setExecutable(true)
     println " done."
@@ -33,7 +33,7 @@ def download_cspm(String target) {
 
 def download_cli(target, probVersion) {
     def downloadFile = target
-    def String dir = "build/resources/cli/" + target + "_cli/cli"
+    def String dir = "build/cli/" + target + "_cli/cli"
     def d = new File(dir)
     delete file(d)
     d.mkdirs();
@@ -107,8 +107,14 @@ targets.each() { target, cliTarget ->
         download_cspm(cliTarget)
     }
 
-    task "copyConfigFile_${target}"(dependsOn: ["grunt_standalone_${target}"], type: Copy) {
+    task "copyResources_${target}"(dependsOn: ["grunt_standalone_${target}", getLibs, "npmProductionDeps", "downloadCli_${target}"], type: Copy) {
+        from 'build/cli/' + cliTarget + '_cli'
         from 'bmotion.json'
+        from('build') {
+            include 'node_modules/**'
+            include 'libs/**'
+            include 'template/**'
+        }
         if (target == "darwin-x64") {
             into 'build/client/bmotion-prob-' + target + '/bmotion-prob.app/Contents/Resources'
         } else {
@@ -116,40 +122,19 @@ targets.each() { target, cliTarget ->
         }
     }
 
-    task "copyLibs_${target}"(dependsOn: ["grunt_standalone_${target}", getLibs], type: Copy) {
-        from 'build/libs'
+    task "copyCli_${target}"(dependsOn: ["grunt_standalone_${target}", "downloadCli_${target}"], type: Copy) {
+        from 'build/cli/' + cliTarget + '_cli'
         if (target == "darwin-x64") {
-            into 'build/client/bmotion-prob-' + target + '/bmotion-prob.app/Contents/Resources/libs'
+            into 'build/client/bmotion-prob-' + target + '/bmotion-prob.app/Contents/Resources'
         } else {
-            into 'build/client/bmotion-prob-' + target + '/resources/libs'
+            into 'build/client/bmotion-prob-' + target + '/resources'
         }
     }
 
-    task "copyNodeModules_${target}"(dependsOn: ["grunt_standalone_${target}", "npmProductionDeps"], type: Copy) {
-        from 'build/node_modules'
-        if (target == "darwin-x64") {
-            into 'build/client/bmotion-prob-' + target + '/bmotion-prob.app/Contents/Resources/node_modules'
-        } else {
-            into 'build/client/bmotion-prob-' + target + '/resources/node_modules'
-        }
-    }
-
-    task "copyTemplate_${target}"(dependsOn: ["grunt_standalone_${target}"], type: Copy) {
-        from 'build/template'
-        if (target == "darwin-x64") {
-            into 'build/client/bmotion-prob-' + target + '/bmotion-prob.app/Contents/Resources/template'
-        } else {
-            into 'build/client/bmotion-prob-' + target + '/resources/template'
-        }
-    }
-
-    task "zip_${target}"(dependsOn: ["copyLibs_${target}", "copyConfigFile_${target}", "copyNodeModules_${target}", "copyTemplate_${target}", "downloadCli_${target}"], type: Zip) {
+    task "zip_${target}"(dependsOn: ["copyResources_${target}"], type: Zip) {
         destinationDir = new File('build/dist/' + appVersion)
         archiveName = 'bmotion-prob-' + appVersion + '-' + target + '.zip'
         from('build/client/bmotion-prob-' + target) {
-            into "./bmotion-prob-" + appVersion
-        }
-        from('build/resources/cli/' + cliTarget + '_cli') {
             into "./bmotion-prob-" + appVersion
         }
     }

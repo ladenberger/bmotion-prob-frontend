@@ -99,14 +99,17 @@ var buildFileMenu = function (mainMenu) {
                 {
                     title: 'Open BMotion Studio Visualization',
                     filters: [
-                        {name: 'BMotion Studio Visualization', extensions: ['json']}
+                        {name: 'BMotion Studio Visualization', extensions: ['json']},
+                        {name: 'Formal Model (*.mch, *.csp, *.bcm, *.bcc)', extensions: ['mch', 'csp', 'bcm', 'bcc']}
                     ],
                     properties: ['openFile']
                 },
                 function (files) {
                     if (files) {
+                        var filename = files[0].replace(/^.*[\\\/]/, '');
+                        var fileExtension = filename.split('.').pop();
                         angular.send({
-                            type: 'startVisualisationViaFileMenu',
+                            type: fileExtension === 'json' ? 'startVisualisationViaFileMenu' : 'startFormalModelOnlyViaFileMenu',
                             data: files[0]
                         }, mainWindow);
                     }

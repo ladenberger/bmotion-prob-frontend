@@ -58,8 +58,7 @@ define(['jquery', 'angular', 'tv4', 'bms.common'], function ($, angular, tv4) {
                                                 "port": "19090"
                                             },
                                             prob: {
-                                                "host": "localhost",
-                                                "binary": './cli/'
+                                                "host": "localhost"
                                             }
                                         }, data, true);
                                         defer.resolve(config);

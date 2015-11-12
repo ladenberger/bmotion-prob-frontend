@@ -20,7 +20,7 @@ html, body {
     height: 100%;
     width: 100%;
     padding-bottom: 23px;
-    margin:0;
+    margin: 0;
 }
 
 .modal-vertical-centered {
@@ -65,7 +65,7 @@ html, body {
 }
 
 .modal-footer {
-    border-top:0;
+    border-top: 0;
 }
 
 .bms-editor .modal-header {
@@ -163,8 +163,17 @@ html, body {
     width: 500px;
     height: 375px;
     font-size: 20px;
-    padding-top: 300px;
+    padding-top: 290px;
     cursor: pointer;
+}
+
+.dropZone:hover {
+    border-radius: 15px;
+    border: 3px solid lightblue;
+}
+
+.dropZone p {
+    padding: 0 15px 0 15px;
 }
 
 .dragover {

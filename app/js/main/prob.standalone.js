@@ -191,7 +191,7 @@ define(['angular', 'jquery', 'socketio', 'angularAMD', 'bms.func', 'bms.common',
                             .then(function (normalizedManifestData) {
 
                                 // Destroy current session in standalone mode (if exists)
-                                if($routeParams.sessionId) {
+                                if ($routeParams.sessionId) {
                                     bmsSessionService.destroy($routeParams.sessionId);
                                 }
 
@@ -263,12 +263,16 @@ define(['angular', 'jquery', 'socketio', 'angularAMD', 'bms.func', 'bms.common',
 
                         if (!connected) {
 
-                            var probBinary = configData['prob']['binary'];
                             var exec = require('child_process').exec;
                             var path = require('path');
                             var appPath = path.dirname(__dirname);
                             var isWin = /^win/.test(process.platform);
                             var separator = isWin ? ';' : ':';
+                            var probBinary;
+                            if (configData['prob']['binary'] === undefined) {
+                                configData['prob']['binary'] = appPath + '/cli/';
+                                probBinary = appPath + '/cli/';
+                            }
                             var server = exec('java -Xmx1024m -cp ' + appPath + '/libs/*' + separator + appPath + '/libs/bmotion-prob-0.2.4-SNAPSHOT.jar -Dprob.home=' + probBinary + ' de.bms.prob.Standalone -standalone -local');
                             //electron.send(server.pid);
                             server.stdout.on('data', function (data) {
@@ -384,19 +388,35 @@ define(['angular', 'jquery', 'socketio', 'angularAMD', 'bms.func', 'bms.common',
                         type: "buildWelcomeMenu"
                     });
                 }])
-            .controller('bmsDropZoneCtrl', ['initVisualizationService', 'electronDialog',
-                function (initVisualizationService, electronDialog) {
+            .controller('bmsDropZoneCtrl', ['initVisualizationService', 'initFormalModelOnlyService', 'electronDialog',
+                function (initVisualizationService, initFormalModelOnlyService, electronDialog) {
                     var self = this;
                     self.openFileDialog = function () {
                         electronDialog.showOpenDialog(
                             {
                                 filters: [
-                                    {name: 'BMotion Studio Visualization', extensions: ['json']}
+                                    {
+                                        name: 'BMotion Studio Visualization',
+                                        extensions: ['json']
+                                    },
+                                    {
+                                        name: 'Formal Model (*.mch, *.csp, *.bcm, *.bcc)',
+                                        extensions: ['mch', 'csp', 'bcm', 'bcc']
+                                    }
                                 ],
                                 properties: ['openFile']
                             },
-                            function (manifestFilePath) {
-                                if (manifestFilePath) initVisualizationService(manifestFilePath[0]);
+                            function (files) {
+                                if (files) {
+                                    var file = files[0];
+                                    var filename = file.replace(/^.*[\\\/]/, '');
+                                    var fileExtension = filename.split('.').pop();
+                                    if (fileExtension === 'json') {
+                                        initVisualizationService(file);
+                                    } else {
+                                        initFormalModelOnlyService(file);
+                                    }
+                                }
                             });
                     };
                 }])
