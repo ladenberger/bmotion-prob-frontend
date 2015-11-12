@@ -396,7 +396,7 @@ define(['angular', 'jquery', 'socketio', 'angularAMD', 'bms.func', 'bms.common',
                             {
                                 filters: [
                                     {
-                                        name: 'BMotion Studio Visualization',
+                                        name: 'BMotion Studio Visualization (*.json)',
                                         extensions: ['json']
                                     },
                                     {

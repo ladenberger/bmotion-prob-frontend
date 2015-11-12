@@ -99,8 +99,14 @@ var buildFileMenu = function (mainMenu) {
                 {
                     title: 'Open BMotion Studio Visualization',
                     filters: [
-                        {name: 'BMotion Studio Visualization', extensions: ['json']},
-                        {name: 'Formal Model (*.mch, *.csp, *.bcm, *.bcc)', extensions: ['mch', 'csp', 'bcm', 'bcc']}
+                        {
+                            name: 'BMotion Studio Visualization (*.json)',
+                            extensions: ['json']
+                        },
+                        {
+                            name: 'Formal Model (*.mch, *.csp, *.bcm, *.bcc)',
+                            extensions: ['mch', 'csp', 'bcm', 'bcc']
+                        }
                     ],
                     properties: ['openFile']
                 },
