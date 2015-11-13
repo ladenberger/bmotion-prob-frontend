@@ -117,6 +117,30 @@ define(['angular', 'jquery', 'prob.modal'], function (angular, $) {
                         } else {
                             return vis['events'][list];
                         }
+                    },
+                    clearObservers: function (visId, list) {
+                        var vis = visualizationService.getVisualization(visId);
+                        if (vis && vis['observers'] && !list) {
+                            // If no list was passed, return all available observers
+                            vis['observers']['js'] = [];
+                            vis['observers']['json'] = [];
+                        } else {
+                            vis['observers'][list] = [];
+                        }
+                    },
+                    clearEvents: function (visId, list) {
+                        var vis = visualizationService.getVisualization(visId);
+                        if (vis && vis['events'] && !list) {
+                            // If no list was passed, return all available observers
+                            vis['events']['js'] = [];
+                            vis['events']['json'] = [];
+                        } else {
+                            vis['events'][list] = [];
+                        }
+                    },
+                    clearListeners: function (visId) {
+                        var vis = visualizationService.getVisualization(visId);
+                        vis['listener'] = [];
                     }
 
                 };

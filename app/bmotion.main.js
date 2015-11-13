@@ -208,41 +208,24 @@ var buildDiagramMenu = function (mainMenu, tool) {
 };
 
 var buildVisualizationMenu = function (mainMenu, tool, addFileHelpMenu) {
-
-    if (process.platform == 'darwin') {
-        buildOsxMenu(mainMenu);
-    }
-
+    if (process.platform == 'darwin') buildOsxMenu(mainMenu);
     if (addFileHelpMenu) buildFileMenu(mainMenu);
-
+    if (process.platform == 'darwin') buildEditMenu(mainMenu);
     buildProBMenu(mainMenu);
-
     buildDiagramMenu(mainMenu, tool);
-
     buildViewMenu(mainMenu);
-
     if (addFileHelpMenu) buildHelpMenu(mainMenu);
-
     buildWindowMenu(mainMenu);
-
 };
 
 var buildModelMenu = function (mainMenu) {
-
-    if (process.platform == 'darwin') {
-        buildOsxMenu(mainMenu);
-    }
-
+    if (process.platform == 'darwin') buildOsxMenu(mainMenu);
     buildFileMenu(mainMenu);
-
+    if (process.platform == 'darwin') buildEditMenu(mainMenu);
     buildProBMenu(mainMenu);
-
     buildViewMenu(mainMenu);
-
     buildHelpMenu(mainMenu);
-
     buildWindowMenu(mainMenu);
-
 };
 
 var buildProBMenu = function (mainMenu) {
@@ -289,10 +272,9 @@ var buildProBMenu = function (mainMenu) {
 };
 
 var buildWelcomeMenu = function (mainMenu) {
-    if (process.platform == 'darwin') {
-        buildOsxMenu(mainMenu);
-    }
+    if (process.platform == 'darwin') buildOsxMenu(mainMenu);
     buildFileMenu(mainMenu);
+    if (process.platform == 'darwin') buildEditMenu(mainMenu);
     buildViewMenu(mainMenu);
     buildHelpMenu(mainMenu);
     buildWindowMenu(mainMenu);
@@ -384,12 +366,53 @@ var buildWindowMenu = function (mainMenu) {
 };
 
 var buildStandardMenu = function (mainMenu) {
-    if (process.platform == 'darwin') {
-        buildOsxMenu(mainMenu);
-    }
+    if (process.platform == 'darwin') buildOsxMenu(mainMenu);
+    if (process.platform == 'darwin') buildEditMenu(mainMenu);
     buildViewMenu(mainMenu);
     buildHelpMenu(mainMenu);
     buildWindowMenu(mainMenu);
+};
+
+var buildEditMenu = function (mainMenu) {
+
+    var editMenu = new Menu();
+    editMenu.append(new MenuItem({
+        label: 'Undo',
+        accelerator: 'CmdOrCtrl+Z',
+        role: 'undo'
+    }));
+    editMenu.append(new MenuItem({
+        label: 'Redo',
+        accelerator: 'Shift+CmdOrCtrl+Z',
+        role: 'redo'
+    }));
+    editMenu.append(new MenuItem({type: 'separator'}));
+    editMenu.append(new MenuItem({
+        label: 'Cut',
+        accelerator: 'CmdOrCtrl+X',
+        role: 'cut'
+    }));
+    editMenu.append(new MenuItem({
+        label: 'Copy',
+        accelerator: 'CmdOrCtrl+C',
+        role: 'copy'
+    }));
+    editMenu.append(new MenuItem({
+        label: 'Paste',
+        accelerator: 'CmdOrCtrl+V',
+        role: 'paste'
+    }));
+    editMenu.append(new MenuItem({
+        label: 'Select All',
+        accelerator: 'CmdOrCtrl+A',
+        role: 'selectall'
+    }));
+
+    mainMenu.append(new MenuItem({
+        label: 'Edit',
+        submenu: editMenu
+    }));
+
 };
 
 app.on('ready', function () {
