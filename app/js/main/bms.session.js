@@ -95,8 +95,8 @@ define(['angular', 'bms.socket'], function (angular) {
                 }
 
             }])
-        .factory('bmsSessionService', ['$q', 'ws',
-            function ($q, ws) {
+        .factory('bmsSessionService', ['$q', 'ws', 'openModelService',
+            function ($q, ws, openModelService) {
 
                 var getModel = function (modelPath) {
 
