@@ -77,6 +77,7 @@ define(['prob.modal', 'bms.common', 'bms.nodejs', 'ng-electron'], function () {
 
                         var saveSvg = function (templateFolder, svg) {
                             var defer = $q.defer();
+                            svg = svg.replace(templateFolder + '/', "");
                             fs.writeFile(templateFolder + '/' + $scope.svg, svg,
                                 function (err) {
                                     if (err) {
