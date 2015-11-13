@@ -278,6 +278,7 @@ define(['angular', 'bms.func', 'jquery', 'prob.common', 'prob.observers', 'prob.
                             deferIframeLoaded.promise
                                 .then(function () {
                                     $scope.checkJsonObservers();
+                                    $scope.setupJsonEvents();
                                 });
                         });
 
