@@ -208,7 +208,6 @@ define(['angularAMD', 'code-mirror!javascript', 'angular', 'jquery.jgraduate', '
                 };
 
                 $scope.removeFormula = function (index) {
-                    electronDialogService.showErrorBox();
                     $scope.observer.data.formulas.splice(index, 1);
                 };
 

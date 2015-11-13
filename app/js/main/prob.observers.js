@@ -407,7 +407,7 @@ define(['bms.func', 'jquery', 'angular', 'qtip', 'prob.modal'], function (bms, $
                                 return formulaObserver.apply(sessionId, visId, o, container, {
                                     result: bms.mapFilter(o.data.formulas, function (f) {
                                         if (data[f]) {
-                                            return data[f].trans ? data[f].trans : data[f].result;
+                                            return data[f]['trans'] !== undefined ? data[f]['trans'] : data[f]['result'];
                                         }
                                     })
                                 });
