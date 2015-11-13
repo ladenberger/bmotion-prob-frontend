@@ -311,8 +311,7 @@ var buildOsxMenu = function (mainMenu) {
     osxMenu.append(new MenuItem({type: 'separator'}));
     osxMenu.append(new MenuItem({
         label: 'Services',
-        role: 'services',
-        submenu: []
+        role: 'services'
     }));
     osxMenu.append(new MenuItem({type: 'separator'}));
     osxMenu.append(new MenuItem({
@@ -422,29 +421,41 @@ app.on('ready', function () {
 
     var mainMenu = new Menu();
     buildStandardMenu(mainMenu);
-    mainWindow.setMenu(mainMenu);
-    Menu.setApplicationMenu(mainMenu);
+    if (process.platform == 'darwin') {
+        Menu.setApplicationMenu(mainMenu);
+    } else {
+        mainWindow.setMenu(mainMenu);
+    }
 
     angular.listen(function (data) {
         if (data.type === 'buildWelcomeMenu') {
             var mainMenu = new Menu();
             buildWelcomeMenu(mainMenu);
-            mainWindow.setMenu(mainMenu);
-            Menu.setApplicationMenu(mainMenu);
+            if (process.platform == 'darwin') {
+                Menu.setApplicationMenu(mainMenu);
+            } else {
+                mainWindow.setMenu(mainMenu);
+            }
         } else if (data.type === 'buildVisualizationMenu') {
             var mainMenu = new Menu();
             var win = BrowserWindow.fromId(data['win']);
             buildVisualizationMenu(mainMenu, data['tool'], data['addMenu']);
-            win.setMenu(mainMenu);
-            if (data['win'] === 1) {
+            if (process.platform == 'darwin' && data['win'] === 1) {
                 Menu.setApplicationMenu(mainMenu);
+            } else {
+                mainWindow.setMenu(mainMenu);
             }
+            win.setMenu(mainMenu);
+
         } else if (data.type === 'buildModelMenu') {
             var mainMenu = new Menu();
             var win = BrowserWindow.fromId(data['win']);
             buildModelMenu(mainMenu, data['tool'], data['addMenu']);
-            win.setMenu(mainMenu);
-            Menu.setApplicationMenu(mainMenu);
+            if (process.platform == 'darwin') {
+                Menu.setApplicationMenu(mainMenu);
+            } else {
+                mainWindow.setMenu(mainMenu);
+            }
         } else if (data.type === 'setWindows') {
             viewWindows = data.data;
         } else if (data.type === 'cleanUp') {
