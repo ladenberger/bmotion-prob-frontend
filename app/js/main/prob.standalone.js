@@ -171,8 +171,102 @@ define(['angular', 'jquery', 'socketio', 'angularAMD', 'bms.func', 'bms.common',
                     }
 
                 }])
-            .factory('initVisualizationService', ['$location', '$routeParams', 'bmsSessionService', 'bmsManifestService', 'bmsMainService', 'bmsModalService', 'electronWindow', 'electronWindowService', 'electron',
-                function ($location, $routeParams, bmsSessionService, bmsManifestService, bmsMainService, bmsModalService, electronWindow, electronWindowService, electron) {
+            .factory('openModelService', ['electronDialog', '$q', '$uibModal',
+                function (electronDialog, $q, $uibModal) {
+
+                    return function () {
+
+                        var defer = $q.defer();
+
+                        var modalInstance = $uibModal.open({
+                            templateUrl: 'resources/templates/bms-open-model.html',
+                            controller: function ($scope, $modalInstance) {
+
+                                $scope.openModel = function () {
+
+                                    electronDialog.showOpenDialog(
+                                        {
+                                            title: 'Please select a model.',
+                                            filters: [
+                                                {name: 'Model (*.mch, *.csp, *.bcm)', extensions: ['mch', 'csp', 'bcm']}
+                                            ],
+                                            properties: ['openFile']
+                                        },
+                                        function (files) {
+
+                                            if (files) {
+
+                                                var modelPath = files[0];
+                                                $scope.$apply(function () {
+                                                    $scope.model = modelPath;
+                                                });
+
+                                            }
+
+                                        }
+                                    );
+
+                                };
+
+                                $scope.close = function () {
+                                    $scope.$broadcast('show-errors-check-validity');
+
+                                    if ($scope.userForm.$valid) {
+                                        // TODO: RETURN DATA
+                                        $modalInstance.close($scope.model);
+                                    }
+                                };
+
+                                $scope.ok = function () {
+
+                                    $scope.close();
+                                };
+
+                                $scope.cancel = function () {
+                                    $modalInstance.dismiss('cancel');
+                                };
+
+                            },
+                            resolve: {},
+                            backdrop: false
+                        });
+                        modalInstance.result.then(function (model) {
+                            defer.resolve(model);
+                        }, function () {
+                            defer.reject();
+                        });
+
+                        return defer.promise;
+
+                    }
+
+                }])
+            .factory('initVisualizationService', ['$q', '$location', '$routeParams', 'bmsSessionService', 'bmsManifestService', 'bmsMainService', 'bmsModalService', 'electronWindow', 'electronWindowService', 'electron',
+                function ($q, $location, $routeParams, bmsSessionService, bmsManifestService, bmsMainService, bmsModalService, electronWindow, electronWindowService, electron) {
+
+                    var getModel = function (modelPath) {
+                        var defer = $q.defer();
+                        if (!modelPath) {
+                            defer.resolve(openModelService());
+                        } else {
+                            defer.resolve(modelPath);
+                        }
+                        return defer.promise;
+                    };
+
+                    var initVisualizationSession = function (modelPath, tool, options, manifestFilePath) {
+                        var defer = $q.defer();
+                        getModel(modelPath)
+                            .then(function (finalModelPath) {
+                                bmsSessionService.initSession(finalModelPath, tool, options, manifestFilePath)
+                                    .then(function (data) {
+                                        defer.resolve(data);
+                                    }, function (errors) {
+                                        defer.reject(errors)
+                                    });
+                            });
+                        return defer.promise;
+                    };
 
                     return function (manifestFilePath) {
 
@@ -195,7 +289,7 @@ define(['angular', 'jquery', 'socketio', 'angularAMD', 'bms.func', 'bms.common',
                                     bmsSessionService.destroy($routeParams.sessionId);
                                 }
 
-                                bmsSessionService.InitVisualizationSession(normalizedManifestData['model'], normalizedManifestData['tool'], normalizedManifestData['prob'], manifestFilePath)
+                                initVisualizationSession(normalizedManifestData['model'], normalizedManifestData['tool'], normalizedManifestData['prob'], manifestFilePath)
                                     .then(function (sessionId) {
                                         var filename = manifestFilePath.replace(/^.*[\\\/]/, '');
                                         var views = normalizedManifestData['views'];

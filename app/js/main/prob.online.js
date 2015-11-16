@@ -151,9 +151,9 @@ define(['angularAMD', 'angular', 'prob.graph', 'prob.iframe.template', 'prob.ui'
                     } else if (model) {
                         initModelService(model);
                     }
-                    else {
-                        bmsModalService.setMessage("Please provide path to bmotion.json file.<br/>Append \"\?path=[relative path to bmotion.json file]\" to URL.");
-                    }
+                    //else {
+                    //    bmsModalService.openErrorDialog("Please provide path to bmotion.json file.<br/>Append \"\?path=[relative path to bmotion.json file]\" to URL.");
+                    //}
                 }])
             .controller('bmsOnlineVisualizationCtrl', ['$scope',
                 function ($scope) {
@@ -220,8 +220,19 @@ define(['angularAMD', 'angular', 'prob.graph', 'prob.iframe.template', 'prob.ui'
                         }
                     }
                 }])
-            .factory('initVisualizationService', ['$location', 'bmsSessionService', 'bmsManifestService', 'bmsMainService', 'bmsModalService',
-                function ($location, bmsSessionService, bmsManifestService, bmsMainService, bmsModalService) {
+            .factory('initVisualizationService', ['$q', '$location', 'bmsSessionService', 'bmsManifestService', 'bmsMainService', 'bmsModalService',
+                function ($q, $location, bmsSessionService, bmsManifestService, bmsMainService, bmsModalService) {
+
+                    var initVisualizationSession = function (modelPath, tool, options, manifestFilePath) {
+                        var defer = $q.defer();
+                        bmsSessionService.initSession(modelPath, tool, options, manifestFilePath)
+                            .then(function (data) {
+                                defer.resolve(data);
+                            }, function (errors) {
+                                defer.reject(errors)
+                            });
+                        return defer.promise;
+                    };
 
                     return function (manifestFilePath) {
 
@@ -235,7 +246,7 @@ define(['angularAMD', 'angular', 'prob.graph', 'prob.iframe.template', 'prob.ui'
                             })
                             .then(function (normalizedManifestData) {
 
-                                bmsSessionService.InitVisualizationSession(normalizedManifestData['model'], normalizedManifestData['tool'], normalizedManifestData['prob'], manifestFilePath)
+                                initVisualizationSession(normalizedManifestData['model'], normalizedManifestData['tool'], normalizedManifestData['prob'], manifestFilePath)
                                     .then(function (sessionId) {
                                         // TODO: Handle multiple views in online mode!
                                         var views = normalizedManifestData['views'];
@@ -246,6 +257,7 @@ define(['angularAMD', 'angular', 'prob.graph', 'prob.iframe.template', 'prob.ui'
                                     }, function (errors) {
                                         bmsModalService.openErrorDialog(errors);
                                     });
+
                             });
 
                     }
