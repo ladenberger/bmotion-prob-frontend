@@ -121,7 +121,7 @@ define(['angular', 'bms.func', 'jquery', 'prob.common', 'prob.observers', 'prob.
                             });
                         };
 
-                        self.setupEvent = function (evt) {
+                        $scope.setupEvent = function (evt) {
                             try {
                                 var instance = $injector.get(evt.type, "");
                                 instance.setup($scope.sessionId, $scope.id, evt, self.data.container.contents(), self.data.traceId);

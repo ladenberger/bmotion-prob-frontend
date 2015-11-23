@@ -245,7 +245,7 @@ define(['jquery', 'bms.visualization', 'prob.observers'], function ($) {
                             if (observerInstance) {
                                 if (typeof observerInstance.getFormulas === "function") {
                                     var result = observerInstance.getFormulas(o).map(function (f) {
-                                        return f.translate ? results[f.formula].trans : results[f.formula].result;
+                                        return f.translate ? results[f.formula]['trans'] : results[f.formula]['result'];
                                     });
                                     promises.push(observerInstance.apply(sessionId, visualizationId, o, element, {
                                             result: result
@@ -319,7 +319,8 @@ define(['jquery', 'bms.visualization', 'prob.observers'], function ($) {
                                     /*if (css !== undefined) {
                                      svgWrapper.prepend(css);
                                      }*/
-                                    defer.resolve($('<div>').html(convertedElement).html());
+                                    var wrapper = $('<div>').html(convertedElement);
+                                    defer.resolve(wrapper.html());
                                 });
                         }, 0);
 
