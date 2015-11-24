@@ -262,6 +262,12 @@ var buildProBMenu = function (mainMenu) {
             openDialog('ModelCheckingUI');
         }
     }));
+    probMenu.append(new MenuItem({
+        label: 'Console',
+        click: function () {
+            openDialog('BConsole');
+        }
+    }));
 
     mainMenu.append(new MenuItem({
         label: 'ProB',

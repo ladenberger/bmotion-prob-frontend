@@ -367,7 +367,7 @@ define(['angular', 'jquery', 'socketio', 'angularAMD', 'bms.func', 'bms.common',
                                 configData['prob']['binary'] = appPath + '/cli/';
                                 probBinary = appPath + '/cli/';
                             }
-                            var server = exec('java -Xmx1024m -cp ' + appPath + '/libs/*' + separator + appPath + '/libs/bmotion-prob-0.2.4-SNAPSHOT.jar -Dprob.home=' + probBinary + ' de.bms.prob.Standalone -standalone -local');
+                            var server = exec('java -Xmx1024m -cp ' + appPath + '/libs/*' + separator + appPath + '/libs/bmotion-prob-0.2.5-SNAPSHOT.jar -Dprob.home=' + probBinary + ' de.bms.prob.Standalone -standalone -local');
                             //electron.send(server.pid);
                             server.stdout.on('data', function (data) {
                                 try {
