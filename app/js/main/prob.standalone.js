@@ -241,8 +241,8 @@ define(['angular', 'jquery', 'socketio', 'angularAMD', 'bms.func', 'bms.common',
                     }
 
                 }])
-            .factory('initVisualizationService', ['$q', '$location', '$routeParams', 'bmsSessionService', 'bmsManifestService', 'bmsMainService', 'bmsModalService', 'electronWindow', 'electronWindowService', 'electron',
-                function ($q, $location, $routeParams, bmsSessionService, bmsManifestService, bmsMainService, bmsModalService, electronWindow, electronWindowService, electron) {
+            .factory('initVisualizationService', ['$q', '$location', '$routeParams', 'bmsSessionService', 'bmsManifestService', 'bmsMainService', 'bmsModalService', 'electronWindow', 'electronWindowService', 'electron', 'openModelService',
+                function ($q, $location, $routeParams, bmsSessionService, bmsManifestService, bmsMainService, bmsModalService, electronWindow, electronWindowService, electron, openModelService) {
 
                     var getModel = function (modelPath) {
                         var defer = $q.defer();
