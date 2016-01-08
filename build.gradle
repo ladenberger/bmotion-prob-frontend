@@ -23,7 +23,7 @@ def download_cspm(String target) {
         downloadFile = "windows"
         postfix = ".exe"
     }
-    def String url = "http://www3.hhu.de/stups/downloads/cspmf/cspmf-" + downloadFile
+    def String url = "http://www3.hhu.de/stups/downloads/cspmf/cspmf-" + downloadFile + postfix
     println "Downloading cspm for " + target + " ..."
     def String dir = "build/cli/" + target + "_cli/cli/lib/cspmf" + postfix
     download(url, dir)
@@ -164,4 +164,3 @@ class GruntTask extends Exec {
         this.args = "$switches $gruntArgs".trim().split(" ") as List
     }
 }
-
