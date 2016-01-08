@@ -438,24 +438,29 @@ define(['angular', 'jquery', 'bms.visualization', 'prob.observers'], function(an
             }
           }, function(data) {
 
-            var promises = [];
+            var errors = data['errors'];
 
-            // Get HTML data
-            angular.forEach(data.nodes, function(node) {
-              if (diagramCond(node)) {
-                promises.push(getElementSnapshotAsDataUrl(sessionId, visualizationId, elementObservers, node, vis.templateFolder));
-              } else {
-                promises.push(getEmptySnapshotDataUrl());
-              }
-            });
-            $q.all(promises).then(function(screens) {
-              angular.forEach(data.nodes, function(n, i) {
-                n.data.svg = screens[i].dataUrl;
-                n.data.height = screens[i].height + 30;
-                n.data.width = screens[i].width + 30;
+            if (errors && errors.length > 0) {
+              defer.reject(errors);
+            } else {
+              var promises = [];
+              // Get HTML data
+              angular.forEach(data.nodes, function(node) {
+                if (diagramCond(node)) {
+                  promises.push(getElementSnapshotAsDataUrl(sessionId, visualizationId, elementObservers, node, vis.templateFolder));
+                } else {
+                  promises.push(getEmptySnapshotDataUrl());
+                }
               });
-              defer.resolve(data);
-            });
+              $q.all(promises).then(function(screens) {
+                angular.forEach(data.nodes, function(n, i) {
+                  n.data.svg = screens[i].dataUrl;
+                  n.data.height = screens[i].height + 30;
+                  n.data.width = screens[i].width + 30;
+                });
+                defer.resolve(data);
+              });
+            }
 
           });
 
@@ -469,7 +474,7 @@ define(['angular', 'jquery', 'bms.visualization', 'prob.observers'], function(an
 
         getTraceDiagramData: function(selector) {
           return getDiagramData(bmsVisualizationService.getCurrentVisualizationId(), selector, 'createTraceDiagram', function(node) {
-            return node.data.id !== 'root' && node.data.id !== '0';
+            return node.data.id !== 'root' && node.data.id !== '0' && node.data.op !== '$setup_constants';
           });
         },
         getProjectionDiagramData: function(selector) {
