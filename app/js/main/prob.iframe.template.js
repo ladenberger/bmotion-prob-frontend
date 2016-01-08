@@ -2,456 +2,492 @@
  * BMotion Studio for ProB IFrame Module
  *
  */
-define(['angular', 'bms.func', 'jquery', 'prob.common', 'prob.observers', 'prob.modal'], function (angular, bms, $) {
+define(['angular', 'bms.func', 'jquery', 'prob.observers', 'prob.modal'], function(angular, bms, $) {
 
-    var module = angular.module('prob.iframe.template', ['prob.common', 'prob.observers', 'prob.modal'])
-        .directive('bmsVisualisationView', ['$rootScope', 'bmsVisualizationService', 'bmsObserverService', 'ws', '$injector', 'bmsModalService', 'trigger', '$compile', '$http', '$timeout', '$q', 'loadServerData',
-            function ($rootScope, bmsVisualizationService, bmsObserverService, ws, $injector, bmsModalService, trigger, $compile, $http, $timeout, $q, loadServerData) {
-                return {
-                    replace: false,
-                    scope: {
-                        view: '@bmsVisualisationView',
-                        sessionId: '@bmsVisualisationSession'
-                    },
-                    template: '<iframe src="" frameBorder="0" class="fullWidthHeight bmsIframe"></iframe>',
-                    controller: ['$scope', function ($scope) {
+  var module = angular.module('prob.iframe.template', ['prob.observers', 'prob.modal'])
+    .directive('bmsVisualisationView', ['$rootScope', 'bmsSessionService', 'bmsVisualizationService', 'bmsObserverService', 'ws', '$injector', 'bmsModalService', 'trigger', '$compile', '$http', '$timeout', '$q',
+      function($rootScope, bmsSessionService, bmsVisualizationService, bmsObserverService, ws, $injector, bmsModalService, trigger, $compile, $http, $timeout, $q) {
+        return {
+          replace: false,
+          scope: {
+            view: '@bmsVisualisationView',
+            sessionId: '@bmsVisualisationSession'
+          },
+          template: '<iframe src="" frameBorder="0" class="fullWidthHeight bmsIframe"></iframe>',
+          controller: ['$scope', function($scope) {
 
-                        var self = this;
+              var self = this;
 
-                        var shouldAdd = function (type, data) {
-                            var shouldAdd = true;
-                            if (data.refinement) {
-                                if ($.inArray(data.refinement, self.data.refinements) == -1) {
-                                    shouldAdd = false;
-                                }
-                            }
-                            return shouldAdd;
-                        };
-
-                        self.attrs = {};
-
-                        $scope.id = bms.uuid();
-                        $scope.values = {};
-
-                        bmsVisualizationService.setCurrentVisualizationId($scope.id);
-                        self.data = bmsVisualizationService.getVisualization($scope.id);
-
-                        $scope.checkObserver = function (observer, stateId, cause) {
-                            stateId = stateId ? stateId : self.data.stateId;
-                            cause = cause ? cause : trigger.TRIGGER_ANIMATION_CHANGED;
-                            if (observer && stateId && cause) {
-                                bmsObserverService.checkObserver($scope.sessionId, $scope.id, observer, self.data.container.contents(), stateId, cause)
-                                    .then(function (data) {
-                                        if (!bms.isEmpty(data)) {
-                                            $scope.values = $.extend(true, $scope.values, data);
-                                            $scope.applyValues();
-                                        }
-                                    });
-                            }
-                        };
-
-                        $scope.checkJsonObservers = function (stateId, cause) {
-                            return $scope.checkObservers(stateId, cause, 'json');
-                        };
-
-                        $scope.checkJsObservers = function (stateId, cause) {
-                            return $scope.checkObservers(stateId, cause, 'js');
-                        };
-
-                        $scope.checkAllObservers = function (stateId, cause) {
-                            return $scope.checkObservers(stateId, cause);
-                        };
-
-                        $scope.checkObservers = function (stateId, cause, list) {
-
-                            var defer = $q.defer();
-
-                            var observers = bmsVisualizationService.getObservers($scope.id, list);
-
-                            var stateId = stateId ? stateId : self.data.stateId;
-                            var cause = cause ? cause : trigger.TRIGGER_ANIMATION_CHANGED;
-                            var initialised = self.data.initialised ? self.data.initialised : false;
-
-                            if (observers && stateId && cause && initialised) {
-
-                                // Collect values from observers
-                                bmsObserverService.checkObservers($scope.sessionId, $scope.id, observers, self.data.container.contents(), stateId, cause)
-                                    .then(function (data) {
-                                        var fvalues = {};
-                                        angular.forEach(data, function (value) {
-                                            if (value !== undefined) {
-                                                $.extend(true, fvalues, value);
-                                            }
-                                        });
-                                        if (!bms.isEmpty(fvalues)) {
-                                            $scope.values = fvalues;
-                                            $scope.applyValues();
-                                        }
-                                        defer.resolve();
-                                    });
-
-                            }
-
-                            return defer.promise;
-
-                        };
-
-                        $scope.triggerListeners = function (cause) {
-                            var vis = bmsVisualizationService.getVisualization($scope.id);
-                            if (vis.listener) {
-                                angular.forEach(vis.listener[cause], function (l) {
-                                    if (!l.executed) {
-                                        l.callback();
-                                        // Init listener should be called only once
-                                        if (cause === "ModelInitialised") l.executed = true;
-                                    }
-                                });
-                            }
-                        };
-
-                        $scope.setupEvents = function () {
-                            angular.forEach(bmsVisualizationService.getEvents($scope.id), function (evt) {
-                                $scope.setupEvent(evt);
-                            });
-                        };
-
-                        $scope.setupJsonEvents = function () {
-                            angular.forEach(bmsVisualizationService.getJsonEvents($scope.id), function (evt) {
-                                $scope.setupEvent(evt);
-                            });
-                        };
-
-                        $scope.setupEvent = function (evt) {
-                            try {
-                                var instance = $injector.get(evt.type, "");
-                                instance.setup($scope.sessionId, $scope.id, evt, self.data.container.contents(), self.data.traceId);
-                            } catch (err) {
-                                bmsModalService.setError("No event with type '" + evt.type + "' exists! (Selector: " + evt.data.selector + ")");
-                            }
-                        };
-
-                        // --------------------------------------
-                        // Parent API (called from prob.template)
-                        // --------------------------------------
-                        $scope.addObserver = function (type, data, list) {
-                            if (shouldAdd(type, data)) {
-                                var observer = {
-                                    type: type,
-                                    data: data
-                                };
-                                // Add observer ..
-                                bmsVisualizationService.addObserver($scope.id, observer, list);
-                                // ... and trigger observer
-                                if (self.data.stateId !== 'root' && self.data.initialised) {
-                                    $scope.checkObserver(observer, self.data.stateId, data.cause);
-                                }
-                            }
-                        };
-
-                        $scope.addEvent = function (type, data, list) {
-                            if (shouldAdd(type, data)) {
-                                var event = {
-                                    type: type,
-                                    data: data
-                                };
-                                // Add event ...
-                                bmsVisualizationService.addEvent($scope.id, event, list);
-                                // ... and setup event
-                                var instance = $injector.get(type, "");
-                                if (instance) {
-                                    instance.setup($scope.sessionId, $scope.id, event, self.data.container.contents(), self.data.traceId);
-                                }
-                            }
-                        };
-
-                        $scope.eval = function (options) {
-
-                            var options = bms.normalize($.extend({
-                                formulas: [],
-                                translate: false,
-                                trigger: function () {
-                                }
-                            }, options), ["trigger"]);
-
-                            ws.emit('evaluateFormulas', {
-                                    data: {
-                                        id: $scope.sessionId,
-                                        formulas: options.formulas.map(function (f) {
-                                            return {
-                                                formula: f,
-                                                translate: options.translate
-                                            }
-                                        })
-                                    }
-                                }, function (r) {
-                                    options.trigger(bms.mapFilter(options.formulas, function (f) {
-                                        return r[f].trans !== undefined ? r[f].trans : r[f].result;
-                                    }));
-                                }
-                            );
-
-                        };
-
-                        $scope.on = function (what, callback) {
-                            var listener = bmsVisualizationService.addListener($scope.id, what, callback);
-                            if (what === "ModelInitialised" && self.data.initialised) {
-                                // Init listener should be called only once
-                                listener.callback();
-                                listener.executed = true;
-                            }
-                        };
-                        // --------------------------------------
-
-                        ws.on('checkObserver', function (cause, s) {
-                            self.data.stateId = s.stateId;
-                            self.data.traceId = s.traceId;
-                            if (cause === trigger.TRIGGER_MODEL_INITIALISED) {
-                                self.data.initialised = true;
-                            }
-                            if (cause === trigger.TRIGGER_MODEL_SETUP_CONSTANTS) {
-                                self.data.setupConstants = true;
-                            }
-                            if (self.data.traceId == s.traceId) {
-                                $scope.checkAllObservers(s.stateId, cause);
-                                $scope.triggerListeners(cause);
-                            }
-                        });
-
-                        $scope.$on('$destroy', function () {
-                            ws.removeAllListeners("checkObserver");
-                        });
-
-                        $scope.reloadTemplate = function () {
-                            bmsObserverService.clearBmsIdCache($scope.id);
-                            self.attrs = {};
-                            $scope.checkObservers();
-                            $scope.setupEvents();
-                        };
-
-                    }],
-                    link: function ($scope, $element, attrs, ctrl) {
-
-                        var iframe = $($element.contents());
-                        var iframeContents;
-                        ctrl.data['container'] = iframe;
-                        var deferIframeLoaded;
-
-                        $scope.getValue = function (bmsid, attr, defaultValue) {
-                            var returnValue = defaultValue === 'undefined' ? undefined : defaultValue;
-                            var ele = $scope.values[bmsid];
-                            if (ele) {
-                                returnValue = ele[attr] === undefined ? returnValue : ele[attr];
-                            }
-                            return returnValue;
-                        };
-
-                        $scope.applyValues = function () {
-
-                            for (bmsid in $scope.values) {
-                                if (ctrl.attrs[bmsid] === undefined) {
-                                    ctrl.attrs[bmsid] = [];
-                                }
-                                var nattrs = $scope.values[bmsid];
-                                for (var a in nattrs) {
-                                    if (ctrl.attrs[bmsid].indexOf(a) === -1) {
-                                        var orgElement = iframeContents.find('[data-bms-id=' + bmsid + ']');
-                                        var attrDefault = orgElement.attr(a);
-                                        // Special case for class attributes
-                                        if (a === "class" && attrDefault === undefined) {
-                                            attrDefault = ""
-                                        }
-                                        orgElement
-                                            .attr("ng-attr-" + a, "{{getValue('" + bmsid + "','" + a + "','" + attrDefault + "')}}");
-                                        $compile(orgElement)($scope);
-                                        ctrl.attrs[bmsid].push(a);
-                                    }
-                                }
-                            }
-                        };
-
-                        $scope.$on('visualizationSaved', function () {
-                            deferIframeLoaded = $q.defer();
-                            bmsVisualizationService.clearObservers($scope.id, 'js');
-                            bmsVisualizationService.clearEvents($scope.id, 'js');
-                            bmsVisualizationService.clearListeners($scope.id);
-                            iframe.attr('src', iframe.attr('src'));
-                            deferIframeLoaded.promise
-                                .then(function () {
-                                    $scope.checkJsonObservers();
-                                    $scope.setupJsonEvents();
-                                });
-                        });
-
-                        var loadManifestData = function (path) {
-                            var defer = $q.defer();
-                            $http.get(path)
-                                .success(function (manifestData) {
-                                    defer.resolve(manifestData);
-                                })
-                                .error(function (data, status, headers, config) {
-                                    if (status === 404) {
-                                        defer.reject("File not found: " + config.url);
-                                    } else {
-                                        defer.reject("Some error occurred while requesting file " + config.url);
-                                    }
-                                });
-                            return defer.promise;
-                        };
-
-                        var loadViewData = function (view, manifestData) {
-                            var defer = $q.defer();
-                            var views = manifestData['views'];
-                            if (views) {
-                                angular.forEach(manifestData['views'], function (v) {
-                                    if (v['id'] === view) {
-                                        defer.resolve(v);
-                                    }
-                                });
-                            } else {
-                                defer.resolve({
-                                    id: 'root',
-                                    template: manifestData['template']
-                                });
-                            }
-                            return defer.promise;
-                        };
-
-                        var loadTemplate = function (visId, templateFolder, template) {
-                            var defer = $q.defer();
-                            iframe.attr('src', templateFolder + '/' + template).attr('id', visId);
-                            iframe.load(function () {
-                                iframeContents = $(iframe.contents());
-                                $compile(iframeContents)($scope);
-                                if (deferIframeLoaded) deferIframeLoaded.resolve();
-                                defer.resolve();
-                            });
-                            return defer.promise;
-                        };
-
-                        var initJsonEvents = function (visId, templateFolder, viewData) {
-
-                            var defer = $q.defer();
-
-                            var eventsViewPath = viewData['events'] ? viewData['events'] : viewData['id'] + '.events.json';
-                            $http.get(templateFolder + '/' + eventsViewPath)
-                                .success(function (data) {
-                                    // TODO: We need to validate the schema of the view data json file!
-                                    angular.forEach(data['events'], function (e) {
-                                        $scope.addEvent(e['type'], e['data'], 'json');
-                                    });
-                                    defer.resolve();
-                                })
-                                .error(function () {
-                                    // TODO: Do we need an error message? The view data json file should be optional!
-                                    defer.resolve();
-                                });
-
-                            return defer.promise;
-
-                        };
-
-                        var initJsonObservers = function (visId, templateFolder, viewData) {
-
-                            var defer = $q.defer();
-
-                            // Get observer data from observers.json file
-                            var observersViewPath = viewData['observers'] ? viewData['observers'] : viewData['id'] + '.observers.json';
-                            $http.get(templateFolder + '/' + observersViewPath)
-                                .success(function (data) {
-                                    // TODO: We need to validate the schema of the view data json file!
-                                    angular.forEach(data['observers'], function (o) {
-                                        $scope.addObserver(o.type, o.data, 'json');
-                                    });
-                                    defer.resolve();
-                                })
-                                .error(function () {
-                                    // TODO: Do we need an error message? The view data json file should be optional!
-                                    defer.resolve();
-                                });
-
-                            return defer.promise;
-
-                        };
-
-                        var initView = function (sessionId, view, file) {
-
-                            bmsModalService.loading("Initialising View ...");
-
-                            ctrl.sessionId = sessionId;
-                            ctrl.view = view;
-                            ctrl.file = file;
-
-                            loadServerData(sessionId)
-                                .then(function (serverData) {
-                                    $rootScope.$broadcast('setProBViewTraceId', serverData['traceId']);
-                                    ctrl.data = $.extend(ctrl.data, serverData, {
-                                        observers: {
-                                            json: [],
-                                            js: []
-                                        },
-                                        events: {
-                                            json: [],
-                                            js: []
-                                        }
-                                    });
-                                    var templateFolder = serverData['templateFolder'];
-
-                                    return loadManifestData(templateFolder + '/' + file)
-                                        .then(function (manifestData) {
-                                            ctrl.data.manifest = $.extend({
-                                                tool: 'BAnimation'
-                                            }, manifestData);
-                                            return loadViewData(view, ctrl.data.manifest);
-                                        },
-                                        function (error) {
-                                            bmsModalService.openErrorDialog(error);
-                                        })
-                                        .then(function (viewData) {
-                                            ctrl.data.view = viewData;
-                                            loadTemplate($scope.id, templateFolder, viewData.template)
-                                                .then(function () {
-                                                    return initJsonObservers($scope.id, templateFolder, viewData)
-                                                })
-                                                .then(function () {
-                                                    return initJsonEvents($scope.id, templateFolder, viewData)
-                                                })
-                                                .then(function () {
-                                                    $rootScope.$broadcast('visualizationLoaded', ctrl.data);
-                                                    bmsModalService.endLoading();
-                                                });
-                                        });
-                                }, function (errors) {
-                                    bmsModalService.openErrorDialog(errors);
-                                });
-
-                        };
-
-                        // Initialise view ...
-                        initView(attrs['bmsVisualisationSession'], attrs['bmsVisualisationView'], attrs['bmsVisualisationFile']);
-
-                    }
+              var shouldAdd = function(type, data) {
+                var shouldAdd = true;
+                if (data.refinement) {
+                  if ($.inArray(data.refinement, self.data.refinements) == -1) {
+                    shouldAdd = false;
+                  }
                 }
+                return shouldAdd;
+              };
+
+              self.attrs = {};
+
+              $scope.id = bms.uuid();
+              $scope.values = {};
+
+              bmsVisualizationService.setCurrentVisualizationId($scope.id);
+              self.data = bmsVisualizationService.getVisualization($scope.id);
+
+              $scope.checkObserver = function(observer, stateId, cause) {
+                stateId = stateId ? stateId : self.data.stateId;
+                cause = cause ? cause : trigger.TRIGGER_ANIMATION_CHANGED;
+                if (observer && stateId && cause) {
+                  bmsObserverService.checkObserver($scope.sessionId, $scope.id, observer, self.data.container.contents(), stateId, cause)
+                    .then(function(data) {
+                      if (!bms.isEmpty(data)) {
+                        $scope.values = $.extend(true, $scope.values, data);
+                        $scope.applyValues();
+                      }
+                    });
+                }
+              };
+
+              $scope.checkJsonObservers = function(stateId, cause) {
+                return $scope.checkObservers(stateId, cause, 'json');
+              };
+
+              $scope.checkJsObservers = function(stateId, cause) {
+                return $scope.checkObservers(stateId, cause, 'js');
+              };
+
+              $scope.checkAllObservers = function(stateId, cause) {
+                return $scope.checkObservers(stateId, cause);
+              };
+
+              $scope.checkObservers = function(stateId, cause, list) {
+
+                var defer = $q.defer();
+
+                var observers = bmsVisualizationService.getObservers($scope.id, list);
+
+                var stateId = stateId ? stateId : self.data.stateId;
+                var cause = cause ? cause : trigger.TRIGGER_ANIMATION_CHANGED;
+                var initialised = self.data.initialised ? self.data.initialised : false;
+
+                if (observers && stateId && cause && initialised) {
+
+                  // Collect values from observers
+                  bmsObserverService.checkObservers($scope.sessionId, $scope.id, observers, self.data.container.contents(), stateId, cause)
+                    .then(function(data) {
+                      var fvalues = {};
+                      angular.forEach(data, function(value) {
+                        if (value !== undefined) {
+                          $.extend(true, fvalues, value);
+                        }
+                      });
+                      if (!bms.isEmpty(fvalues)) {
+                        $scope.values = fvalues;
+                        $scope.applyValues();
+                      }
+                      defer.resolve();
+                    });
+
+                }
+
+                return defer.promise;
+
+              };
+
+              $scope.triggerListeners = function(cause) {
+                var vis = bmsVisualizationService.getVisualization($scope.id);
+                if (vis.listener) {
+                  angular.forEach(vis.listener[cause], function(l) {
+                    if (!l.executed) {
+                      l.callback();
+                      // Init listener should be called only once
+                      if (cause === "ModelInitialised") l.executed = true;
+                    }
+                  });
+                }
+              };
+
+              $scope.setupEvents = function() {
+                angular.forEach(bmsVisualizationService.getEvents($scope.id), function(evt) {
+                  $scope.setupEvent(evt);
+                });
+              };
+
+              $scope.setupJsonEvents = function() {
+                angular.forEach(bmsVisualizationService.getJsonEvents($scope.id), function(evt) {
+                  $scope.setupEvent(evt);
+                });
+              };
+
+              $scope.setupEvent = function(evt) {
+                try {
+                  var instance = $injector.get(evt.type, "");
+                  instance.setup($scope.sessionId, $scope.id, evt, self.data.container.contents(), self.data.traceId);
+                } catch (err) {
+                  bmsModalService.setError("No event with type '" + evt.type + "' exists! (Selector: " + evt.data.selector + ")");
+                }
+              };
+
+              // --------------------------------------
+              // Parent API (called from prob.template)
+              // --------------------------------------
+              $scope.addObserver = function(type, data, list) {
+                if (shouldAdd(type, data)) {
+                  var observer = {
+                    type: type,
+                    data: data
+                  };
+                  // Add observer ..
+                  bmsVisualizationService.addObserver($scope.id, observer, list);
+                  // ... and trigger observer
+                  if (self.data.stateId !== 'root' && self.data.initialised && self.data.lastOperation !== '$setup_constants') {
+                    $scope.checkObserver(observer, self.data.stateId, data.cause);
+                  }
+                }
+              };
+
+              $scope.addEvent = function(type, data, list) {
+                if (shouldAdd(type, data)) {
+                  var event = {
+                    type: type,
+                    data: data
+                  };
+                  // Add event ...
+                  bmsVisualizationService.addEvent($scope.id, event, list);
+                  // ... and setup event
+                  var instance = $injector.get(type, "");
+                  if (instance) {
+                    instance.setup($scope.sessionId, $scope.id, event, self.data.container.contents(), self.data.traceId);
+                  }
+                }
+              };
+
+              $scope.eval = function(options) {
+
+                var options = bms.normalize($.extend({
+                  formulas: [],
+                  translate: false,
+                  trigger: function() {}
+                }, options), ["trigger"]);
+
+                ws.emit('evaluateFormulas', {
+                    data: {
+                      id: $scope.sessionId,
+                      formulas: options.formulas.map(function(f) {
+                        return {
+                          formula: f,
+                          translate: options.translate
+                        }
+                      })
+                    }
+                  }, function(r) {
+
+                    var errors = [];
+                    var results = [];
+
+                    angular.forEach(options.formulas, function(f) {
+                        if (r[f]['error']) {
+                          var errorMsg = r[f]['error'] + " ("
+                          if (options.selector) {
+                            errorMsg = errorMsg + "selector: " + options.selector + ", ";
+                          }
+                          errorMsg = errorMsg + "formula: " + f + ")";
+                        errors.push(errorMsg);
+                      } else {
+                        results.push(r[f]['trans'] !== undefined ? r[f]['trans'] : r[f]['result']);
+                      }
+                    });
+
+                  /*var results = bms.mapFilter(options.formulas, function(f) {
+                    return r[f].trans !== undefined ? r[f].trans : r[f].result;
+                  });*/
+
+                  if (errors.length === 0) {
+                    if (options.selector) {
+                      options.trigger(self.data.container.contents().find(options.selector), results);
+                    } else {
+                      options.trigger(results);
+                    }
+                  } else {
+                    bmsModalService.openErrorDialog(errors);
+                  }
+
+                });
+
+            };
+
+            $scope.on = function(what, callback) {
+              var listener = bmsVisualizationService.addListener($scope.id, what, callback);
+              if (what === "ModelInitialised" && self.data.initialised) {
+                // Init listener should be called only once
+                listener.callback();
+                listener.executed = true;
+              }
+            };
+            // --------------------------------------
+
+            ws.on('checkObserver', function(cause, s) {
+              self.data.stateId = s.stateId;
+              self.data.traceId = s.traceId;
+              if (cause === trigger.TRIGGER_MODEL_INITIALISED) {
+                self.data.initialised = true;
+              }
+              if (cause === trigger.TRIGGER_MODEL_SETUP_CONSTANTS) {
+                self.data.setupConstants = true;
+              }
+              if (self.data.traceId == s.traceId) {
+                $scope.checkAllObservers(s.stateId, cause);
+                $scope.triggerListeners(cause);
+              }
+            });
+
+            $scope.$on('$destroy', function() {
+              ws.removeAllListeners("checkObserver");
+            });
+
+            $scope.reloadTemplate = function() {
+              bmsObserverService.clearBmsIdCache($scope.id);
+              self.attrs = {};
+              $scope.checkObservers();
+              $scope.setupEvents();
+            };
+
+          }],
+        link: function($scope, $element, attrs, ctrl) {
+
+          var iframe = $($element.contents());
+          var iframeContents;
+          ctrl.data['container'] = iframe;
+          var deferIframeLoaded;
+
+          $scope.getValue = function(bmsid, attr, defaultValue) {
+            var returnValue = defaultValue === 'undefined' ? undefined : defaultValue;
+            var ele = $scope.values[bmsid];
+            if (ele) {
+              returnValue = ele[attr] === undefined ? returnValue : ele[attr];
             }
-        ])
-        .directive('bmsSvg', ['$compile', '$http', 'bmsVisualizationService',
-            function ($compile, $http, bmsVisualizationService) {
-                return {
-                    replace: false,
-                    link: function ($scope, element, attrs) {
-                        var svg = attrs['bmsSvg'];
-                        var vis = bmsVisualizationService.getVisualization($scope.id);
-                        bmsVisualizationService.addSvg($scope.id, svg);
-                        var reloadTemplate = function () {
-                            return $http.get(vis['templateFolder'] + '/' + svg)
-                                .success(function (svgCode) {
-                                    element.html(svgCode);
-                                });
-                        };
-                        reloadTemplate();
-                    }
-                }
-            }]);
+            return returnValue;
+          };
 
-    return module;
+          $scope.applyValues = function() {
+
+            for (bmsid in $scope.values) {
+              if (ctrl.attrs[bmsid] === undefined) {
+                ctrl.attrs[bmsid] = [];
+              }
+              var nattrs = $scope.values[bmsid];
+              for (var a in nattrs) {
+                if (ctrl.attrs[bmsid].indexOf(a) === -1) {
+                  var orgElement = iframeContents.find('[data-bms-id=' + bmsid + ']');
+                  var attrDefault = orgElement.attr(a);
+                  // Special case for class attributes
+                  if (a === "class" && attrDefault === undefined) {
+                    attrDefault = ""
+                  }
+                  orgElement
+                    .attr("ng-attr-" + a, "{{getValue('" + bmsid + "','" + a + "','" + attrDefault + "')}}");
+                  $compile(orgElement)($scope);
+                  ctrl.attrs[bmsid].push(a);
+                }
+              }
+            }
+          };
+
+          $scope.$on('visualizationSaved', function() {
+            deferIframeLoaded = $q.defer();
+            bmsVisualizationService.clearObservers($scope.id, 'js');
+            bmsVisualizationService.clearEvents($scope.id, 'js');
+            bmsVisualizationService.clearListeners($scope.id);
+            iframe.attr('src', iframe.attr('src'));
+            deferIframeLoaded.promise
+              .then(function() {
+                $scope.checkJsonObservers();
+                $scope.setupJsonEvents();
+              });
+          });
+
+          var loadManifestData = function(path) {
+            var defer = $q.defer();
+            $http.get(path)
+              .success(function(manifestData) {
+                defer.resolve(manifestData);
+              })
+              .error(function(data, status, headers, config) {
+                if (status === 404) {
+                  defer.reject("File not found: " + config.url);
+                } else {
+                  defer.reject("Some error occurred while requesting file " + config.url);
+                }
+              });
+            return defer.promise;
+          };
+
+          var loadViewData = function(view, manifestData) {
+            var defer = $q.defer();
+            var views = manifestData['views'];
+            if (views) {
+              angular.forEach(manifestData['views'], function(v) {
+                if (v['id'] === view) {
+                  defer.resolve(v);
+                }
+              });
+            } else {
+              defer.resolve({
+                id: 'root',
+                template: manifestData['template']
+              });
+            }
+            return defer.promise;
+          };
+
+          var loadTemplate = function(visId, templateFolder, template) {
+            var defer = $q.defer();
+            iframe.attr('src', templateFolder + '/' + template).attr('id', visId);
+            iframe.load(function() {
+              iframeContents = $(iframe.contents());
+              $compile(iframeContents)($scope);
+              if (deferIframeLoaded) deferIframeLoaded.resolve();
+              defer.resolve();
+            });
+            return defer.promise;
+          };
+
+          var initJsonEvents = function(visId, templateFolder, viewData) {
+
+            var defer = $q.defer();
+
+            //var eventsViewPath = viewData['events'] ? viewData['events'] : viewData['id'] + '.events.json';
+            var eventsViewPath = viewData['events'];
+            if (eventsViewPath) {
+              $http.get(templateFolder + '/' + eventsViewPath)
+                .success(function(data) {
+                  // TODO: We need to validate the schema of the view data json file!
+                  angular.forEach(data['events'], function(e) {
+                    $scope.addEvent(e['type'], e['data'], 'json');
+                  });
+                  defer.resolve();
+                })
+                .error(function() {
+                  // TODO: Do we need an error message? The view data json file should be optional!
+                  defer.resolve();
+                });
+            } else {
+              defer.resolve();
+            }
+
+            return defer.promise;
+
+          };
+
+          var initJsonObservers = function(visId, templateFolder, viewData) {
+
+            var defer = $q.defer();
+
+            // Get observer data from observers.json file
+            //var observersViewPath = viewData['observers'] ? viewData['observers'] : viewData['id'] + '.observers.json';
+            var observersViewPath = viewData['observers'];
+            if (observersViewPath) {
+              $http.get(templateFolder + '/' + observersViewPath)
+                .success(function(data) {
+                  // TODO: We need to validate the schema of the view data json file!
+                  angular.forEach(data['observers'], function(o) {
+                    $scope.addObserver(o.type, o.data, 'json');
+                  });
+                  defer.resolve();
+                })
+                .error(function() {
+                  // TODO: Do we need an error message? The view data json file should be optional!
+                  defer.resolve();
+                });
+            } else {
+              defer.resolve();
+            }
+
+            return defer.promise;
+
+          };
+
+          var initView = function(sessionId, view, file) {
+
+            bmsModalService.loading("Initialising View ...");
+
+            ctrl.sessionId = sessionId;
+            ctrl.view = view;
+            ctrl.file = file;
+
+            bmsSessionService.loadServerData(sessionId)
+              .then(function(serverData) {
+                $rootScope.$broadcast('setProBViewTraceId', serverData['traceId']);
+                ctrl.data = $.extend(ctrl.data, serverData, {
+                  observers: {
+                    json: [],
+                    js: []
+                  },
+                  events: {
+                    json: [],
+                    js: []
+                  }
+                });
+                var templateFolder = serverData['templateFolder'];
+
+                return loadManifestData(templateFolder + '/' + file)
+                  .then(function(manifestData) {
+                      ctrl.data.manifest = $.extend({
+                        tool: 'BAnimation'
+                      }, manifestData);
+                      return loadViewData(view, ctrl.data.manifest);
+                    },
+                    function(error) {
+                      bmsModalService.openErrorDialog(error);
+                    })
+                  .then(function(viewData) {
+                    ctrl.data.view = viewData;
+                    loadTemplate($scope.id, templateFolder, viewData.template)
+                      .then(function() {
+                        return initJsonObservers($scope.id, templateFolder, viewData)
+                      })
+                      .then(function() {
+                        return initJsonEvents($scope.id, templateFolder, viewData)
+                      })
+                      .then(function() {
+                        $rootScope.$broadcast('visualizationLoaded', ctrl.data);
+                        bmsModalService.endLoading();
+                      });
+                  });
+              }, function(errors) {
+                bmsModalService.openErrorDialog(errors);
+              });
+
+          };
+
+          // Initialise view ...
+          initView(attrs['bmsVisualisationSession'], attrs['bmsVisualisationView'], attrs['bmsVisualisationFile']);
+
+        }
+      }
+    }])
+.directive('bmsSvg', ['$compile', '$http', 'bmsVisualizationService',
+  function($compile, $http, bmsVisualizationService) {
+    return {
+      replace: false,
+      link: function($scope, element, attrs) {
+        var svg = attrs['bmsSvg'];
+        var vis = bmsVisualizationService.getVisualization($scope.id);
+        bmsVisualizationService.addSvg($scope.id, svg);
+        var reloadTemplate = function() {
+          return $http.get(vis['templateFolder'] + '/' + svg)
+            .success(function(svgCode) {
+              element.html(svgCode);
+            });
+        };
+        reloadTemplate();
+      }
+    }
+  }
+]);
+
+return module;
 
 });

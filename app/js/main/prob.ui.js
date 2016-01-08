@@ -189,13 +189,15 @@ define(['jquery', 'angular', 'jquery-ui', 'ui-bootstrap', 'bms.config'], functio
                 }
             }
         }])
-        .directive('probView', ['bmsConfigService', 'probMainService', '$q', function (bmsConfigService, probMainService, $q) {
+        .directive('probView', ['bmsConfigService', '$q', function (bmsConfigService, $q) {
             return {
                 replace: true,
                 scope: {},
                 template: '<div style="width:100%;height:100%"><iframe src="" frameBorder="0" style="width:100%;height:100%"></iframe></div>',
                 require: '^bmsDialog',
-                controller: ['$scope', function ($scope) {
+                controller: ['$scope', 'ws', '$q', function ($scope, ws, $q) {
+
+                    var probPort = null;
 
                     $scope.postpone = false;
 
@@ -206,6 +208,19 @@ define(['jquery', 'angular', 'jquery-ui', 'ui-bootstrap', 'bms.config'], functio
                     $scope.$on('setProBViewTraceId', function (evt, traceId) {
                         $scope.traceId = traceId;
                     });
+
+                    $scope.getProBPort = function () {
+                        var defer = $q.defer();
+                        if (probPort) {
+                            defer.resolve(probPort);
+                        } else {
+                            ws.emit('initProB', "", function (port) {
+                                probPort = port;
+                                defer.resolve(probPort);
+                            });
+                        }
+                        return defer.promise;
+                    }
 
                 }],
                 link: function ($scope, element, attrs, ctrl) {
@@ -220,7 +235,7 @@ define(['jquery', 'angular', 'jquery-ui', 'ui-bootstrap', 'bms.config'], functio
                     });
 
                     $scope.setUrl = function (postfix) {
-                        $q.all([bmsConfigService.getConfig(), probMainService.getPort()]).then(function (data) {
+                        $q.all([bmsConfigService.getConfig(), $scope.getProBPort()]).then(function (data) {
                             postfix = postfix ? postfix : '';
                             iframe.attr("src", 'http://' + data[0].prob.host + ':' + data[1].port + '/sessions/' + ctrl.getType() + '/' + postfix);
                         });

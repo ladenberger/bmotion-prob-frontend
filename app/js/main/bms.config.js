@@ -2,7 +2,7 @@
  * BMotion Studio Config Module
  *
  */
-define(['jquery', 'angular', 'tv4', 'bms.common'], function ($, angular, tv4) {
+define(['angular', 'tv4', 'bms.common'], function (angular, tv4) {
 
         return angular.module('bms.config', ['bms.common'])
             .constant('configScheme', {
@@ -50,9 +50,9 @@ define(['jquery', 'angular', 'tv4', 'bms.common'], function ($, angular, tv4) {
                             if (config) {
                                 defer.resolve(config);
                             } else {
-                                main.validateConfig()
+                                main.validate()
                                     .then(function (data) {
-                                        config = $.extend({
+                                        config = angular.extend({}, {
                                             socket: {
                                                 "host": "localhost",
                                                 "port": "19090"
@@ -60,7 +60,7 @@ define(['jquery', 'angular', 'tv4', 'bms.common'], function ($, angular, tv4) {
                                             prob: {
                                                 "host": "localhost"
                                             }
-                                        }, data, true);
+                                        }, data);
                                         defer.resolve(config);
                                     }, function (error) {
                                         defer.reject(error);
@@ -68,7 +68,7 @@ define(['jquery', 'angular', 'tv4', 'bms.common'], function ($, angular, tv4) {
                             }
                             return defer.promise;
                         },
-                        validateConfig: function () {
+                        validate: function () {
                             var defer = $q.defer();
                             var path = bmsMainService.mode === "ModeStandalone" ? '../bmotion.json' : 'bmotion.json';
                             $http.get(path).success(function (configData) {

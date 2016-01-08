@@ -1,58 +1,54 @@
 <div ng-controller="bmsVisualizationCtrl as vis" class="fullWidthHeight">
 
-    <div ng-show="vis.sessionId" class="fullWidthHeight" ng-controller="bmsTabsCtrl as bmsTabs">
+  <div ng-show="vis.sessionId" class="fullWidthHeight bms-tabs" ng-controller="bmsTabsCtrl as bmsTabs">
 
-        <uib-tabset class="fullWidthHeight">
-            <uib-tab select="bmsTabs.selectSimulatorTab()"
-                     heading="Simulator">
-                <div data-bms-visualisation-session="{{vis.sessionId}}"
-                     data-bms-visualisation-view="{{vis.view}}"
-                     data-bms-visualisation-file="{{vis.file}}"
-                     class="fullWidthHeight"></div>
-            </uib-tab>
-            <uib-tab select="bmsTabs.selectEditorTab(svg)"
-                     ng-show="bmsTabs.hasSvg() && bmsTabs.visualizationLoaded()"
-                     ng-repeat="svg in bmsTabs.getSvg()"
-                     heading="Editor: {{svg}}"
-                     disable="bmsTabs.isDisabled(svg)"
-                     ng-click="!bmsTabs.isDisabled(svg) || bmsTabs.whyDisabled(svg)">
-                <div data-bms-visualisation-editor="{{vis.sessionId}}"
-                     data-bms-visualisation-id="{{bmsTabs.getCurrentVisualizationId()}}"
-                     data-bms-svg-file="{{svg}}"
-                     class="fullWidthHeight"></div>
-            </uib-tab>
-        </uib-tabset>
+    <uib-tabset class="fullWidthHeight">
+      <uib-tab select="bmsTabs.selectSimulatorTab()" heading="Simulator">
+        <div data-bms-visualisation-session="{{vis.sessionId}}" data-bms-visualisation-view="{{vis.view}}" data-bms-visualisation-file="{{vis.file}}" class="fullWidthHeight"></div>
+      </uib-tab>
+      <uib-tab select="bmsTabs.selectEditorTab(svg)" ng-show="bmsTabs.hasSvg() && bmsTabs.visualizationLoaded()" ng-repeat="svg in bmsTabs.getSvg()" heading="Editor: {{svg}}" disable="bmsTabs.isDisabled(svg)" ng-click="!bmsTabs.isDisabled(svg) || bmsTabs.whyDisabled(svg)">
+        <div data-bms-visualisation-editor="{{vis.sessionId}}" data-bms-visualisation-id="{{bmsTabs.getCurrentVisualizationId()}}" data-bms-svg-file="{{svg}}" class="fullWidthHeight"></div>
+      </uib-tab>
+      <uib-tab select="bmsTabs.selectDiagramTab()" ng-repeat="tab in bmsTabs.tabs track by $index" active="tab.active" disable="tab.disabled" ng-mouseenter="bmsTabs.enter(tab)" ng-mouseleave="bmsTabs.leave(tab)">
+        <uib-tab-heading>
+          {{tab.title}} <a href="" class="tab-close-bt" ng-click="bmsTabs.removeTab($index)" ng-show="tab.showClose"><i class="glyphicon glyphicon-remove"></i></a>
+        </uib-tab-heading>
+        <div ng-include="tab.content" class="fullWidthHeight"></div>
+      </uib-tab>
+    </uib-tabset>
 
-    </div>
+  </div>
 
 </div>
 
 <div bms-dialog type="CurrentTrace" title="History">
-    <div prob-view></div>
+  <div prob-view></div>
 </div>
 
 <div bms-dialog type="Events" title="Events">
-    <div prob-view></div>
+  <div prob-view></div>
 </div>
 
 <div bms-dialog type="StateInspector" title="State">
-    <div prob-view></div>
+  <div prob-view></div>
 </div>
 
 <div bms-dialog type="CurrentAnimations" title="Animations">
-    <div prob-view></div>
+  <div prob-view></div>
 </div>
 
 <div bms-dialog type="BConsole" title="Console">
-    <div prob-view></div>
+  <div prob-view></div>
 </div>
 
 <div bms-dialog type="ModelCheckingUI" title="ModelChecking">
-    <div prob-view></div>
+  <div prob-view></div>
 </div>
 
-<div ng-controller="bmsElementProjectionModalCtrl">
-</div>
+<script type="text/ng-template" id="projectionDiagramTemplate">
+  <div data-bms-diagram-element-projection-view class="fullWidthHeight"></div>
+</script>
 
-<div ng-controller="bmsTraceDiagramModalCtrl">
-</div>
+<script type="text/ng-template" id="traceDiagramTemplate">
+  <div data-bms-diagram-trace-view class="fullWidthHeight"></div>
+</script>

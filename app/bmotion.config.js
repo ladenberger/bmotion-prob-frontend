@@ -27,9 +27,9 @@ requirejs.config({
         "bms.nwjs": "js/main/bms.nwjs",
         "bms.electron": "js/main/bms.electron",
         "bms.nodejs": "js/main/bms.nodejs",
-
+        "bms.tabs": "js/main/bms.tabs",
+        
         "prob.ui": "js/main/prob.ui",
-        "prob.common": "js/main/prob.common",
         "prob.modal": "js/main/prob.modal",
         "prob.graph": "js/main/prob.graph",
         "prob.observers": "js/main/prob.observers",

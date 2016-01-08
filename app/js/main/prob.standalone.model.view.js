@@ -5,8 +5,8 @@
 define(['bms.session', 'prob.modal', 'bms.electron', 'ng-electron'], function () {
 
     var module = angular.module('prob.standalone.model.view', ['bms.session', 'prob.modal', 'bms.electron', 'ngElectron'])
-        .controller('bmsModelViewCtrl', ['$scope', '$rootScope', '$location', '$routeParams', 'electron', 'loadServerData', 'bmsModalService',
-            function ($scope, $rootScope, $location, $routeParams, electron, loadServerData, bmsModalService) {
+        .controller('bmsModelViewCtrl', ['$scope', '$rootScope', '$location', '$routeParams', 'electron', 'bmsSessionService', 'bmsModalService',
+            function ($scope, $rootScope, $location, $routeParams, electron, bmsSessionService, bmsModalService) {
 
                 var self = this;
                 self.sessionId = $routeParams.sessionId;
@@ -20,7 +20,7 @@ define(['bms.session', 'prob.modal', 'bms.electron', 'ng-electron'], function ()
                     win: self.win
                 }, self.win);
 
-                loadServerData(self.sessionId)
+                bmsSessionService.loadServerData(self.sessionId)
                     .then(function (serverData) {
                         $rootScope.$broadcast('setProBViewTraceId', serverData['traceId']);
                         $rootScope.$broadcast('openDialog_CurrentTrace');
