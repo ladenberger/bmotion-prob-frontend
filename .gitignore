@@ -1,4 +1,5 @@
 .directory
+.gradle
 node_modules
 workspace
 bower_components
