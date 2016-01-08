@@ -63,8 +63,8 @@ repositories {
     }
     maven {
         name "sonatype releases"
-        url "    https://oss.sonatype.org/content/repositories/releases/"
-    }    
+        url "https://oss.sonatype.org/content/repositories/releases/"
+    }
     maven {
         name "cobra"
         url "http://cobra.cs.uni-duesseldorf.de/artifactory/repo"
