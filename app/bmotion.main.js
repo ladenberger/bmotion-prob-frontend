@@ -59,6 +59,12 @@ var buildViewMenu = function(mainMenu) {
     }
   }));
   viewMenu.append(new MenuItem({
+    label: 'Open Groovy Console',
+    click: function() {
+      openDialog('GroovyConsoleSession');
+    }
+  }));
+  viewMenu.append(new MenuItem({
     label: 'Toggle Full Screen',
     accelerator: (function() {
       if (process.platform == 'darwin')
@@ -99,9 +105,9 @@ var buildFileMenu = function(mainMenu) {
     label: 'Open Visualization',
     accelerator: (function() {
       if (process.platform == 'darwin')
-        return 'Command+O';
+        return 'Alt+Command+O';
       else
-        return 'Shift+O';
+        return 'Ctrl+Shift+O';
     })(),
     click: function() {
       Dialog.showOpenDialog({
@@ -131,9 +137,9 @@ var buildFileMenu = function(mainMenu) {
     label: 'New Visualization',
     accelerator: (function() {
       if (process.platform == 'darwin')
-        return 'Command+N';
+        return 'Alt+Command+N';
       else
-        return 'Shift+N';
+        return 'Ctrl+Shift+N';
     })(),
     click: function() {
 
