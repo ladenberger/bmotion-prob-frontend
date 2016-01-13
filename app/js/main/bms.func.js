@@ -11,6 +11,9 @@ define(['jquery'], function ($) {
                 return typeof x !== 'undefined';
             });
         },
+        toList: function(obj) {
+          return Object.prototype.toString.call(obj) !== '[object Array]' ? [obj] : obj;
+        },
         getUrlParameter: function (sParam) {
             var sPageURL = window.location.search.substring(1);
             var sURLVariables = sPageURL.split('&');

@@ -7,7 +7,7 @@ define(['angular', 'jquery', 'bms.visualization', 'prob.observers'], function(an
   return angular.module('prob.graph', ['bms.visualization', 'prob.observers'])
     .factory('bmsRenderingService', ['$q', 'ws', '$injector', 'bmsModalService', 'bmsObserverService', 'bmsVisualizationService', '$http', '$templateCache', '$compile', '$rootScope', '$interpolate', '$timeout', function($q, ws, $injector, bmsModalService, bmsObserverService, bmsVisualizationService, $http, $templateCache, $compile, $rootScope, $interpolate, $timeout) {
 
-      var supportedSvgElements = ["svg", "g", "rect", "circle", "image", "line", "path", "text"];
+      var supportedSvgElements = ["svg", "g", "rect", "circle", "image", "line", "path", "text", "ellipse"];
 
       var isValidSelector = function(container, selector) {
 

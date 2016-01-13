@@ -325,7 +325,7 @@ define(['bms.func', 'jquery', 'angular', 'qtip', 'prob.modal'], function(bms, $,
           }, options);
         },
         getFormulas: function(observer) {
-          return observer.data.formulas.map(function(f) {
+          return bms.toList(observer.data.formulas).map(function(f) {
             return {
               formula: f,
               translate: observer.data.translate
@@ -385,7 +385,7 @@ define(['bms.func', 'jquery', 'angular', 'qtip', 'prob.modal'], function(bms, $,
           var formulas = [];
           angular.forEach(observers, function(o) {
             if (o.data.cause === trigger) {
-              formulas = formulas.concat(bms.mapFilter(o.data.formulas, function(f) {
+              formulas = formulas.concat(bms.mapFilter(bms.toList(o.data.formulas), function(f) {
                 return {
                   formula: f,
                   translate: o.data.translate ? o.data.translate : false
@@ -410,7 +410,7 @@ define(['bms.func', 'jquery', 'angular', 'qtip', 'prob.modal'], function(bms, $,
               if (o.data.cause === trigger) {
 
                 var result = [];
-                angular.forEach(o.data.formulas, function(f) {
+                angular.forEach(bms.toList(o.data.formulas), function(f) {
                   if (data[f]['error']) {
                     errors.push(data[f]['error'] + " (formula observer, selector: " + o.data.selector + ", formula: " + f + ")");
                   } else {
