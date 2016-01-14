@@ -357,6 +357,19 @@ define(['angular', 'jquery', 'bms.visualization', 'prob.observers'], function(an
 
       };
 
+      var getChildrenObservers = function(element) {
+        var observers = [];
+        var co = element.data('observers');
+        if (co) observers = observers.concat(co);
+        var eleChildren = element.children();
+        if (eleChildren.length > 0) {
+          eleChildren.each(function() {
+            observers = observers.concat(getChildrenObservers($(this)));
+          });
+        }
+        return observers;
+      };
+
       var getDiagramData = function(visualizationId, selector, diagramType, diagramCond) {
 
         var defer = $q.defer();
@@ -392,21 +405,12 @@ define(['angular', 'jquery', 'bms.visualization', 'prob.observers'], function(an
             var e = $(this);
             var eo = {
               element: e,
-              observers: e.data('observers') ? e.data('observers') : []
+              observers: getChildrenObservers(e)
             };
-            var eleChildren = e.children();
-            if (eleChildren.length > 0) {
-              eleChildren.each(function() {
-                var co = $(this).data('observers');
-                if (co) {
-                  eo.observers = eo.observers.concat(co);
-                }
-              });
-            }
             elementObservers.push(eo);
           });
 
-          // (2) Collect formulas of observers
+          // (3) Collect formulas of observers
           var formulas = [];
           angular.forEach(elementObservers, function(oe) {
             angular.forEach(oe.observers, function(o) {
