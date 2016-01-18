@@ -509,15 +509,15 @@
             <div ng-controller="bmsObserverViewCtrl" class="oe-view">
 
               <div class="observer-menu">
-                <a href="#" uib-popover-template="dynamicPopover.templateUrl" popover-trigger="focus" popover-placement="bottom"><i class="fa fa-plus"></i> Add Observer</a>
+                <a href="" uib-popover-template="dynamicPopover.templateUrl" popover-trigger="focus" popover-placement="bottom"><i class="fa fa-plus"></i> Add Observer</a>
                 <script type="text/ng-template" id="observerMenuBAnimationTemplate.html">
                   <div>
-                    <a href="#" ng-click="addFormulaObserver()"><i class="fa fa-eye"></i> Formula Observer</a>
+                    <a href="" ng-click="addFormulaObserver()"><i class="fa fa-eye"></i> Formula Observer</a>
                   </div>
                 </script>
                 <script type="text/ng-template" id="observerMenuCSPAnimationTemplate.html">
                   <div>
-                    <a href="#" ng-click="addCSPEventObserver()"><i class="fa fa-eye"></i> CSP-Event
+                    <a href="" ng-click="addCSPEventObserver()"><i class="fa fa-eye"></i> CSP-Event
                                         Observer</a>
                     <br/>
                   </div>
@@ -533,9 +533,9 @@
 
                     <div style="float:right" ng-mouseover="showMenu($index)" ng-mouseleave="hideMenu($index)">
                       <div ng-show="isMenu($index)" class="observer-menu">
-                        <a href="#" ng-click="duplicateObserver($index)" title="Duplicate Observer"><i
+                        <a href="" ng-click="duplicateObserver($index)" title="Duplicate Observer"><i
                                                     class="fa fa-files-o"></i></a>
-                        <a href="#" ng-click="removeObserver($index)" title="Remove Observer"><i
+                        <a href="" ng-click="removeObserver($index)" title="Remove Observer"><i
                                                     class="fa fa-trash-o"></i></a>
                       </div>
                       <div ng-hide="isMenu($index)">
@@ -558,10 +558,10 @@
             <div ng-controller="bmsEventsViewCtrl" class="oe-view">
 
               <div class="observer-menu">
-                <a href="#" uib-popover-template="dynamicPopover.templateUrl" popover-trigger="focus" popover-placement="bottom"><i class="fa fa-plus"></i> Add Event</a>
+                <a href="" uib-popover-template="dynamicPopover.templateUrl" popover-trigger="focus" popover-placement="bottom"><i class="fa fa-plus"></i> Add Event</a>
                 <script type="text/ng-template" id="eventsMenuTemplate.html">
                   <div>
-                    <a href="#" ng-click="addExecuteEventEvent()"><i class="fa fa-eye"></i> Execute
+                    <a href="" ng-click="addExecuteEventEvent()"><i class="fa fa-eye"></i> Execute
                                         Event
                                         Handler</a>
                     <br/>
@@ -577,9 +577,9 @@
 
                     <div style="float:right" ng-mouseover="showMenu($index)" ng-mouseleave="hideMenu($index)">
                       <div ng-show="isMenu($index)" class="observer-menu">
-                        <a href="#" ng-click="duplicateEvent($index)" title="Duplicate Event"><i
+                        <a href="" ng-click="duplicateEvent($index)" title="Duplicate Event"><i
                                                     class="fa fa-files-o"></i></a>
-                        <a href="#" ng-click="removeEvent($index)" title="Remove Event"><i
+                        <a href="" ng-click="removeEvent($index)" title="Remove Event"><i
                                                     class="fa fa-trash-o"></i></a>
                       </div>
                       <div ng-hide="isMenu($index)">
@@ -707,9 +707,9 @@
       <li><a href="#move_down">Send Backward<span class="shortcut">Ctrl+Down</span></a></li>
       <li><a href="#move_back">Send to Back<span class="shortcut">Ctrl+Shift+Down</span></a></li>
       <li class="separator"></li>
-      <li ng-repeat="item in menuCtrl.addObserverItems track by $index" ng-show="{{item.show}}"><a href="#" ng-click="item.click()">{{item.label}}</a></li>
+      <li ng-repeat="item in menuCtrl.addObserverItems track by $index" ng-show="{{item.show}}"><a href="" ng-click="item.click()">{{item.label}}</a></li>
       <li class="separator"></li>
-      <li ng-repeat="item in menuCtrl.addEventItems track by $index" ng-show="{{item.show}}"><a href="#" ng-click="item.click()">{{item.label}}</a></li>
+      <li ng-repeat="item in menuCtrl.addEventItems track by $index" ng-show="{{item.show}}"><a href="" ng-click="item.click()">{{item.label}}</a></li>
     </ul>
   </div>
 
