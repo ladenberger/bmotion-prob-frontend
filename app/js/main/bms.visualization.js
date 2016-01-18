@@ -60,33 +60,42 @@ define(['angular', 'jquery', 'prob.modal'], function(angular, $) {
           return visualizations[currentVisualization];
         },
         addSvg: function(visId, svg) {
-          if (!visualizations[visId]['svg'][svg]) visualizations[visId]['svg'][svg] = {};
-          return visualizations[visId]['svg'][svg];
+          var vis = visualizationService.getVisualization(visId);
+          if (vis) {
+            if (!vis['svg'][svg]) vis['svg'][svg] = {};
+            return visualizations[visId]['svg'][svg];
+          }
         },
         getSvg: function(visId, svg) {
-          return visualizations[visId]['svg'][svg];
+          var vis = visualizationService.getVisualization(visId);
+          if (vis) {
+            return vis['svg'][svg];
+          }
         },
         addListener: function(visId, what, callback) {
-          if (!visualizations[visId]['listener']) visualizations[visId]['listener'] = [];
-          if (!visualizations[visId]['listener'][what]) visualizations[visId]['listener'][what] = [];
-          var obj = {
-            callback: callback,
-            executed: false
-          };
-          visualizations[visId]['listener'][what].push(obj);
-          return obj;
+          var vis = visualizationService.getVisualization(visId);
+          if (vis) {
+            if (!vis['listener']) vis['listener'] = [];
+            if (!vis['listener'][what]) vis['listener'][what] = [];
+            var obj = {
+              callback: callback,
+              executed: false
+            };
+            vis['listener'][what].push(obj);
+            return obj;
+          }
         },
         addObserverEvent: function(visId, list, e, origin) {
-          try {
-            var instance = $injector.get(e.type, "");
-          } catch (err) {
-            bmsModalService.setError("Observer or event with type '" + e.type + "' does not exists! (Selector: " + e.data.selector + ")");
-          } finally {
-            if (instance && (typeof instance.getDefaultOptions === "function")) {
-              e.data = instance.getDefaultOptions(e.data);
-            }
-            var vis = visualizations[visId];
-            if (vis) {
+          var vis = visualizationService.getVisualization(visId);
+          if (vis) {
+            try {
+              var instance = $injector.get(e.type, "");
+            } catch (err) {
+              bmsModalService.setError("Observer or event with type '" + e.type + "' does not exists! (Selector: " + e.data.selector + ")");
+            } finally {
+              if (instance && (typeof instance.getDefaultOptions === "function")) {
+                e.data = instance.getDefaultOptions(e.data);
+              }
               if (vis[list] === undefined) vis[list] = {};
               if (vis[list][origin] === undefined) vis[list][origin] = [];
               vis[list][origin].push(e);
@@ -149,7 +158,7 @@ define(['angular', 'jquery', 'prob.modal'], function(angular, $) {
         },
         clearObservers: function(visId, list) {
           var vis = visualizationService.getVisualization(visId);
-          if (vis && vis['observers'] && !list) {
+          if (vis && !list) {
             // If no list was passed, return all available observers
             vis['observers']['js'] = [];
             vis['observers']['json'] = [];
@@ -159,7 +168,7 @@ define(['angular', 'jquery', 'prob.modal'], function(angular, $) {
         },
         clearEvents: function(visId, list) {
           var vis = visualizationService.getVisualization(visId);
-          if (vis && vis['events'] && !list) {
+          if (vis && !list) {
             // If no list was passed, return all available observers
             vis['events']['js'] = [];
             vis['events']['json'] = [];
@@ -169,7 +178,7 @@ define(['angular', 'jquery', 'prob.modal'], function(angular, $) {
         },
         clearListeners: function(visId) {
           var vis = visualizationService.getVisualization(visId);
-          vis['listener'] = [];
+          if (vis) vis['listener'] = [];
         }
 
       };

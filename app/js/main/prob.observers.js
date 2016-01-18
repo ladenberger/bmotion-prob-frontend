@@ -44,102 +44,76 @@ define(['bms.func', 'jquery', 'angular', 'qtip', 'prob.modal'], function(bms, $,
         },
         checkObservers: function(sessionId, visId, observers, container, stateId, cause, data) {
 
-            var defer = $q.defer();
+          var defer = $q.defer();
 
-            var formulaObservers = [];
-            var predicateObservers = [];
-            var promises = [];
-            var errors = [];
+          var formulaObservers = [];
+          var predicateObservers = [];
+          var promises = [];
+          var errors = [];
 
-            if (!cause) cause = trigger.TRIGGER_ANIMATION_CHANGED;
-            //observerService.hideErrors(container);
+          if (!cause) cause = trigger.TRIGGER_ANIMATION_CHANGED;
+          //observerService.hideErrors(container);
 
-            angular.forEach(observers, function(o) {
-              if (o.type === 'formula') {
-                formulaObservers.push(o);
-              } else if (o.type === 'predicate') {
-                predicateObservers.push(o);
-              } else {
-                try {
-                  var observerInstance = $injector.get(o.type, "");
-                } catch (err) {
-                  errors.push("No observer with type '" + o.type + "' exists! (Selector: " + o.data.selector + ")");
-                } finally {
-                  if (observerInstance) {
-                    promises.push(observerInstance.check(sessionId, visId, o, container, stateId, cause, data));
-                  }
+          angular.forEach(observers, function(o) {
+            if (o.type === 'formula') {
+              formulaObservers.push(o);
+            } else if (o.type === 'predicate') {
+              predicateObservers.push(o);
+            } else {
+              try {
+                var observerInstance = $injector.get(o.type, "");
+              } catch (err) {
+                errors.push("No observer with type '" + o.type + "' exists! (Selector: " + o.data.selector + ")");
+              } finally {
+                if (observerInstance) {
+                  promises.push(observerInstance.check(sessionId, visId, o, container, stateId, cause, data));
                 }
               }
+            }
+          });
+
+          // Special case for formula observers
+          if (!$.isEmptyObject(formulaObservers)) {
+            // Execute formula observer at once (performance boost)
+            var observerInstance = $injector.get("formula", "");
+            promises.push(observerInstance.check(sessionId, visId, formulaObservers, container, stateId, cause, data));
+          }
+
+          // Special case for predicate observers
+          if (!$.isEmptyObject(predicateObservers)) {
+            // Execute predicate observer at once (performance boost)
+            var observerInstance = $injector.get("predicate", "");
+            promises.push(observerInstance.check(sessionId, visId, predicateObservers, container, stateId, cause, data));
+          }
+
+          if (errors.length > 0) {
+            bmsModalService.setError(errors.join("<br/>"));
+          }
+
+          $q.all(promises)
+            .then(function(res) {
+              defer.resolve(res);
             });
 
-            // Special case for formula observers
-            if (!$.isEmptyObject(formulaObservers)) {
-              // Execute formula observer at once (performance boost)
-              var observerInstance = $injector.get("formula", "");
-              promises.push(observerInstance.check(sessionId, visId, formulaObservers, container, stateId, cause, data));
-            }
+          return defer.promise;
 
-            // Special case for predicate observers
-            if (!$.isEmptyObject(predicateObservers)) {
-              // Execute predicate observer at once (performance boost)
-              var observerInstance = $injector.get("predicate", "");
-              promises.push(observerInstance.check(sessionId, visId, predicateObservers, container, stateId, cause, data));
-            }
-
-            if (errors.length > 0) {
-              bmsModalService.setError(errors.join("<br/>"));
-            }
-
-            $q.all(promises)
-              .then(function(res) {
-                defer.resolve(res);
-              });
-
-            return defer.promise;
-
+        },
+        setupEvent: function(sessionId, visId, evt, container, traceId) {
+          try {
+            var instance = $injector.get(evt.type, "");
+            instance.setup(sessionId, visId, evt, container, traceId);
+          } catch (err) {
+            bmsModalService.setError("No event with type '" + evt.type + "' exists! (Selector: " + evt.data.selector + ")");
           }
-          /*,hideErrors: function (container) {
-           if (hasErrors) {
-           container.find('[data-hasqtip]').qtip('destroy');
-           }
-           hasErrors = false;
-           },
-           showError: function (element, type, error) {
+        },
+        setupEvents: function(sessionId, visId, evts, container, traceId) {
+          if (evts) {
+            angular.forEach(evts, function(evt) {
+              observerService.setupEvent(sessionId, visId, evt, container, traceId);
+            });
+          }
+        }
 
-           if (!element.get(0)) element = $('body');
-           // TODO: check if element exists, if not attached qtip to root element (e.g. body)
-           if (!element.data('qtip-error')) {
-           element.qtip({ // Grab some elements to apply the tooltip to
-           content: {
-           text: '',
-           title: 'Observer errors'
-           },
-           position: {
-           my: 'top left',
-           at: 'center left',
-           effect: false,
-           viewport: $(window)
-           },
-           show: {
-           when: false,
-           ready: true
-           },
-           hide: {
-           event: false,
-           inactive: 10000
-           },
-           style: {
-           classes: 'qtip-rounded qtip-red'
-           }
-           });
-           element.data('qtip-error', true)
-           }
-           var api = element.qtip('api');
-           if (api) {
-           api.set('content.text', '<p><span style="font-weight:bold">' + type + '</span>: ' + error + '</p>' + api.get('content.text'));
-           }
-           hasErrors = true;
-           }*/
       };
       return observerService;
     }])
