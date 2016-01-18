@@ -40,23 +40,7 @@ define(['bms.func', 'jquery', 'angular', 'qtip', 'prob.modal'], function(bms, $,
           return cbmsid;
         },
         checkObserver: function(sessionId, visId, observer, container, stateId, cause, data) {
-          var defer = $q.defer();
-          var observerInstance;
-          if (!cause) cause = trigger.TRIGGER_ANIMATION_CHANGED;
-          try {
-            observerInstance = $injector.get(observer.type, '');
-          } catch (err) {
-            bmsModalService.setError("No observer with type '" + observer.type + "' exists! (Selector: " + observer.data.selector + ")");
-          } finally {
-            if (observerInstance) {
-              observerInstance.check(sessionId, visId, observer, container, stateId, cause, data).then(function(res) {
-                defer.resolve(res);
-              });
-            } else {
-              defer.resolve();
-            }
-          }
-          return defer.promise;
+          return observerService.checkObservers(sessionId, visId, [observer], container, stateId, cause, data);
         },
         checkObservers: function(sessionId, visId, observers, container, stateId, cause, data) {
 
@@ -314,7 +298,7 @@ define(['bms.func', 'jquery', 'angular', 'qtip', 'prob.modal'], function(bms, $,
       return cspEventObserver;
 
     }])
-    .service('formula', ['ws', '$q', 'bmsObserverService', 'bmsModalService', function(ws, $q, bmsObserverService, bmsModalService) {
+    .service('formula', ['ws', '$q', 'bmsObserverService', 'bmsModalService', 'bmsVisualizationService', function(ws, $q, bmsObserverService, bmsModalService, bmsVisualizationService) {
 
       var formulaObserver = {
         getDefaultOptions: function(options) {
@@ -331,6 +315,14 @@ define(['bms.func', 'jquery', 'angular', 'qtip', 'prob.modal'], function(bms, $,
               translate: observer.data.translate
             }
           });
+        },
+        shouldBeChecked: function(visId, obj) {
+          var visualization = bmsVisualizationService.getVisualization(visId);
+          var check = true;
+          if (obj.data.refinement !== undefined && !bms.inArray(obj.data.refinement, visualization.refinements)) {
+            check = false;
+          }
+          return check;
         },
         apply: function(sessionId, visId, observer, container, options) {
 
@@ -384,7 +376,8 @@ define(['bms.func', 'jquery', 'angular', 'qtip', 'prob.modal'], function(bms, $,
           // Collect formulas
           var formulas = [];
           angular.forEach(observers, function(o) {
-            if (o.data.cause === trigger) {
+
+            if (formulaObserver.shouldBeChecked(visId, o) && o.data.cause === trigger) {
               formulas = formulas.concat(bms.mapFilter(bms.toList(o.data.formulas), function(f) {
                 return {
                   formula: f,
@@ -392,6 +385,7 @@ define(['bms.func', 'jquery', 'angular', 'qtip', 'prob.modal'], function(bms, $,
                 };
               }));
             }
+
           });
 
           // Evaluate formulas and apply observers
@@ -407,7 +401,7 @@ define(['bms.func', 'jquery', 'angular', 'qtip', 'prob.modal'], function(bms, $,
             var errors = [];
             angular.forEach(observers, function(o) {
 
-              if (o.data.cause === trigger) {
+              if (formulaObserver.shouldBeChecked(visId, o) && o.data.cause === trigger) {
 
                 var result = [];
                 angular.forEach(bms.toList(o.data.formulas), function(f) {
@@ -451,7 +445,7 @@ define(['bms.func', 'jquery', 'angular', 'qtip', 'prob.modal'], function(bms, $,
       return formulaObserver;
 
     }])
-    .service('bset', ['ws', '$q', 'bmsObserverService', function(ws, $q, bmsObserverService) {
+    .service('bset', ['ws', '$q', 'bmsObserverService', 'bmsVisualizationService', function(ws, $q, bmsObserverService, bmsVisualizationService) {
 
       var bsetObserver = {
 
@@ -470,6 +464,14 @@ define(['bms.func', 'jquery', 'angular', 'qtip', 'prob.modal'], function(bms, $,
             formula: observer.data.expression,
             translate: true
           }];
+        },
+        shouldBeChecked: function(visId, obj) {
+          var visualization = bmsVisualizationService.getVisualization(visId);
+          var check = true;
+          if (obj.data.refinement !== undefined && !bms.inArray(obj.data.refinement, visualization.refinements)) {
+            check = false;
+          }
+          return check;
         },
         apply: function(sessionId, visId, observer, container, options) {
 
@@ -607,7 +609,7 @@ define(['bms.func', 'jquery', 'angular', 'qtip', 'prob.modal'], function(bms, $,
       return refinementObserver;
 
     }])
-    .service('predicate', ['ws', '$q', 'bmsObserverService', function(ws, $q, bmsObserverService) {
+    .service('predicate', ['ws', '$q', 'bmsObserverService', 'bmsVisualizationService', function(ws, $q, bmsObserverService, bmsVisualizationService) {
 
       var predicateObserver = {
 
@@ -624,6 +626,14 @@ define(['bms.func', 'jquery', 'angular', 'qtip', 'prob.modal'], function(bms, $,
             formula: observer.data.predicate,
             translate: false
           }];
+        },
+        shouldBeChecked: function(visId, obj) {
+          var visualization = bmsVisualizationService.getVisualization(visId);
+          var check = true;
+          if (obj.data.refinement !== undefined && !bms.inArray(obj.data.refinement, visualization.refinements)) {
+            check = false;
+          }
+          return check;
         },
         apply: function(sessionId, visId, observer, container, options) {
 
@@ -713,7 +723,7 @@ define(['bms.func', 'jquery', 'angular', 'qtip', 'prob.modal'], function(bms, $,
       return predicateObserver;
 
     }])
-    .service('executeEvent', ['ws', '$q', function(ws, $q) {
+    .service('executeEvent', ['ws', '$q', 'bmsModalService', 'bmsVisualizationService', function(ws, $q, bmsModalService, bmsVisualizationService) {
 
       var ev = {
 
@@ -736,6 +746,14 @@ define(['bms.func', 'jquery', 'angular', 'qtip', 'prob.modal'], function(bms, $,
             settings.callback.call(this, result)
           });
           return settings
+        },
+        shouldBeChecked: function(visId, obj) {
+          var visualization = bmsVisualizationService.getVisualization(visId);
+          var check = true;
+          if (obj.data.refinement !== undefined && !bms.inArray(obj.data.refinement, visualization.refinements)) {
+            check = false;
+          }
+          return check;
         },
         getTooltipContent: function(options, origin, api, sessionId, traceId) {
           var defer = $q.defer();
@@ -834,55 +852,66 @@ define(['bms.func', 'jquery', 'angular', 'qtip', 'prob.modal'], function(bms, $,
 
           var defer = $q.defer();
 
-          var options = ev.getDefaultOptions(event.data);
-          var el = $(container).find(options.selector);
-          el.each(function(i2, v) {
+          if (ev.shouldBeChecked(visId, event)) {
 
-            var e = $(v);
-            e.css('cursor', 'pointer');
-            var tooltip = ev.initTooltip(e, options, sessionId, traceId);
-            var api = tooltip.qtip('api');
+            var options = ev.getDefaultOptions(event.data);
+            if (options.selector) {
 
-            e.click(function(event) {
+              var el = $(container).find(options.selector);
+              el.each(function(i2, v) {
 
-              ws.emit('initTooltip', {
-                data: bms.normalize({
-                  id: sessionId,
-                  traceId: traceId,
-                  events: options.events
-                }, [], e)
-              }, function(data) {
+                var e = $(v);
+                e.css('cursor', 'pointer');
+                var tooltip = ev.initTooltip(e, options, sessionId, traceId);
+                var api = tooltip.qtip('api');
 
-                var enabledEvents = [];
+                e.click(function(event) {
 
-                angular.forEach(data['events'], function(event) {
-                  if (event['canExecute']) enabledEvents.push(event);
-                });
+                  ws.emit('initTooltip', {
+                    data: bms.normalize({
+                      id: sessionId,
+                      traceId: traceId,
+                      events: options.events
+                    }, [], e)
+                  }, function(data) {
 
-                if (enabledEvents.length === 1) {
-                  // If only one events is enabled of the list of events, execute it
-                  ev.executeEvent({
-                    id: sessionId,
-                    traceId: traceId,
-                    events: [enabledEvents[0]],
-                    callback: function() {
-                      api.hide();
+                    var enabledEvents = [];
+
+                    angular.forEach(data['events'], function(event) {
+                      if (event['canExecute']) enabledEvents.push(event);
+                    });
+
+                    if (enabledEvents.length === 1) {
+                      // If only one events is enabled of the list of events, execute it
+                      ev.executeEvent({
+                        id: sessionId,
+                        traceId: traceId,
+                        events: [enabledEvents[0]],
+                        callback: function() {
+                          api.hide();
+                        }
+                      }, e);
+                    } else {
+                      // Else show a popup displaying the available events
+                      api.show('click');
                     }
-                  }, e);
-                } else {
-                  // Else show a popup displaying the available events
-                  api.show('click');
-                }
 
-                e.data('qtip-disable', true);
+                    e.data('qtip-disable', true);
+
+                  });
+
+                }).mouseout(function() {
+                  e.data('qtip-disable', false);
+                });
 
               });
 
-            }).mouseout(function() {
-              e.data('qtip-disable', false);
-            });
+            } else {
+              // TODO: We need a more meaningful error message
+              bmsModalService.setError("Please specify a selector!");
+            }
 
-          });
+          }
 
           defer.resolve();
 

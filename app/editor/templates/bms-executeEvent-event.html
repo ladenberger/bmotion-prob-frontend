@@ -1,54 +1,58 @@
 <div ng-controller="bmsExecuteEventCtrl">
 
-    <div class="row fixed-height">
-        <div class="col-xs-3">Selector:</div>
-        <div class="col-xs-9">
-            <span editable-text="event.data.selector">{{ event.data.selector || "selector" }}</span>
-        </div>
+  <div class="row fixed-height">
+    <div class="col-xs-3">Selector:</div>
+    <div class="col-xs-9">
+      <span editable-text="event.data.selector">{{ (event.data.selector | cut:true:22:' ...') || "selector" }}</span>
     </div>
+  </div>
 
-    <div class="row fixed-height">
-        <div class="col-xs-3 observer-formula-menu"
-             ng-mouseover="showMenu()"
-             ng-mouseleave="hideMenu()"
-             ng-click="addEvent()">
-            <i ng-class="{'fa fa-plus': isMenu, '': !isMenu}"></i>
-            {{ isMenu ? " Add" : "Events:" }}
-        </div>
-        <div class="col-xs-9">
-            <div ng-repeat="e in event.data.events track by $index">
-
-                <div ng-click="rowform.$show()" ng-class="{'editable-click': !rowform.$visible, '': rowform.$visible}">
-                    <span editable-text="e.name" e-name="name" e-form="rowform">{{e.name || "event"}}</span>
-                    <br ng-show="rowform.$visible"/>
-                <span editable-text="e.predicate" e-name="predicate"
-                      e-form="rowform">({{e.predicate || ""}})</span>
-                </div>
-
-                <div ng-show="rowform.$visible" class="observer-form-buttons">
-                    <form editable-form name="rowform">
-                        <button type="submit" ng-disabled="rowform.$waiting" title="Save Event"><i
-                                class="fa fa-floppy-o"></i>
-                        </button>
-                        <button type="button" ng-disabled="rowform.$waiting" ng-click="rowform.$cancel()"><i
-                                class="fa fa-ban" title="Cancel Editing Event"></i></button>
-                    </form>
-                    <div>
-                        <button ng-click="removeEvent($index)" title="Remove Event"><i
-                                class="fa fa-trash-o"></i></button>
-                    </div>
-                </div>
-
-            </div>
-        </div>
+  <div class="row fixed-height">
+    <div class="col-xs-3 observer-formula-menu" ng-mouseover="showMenu()" ng-mouseleave="hideMenu()" ng-click="addEvent()">
+      <i ng-class="{'fa fa-plus': isMenu, '': !isMenu}"></i>
+      {{ isMenu ? " Add" : "Events:" }}
     </div>
+    <div class="col-xs-9">
+      <div ng-repeat="e in event.data.events track by $index">
 
-    <div class="row fixed-height">
-        <div class="col-xs-3">Label:</div>
-        <div class="col-xs-9">
-            <span class="editable-click" ng-click="openJsEditor('label', event)"><i
-                    class="fa fa-file-text-o"></i> Func</span>
+        <div ng-click="rowform.$show()" ng-class="{'editable-click': !rowform.$visible, '': rowform.$visible}">
+          <span editable-text="e.name" e-name="name" e-form="rowform">{{ (e.name | cut:true:15:' ...') || "event" }}</span>
+          <br ng-show="rowform.$visible"/>
+          <span editable-text="e.predicate" e-name="predicate" e-form="rowform">({{ (e.predicate | cut:true:6:' ...') || "" }})</span>
         </div>
+
+        <div ng-show="rowform.$visible" class="observer-form-buttons">
+          <form editable-form name="rowform">
+            <button type="submit" ng-disabled="rowform.$waiting" title="Save Event">
+              <i class="fa fa-floppy-o"></i>
+            </button>
+            <button type="button" ng-disabled="rowform.$waiting" ng-click="rowform.$cancel()">
+              <i class="fa fa-ban" title="Cancel Editing Event"></i>
+            </button>
+          </form>
+          <div>
+            <button ng-click="removeEvent($index)" title="Remove Event">
+              <i class="fa fa-trash-o"></i>
+            </button>
+          </div>
+        </div>
+
+      </div>
     </div>
+  </div>
+  <div class="row fixed-height">
+    <div class="col-xs-3">Label:</div>
+    <div class="col-xs-9">
+      <span class="editable-click" ng-click="openJsEditor('label', event)">
+        <i class="fa fa-file-text-o"></i>
+        Func</span>
+    </div>
+  </div>
+  <div class="row fixed-height">
+    <div class="col-xs-3">Refinement:</div>
+    <div class="col-xs-9">
+      <span editable-text="event.data.refinement">{{ (event.data.refinement | cut:true:22:' ...') || "-" }}</span>
+    </div>
+  </div>
 
 </div>

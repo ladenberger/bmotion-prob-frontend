@@ -5,13 +5,21 @@
 define(['angular', 'jquery', 'prob.modal'], function(angular, $) {
 
   return angular.module('bms.visualization', ['prob.modal'])
-    .factory('bmsVisualizationService', ['bmsModalService', '$injector', function(bmsModalService, $injector) {
+    .factory('bmsVisualizationService', ['bmsModalService', '$injector', '$q', function(bmsModalService, $injector, $q) {
       var currentVisualization,
         visualizations = {},
         disabledTabs = {};
 
       var visualizationService = {
 
+        isBAnimation: function(visId) {
+          var vis = visualizations[visId];
+          if (vis) {
+            return vis && vis['manifest'] && vis['manifest']['tool'] === 'BAnimation';
+          } else {
+            bmsModalService.openErrorDialog("No Visualization found with id " + visId);
+          }
+        },
         getDisabledTabs: function() {
           return disabledTabs;
         },
@@ -28,7 +36,17 @@ define(['angular', 'jquery', 'prob.modal'], function(angular, $) {
         },
         getVisualization: function(visId) {
           if (visualizations[visId] === undefined) {
-            visualizations[visId] = {};
+            visualizations[visId] = {
+              observers: {
+                json: [],
+                js: []
+              },
+              events: {
+                json: [],
+                js: []
+              },
+              svg: {}
+            };
           }
           return visualizations[visId];
         },
@@ -42,8 +60,11 @@ define(['angular', 'jquery', 'prob.modal'], function(angular, $) {
           return visualizations[currentVisualization];
         },
         addSvg: function(visId, svg) {
-          if (!visualizations[visId]['svg']) visualizations[visId]['svg'] = [];
-          if (visualizations[visId]['svg'].indexOf(svg) === -1) visualizations[visId]['svg'].push(svg);
+          if (!visualizations[visId]['svg'][svg]) visualizations[visId]['svg'][svg] = {};
+          return visualizations[visId]['svg'][svg];
+        },
+        getSvg: function(visId, svg) {
+          return visualizations[visId]['svg'][svg];
         },
         addListener: function(visId, what, callback) {
           if (!visualizations[visId]['listener']) visualizations[visId]['listener'] = [];
@@ -124,6 +145,7 @@ define(['angular', 'jquery', 'prob.modal'], function(angular, $) {
               events = vis['events'][list];
             }
           }
+          return events;
         },
         clearObservers: function(visId, list) {
           var vis = visualizationService.getVisualization(visId);

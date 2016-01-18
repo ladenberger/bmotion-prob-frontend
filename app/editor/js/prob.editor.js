@@ -2,11 +2,11 @@
  * BMotion Studio for ProB Editor Iframe Module
  *
  */
-define(['angularAMD', 'code-mirror!javascript', 'angular', 'jquery.jgraduate', 'jpicker',
+define(['angular', 'angularAMD', 'code-mirror!javascript', 'jquery.jgraduate', 'jpicker',
   'jquery.draginput', 'mousewheel', 'taphold', 'requestanimationframe',
   'method-draw', 'angular-ui-codemirror', 'angular-xeditable', 'ui-bootstrap',
   'ui-bootstrap-tpls', 'angular-sanitize'
-], function(angularAMD, CodeMirror) {
+], function(angular, angularAMD, CodeMirror) {
 
   var module = angular.module('prob.editor', ['ui.codemirror', 'xeditable', 'ui.bootstrap', 'ngSanitize'])
     .run(function(editableOptions, editableThemes) {
@@ -15,21 +15,119 @@ define(['angularAMD', 'code-mirror!javascript', 'angular', 'jquery.jgraduate', '
       editableThemes['default'].submitTpl = '<button type="submit"><i class="fa fa-floppy-o"></i></button>';
       editableThemes['default'].cancelTpl = '<button type="button" ng-click="$form.$cancel()"><i class="fa fa-ban"></i></button>';
     })
+    .filter('cut', function() {
+      return function(value, wordwise, max, tail) {
+        if (!value) return '';
+        max = parseInt(max, 10);
+        if (!max) return value;
+        if (value.length <= max) return value;
+        value = value.substr(0, max);
+        if (wordwise) {
+          var lastspace = value.lastIndexOf(' ');
+          if (lastspace != -1) {
+            value = value.substr(0, lastspace);
+          }
+        }
+        return value + (tail || '...');
+      };
+    })
     .factory('$parentScope', ['$window', function($window) {
       return $window.parent.angular.element($window.frameElement).scope();
     }])
-    .factory('bmsEditorCommonService', ['$q', function($q) {
+    .factory('bmsEditorCommonService', ['$q', 'bmsParentService', function($q, bmsParentService) {
 
-      var visualization;
-      return {
+      var isInitialised = $q.defer();
+      var visualization, observers, events, uiState;
+
+      // Get json observers and events
+      isInitialised.promise.then(function() {
+
+        observers = visualization['observers']['json'];
+        events = visualization['events']['json'];
+
+        uiState = {
+          observers: observers.map(function() {
+            return {
+              isMenu: false,
+              isCollapsed: true
+            };
+          }),
+          events: events.map(function() {
+            return {
+              isMenu: false,
+              isCollapsed: true
+            }
+          })
+        };
+
+      });
+
+      var service = {
         setVisualization: function(vis) {
           visualization = vis;
         },
         getVisualization: function() {
           return visualization;
         },
-        isInitialised: $q.defer()
-      }
+        getObservers: function() {
+          return observers;
+        },
+        getUiState: function(type) {
+          return uiState[type];
+        },
+        getEvents: function() {
+          return events;
+        },
+        addObserver: function(type, data) {
+          service.addObserverEvent("observers", type, data);
+        },
+        addObserverEvent: function(list, type, data) {
+          bmsParentService.addObserverEvent(list, type, data);
+          return uiState[list].push({
+            isMenu: false,
+            isCollapsed: true
+          }) - 1;
+        },
+        removeObserver: function(index) {
+          observers.splice(index, 1);
+          uiState['observers'].splice(index, 1);
+        },
+        duplicateObserver: function(index) {
+          var newObject = $.extend(true, {}, observers[index]);
+          observers.push(newObject);
+          uiState['observers'].push({
+            isMenu: false,
+            isCollapsed: true
+          });
+        },
+        addEvent: function(type, data) {
+          service.addObserverEvent("events", type, data);
+        },
+        removeEvent: function(index) {
+          events.splice(index, 1);
+          uiState['events'].splice(index, 1)
+        },
+        duplicateEvents: function(index) {
+          var newObject = $.extend(true, {}, events[index]);
+          events.push(newObject);
+          uiState['events'].push({
+            isMenu: false,
+            isCollapsed: true
+          });
+        },
+        toggleCollapse: function(type, index) {
+          uiState[type][index]['isCollapsed'] = !uiState[type][index]['isCollapsed'];
+        },
+        showMenu: function(type, index) {
+          uiState[type][index]['isMenu'] = true;
+        },
+        hideMenu: function(type, index) {
+          uiState[type][index]['isMenu'] = false;
+        },
+        isInitialised: isInitialised
+      };
+
+      return service;
 
     }])
     .factory('bmsParentService', ['$parentScope', function($parentScope) {
@@ -46,11 +144,8 @@ define(['angularAMD', 'code-mirror!javascript', 'angular', 'jquery.jgraduate', '
         saveEvents: function() {
           $parentScope.saveEvents();
         },
-        addObserver: function(type, data) {
-          $parentScope.addObserver(type, data);
-        },
-        addEvent: function(type, data) {
-          $parentScope.addEvent(type, data);
+        addObserverEvent: function(list, type, data) {
+          $parentScope.addObserverEvent(list, type, data);
         },
         disableEditor: function(reason) {
           $parentScope.disableEditor(reason);
@@ -147,30 +242,6 @@ define(['angularAMD', 'code-mirror!javascript', 'angular', 'jquery.jgraduate', '
         }
       };
     }])
-    .controller('bmsElementObjectCtrl', ['$scope', function($scope) {
-
-      $scope.isMenu = false;
-      $scope.isCollapsed = true;
-
-      $scope.showMenu = function() {
-        $scope.isMenu = true;
-      };
-
-      $scope.hideMenu = function() {
-        $scope.isMenu = false;
-      };
-
-      $scope.toggleCollapse = function() {
-        $scope.isCollapsed = ! $scope.isCollapsed;
-      };
-
-      $scope.selected = false;
-
-      $scope.$on('highlightObserver', function(event, b) {
-        $scope.selected = b;
-      });
-
-    }])
     .controller('bmsObserverFormulaCtrl', ['$scope', 'bmsJsEditorService',
       function($scope, bmsJsEditorService) {
 
@@ -217,8 +288,7 @@ define(['angularAMD', 'code-mirror!javascript', 'angular', 'jquery.jgraduate', '
       }
 
     ])
-    .
-  controller('bmsExecuteEventCtrl', ['$scope', 'bmsJsEditorService', function($scope, bmsJsEditorService) {
+    .controller('bmsExecuteEventCtrl', ['$scope', 'bmsJsEditorService', function($scope, bmsJsEditorService) {
 
       $scope.isMenu = false;
 
@@ -318,11 +388,13 @@ define(['angularAMD', 'code-mirror!javascript', 'angular', 'jquery.jgraduate', '
     .controller('bmsObserverViewCtrl', ['$scope', 'bmsEditorCommonService', 'bmsParentService', '$rootScope',
       function($scope, bmsEditorCommonService, bmsParentService, $rootScope) {
 
+        // Get json observers
         bmsEditorCommonService.isInitialised.promise.then(function() {
-          var tool = bmsEditorCommonService.getVisualization()['manifest']['tool'];
           $scope.dynamicPopover = {
-            templateUrl: 'observerMenu' + tool + 'Template.html'
+            templateUrl: 'observerMenu' + bmsEditorCommonService.getVisualization()['manifest']['tool'] + 'Template.html'
           };
+          $scope.data = bmsEditorCommonService.getObservers();
+          $scope.uiState = bmsEditorCommonService.getUiState('observers');
         });
 
         $scope.getIncludeFile = function(type) {
@@ -333,53 +405,59 @@ define(['angularAMD', 'code-mirror!javascript', 'angular', 'jquery.jgraduate', '
           bmsParentService.openDialog("Do you really want to delete this observer?", function(response) {
             if (response === 0) {
               $rootScope.$apply(function() {
-                $scope.data.splice(index, 1);
+                bmsEditorCommonService.removeObserver(index);
               });
             }
           });
         };
 
         $scope.addFormulaObserver = function() {
-          bmsParentService.addObserver("formula", {
+          bmsEditorCommonService.addObserver("formula", {
             selector: "",
             trigger: ""
           });
         };
 
-        $scope.addPredicateObserver = function() {
-          bmsParentService.addObserver("predicate", {
-            selector: ""
-          });
-        };
-
         $scope.addCSPEventObserver = function() {
-          bmsParentService.addObserver("csp-event", {
+          bmsEditorCommonService.addObserver("csp-event", {
             selector: "",
             observers: []
           });
         };
 
-        $scope.toggleCollapseObserver = function(index) {
-          console.log(index);
-        };
-
         $scope.duplicateObserver = function(index) {
-          var newObject = $.extend(true, {}, $scope.data[index]);
-          $scope.data.push(newObject);
+          bmsEditorCommonService.duplicateObserver(index);
         };
 
-        $scope.showJson = function() {
-          console.log($scope.data);
+        $scope.toggleCollapse = function(index) {
+          bmsEditorCommonService.toggleCollapse('observers', index);
         };
 
-        bmsEditorCommonService.isInitialised.promise.then(function() {
-          $scope.data = bmsEditorCommonService.getVisualization()['observers']['json'];
-        });
+        $scope.showMenu = function(index) {
+          bmsEditorCommonService.showMenu('observers', index);
+        };
+
+        $scope.hideMenu = function(index) {
+          bmsEditorCommonService.hideMenu('observers', index);
+        };
+
+        $scope.isCollapsed = function(index) {
+          return $scope.uiState[index]['isCollapsed'];
+        };
+
+        $scope.isMenu = function(index) {
+          return $scope.uiState[index]['isMenu'];
+        };
 
       }
     ])
     .controller('bmsEventsViewCtrl', ['$scope', 'bmsEditorCommonService', 'bmsParentService', '$rootScope',
       function($scope, bmsEditorCommonService, bmsParentService, $rootScope) {
+
+        bmsEditorCommonService.isInitialised.promise.then(function() {
+          $scope.data = bmsEditorCommonService.getEvents();
+          $scope.uiState = bmsEditorCommonService.getUiState('events');
+        });
 
         $scope.dynamicPopover = {
           templateUrl: 'eventsMenuTemplate.html'
@@ -393,27 +471,42 @@ define(['angularAMD', 'code-mirror!javascript', 'angular', 'jquery.jgraduate', '
           bmsParentService.openDialog("Do you really want to delete this event?", function(response) {
             if (response === 0) {
               $rootScope.$apply(function() {
-                $scope.data.splice(index, 1);
+                bmsEditorCommonService.removeEvent(index);
               });
             }
           });
         };
 
         $scope.addExecuteEventEvent = function() {
-          bmsParentService.addEvent("executeEvent", {
+          bmsEditorCommonService.addEvent("executeEvent", {
             selector: "",
             events: []
           });
         };
 
         $scope.duplicateEvent = function(index) {
-          var newObject = $.extend(true, {}, $scope.data[index]);
-          $scope.data.push(newObject);
+          bmsEditorCommonService.duplicateEvent(index);
         };
 
-        bmsEditorCommonService.isInitialised.promise.then(function() {
-          $scope.data = bmsEditorCommonService.getVisualization()['events']['json'];
-        });
+        $scope.toggleCollapse = function(index) {
+          bmsEditorCommonService.toggleCollapse('events', index);
+        };
+
+        $scope.showMenu = function(index) {
+          bmsEditorCommonService.showMenu('events', index);
+        };
+
+        $scope.hideMenu = function(index) {
+          bmsEditorCommonService.hideMenu('events', index);
+        };
+
+        $scope.isCollapsed = function(index) {
+          return $scope.uiState[index]['isCollapsed'];
+        };
+
+        $scope.isMenu = function(index) {
+          return $scope.uiState[index]['isMenu'];
+        };
 
       }
     ])
@@ -452,7 +545,113 @@ define(['angularAMD', 'code-mirror!javascript', 'angular', 'jquery.jgraduate', '
         });
 
       }
-    ]);
+    ])
+    .controller('bmsEditorContextMenuCtrl', ['$scope', 'bmsEditorCommonService', 'bmsEditorTabsService', '$parentScope',
+      function($scope, bmsEditorCommonService, bmsEditorTabsService, $parentScope) {
+
+        var self = this;
+
+        var isBAnimation = function() {
+          var vis = bmsEditorCommonService.getVisualization();
+          return vis && vis['manifest'] && vis['manifest']['tool'] === 'BAnimation'
+        };
+
+        var isCSPAnimation = function() {
+          var vis = bmsEditorCommonService.getVisualization();
+          return vis && vis['manifest'] && vis['manifest']['tool'] === 'CSPAnimation'
+        };
+
+        var addObserverEvent = function(list, type, data) {
+          var selectedElements = methodDraw.getSvgCanvas().getSelectedElems();
+          if (selectedElements) {
+            var selectors = selectedElements.map(function(element) {
+              return "#" + $(element).attr("id");
+            });
+            data.selector = selectors.join(",");
+            var index = bmsEditorCommonService.addObserverEvent(list, type, data);
+            bmsEditorTabsService.activateTab(list);
+            bmsEditorCommonService.toggleCollapse(list, index);
+          }
+        };
+
+        bmsEditorCommonService.isInitialised.promise.then(function() {
+
+          self.addObserverItems = [{
+            label: "Add Formula Observer",
+            show: isBAnimation(),
+            click: function() {
+              addObserverEvent("observers", "formula", {
+                formulas: []
+              });
+            }
+          }, {
+            label: "Add CSP Observer",
+            show: isCSPAnimation(),
+            click: function() {
+              addObserverEvent("observers", "csp-event", {
+                observers: []
+              });
+            }
+          }];
+
+          self.addEventItems = [{
+            label: "Add Execute Event Handler",
+            show: true,
+            click: function() {
+              addObserverEvent("events", "executeEvent", {
+                events: []
+              });
+            }
+          }];
+
+        });
+
+      }
+    ])
+    .controller('bmsEditorTabsCtrl', ['$scope', 'bmsEditorTabsService',
+      function($scope, bmsEditorTabsService) {
+
+        var self = this;
+
+        self.active = bmsEditorTabsService.getActiveTab();
+
+        self.toggleTab = function(type) {
+          bmsEditorTabsService.activateTab(type);
+          self.active = type;
+        };
+
+        $scope.$watch(function() {
+          return bmsEditorTabsService.getActiveTab()
+        }, function(newValue) {
+          self.active = newValue;
+        });
+
+      }
+    ])
+    .factory('bmsEditorTabsService', function() {
+
+      var activeTab = 'properties';
+
+      return {
+        getActiveTab: function() {
+          return activeTab;
+        },
+        activateTab: function(type) {
+          activeTab = type;
+        },
+        activatePropertiesTab: function() {
+          activeTab = 'properties';
+        },
+        activateObserversTab: function() {
+          activeTab = 'observers';
+        },
+        activateEventsTab: function() {
+          activeTab = 'events';
+        }
+      };
+
+    });
+
 
   return angularAMD.bootstrap(module);
 

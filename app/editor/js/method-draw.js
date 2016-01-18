@@ -132,6 +132,10 @@ define(["jquery", "touch", "jquery.hotkeys", "jquery.bbq",
       return svgRootId;
     };
 
+    Editor.getSvgCanvas = function() {
+      return svgCanvas;
+    };
+
     // Extension mechanisms must call setCustomHandlers with two functions: opts.open and opts.save
     // opts.open's responsibilities are:
     // 	- invoke a file chooser dialog in 'open' mode
@@ -4183,7 +4187,7 @@ define(["jquery", "touch", "jquery.hotkeys", "jquery.bbq",
         ev.preventDefault();
       })
 
-      $('#cmenu_canvas li').disableContextMenu();
+      //$('#cmenu_canvas li').disableContextMenu();
       canv_menu.enableContextMenuItems('#delete,#cut,#copy');
 
       window.onbeforeunload = function() {

@@ -114,10 +114,9 @@
 
     <div id="tools_top" class="tools_panel">
 
-      <ul class="tabs">
-        <li>
+      <ul class="tabs" ng-controller="bmsEditorTabsCtrl as tabsCtrl">
+        <li ng-click="tabsCtrl.toggleTab('properties')" class="{{tabsCtrl.active === 'properties' && 'active' || 'inactive' }}">
 
-          <input type="radio" name="tabs" id="tab1" checked/>
           <label for="tab1" class="tab_label">Properties</label>
 
           <div id="tab-content1" class="tab-content">
@@ -502,8 +501,7 @@
           </div>
 
         </li>
-        <li>
-          <input type="radio" name="tabs" id="tab2" />
+        <li ng-click="tabsCtrl.toggleTab('observers')" class="{{tabsCtrl.active === 'observers' && 'active' || 'inactive' }}">
           <label for="tab2" class="tab_label">Observers</label>
 
           <div id="tab-content2" class="tab-content oe-tab">
@@ -514,11 +512,7 @@
                 <a href="#" uib-popover-template="dynamicPopover.templateUrl" popover-trigger="focus" popover-placement="bottom"><i class="fa fa-plus"></i> Add Observer</a>
                 <script type="text/ng-template" id="observerMenuBAnimationTemplate.html">
                   <div>
-                    <a href="#" ng-click="addFormulaObserver()"><i class="fa fa-eye"></i> Formula
-                                        Observer</a>
-                    <br/>
-                    <!--a href="#" ng-click="addPredicateObserver()"><i class="fa fa-eye"></i> Predicate
-                                        Observer</a-->
+                    <a href="#" ng-click="addFormulaObserver()"><i class="fa fa-eye"></i> Formula Observer</a>
                   </div>
                 </script>
                 <script type="text/ng-template" id="observerMenuCSPAnimationTemplate.html">
@@ -531,38 +525,32 @@
               </div>
 
               <div ng-repeat="observer in data track by $index">
-                <div ng-controller="bmsElementObjectCtrl">
-                  <div ng-click="toggleCollapse()" ng-class="{'observer-header observer-box observer-highlight': selected, 'observer-header observer-box': !selected}">
-                    <span class="label-type">{{observer.type}}: </span>
-                    <span class="label-selector">{{observer.data.selector}}</span>
+                <div>
+                  <div ng-click="toggleCollapse($index)" ng-class="{'observer-header observer-box observer-highlight': selected, 'observer-header observer-box': !selected}">
 
-                    <div style="float:right" ng-mouseover="showMenu()" ng-mouseleave="hideMenu()">
-                      <div ng-show="isMenu" class="observer-menu">
+                    <span class="label-type">{{observer.type}}: </span>
+                    <span class="label-selector">{{ observer.data.selector | cut:true:22:' ...'}}</span>
+
+                    <div style="float:right" ng-mouseover="showMenu($index)" ng-mouseleave="hideMenu($index)">
+                      <div ng-show="isMenu($index)" class="observer-menu">
                         <a href="#" ng-click="duplicateObserver($index)" title="Duplicate Observer"><i
                                                     class="fa fa-files-o"></i></a>
-                        <!--a href="#" confirmed-click="removeObserver($index)"
-                                               ng-confirm-click="Do you really want to remove this observer?"
-                                               title="Remove Observer"><i
-                                                    class="fa fa-trash-o"></i></a-->
                         <a href="#" ng-click="removeObserver($index)" title="Remove Observer"><i
                                                     class="fa fa-trash-o"></i></a>
-                        <!--a href="#" title="Collapse Observer"> <i class="fa fa-minus-square-o"></i></a-->
                       </div>
-                      <div ng-hide="isMenu">
+                      <div ng-hide="isMenu($index)">
                         <i class="fa fa-eye"></i>
                       </div>
                     </div>
                   </div>
-                  <div ng-show="!isCollapsed" ng-class="{'observer-content observer-box  observer-highlight': selected, 'observer-content observer-box ': !selected}" ng-include="getIncludeFile(observer.type)"></div>
+                  <div ng-show="!isCollapsed($index)" ng-class="{'observer-content observer-box  observer-highlight': selected, 'observer-content observer-box ': !selected}" ng-include="getIncludeFile(observer.type)"></div>
                 </div>
               </div>
-              <!--button ng-click="showJson()">JSON</button-->
 
             </div>
           </div>
         </li>
-        <li>
-          <input type="radio" name="tabs" id="tab3" />
+        <li ng-click="tabsCtrl.toggleTab('events')" class="{{tabsCtrl.active === 'events' && 'active' || 'inactive' }}">
           <label for="tab3" class="tab_label">Events</label>
 
           <div id="tab-content3" class="tab-content oe-tab">
@@ -582,32 +570,26 @@
               </div>
 
               <div ng-repeat="event in data track by $index">
-                <div ng-controller="bmsElementObjectCtrl">
-                  <div ng-click="toggleCollapse()" ng-class="{'observer-header observer-box observer-highlight': selected, 'observer-header observer-box': !selected}">
+                <div>
+                  <div ng-click="toggleCollapse($index)" ng-class="{'observer-header observer-box observer-highlight': selected, 'observer-header observer-box': !selected}">
                     <span class="label-type">{{event.type}}: </span>
-                    <span class="label-selector">{{event.data.selector}}</span>
+                    <span class="label-selector">{{ event.data.selector | cut:true:18:' ...'}}</span>
 
-                    <div style="float:right" ng-mouseover="showMenu()" ng-mouseleave="hideMenu()">
-                      <div ng-show="isMenu" class="observer-menu">
+                    <div style="float:right" ng-mouseover="showMenu($index)" ng-mouseleave="hideMenu($index)">
+                      <div ng-show="isMenu($index)" class="observer-menu">
                         <a href="#" ng-click="duplicateEvent($index)" title="Duplicate Event"><i
                                                     class="fa fa-files-o"></i></a>
-                        <!--a href="#" confirmed-click="removeObserver($index)"
-                                               ng-confirm-click="Do you really want to remove this observer?"
-                                               title="Remove Observer"><i
-                                                    class="fa fa-trash-o"></i></a-->
                         <a href="#" ng-click="removeEvent($index)" title="Remove Event"><i
                                                     class="fa fa-trash-o"></i></a>
-                        <!--a href="#" title="Collapse Observer"> <i class="fa fa-minus-square-o"></i></a-->
                       </div>
-                      <div ng-hide="isMenu">
+                      <div ng-hide="isMenu($index)">
                         <i class="fa fa-eye"></i>
                       </div>
                     </div>
                   </div>
-                  <div ng-show="!isCollapsed" ng-class="{'observer-content observer-box  observer-highlight': selected, 'observer-content observer-box ': !selected}" ng-include="getIncludeFile(event.type)"></div>
+                  <div ng-show="!isCollapsed($index)" ng-class="{'observer-content observer-box  observer-highlight': selected, 'observer-content observer-box ': !selected}" ng-include="getIncludeFile(event.type)"></div>
                 </div>
               </div>
-              <!--button ng-click="showJson()">JSON</button-->
 
             </div>
 
@@ -712,18 +694,24 @@
     </div>
   </div>
 
-  <ul id="cmenu_canvas" class="contextMenu">
-    <li><a href="#cut">Cut <span class="shortcut">Ctrl+X</span></a></li>
-    <li><a href="#copy">Copy<span class="shortcut">Ctrl+C</span></a></li>
-    <li><a href="#paste">Paste<span class="shortcut">Ctrl+V</span></a></li>
-    <li class="separator"><a href="#delete">Delete</a></li>
-    <li class="separator"><a href="#group">Group<span class="shortcut">Ctrl+G</span></a></li>
-    <li><a href="#ungroup">Ungroup<span class="shortcut">Ctrl+Shift+G</span></a></li>
-    <li class="separator"><a href="#move_front">Bring to Front<span class="shortcut">Ctrl+Shift+Up</span></a></li>
-    <li><a href="#move_up">Bring Forward<span class="shortcut">Ctrl+Up</span></a></li>
-    <li><a href="#move_down">Send Backward<span class="shortcut">Ctrl+Down</span></a></li>
-    <li><a href="#move_back">Send to Back<span class="shortcut">Ctrl+Shift+Down</span></a></li>
-  </ul>
+  <div ng-controller="bmsEditorContextMenuCtrl as menuCtrl">
+    <ul id="cmenu_canvas" class="contextMenu">
+      <li><a href="#cut">Cut <span class="shortcut">Ctrl+X</span></a></li>
+      <li><a href="#copy">Copy<span class="shortcut">Ctrl+C</span></a></li>
+      <li><a href="#paste">Paste<span class="shortcut">Ctrl+V</span></a></li>
+      <li class="separator"><a href="#delete">Delete</a></li>
+      <li class="separator"><a href="#group">Group<span class="shortcut">Ctrl+G</span></a></li>
+      <li><a href="#ungroup">Ungroup<span class="shortcut">Ctrl+Shift+G</span></a></li>
+      <li class="separator"><a href="#move_front">Bring to Front<span class="shortcut">Ctrl+Shift+Up</span></a></li>
+      <li><a href="#move_up">Bring Forward<span class="shortcut">Ctrl+Up</span></a></li>
+      <li><a href="#move_down">Send Backward<span class="shortcut">Ctrl+Down</span></a></li>
+      <li><a href="#move_back">Send to Back<span class="shortcut">Ctrl+Shift+Down</span></a></li>
+      <li class="separator"></li>
+      <li ng-repeat="item in menuCtrl.addObserverItems track by $index" ng-show="{{item.show}}"><a href="#" ng-click="item.click()">{{item.label}}</a></li>
+      <li class="separator"></li>
+      <li ng-repeat="item in menuCtrl.addEventItems track by $index" ng-show="{{item.show}}"><a href="#" ng-click="item.click()">{{item.label}}</a></li>
+    </ul>
+  </div>
 
 </body>
 

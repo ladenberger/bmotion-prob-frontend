@@ -6,6 +6,9 @@ define(['jquery'], function ($) {
 
     var api = {
 
+        inArray: function(obj, array) {
+          return !($.inArray(obj, array) === -1);
+        },
         mapFilter: function (arr, func) {
             return arr.map(func).filter(function (x) {
                 return typeof x !== 'undefined';
