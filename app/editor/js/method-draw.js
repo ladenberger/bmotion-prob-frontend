@@ -3553,8 +3553,17 @@ define(["jquery", "touch", "jquery.hotkeys", "jquery.bbq",
           },
 
           // Shortcuts not associated with buttons
-
           {
+            key: 'ctrl+s',
+            fn: function() {
+              setTimeout(function() {
+                svgCanvas.clearSelection();
+                var svgContent = svgCanvas.getSvgString();
+                var parentScope = window.parent.angular.element(window.frameElement).scope();
+                parentScope.save(svgContent);
+              }, 0);
+            }
+          }, {
             key: 'ctrl+left',
             fn: function() {
               rotateSelected(0, 1)
