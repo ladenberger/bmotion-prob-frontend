@@ -390,23 +390,23 @@ define(['angular', 'jquery', 'bms.visualization', 'prob.observers'], function(an
             try {
               var observerInstance = $injector.get(o.type, "");
             } catch (err) {
-              // TODO: Return some error
-            }
-
-            var check = true;
-            if (observerInstance && (typeof observerInstance.shouldBeChecked === "function")) {
-              var check = observerInstance.shouldBeChecked(visualizationId, o);
-            }
-            if (check) {
-              var oe = container.find(o.data.selector);
-              if (oe.length) { // If element(s) exist(s)
-                oe.each(function() {
-                  var e = $(this);
-                  if (!e.data('observers')) {
-                    e.data('observers', []);
-                  }
-                  e.data('observers').push(o);
-                });
+              // TODO: Do we need to return an error?
+            } finally {
+              var check = true;
+              if (observerInstance && (typeof observerInstance.shouldBeChecked === "function")) {
+                var check = observerInstance.shouldBeChecked(visualizationId, o);
+              }
+              if (check) {
+                var oe = container.find(o.data.selector);
+                if (oe.length) { // If element(s) exist(s)
+                  oe.each(function() {
+                    var e = $(this);
+                    if (!e.data('observers')) {
+                      e.data('observers', []);
+                    }
+                    e.data('observers').push(o);
+                  });
+                }
               }
             }
 

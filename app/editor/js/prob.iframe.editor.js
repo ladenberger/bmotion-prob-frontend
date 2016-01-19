@@ -2,11 +2,11 @@
  * BMotion Studio for ProB Editor Module
  *
  */
-define(['prob.modal', 'bms.common', 'bms.nodejs', 'ng-electron'], function() {
+define(['jquery', 'prob.modal', 'bms.common', 'bms.nodejs', 'ng-electron'], function($) {
 
   var module = angular.module('prob.iframe.editor', ['prob.modal', 'bms.common', 'bms.nodejs', 'ngElectron'])
-    .directive('bmsVisualisationEditor', ['bmsVisualizationService', 'bmsModalService', 'bmsMainService', '$q', '$http', 'fs', '$rootScope', 'electron',
-      function(bmsVisualizationService, bmsModalService, bmsMainService, $q, $http, fs, $rootScope, electron) {
+    .directive('bmsVisualisationEditor', ['bmsVisualizationService', 'bmsModalService', 'bmsMainService', '$q', '$timeout', '$http', 'fs', '$rootScope', 'electron',
+      function(bmsVisualizationService, bmsModalService, bmsMainService, $q, $timeout, $http, fs, $rootScope, electron) {
         return {
           replace: false,
           scope: {
@@ -15,7 +15,7 @@ define(['prob.modal', 'bms.common', 'bms.nodejs', 'ng-electron'], function() {
             view: '@bmsVisualisationView',
             sessionId: '@bmsVisualisationEditor'
           },
-          template: '<iframe src="editor/editor.html" class="editorIframe"></iframe>',
+          template: '<iframe src="editor/editor.html" id="bla" class="editorIframe"></iframe>',
           controller: ['$scope', '$rootScope', function($scope, $rootScope) {
 
             // Parent API (called from prob.template)
@@ -146,7 +146,14 @@ define(['prob.modal', 'bms.common', 'bms.nodejs', 'ng-electron'], function() {
             };
 
           }],
-          link: function($scope, $element, attrs, ctrl) {}
+          link: function($scope, $element, attrs, ctrl) {
+            $scope.$on('selectEditorTab', function() {
+              $timeout(function() {
+                var iframe = $element.contents();
+                iframe[0].focus();
+              }, 0);
+            });
+          }
         }
       }
     ]);

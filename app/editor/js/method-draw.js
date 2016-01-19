@@ -2568,9 +2568,10 @@ define(["jquery", "touch", "jquery.hotkeys", "jquery.bbq",
 
       var minimizeModal = function() {
 
-        if (window.self != window.top) { //we're in an iframe
+        /*if (window.self != window.top) { //we're in an iframe
           top.exit_fullscreen();
-        }
+        }*/
+
       }
 
       var clickRulers = function() {

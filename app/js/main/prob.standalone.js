@@ -560,6 +560,7 @@ define(['angular', 'jquery', 'socketio', 'angularAMD', 'bms.func', 'bms.tabs', '
         self.selectEditorTab = function(svg) {
           self.currentSvg = svg;
           self.lastTab = 'editor';
+          $rootScope.$broadcast('selectEditorTab');
           $rootScope.$broadcast('hideDialog');
         };
 
