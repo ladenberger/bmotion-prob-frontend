@@ -34,14 +34,12 @@ define(['angular', 'bms.func', 'jquery', 'prob.observers', 'prob.modal'], functi
                 // Collect values from observers
                 bmsObserverService.checkObservers($scope.sessionId, $scope.id, observers, $scope.visualization.container.contents(), stateId, cause)
                   .then(function(data) {
-                    var fvalues = {};
                     angular.forEach(data, function(value) {
                       if (value !== undefined) {
-                        $.extend(true, fvalues, value);
+                        $.extend(true, $scope.values, value);
                       }
                     });
-                    if (!bms.isEmpty(fvalues)) {
-                      $scope.values = fvalues;
+                    if (!bms.isEmpty($scope.values)) {
                       $scope.applyValues();
                     }
                   });
@@ -222,7 +220,6 @@ define(['angular', 'bms.func', 'jquery', 'prob.observers', 'prob.modal'], functi
             };
 
             $scope.applyValues = function() {
-
               for (bmsid in $scope.values) {
                 if ($scope.attrs[bmsid] === undefined) {
                   $scope.attrs[bmsid] = [];
