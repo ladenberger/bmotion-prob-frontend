@@ -508,12 +508,21 @@ define(['angular', 'jquery', 'bms.visualization', 'prob.observers'], function(an
 
           var observers = bmsVisualizationService.getObservers(visualizationId);
           angular.forEach(observers, function(o) {
-            //var oe = container.find(o.data.selector);
-            //if (oe.length) { // If element(s) exist(s)
-            elementIds.push({
-              selector: o.data.selector
-            });
-            //}
+
+            try {
+              var observerInstance = $injector.get(o.type, "");
+            } catch (err) {
+              // TODO: Return some error
+            } finally {
+              if (observerInstance && (typeof observerInstance.shouldBeChecked === "function")) {
+                if (observerInstance.shouldBeChecked(visualizationId, o)) {
+                  elementIds.push({
+                    selector: o.data.selector
+                  });
+                }
+              }
+            }
+
           });
 
           return elementIds;
