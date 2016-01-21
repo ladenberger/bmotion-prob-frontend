@@ -486,7 +486,7 @@ app.on('ready', function() {
     if (data.type === 'buildWelcomeMenu') {
       var mainMenu = new Menu();
       buildWelcomeMenu(mainMenu);
-      if (process.platform == 'darwin') {
+      if (process.platform == 'darwin' && data['win'] === 1) {
         Menu.setApplicationMenu(mainMenu);
       } else {
         mainWindow.setMenu(mainMenu);
@@ -497,20 +497,16 @@ app.on('ready', function() {
       buildVisualizationMenu(mainMenu, data['tool'], data['addMenu']);
       if (process.platform == 'darwin' && data['win'] === 1) {
         Menu.setApplicationMenu(mainMenu);
-      } else {
-        mainWindow.setMenu(mainMenu);
       }
       win.setMenu(mainMenu);
-
     } else if (data.type === 'buildModelMenu') {
       var mainMenu = new Menu();
       var win = BrowserWindow.fromId(data['win']);
       buildModelMenu(mainMenu, data['tool'], data['addMenu']);
-      if (process.platform == 'darwin') {
+      if (process.platform == 'darwin' && data['win'] === 1) {
         Menu.setApplicationMenu(mainMenu);
-      } else {
-        mainWindow.setMenu(mainMenu);
       }
+      win.setMenu(mainMenu);
     } else if (data.type === 'setWindows') {
       viewWindows = data.data;
     } else if (data.type === 'cleanUp') {
