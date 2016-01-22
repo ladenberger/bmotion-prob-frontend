@@ -37,7 +37,8 @@ def download_cli(target, probVersion) {
     def d = new File(dir)
     delete file(d)
     d.mkdirs();
-    def url = "http://nightly.cobra.cs.uni-duesseldorf.de/tmp/" + probVersion + "/probcli_" + downloadFile + ".zip"
+    //def url = "http://nightly.cobra.cs.uni-duesseldorf.de/tmp/" + probVersion + "/probcli_" + downloadFile + ".zip"
+    def url = "https://www3.hhu.de/stups/downloads/prob/cli/nightly/probcli_" + downloadFile + ".zip"
     //def nwurl = "http://nightly.cobra.cs.uni-duesseldorf.de/cli/probcli_"+downloadFile+".zip"
     println "Downloading cli for " + target + " ..."
     def String targetzip = dir + "probcli.zip"
