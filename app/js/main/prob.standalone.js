@@ -442,9 +442,9 @@ define(['angular', 'jquery', 'socketio', 'angularAMD', 'bms.func', 'bms.tabs', '
                 checkIfConnectionExists()
                   .then(function(connected) {
                     startServer(connected, configData)
-                      .then(function() {
-                        return checkProbCli(configData);
-                      })
+                      //.then(function() {
+                      //  return checkProbCli(configData);
+                      //})
                       .then(function() {
                         defer.resolve();
                       }, function(error) {
