@@ -249,9 +249,10 @@ define(['angular', 'angularAMD', 'code-mirror!javascript', 'jquery.jgraduate', '
 
         $scope.openJsEditor = function(fn, el) {
           var doc = {
-            description: 'The ' + fn + '  function will be called after every state change with its ' +
-              '<i>origin</i> reference set to the graphical element that the observer is attached to ' +
-              'and the <i>values</i> of the formulas. The <i>origin</i> is a jQuery selector element. ' +
+            description: 'The ' + fn + '  function will be called after initialising the machine ' +
+              '(if the given refinement is '+ fn + 'd in the animation) with its ' +
+              '<i>origin</i> reference set to the graphical element that the observer is attached to. ' +
+              'The <i>origin</i> is a jQuery selector element. ' +
               'Consult the <a href="http://api.jquery.com/" target="_blank">jQuery API</a> for more ' +
               'information regarding accessing or manipulating the <i>origin</i> ' +
               '(e.g. <a href="http://api.jquery.com/category/attributes/" target="_blank">set and get attributes</a>).',
