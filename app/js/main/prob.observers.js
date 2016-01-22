@@ -544,16 +544,14 @@ define(['bms.func', 'jquery', 'angular', 'qtip', 'prob.modal'], function(bms, $,
             el.each(function(i, v) {
               var rr;
               var e = $(v);
-              var refs = bms.callOrReturn(observer.data["refinements"], e);
-              var observerRefinements = Object.prototype.toString.call(refs) !== '[object Array]' ? [refs] : refs;
+              var ref = bms.callOrReturn(observer.data["refinement"], e);
+              //var observerRefinements = Object.prototype.toString.call(refs) !== '[object Array]' ? [refs] : refs;
               // TODO: Maybe an intersection of both arrays (visRefinements and observerRefinements) would be more efficient.
-              angular.forEach(observerRefinements, function(v) {
-                if ($.inArray(v, visRefinements) > -1) {
-                  rr = bms.callOrReturn(observer.data['enable'], e);
-                } else {
-                  rr = bms.callOrReturn(observer.data['disable'], e);
-                }
-              });
+              if ($.inArray(ref, visRefinements) > -1) {
+                rr = bms.callOrReturn(observer.data['enable'], e);
+              } else {
+                rr = bms.callOrReturn(observer.data['disable'], e);
+              }
               if (rr) {
                 var bmsid = bmsObserverService.getBmsIdForElement(e);
                 obj[bmsid] = rr;

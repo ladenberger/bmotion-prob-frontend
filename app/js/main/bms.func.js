@@ -74,11 +74,10 @@ define(['jquery'], function($) {
         api._s4() + '-' + api._s4() + api._s4() + api._s4();
     },
     callOrReturn: function(subject, element) {
-      if (Object.prototype.toString.call(subject) === '[object Object]' || Object.prototype.toString.call(subject) === '[object Array]') {
-        return subject;
-      } else if (api.isFunction(subject)) {
-        // TODO: Check if return value is a valid transformer object
+      if (api.isFunction(subject)) {
         return subject.call(this, element);
+      } else {
+        return subject;
       }
     }
   };
