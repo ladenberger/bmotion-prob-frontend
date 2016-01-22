@@ -242,6 +242,30 @@ define(['angular', 'angularAMD', 'code-mirror!javascript', 'jquery.jgraduate', '
         }
       };
     }])
+    .controller('bmsObserverRefinementCtrl', ['$scope', 'bmsJsEditorService',
+      function($scope, bmsJsEditorService) {
+
+        $scope.isMenu = false;
+
+        $scope.openJsEditor = function(fn, el) {
+          var doc = {
+            description: 'The ' + fn + '  function will be called after every state change with its ' +
+              '<i>origin</i> reference set to the graphical element that the observer is attached to ' +
+              'and the <i>values</i> of the formulas. The <i>origin</i> is a jQuery selector element. ' +
+              'Consult the <a href="http://api.jquery.com/" target="_blank">jQuery API</a> for more ' +
+              'information regarding accessing or manipulating the <i>origin</i> ' +
+              '(e.g. <a href="http://api.jquery.com/category/attributes/" target="_blank">set and get attributes</a>).',
+            parameter: [{
+              name: 'origin',
+              description: 'The reference set to the graphical element that the observer is attached to.'
+            }]
+          };
+          bmsJsEditorService.openJsEditor(fn, el, doc);
+        };
+
+      }
+
+    ])
     .controller('bmsObserverFormulaCtrl', ['$scope', 'bmsJsEditorService',
       function($scope, bmsJsEditorService) {
 
@@ -418,6 +442,13 @@ define(['angular', 'angularAMD', 'code-mirror!javascript', 'jquery.jgraduate', '
           });
         };
 
+        $scope.addRefinementObserver = function() {
+          bmsEditorCommonService.addObserver("refinement", {
+            selector: "",
+            refinement: ""
+          });
+        };
+
         $scope.addCSPEventObserver = function() {
           bmsEditorCommonService.addObserver("csp-event", {
             selector: "",
@@ -582,6 +613,14 @@ define(['angular', 'angularAMD', 'code-mirror!javascript', 'jquery.jgraduate', '
             click: function() {
               addObserverEvent("observers", "formula", {
                 formulas: []
+              });
+            }
+          }, {
+            label: "Add Refinement Observer",
+            show: isBAnimation(),
+            click: function() {
+              addObserverEvent("observers", "refinement", {
+                refinement: ""
               });
             }
           }, {

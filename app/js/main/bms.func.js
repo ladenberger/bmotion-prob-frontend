@@ -77,7 +77,13 @@ define(['jquery'], function($) {
       if (api.isFunction(subject)) {
         return subject.call(this, element);
       } else {
-        return subject;
+        try {
+          // Try to convert subject to function
+          var func = new Function('origin', subject);
+          return func(element);
+        } catch (err) {
+          return subject;
+        }
       }
     }
   };

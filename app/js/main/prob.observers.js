@@ -525,9 +525,7 @@ define(['bms.func', 'jquery', 'angular', 'qtip', 'prob.modal'], function(bms, $,
       var refinementObserver = {
         getDefaultOptions: function(options) {
           return $.extend({
-            refinements: [],
-            enable: {},
-            disable: {}
+            refinement: ""
           }, options);
         },
         apply: function(sessionId, visId, observer, container) {
