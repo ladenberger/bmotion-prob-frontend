@@ -50,15 +50,15 @@ define(['angularAMD', 'angular', 'prob.graph', 'prob.iframe.template', 'prob.ui'
                 '<i class="glyphicon glyphicon glyphicon-cog"></i> Console</a></li>' +
                 '</ul>' +
                 '</li>' +
-                '<li uib-dropdown>' +
-                '<a href="" uib-dropdown-toggle>Diagram <span class="caret"></span></a>' +
-                '<ul class="uib-dropdown-menu" role="menu" aria-labelledby="single-button">' +
-                '<li ng-show="nav.isBAnimation()"><a href="" ng-click="nav.openElementProjectionDiagram()">' +
-                '<i class="glyphicon glyphicon-random"></i> Element Projection</a></li>' +
-                '<li role="menuitem"><a href="" ng-click="nav.openTraceDiagram()">' +
-                '<i class="glyphicon glyphicon glyphicon-road"></i> Trace Diagram</a></li>' +
-                '</ul>' +
-                '</li>' +
+                //'<li uib-dropdown>' +
+                //'<a href="" uib-dropdown-toggle>Diagram <span class="caret"></span></a>' +
+                //'<ul class="uib-dropdown-menu" role="menu" aria-labelledby="single-button">' +
+                //'<li ng-show="nav.isBAnimation()"><a href="" ng-click="nav.openElementProjectionDiagram()">' +
+                //'<i class="glyphicon glyphicon-random"></i> Element Projection</a></li>' +
+                //'<li role="menuitem"><a href="" ng-click="nav.openTraceDiagram()">' +
+                //'<i class="glyphicon glyphicon glyphicon-road"></i> Trace Diagram</a></li>' +
+                //'</ul>' +
+                //'</li>' +
                 '</ul>' +
                 '</div>' +
                 '</div>' +
@@ -279,13 +279,14 @@ define(['angularAMD', 'angular', 'prob.graph', 'prob.iframe.template', 'prob.ui'
                     var rootView = views[0];
                     var filename = manifestPath.replace(/^.*[\\\/]/, '');
                     $location.path('/vis/' + sessionId + '/' + rootView['id'] + '/' + filename);
+                    openViews(views);
+                    defer.resolve();
                   });
 
+                } else {
+                  openViews(views);
+                  defer.resolve();
                 }
-
-                openViews(views);
-
-                defer.resolve();
 
               });
 
