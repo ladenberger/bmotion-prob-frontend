@@ -15,15 +15,106 @@ define(['angularAMD', 'angular', 'prob.graph', 'prob.iframe.template', 'prob.ui'
         function($routeProvider) {
           $routeProvider
             .when('/', {
-              template: '<div class="navbar navbar-default navbar-fixed-bottom" role="navigation">' + '<div class="container-fluid">' + '<div class="navbar-header">' + '<a class="navbar-brand" href="">BMotion Studio for ProB</a>' + '</div>' + '</div>' + '</div>',
+              template: '<div class="navbar navbar-default navbar-fixed-bottom" role="navigation">' +
+                '<div class="container-fluid">' +
+                '<div class="navbar-header"><a class="navbar-brand" href="">BMotion Studio for ProB</a></div>' +
+                '</div>' +
+                '</div>',
               controller: 'bmsOnlineHomeCtrl'
             })
             .when('/vis/:sessionId/:view/:file', {
-              template: '<div ng-controller="bmsVisualizationCtrl as vis" class="fullWidthHeight">' + '<div data-bms-visualisation-session="{{vis.sessionId}}" data-bms-visualisation-view="{{vis.view}}"  data-bms-visualisation-file="{{vis.file}}" class="fullWidthHeight"></div>' + '</div>' + '<div ng-controller="bmsUiNavigationCtrl as nav">' + '<div class="navbar navbar-default navbar-fixed-bottom" role="navigation">' + '<div class="container-fluid">' + '<div class="navbar-header">' + '<a class="navbar-brand" href="">BMotion Studio for ProB</a>' + '</div>' + '<div class="collapse navbar-collapse">' + '<ul class="nav navbar-nav navbar-right" id="bmotion-navigation">' + '<li uib-dropdown>' + '<a href="" uib-dropdown-toggle>ProB<span class="caret"></span></a>' + '<ul class="uib-dropdown-menu" role="menu" aria-labelledby="single-button">' + '<li role="menuitem"><a href="" ng-click="nav.openDialog(\'CurrentTrace\')">' + '<i class="glyphicon glyphicon-indent-left"></i> History</a></a></li>' + '<li role="menuitem"><a href="" ng-click="nav.openDialog(\'Events\')">' + '<i class="glyphicon glyphicon-align-left"></i> Events</a></li>' + '<li role="menuitem"><a href="" ng-click="nav.openDialog(\'StateInspector\')">' + '<i class="glyphicon glyphicon-list-alt"></i> State</a></li>' + '<li role="menuitem"><a href="" ng-click="nav.openDialog(\'CurrentAnimations\')">' + '<i class="glyphicon glyphicon-th-list"></i> Animations</a></li>' + '<li role="menuitem"><a href="" ng-click="nav.openDialog(\'ModelCheckingUI\')">' + '<i class="glyphicon glyphicon-ok"></i> Model Checking</a></li>' + '<li role="menuitem"><a href="" ng-click="nav.openDialog(\'BConsole\')">' + '<i class="glyphicon glyphicon glyphicon-cog"></i> Console</a></li>' + '</ul>' + '</li>' + '<li uib-dropdown>' + '<a href="" uib-dropdown-toggle>Diagram <span class="caret"></span></a>' + '<ul class="uib-dropdown-menu" role="menu" aria-labelledby="single-button">' + '<li ng-show="nav.isBAnimation()"><a href="" ng-click="nav.openElementProjectionDiagram()">' + '<i class="glyphicon glyphicon-random"></i> Element Projection</a></li>' + '<li role="menuitem"><a href="" ng-click="nav.openTraceDiagram()">' + '<i class="glyphicon glyphicon glyphicon-road"></i> Trace Diagram</a></li>' + '</ul>' + '</li>' + '</ul>' + '</div>' + '</div>' + '</div>' + '</div>' + '<div bms-dialog type="CurrentTrace" title="History">' + '<div prob-view></div>' + '</div>' + '<div bms-dialog type="Events" title="Events">' + '<div prob-view></div>' + '</div>' + '<div bms-dialog type="StateInspector" title="State">' + '<div prob-view></div>' + '</div>' + '<div bms-dialog type="CurrentAnimations" title="Animations">' + '<div prob-view></div>' + '</div>' + '<div bms-dialog type="BConsole" title="Console">' + '<div prob-view></div>' + '</div>' + '<div bms-dialog type="ModelCheckingUI" title="ModelChecking">' + '<div prob-view></div>' + '</div>'
+              template: '<div ng-controller="bmsVisualizationCtrl as vis" class="fullWidthHeight">' +
+                '<div data-bms-visualisation-session="{{vis.sessionId}}" data-bms-visualisation-view="{{vis.view}}"  data-bms-visualisation-file="{{vis.file}}" class="fullWidthHeight"></div>' +
+                '<div ng-controller="bmsUiNavigationCtrl as nav">' +
+                '<div class="navbar navbar-default navbar-fixed-bottom" role="navigation">' +
+                '<div class="container-fluid">' +
+                '<div class="navbar-header">' +
+                '<a class="navbar-brand" href="">BMotion Studio for ProB</a>' +
+                '</div>' +
+                '<div class="collapse navbar-collapse">' +
+                '<ul class="nav navbar-nav navbar-right" id="bmotion-navigation">' +
+                '<li uib-dropdown>' +
+                '<a href="" uib-dropdown-toggle>ProB<span class="caret"></span></a>' +
+                '<ul class="uib-dropdown-menu" role="menu" aria-labelledby="single-button">' +
+                '<li role="menuitem"><a href="" ng-click="nav.openDialog(\'CurrentTrace\')">' +
+                '<i class="glyphicon glyphicon-indent-left"></i> History</a></a></li>' +
+                '<li role="menuitem"><a href="" ng-click="nav.openDialog(\'Events\')">' +
+                '<i class="glyphicon glyphicon-align-left"></i> Events</a></li>' +
+                '<li role="menuitem"><a href="" ng-click="nav.openDialog(\'StateInspector\')">' +
+                '<i class="glyphicon glyphicon-list-alt"></i> State</a></li>' +
+                '<li role="menuitem"><a href="" ng-click="nav.openDialog(\'CurrentAnimations\')">' +
+                '<i class="glyphicon glyphicon-th-list"></i> Animations</a></li>' +
+                '<li role="menuitem"><a href="" ng-click="nav.openDialog(\'ModelCheckingUI\')">' +
+                '<i class="glyphicon glyphicon-ok"></i> Model Checking</a></li>' +
+                '<li role="menuitem"><a href="" ng-click="nav.openDialog(\'BConsole\')">' +
+                '<i class="glyphicon glyphicon glyphicon-cog"></i> Console</a></li>' +
+                '</ul>' +
+                '</li>' +
+                '<li uib-dropdown>' +
+                '<a href="" uib-dropdown-toggle>Diagram <span class="caret"></span></a>' +
+                '<ul class="uib-dropdown-menu" role="menu" aria-labelledby="single-button">' +
+                '<li ng-show="nav.isBAnimation()"><a href="" ng-click="nav.openElementProjectionDiagram()">' +
+                '<i class="glyphicon glyphicon-random"></i> Element Projection</a></li>' +
+                '<li role="menuitem"><a href="" ng-click="nav.openTraceDiagram()">' +
+                '<i class="glyphicon glyphicon glyphicon-road"></i> Trace Diagram</a></li>' +
+                '</ul>' +
+                '</li>' +
+                '</ul>' +
+                '</div>' +
+                '</div>' +
+                '</div>' +
+                '</div>' +
+                '<div bms-dialog type="CurrentTrace" title="History"><div prob-view></div></div>' +
+                '<div bms-dialog type="Events" title="Events"><div prob-view></div></div>' +
+                '<div bms-dialog type="StateInspector" title="State"><div prob-view></div></div>' +
+                '<div bms-dialog type="CurrentAnimations" title="Animations"><div prob-view></div></div>' +
+                '<div bms-dialog type="BConsole" title="Console"><div prob-view></div></div>' +
+                '<div bms-dialog type="ModelCheckingUI" title="ModelChecking"><div prob-view></div></div>' +
+                '<div ng-controller="bmsViewsCtrl as tabsCtrl">' +
+                '<div ng-repeat="view in tabsCtrl.views track by $index" bms-dialog state="open" width="{{view.width}}" height="{{view.height}}" title="View ({{view.id}})">' +
+                '<div data-bms-visualisation-session="{{vis.sessionId}}" data-bms-visualisation-view="{{view.id}}" data-bms-visualisation-file="{{vis.file}}" class="fullWidthHeight"></div>' +
+                '</div>' +
+                '</div>' +
+                '</div>',
               controller: 'bmsOnlineVisualizationCtrl'
             })
             .when('/model/:sessionId/:win/:tool', {
-              template: '<div ng-controller="bmsUiNavigationCtrl as nav">' + '<div class="navbar navbar-default navbar-fixed-bottom" role="navigation">' + '<div class="container-fluid">' + '<div class="navbar-header">' + '<a class="navbar-brand" href="">BMotion Studio for ProB</a>' + '</div>' + '<div class="collapse navbar-collapse">' + '<ul class="nav navbar-nav navbar-right" id="bmotion-navigation">' + '<li uib-dropdown>' + '<a href="" uib-dropdown-toggle>ProB<span class="caret"></span></a>' + '<ul class="uib-dropdown-menu" role="menu" aria-labelledby="single-button">' + '<li role="menuitem"><a href="" ng-click="nav.openDialog(\'CurrentTrace\')">' + '<i class="glyphicon glyphicon-indent-left"></i> History</a></a></li>' + '<li role="menuitem"><a href="" ng-click="nav.openDialog(\'Events\')">' + '<i class="glyphicon glyphicon-align-left"></i> Events</a></li>' + '<li role="menuitem"><a href="" ng-click="nav.openDialog(\'StateInspector\')">' + '<i class="glyphicon glyphicon-list-alt"></i> State</a></li>' + '<li role="menuitem"><a href="" ng-click="nav.openDialog(\'CurrentAnimations\')">' + '<i class="glyphicon glyphicon-th-list"></i> Animations</a></li>' + '<li role="menuitem"><a href="" ng-click="nav.openDialog(\'ModelCheckingUI\')">' + '<i class="glyphicon glyphicon-ok"></i> Model Checking</a></li>' + '<li role="menuitem"><a href="" ng-click="nav.openDialog(\'BConsole\')">' + '<i class="glyphicon glyphicon glyphicon-cog"></i> Console</a></li>' + '</ul>' + '</li>' + '</ul>' + '</div>' + '</div>' + '</div>' + '</div>' + '<div bms-dialog type="CurrentTrace" title="History">' + '<div prob-view></div>' + '</div>' + '<div bms-dialog type="Events" title="Events">' + '<div prob-view></div>' + '</div>' + '<div bms-dialog type="StateInspector" title="State">' + '<div prob-view></div>' + '</div>' + '<div bms-dialog type="CurrentAnimations" title="Animations">' + '<div prob-view></div>' + '</div>' + '<div bms-dialog type="ModelCheckingUI" title="ModelChecking">' + '<div prob-view></div>' + '</div>' + '<div bms-dialog type="BConsole" title="Console">' + '<div prob-view></div>' + '</div>' + '<div ng-controller="bmsElementProjectionModalCtrl">' + '</div>' + '<div ng-controller="bmsTraceDiagramModalCtrl">' + '</div>',
+              template: '<div ng-controller="bmsUiNavigationCtrl as nav">' +
+                '<div class="navbar navbar-default navbar-fixed-bottom" role="navigation">' +
+                '<div class="container-fluid">' +
+                '<div class="navbar-header">' +
+                '<a class="navbar-brand" href="">BMotion Studio for ProB</a>' +
+                '</div>' +
+                '<div class="collapse navbar-collapse">' +
+                '<ul class="nav navbar-nav navbar-right" id="bmotion-navigation">' +
+                '<li uib-dropdown>' +
+                '<a href="" uib-dropdown-toggle>ProB<span class="caret"></span></a>' +
+                '<ul class="uib-dropdown-menu" role="menu" aria-labelledby="single-button">' +
+                '<li role="menuitem"><a href="" ng-click="nav.openDialog(\'CurrentTrace\')">' +
+                '<i class="glyphicon glyphicon-indent-left"></i> History</a></a></li>' +
+                '<li role="menuitem"><a href="" ng-click="nav.openDialog(\'Events\')">' +
+                '<i class="glyphicon glyphicon-align-left"></i> Events</a></li>' +
+                '<li role="menuitem"><a href="" ng-click="nav.openDialog(\'StateInspector\')">' +
+                '<i class="glyphicon glyphicon-list-alt"></i> State</a></li>' +
+                '<li role="menuitem"><a href="" ng-click="nav.openDialog(\'CurrentAnimations\')">' +
+                '<i class="glyphicon glyphicon-th-list"></i> Animations</a></li>' +
+                '<li role="menuitem"><a href="" ng-click="nav.openDialog(\'ModelCheckingUI\')">' +
+                '<i class="glyphicon glyphicon-ok"></i> Model Checking</a></li>' +
+                '<li role="menuitem"><a href="" ng-click="nav.openDialog(\'BConsole\')">' +
+                '<i class="glyphicon glyphicon glyphicon-cog"></i> Console</a></li>' +
+                '</ul>' +
+                '</li>' +
+                '</ul>' +
+                '</div>' +
+                '</div>' +
+                '</div>' +
+                '</div>' +
+                '<div bms-dialog type="CurrentTrace" title="History"><div prob-view></div></div>' +
+                '<div bms-dialog type="Events" title="Events"><div prob-view></div></div>' +
+                '<div bms-dialog type="StateInspector" title="State"><div prob-view></div></div>' +
+                '<div bms-dialog type="CurrentAnimations" title="Animations"><div prob-view></div></div>' +
+                '<div bms-dialog type="ModelCheckingUI" title="ModelChecking"><div prob-view></div></div>' +
+                '<div bms-dialog type="BConsole" title="Console"><div prob-view></div></div>',
               controller: 'bmsOnlineModelCtrl'
             })
             .otherwise({
@@ -40,9 +131,6 @@ define(['angularAMD', 'angular', 'prob.graph', 'prob.iframe.template', 'prob.ui'
           } else if (model) {
             initModelService(model);
           }
-          //else {
-          //    bmsModalService.openErrorDialog("Please provide path to bmotion.json file.<br/>Append \"\?path=[relative path to bmotion.json file]\" to URL.");
-          //}
         }
       ])
       .controller('bmsOnlineVisualizationCtrl', ['$scope',
@@ -70,24 +158,28 @@ define(['angularAMD', 'angular', 'prob.graph', 'prob.iframe.template', 'prob.ui'
           self.file = $routeParams.file;
         }
       ])
-      .directive('bmsVisualization', ['initVisualizationService', '$routeParams', 'bmsModalService',
-        function(initVisualizationService, $routeParams, bmsModalService) {
+      .directive('bmsVisualization', ['$routeParams', '$compile', 'initVisualizationService', 'bmsModalService', 'bmsManifestService',
+        function($routeParams, $compile, initVisualizationService, bmsModalService, bmsManifestService) {
           return {
             replace: true,
             scope: {},
             controller: ['$scope', function($scope) {}],
             link: function($scope, element, attrs) {
+
               element.attr('class', 'fullWidthHeight');
-              var view = $routeParams.view;
-              var sessionId = $routeParams.sessionId;
-              if (!sessionId && !view) {
-                var path = attrs['bmsVisualization'];
-                if (path) {
-                  initVisualizationService(path);
-                } else {
-                  bmsModalService.setMessage("Please provide path to BMotion Studio manifest file.");
-                }
+              element.append($compile('<div ng-view class="fullWidthHeight"></div>')($scope));
+
+              var path = attrs['bmsVisualization'];
+              if (path) {
+                bmsModalService.loading("Initialising visualization ...");
+                initVisualizationService(path)
+                  .then(function() {
+                    bmsModalService.endLoading();
+                  });
+              } else {
+                bmsModalService.setMessage("Please provide path to BMotion Studio manifest file.");
               }
+
             }
           }
         }
@@ -112,8 +204,36 @@ define(['angularAMD', 'angular', 'prob.graph', 'prob.iframe.template', 'prob.ui'
           }
         }
       ])
-      .factory('initVisualizationService', ['$q', '$location', 'bmsSessionService', 'bmsManifestService', 'bmsMainService', 'bmsModalService',
-        function($q, $location, bmsSessionService, bmsManifestService, bmsMainService, bmsModalService) {
+      .controller('bmsViewsCtrl', ['$scope', 'bmsOnlineViewService',
+        function($scope, bmsOnlineViewService) {
+
+          var self = this;
+          self.views = bmsOnlineViewService.getViews();
+
+          $scope.$watch(function() {
+            return bmsOnlineViewService.getViews();
+          }, function(newValue) {
+            self.views = newValue;
+          }, true);
+
+        }
+      ])
+      .factory('bmsOnlineViewService', function() {
+
+        var views = [];
+
+        return {
+          addView: function(view) {
+            views.push(view);
+          },
+          getViews: function() {
+            return views;
+          }
+        };
+
+      })
+      .factory('initVisualizationService', ['$q', '$location', 'bmsOnlineViewService', 'bmsSessionService', 'bmsManifestService', 'bmsModalService', '$routeParams',
+        function($q, $location, bmsOnlineViewService, bmsSessionService, bmsManifestService, bmsModalService, $routeParams) {
 
           var initVisualizationSession = function(modelPath, tool, options, manifestFilePath) {
             var defer = $q.defer();
@@ -126,35 +246,55 @@ define(['angularAMD', 'angular', 'prob.graph', 'prob.iframe.template', 'prob.ui'
             return defer.promise;
           };
 
-          return function(manifestFilePath) {
+          var openViews = function(views) {
+            angular.forEach(views, function(view, i) {
+              if (i > 0) { // Ignore root view with id 1
+                bmsOnlineViewService.addView(view);
+              }
+            });
+          };
 
-            bmsModalService.loading("Initialising visualisation ...");
+          return function(manifestPath) {
 
-            bmsManifestService.validate(manifestFilePath)
+            var defer = $q.defer();
+
+            bmsManifestService.validate(manifestPath)
               .then(function(manifestData) {
                 return bmsManifestService.normalize(manifestData);
               }, function(errors) {
                 bmsModalService.openErrorDialog(errors);
               })
-              .then(function(normalizedManifestData) {
+              .then(function(data) {
 
-                initVisualizationSession(normalizedManifestData['model'], normalizedManifestData['tool'], normalizedManifestData['prob'], manifestFilePath)
-                  .then(function(sessionId) {
-                    // TODO: Handle multiple views in online mode!
-                    var views = normalizedManifestData['views'];
-                    var view = views[0];
-                    var filename = manifestFilePath.replace(/^.*[\\\/]/, '');
-                    $location.path('/vis/' + sessionId + '/' + view.id + '/' + filename);
-                    bmsModalService.endLoading();
-                  }, function(errors) {
-                    bmsModalService.openErrorDialog(errors);
+                var views = data['views'];
+
+                if (!$routeParams.sessionId && !$routeParams.view) {
+
+                  initVisualizationSession(
+                    data['model'],
+                    data['tool'],
+                    data['prob'],
+                    manifestPath
+                  ).then(function(sessionId) {
+                    var rootView = views[0];
+                    var filename = manifestPath.replace(/^.*[\\\/]/, '');
+                    $location.path('/vis/' + sessionId + '/' + rootView['id'] + '/' + filename);
                   });
+
+                }
+
+                openViews(views);
+
+                defer.resolve();
 
               });
 
-          }
+            return defer.promise;
+
+          };
 
         }
+
       ])
       .factory('initModelService', ['$rootScope', '$location', 'bmsSessionService', 'bmsManifestService', 'bmsMainService', 'bmsModalService',
         function($rootScope, $location, bmsSessionService, bmsManifestService, bmsMainService, bmsModalService) {

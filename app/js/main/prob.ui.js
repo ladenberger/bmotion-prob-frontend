@@ -59,7 +59,10 @@ define(['jquery', 'angular', 'jquery-ui', 'ui-bootstrap', 'bms.config'], functio
       return {
         scope: {
           type: '@',
-          title: '@'
+          title: '@',
+          state: '@',
+          width: '@',
+          height: '@'
         },
         controller: ['$scope', function($scope) {
 
@@ -75,7 +78,9 @@ define(['jquery', 'angular', 'jquery-ui', 'ui-bootstrap', 'bms.config'], functio
             close: []
           };
 
-          self.state = 'close';
+          self.state = $scope.state ? $scope.state : 'close';
+          self.width = $scope.width ? $scope.width : 400;
+          self.height = $scope.height ? $scope.height : 450;
           self.hidden = false;
 
           self.getType = function() {
@@ -98,6 +103,14 @@ define(['jquery', 'angular', 'jquery-ui', 'ui-bootstrap', 'bms.config'], functio
 
           self.isOpen = function() {
             return self.state === 'open' ? true : false;
+          };
+
+          self.getWidth = function() {
+            return self.width;
+          };
+
+          self.getHeight = function() {
+            return self.height;
           };
 
           self.open = function() {
@@ -181,8 +194,8 @@ define(['jquery', 'angular', 'jquery-ui', 'ui-bootstrap', 'bms.config'], functio
               ctrl.propagateEvent('close');
             },
             autoOpen: ctrl.isOpen(),
-            width: 400,
-            height: 450,
+            width: ctrl.getWidth(),
+            height: ctrl.getHeight(),
             title: $scope.title
           });
 
