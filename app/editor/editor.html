@@ -184,6 +184,27 @@
               </label>
             </div>
 
+            <div id="iarea_panel" class="context_panel">
+              <h4 class="clearfix">Ineractive Button Area</h4>
+              <label>
+                <input id="iarea_x" class="attr_changer" data-title="Change X coordinate" size="3" data-attr="x" pattern="[0-9]*" />
+                <span>X</span>
+              </label>
+              <label>
+                <input id="iarea_y" class="attr_changer" data-title="Change Y coordinate" size="3" data-attr="y" pattern="[0-9]*" />
+                <span>Y</span>
+              </label>
+              <label id="iarea_width_tool attr_changer" data-title="Change Interactive Button Area Width">
+                <input id="iarea_width" class="attr_changer" size="3" data-attr="width" type="text" pattern="[0-9]*" />
+                <span class="icon_label">Width</span>
+              </label>
+              <label id="iarea_height_tool" data-title="Change Interactive Button Area Height">
+                <input id="iarea_height" class="attr_changer" size="3" data-attr="height" type="text" pattern="[0-9]*" />
+                <span class="icon_label">Height</span>
+              </label>
+              <div class="clearfix"></div>
+            </div>
+
             <div id="path_panel" class="context_panel clearfix">
               <h4 class="clearfix">Path</h4>
               <label>
@@ -383,17 +404,23 @@
               <!--<div class="tool_button" id="tool_add_subpath" title="Add sub-path"></div>-->
             </div>
 
-            <!-- Buttons when a single element is selected -->
-            <div id="selected_panel" class="context_panel">
-
+            <div id="common_panel" class="context_panel">
               <label id="tool_angle" data-title="Change rotation angle" class="draginput">
                 <input id="angle" class="attr_changer" size="2" value="0" data-attr="transform" data-min="-180" data-max="180" type="text" />
                 <span class="icon_label">Rotation</span>
-
                 <div id="tool_angle_indicator">
                   <div id="tool_angle_indicator_cursor"></div>
                 </div>
               </label>
+              <label id="cornerRadiusLabel" data-title="Change Rectangle Corner Radius">
+                <input id="rect_rx" size="3" value="0" data-attr="rx" class="attr_changer" type="text" pattern="[0-9]*" />
+                <span class="icon_label">Roundness</span>
+              </label>
+              <div class="clearfix"></div>
+            </div>
+
+            <!-- Buttons when a single element is selected -->
+            <div id="selected_panel" class="context_panel">
 
               <label class="toolset" id="tool_opacity" data-title="Change selected item opacity">
                 <input id="group_opacity" class="attr_changer" data-attr="opacity" data-multiplier="0.01" size="3" value="100" step="5" min="0" max="100" />
@@ -406,18 +433,6 @@
                   <span class="icon_label">Blur</span>
                 </label>
               </div>
-
-              <label id="cornerRadiusLabel" data-title="Change Rectangle Corner Radius">
-                <input id="rect_rx" size="3" value="0" data-attr="rx" class="attr_changer" type="text" pattern="[0-9]*" />
-                <span class="icon_label">Roundness</span>
-              </label>
-
-              <div class="clearfix"></div>
-
-              <label class="idLabel" title="Identify the element">
-                <input id="elem_id" class="id_changer" data-attr="id" size="10" type="text" />
-                <span>ID</span>
-              </label>
 
               <div class="clearfix"></div>
 
@@ -437,6 +452,17 @@
                   </label>
                 </div>
               </div>
+
+              <div class="clearfix"></div>
+
+            </div>
+
+            <div id="attributes_panel" class="context_panel">
+              <h4>Attributes</h4>
+              <label class="idLabel" title="Identify the element">
+                <input id="elem_id" class="id_changer" data-attr="id" size="10" type="text" />
+                <span>ID</span>
+              </label>
             </div>
 
             <!-- Buttons when multiple elements are selected -->
@@ -612,6 +638,7 @@
       <div class="tool_button" id="tool_path" title="Path Tool [P]"></div>
       <div class="tool_button" id="tool_text" title="Text Tool [T]"></div>
       <div class="tool_button" id="tool_image" title="Image Tool [I]"></div>
+      <div class="tool_button" id="tool_iarea" title="Interactive Button Area Tool [W]"></div>
       <div class="tool_button" id="tool_zoom" title="Zoom Tool [Z]"></div>
 
       <div id="color_tools">

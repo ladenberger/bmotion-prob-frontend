@@ -542,8 +542,11 @@ $.SvgCanvas = function(container, config) {
     // String indicating the current editor mode
     current_mode = "select",
 
-    // String with the current direction in which an element is being resized
-    current_resize_mode = "none",
+    // String indicating the last mouse action
+    last_mouse_action = "";
+
+  // String with the current direction in which an element is being resized
+  current_resize_mode = "none",
 
     // Object with IDs for imported files, to see if one was already added
     import_ids = {};
@@ -2664,6 +2667,31 @@ $.SvgCanvas = function(container, config) {
               "width": 0,
               "height": 0,
               "id": getNextId(),
+              "fill": "white",
+              "stroke": "black",
+              "stroke-dasharray": "none",
+              "opacity": cur_shape.opacity / 2
+            }
+          });
+          break;
+        case "iarea":
+          started = true;
+          start_x = x;
+          start_y = y;
+          var iarea = addSvgElementFromJson({
+            "element": "rect",
+            "curStyles": true,
+            "attr": {
+              "x": x,
+              "y": y,
+              "width": 0,
+              "height": 0,
+              "id": getNextId(),
+              "fill": "#eaeaea",
+              "fill-opacity": 0.5,
+              "stroke": "#84b3ff",
+              "stroke-dasharray": "5,5",
+              "data-bms-widget": "iarea",
               "opacity": cur_shape.opacity / 2
             }
           });
@@ -2681,8 +2709,8 @@ $.SvgCanvas = function(container, config) {
               "y2": y,
               "id": getNextId(),
               "stroke": cur_shape.stroke,
-              "stroke-width": stroke_w,
-              "stroke-dasharray": cur_shape.stroke_dasharray,
+              "stroke-width": "1.5",
+              "stroke-dasharray": "none",
               "stroke-linejoin": cur_shape.stroke_linejoin,
               "stroke-linecap": cur_shape.stroke_linecap,
               "stroke-opacity": cur_shape.stroke_opacity,
@@ -2702,6 +2730,9 @@ $.SvgCanvas = function(container, config) {
               "cy": y,
               "r": 0,
               "id": getNextId(),
+              "fill": "white",
+              "stroke": "black",
+              "stroke-dasharray": "none",
               "opacity": cur_shape.opacity / 2
             }
           });
@@ -2717,6 +2748,9 @@ $.SvgCanvas = function(container, config) {
               "rx": 0,
               "ry": 0,
               "id": getNextId(),
+              "fill": "white",
+              "stroke": "black",
+              "stroke-dasharray": "none",
               "opacity": cur_shape.opacity / 2
             }
           });
@@ -2731,7 +2765,8 @@ $.SvgCanvas = function(container, config) {
               "y": y,
               "id": getNextId(),
               "fill": cur_text.fill,
-              "stroke-width": cur_text.stroke_width,
+              "stroke-width": 0,
+              "stroke-dasharray": "none",
               "font-size": cur_text.font_size,
               "font-family": cur_text.font_family,
               "text-anchor": "left",
@@ -2803,6 +2838,8 @@ $.SvgCanvas = function(container, config) {
         x = snapToGrid(x);
         y = snapToGrid(y);
       }
+
+      last_mouse_action = "mouse_move";
 
       evt.preventDefault();
 
@@ -3059,6 +3096,7 @@ $.SvgCanvas = function(container, config) {
         case "square":
           // fall through
         case "rect":
+        case "iarea":
         case "image":
           var square = (current_mode == 'square') || evt.shiftKey,
             w = Math.abs(x - start_x),
@@ -3428,17 +3466,41 @@ $.SvgCanvas = function(container, config) {
         case "foreignObject":
         case "square":
         case "rect":
+        case "iarea":
+          if (last_mouse_action !== 'mouse_move') {
+            var ele = $(element);
+            var attrs = ele.attr(["width", "height"]);
+            if (attrs.width < 50) ele.attr("width", 50);
+            if (attrs.height < 50) ele.attr("height", 50);
+          }
+          last_mouse_action = '';
+          keep = true;
+          break;
         case "image":
           var attrs = $(element).attr(["width", "height"]);
           // Image should be kept regardless of size (use inherit dimensions later)
           keep = (attrs.width != 0 || attrs.height != 0) || current_mode === "image";
           break;
         case "circle":
-          keep = (element.getAttribute('r') != 0);
+          if (last_mouse_action !== 'mouse_move') {
+            var ele = $(element);
+            var attr_r = ele.attr("r");
+            if (attr_r < 50) ele.attr("r", 50);
+          }
+          last_mouse_action = '';
+          keep = true;
+          //keep = (element.getAttribute('r') != 0);
           break;
         case "ellipse":
-          var attrs = $(element).attr(["rx", "ry"]);
-          keep = (attrs.rx != null || attrs.ry != null);
+          if (last_mouse_action !== 'mouse_move') {
+            var ele = $(element);
+            var attrs = ele.attr(["rx", "ry"]);
+            if (attrs.rx < 50) ele.attr("rx", 50);
+            if (attrs.ry < 25) ele.attr("ry", 25);
+          }
+          last_mouse_action = '';
+          keep = true;
+          //keep = (attrs.rx != null || attrs.ry != null);
           break;
         case "fhellipse":
           if ((freehand.maxx - freehand.minx) > 0 &&
@@ -7994,12 +8056,17 @@ $.SvgCanvas = function(container, config) {
     if (!elements.length || elements[0] == null) return null
     else {
       var isSameElement = function(el) {
-        if (el && selectedElements[0])
-          return (el.nodeName == selectedElements[0].nodeName);
-        else return null;
+        if (el && selectedElements[0]) {
+          var jele1 = $(el);
+          var jele2 = $(selectedElements[0]);
+          var compare1 = jele1.attr("data-bms-widget") !== null ? jele1.attr("data-bms-widget") : el.nodeName;
+          var compare2 = jele2.attr("data-bms-widget") !== null ? jele2.attr("data-bms-widget") : selectedElements[0].nodeName;
+          return (compare1 == compare2);
+
+        } else return null;
       }
-      return selectedElements.every(isSameElement);
     }
+    return selectedElements.every(isSameElement);
   }
 
 

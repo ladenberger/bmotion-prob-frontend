@@ -267,6 +267,7 @@ define(["jquery", "touch", "jquery.hotkeys", "jquery.bbq",
           'path': 'path.png',
           'text': 'text.png',
           'image': 'image.png',
+          'iarea': 'iarea.png',
           'zoom': 'zoom.png',
           'delete': 'delete.png',
           'node_delete': 'node_delete.png',
@@ -289,6 +290,7 @@ define(["jquery", "touch", "jquery.hotkeys", "jquery.bbq",
           '#tool_path': 'path',
           '#tool_text,#layer_rename': 'text',
           '#tool_image': 'image',
+          '#tool_iarea': 'iarea',
           '#tool_zoom': 'zoom',
           '#tool_node_clone': 'node_clone',
           '#tool_node_delete': 'node_delete',
@@ -535,6 +537,17 @@ define(["jquery", "touch", "jquery.hotkeys", "jquery.bbq",
 
       // called when we've selected a different element
       var selectedChanged = function(window, elems) {
+
+        // If elemen is bms widget, hide color tools
+        var color_tools = $('#color_tools, #palette');
+        color_tools.css("visibility", "visible");
+        elems.forEach(function(e) {
+          if ($(e).attr("data-bms-widget")) {
+            color_tools.css("visibility", "hidden");
+            return;
+          }
+        });
+
         var mode = svgCanvas.getMode();
         if (mode === "select") setSelectMode();
         if (mode === "pathedit") return updateContextPanel();
@@ -542,10 +555,10 @@ define(["jquery", "touch", "jquery.hotkeys", "jquery.bbq",
         selectedElement = (elems.length == 1 || elems[1] == null ? elems[0] : null);
         elems = elems.filter(Boolean)
         multiselected = (elems.length >= 2) ? elems : false;
-        if (svgCanvas.elementsAreSame(multiselected)) selectedElement = multiselected[0]
+        if (svgCanvas.elementsAreSame(multiselected)) selectedElement = multiselected[0];
         if (selectedElement != null) {
           $('#multiselected_panel').hide()
-          $('.idLabel').show();
+          $('#attributes_panel').show();
           updateToolbar();
           if (multiselected.length) { //multiselected elements are the same
             $('#tools_top').addClass('multiselected')
@@ -1446,18 +1459,10 @@ define(["jquery", "touch", "jquery.hotkeys", "jquery.bbq",
 
         if (elem != null) {
 
-          // select observer ...
-          // TODO: We select only by id .. manage other selection (e.g. by class, etc.)
-          var activeElement = $("div[oid=#" + $(elem).attr("id") + "]");
-          var indexToActive = activeElement.index()
-          if (indexToActive > -1) {
-            $('.observer_loop').animate({
-              scrollTop: activeElement.offset().top - 240
-            }, 0);
-            $(".observer_objs").accordion("option", "active", indexToActive);
-          }
-
-          $("#stroke_panel").show();
+          var jele = $(elem);
+          var isBmsWidget = jele.attr("data-bms-widget") !== null ? jele.attr("data-bms-widget") : undefined;
+          //var isIArea = $(elem).attr("iarea") !== null;
+          if (!isBmsWidget) $("#stroke_panel").show();
           var elname = elem.nodeName;
           var angle = svgCanvas.getRotationAngle(elem);
           $('#angle').val(Math.round(angle));
@@ -1466,7 +1471,10 @@ define(["jquery", "touch", "jquery.hotkeys", "jquery.bbq",
           $('#blur').val(blurval);
 
           if (!is_node && currentMode != 'pathedit') {
-            $('#selected_panel').show();
+
+            $('#attributes_panel').show();
+            $('#common_panel').show();
+            if (!isBmsWidget) $('#selected_panel').show();
             $('.action_selected').removeClass('disabled');
             // Elements in this array already have coord fields
             var x, y
@@ -1492,7 +1500,7 @@ define(["jquery", "touch", "jquery.hotkeys", "jquery.bbq",
             }
 
             // Elements in this array cannot be converted to a path
-            var no_path = ['image', 'text', 'path', 'g', 'use'].indexOf(elname) == -1;
+            var no_path = ['image', 'text', 'path', 'g', 'use'].indexOf(elname) == -1 || isBmsWidget;
             if (no_path) $('.action_path_convert_selected').removeClass('disabled');
             if (elname === "path") $('.action_path_selected').removeClass('disabled');
 
@@ -1523,6 +1531,7 @@ define(["jquery", "touch", "jquery.hotkeys", "jquery.bbq",
             g: [],
             a: [],
             rect: ['rx', 'width', 'height', 'x', 'y'],
+            iarea: ['width', 'height', 'x', 'y'],
             image: ['width', 'height', 'x', 'y'],
             circle: ['cx', 'cy', 'r'],
             ellipse: ['cx', 'cy', 'rx', 'ry'],
@@ -1532,7 +1541,7 @@ define(["jquery", "touch", "jquery.hotkeys", "jquery.bbq",
             path: []
           };
 
-          var el_name = elem.tagName;
+          var el_name = isBmsWidget ? isBmsWidget : elem.tagName;
 
           if ($(elem).data('gsvg')) {
             $('#g_panel').show();
@@ -1542,14 +1551,17 @@ define(["jquery", "touch", "jquery.hotkeys", "jquery.bbq",
             $('#path_panel').show();
           }
 
+          // Show element related panel
           if (panels[el_name]) {
+
             var cur_panel = panels[el_name];
-            $('#' + el_name + '_panel').show();
+            var panel_element = $('#' + el_name + '_panel');
+            panel_element.show();
 
             // corner radius has to live in a different panel
             // because otherwise it changes the position of the
             // of the elements
-            if (el_name == "rect") $("#cornerRadiusLabel").show()
+            if (el_name == "rect" || el_name == "iarea") $("#cornerRadiusLabel").show()
             else $("#cornerRadiusLabel").hide()
 
             $.each(cur_panel, function(i, item) {
@@ -1558,7 +1570,6 @@ define(["jquery", "touch", "jquery.hotkeys", "jquery.bbq",
                 var bv = elem[item].baseVal.value;
                 attrVal = svgedit.units.convertUnit(bv);
               }
-
               //update the draginput cursors
               var name_item = document.getElementById(el_name + '_' + item);
               name_item.value = Math.round(attrVal) || 0;
@@ -1601,7 +1612,7 @@ define(["jquery", "touch", "jquery.hotkeys", "jquery.bbq",
 
         if (multiselected) {
           $('#multiselected_panel').show();
-          $('.idLabel').hide();
+          $('#attributes_panel').hide();
           $('.action_multi_selected').removeClass('disabled');
           menu_items
             .enableContextMenuItems('#group')
@@ -2183,6 +2194,12 @@ define(["jquery", "touch", "jquery.hotkeys", "jquery.bbq",
       var clickRect = function() {
         if (toolButtonClick('#tool_rect')) {
           svgCanvas.setMode('rect');
+        }
+      };
+
+      var clickIArea = function() {
+        if (toolButtonClick('#tool_iarea')) {
+          svgCanvas.setMode('iarea');
         }
       };
 
@@ -3369,6 +3386,11 @@ define(["jquery", "touch", "jquery.hotkeys", "jquery.bbq",
             fn: clickImage,
             evt: 'mouseup'
           }, {
+            sel: '#tool_iarea',
+            fn: clickIArea,
+            evt: 'mouseup',
+            key: ['W', true]
+          }, {
             sel: '#tool_zoom',
             fn: clickZoom,
             evt: 'mouseup',
@@ -3897,6 +3919,13 @@ define(["jquery", "touch", "jquery.hotkeys", "jquery.bbq",
         callback: changeAttribute,
         cursor: false
       });
+      $('#iarea_height, #iarea_width').dragInput({
+        min: 1,
+        max: null,
+        step: 1,
+        callback: changeAttribute,
+        cursor: false
+      });
       $('#ellipse_cx').dragInput({
         min: 1,
         max: null,
@@ -4046,6 +4075,20 @@ define(["jquery", "touch", "jquery.hotkeys", "jquery.bbq",
       });
       $('#rect_y').dragInput({
         min: null,
+        max: null,
+        step: 1,
+        callback: changeAttribute,
+        cursor: false
+      });
+      $('#iarea_x, #iarea_y').dragInput({
+        min: null,
+        max: null,
+        step: 1,
+        callback: changeAttribute,
+        cursor: false
+      });
+      $('#iarea_rx').dragInput({
+        min: 1,
         max: null,
         step: 1,
         callback: changeAttribute,

@@ -410,8 +410,8 @@ define(['angular', 'bms.func', 'jquery', 'prob.observers', 'prob.modal'], functi
         }
       }
     ])
-    .directive('bmsSvg', ['$http', 'bmsVisualizationService',
-      function($http, bmsVisualizationService) {
+    .directive('bmsSvg', ['$http', '$compile', 'bmsVisualizationService',
+      function($http, $compile, bmsVisualizationService) {
         return {
           replace: false,
           link: function($scope, element, attrs) {
@@ -422,6 +422,7 @@ define(['angular', 'bms.func', 'jquery', 'prob.observers', 'prob.modal'], functi
               return $http.get(vis['templateFolder'] + '/' + svg)
                 .success(function(svgCode) {
                   element.html(svgCode);
+                  $compile(element.contents())($scope);
                   if (svgObj.defer) svgObj.defer.resolve();
                 });
             };
@@ -429,7 +430,17 @@ define(['angular', 'bms.func', 'jquery', 'prob.observers', 'prob.modal'], functi
           }
         }
       }
-    ]);
+    ])
+    .directive('bmsWidget', [function() {
+      return {
+        link: function(scope, element, attr) {
+          var type = attr["bmsWidget"];
+          if (type === "iarea") {
+            $(element).css("opacity", 0.1);
+          }
+        }
+      };
+    }]);
 
   return module;
 
