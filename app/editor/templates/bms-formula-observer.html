@@ -12,27 +12,35 @@
       {{ isMenu ? " Add" : "Formulas:" }}
     </div>
     <div class="col-xs-9">
-      <div ng-repeat="formula in observer.data.formulas track by $index">
+      <div ng-repeat="formula in observer.data.formulas track by $index" class="clearfix">
 
-        <div ng-class="{'editable-click': !rowform.$visible, '': rowform.$visible}" ng-click="rowform.$show()">
-          <span editable-text="observer.data.formulas[$index]" e-name="formula" e-form="rowform">
-            {{ (formula | cut:true:22:' ...') || "formula" }}
-          </span>
+        <div ng-class="{'editable-click': !rowform.$visible, '': rowform.$visible}" ng-click="rowform.$show()" ng-show="!rowform.$visible">
+          {{ (formula | cut:true:22:' ...') || "formula" }}
         </div>
-        <div ng-show="rowform.$visible" class="observer-form-buttons">
-          <form editable-form name="rowform">
-            <button type="submit" ng-disabled="rowform.$waiting" title="Save Formula">
-              <i class="fa fa-floppy-o"></i>
-            </button>
-            <button type="button" ng-disabled="rowform.$waiting" ng-click="rowform.$cancel()">
-              <i class="fa fa-ban" title="Cancel Editing Formula"></i>
-            </button>
-          </form>
-          <div>
-            <button ng-click="removeFormula($index)" title="Remove Formula">
-              <i class="fa fa-trash-o"></i>
-            </button>
+
+        <div ng-show="rowform.$visible" class="inner-value-box">
+
+          <div ng-class="{'editable-click': !rowform.$visible, '': rowform.$visible}">
+            <span editable-text="observer.data.formulas[$index]" e-name="formula" e-form="rowform">
+              {{ (formula | cut:true:22:' ...') || "formula" }}
+            </span>
           </div>
+          <div class="observer-form-buttons">
+            <form editable-form name="rowform">
+              <button type="submit" ng-disabled="rowform.$waiting" title="Save Formula">
+                <i class="fa fa-floppy-o"></i>
+              </button>
+              <button type="button" ng-disabled="rowform.$waiting" ng-click="rowform.$cancel()">
+                <i class="fa fa-ban" title="Cancel Editing Formula"></i>
+              </button>
+            </form>
+            <div>
+              <button ng-click="removeFormula($index)" title="Remove Formula">
+                <i class="fa fa-trash-o"></i>
+              </button>
+            </div>
+          </div>
+
         </div>
 
       </div>
@@ -50,7 +58,7 @@
   <div class="row fixed-height">
     <div class="col-xs-3">Trigger:</div>
     <div class="col-xs-9">
-      <span class="editable-click" ng-click="openJsEditor('trigger', observer)">
+      <span class="editable-click" ng-click="openJsEditor('trigger', observer.data)">
         <i class="fa fa-file-text-o"></i>
         Func</span>
     </div>
@@ -58,7 +66,19 @@
   <div class="row fixed-height">
     <div class="col-xs-3">Refinement:</div>
     <div class="col-xs-9">
-      <span editable-text="observer.data.refinement">{{ (observer.data.refinement | cut:true:22:' ...') || "-" }}</span>
+      <div class="js-edit-field">
+        <div ng-show="observer.data.refinementJs">
+          <span class="editable-click" ng-click="openJsEditor('refinement', observer.data)">
+            <i class="fa fa-file-text-o"></i>
+            Func</span>
+        </div>
+        <div ng-show="!observer.data.refinementJs">
+          <span ng-class="{'editable-click': !refinementForm.$visible, '': refinementForm.$visible}" ng-show="!refinementForm.$visible" ng-click="refinementForm.$show()" editable-text="observer.data.refinement" e-name="refinement" e-form="refinementForm">{{ (observer.data.refinement | cut:true:22:' ...') || "-" }}</span>
+        </div>
+      </div>
+      <div class="bt-switch-js" ng-hide="refinementForm.$visible">
+        <i class="fa fa-code" ng-click="switchToJs('refinement', observer.data)"></i>
+      </div>
     </div>
   </div>
 

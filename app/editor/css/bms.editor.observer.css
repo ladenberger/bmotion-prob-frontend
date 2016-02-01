@@ -140,6 +140,35 @@ input[type="checkbox"].editable-input.editable-has-buttons {
 .js-editor {
   border: 1px solid darkgray;
 }
+.inner-value-box {
+  margin-bottom: 1px;
+  padding: 6px;
+  -webkit-box-shadow: inset 1px 1px 2px white, 1px 1px 1px rgba(0, 0, 0, 0.3);
+  moz-box-shadow: inset 1px 1px 2px white, 1px 1px 1px rgba(0, 0, 0, 0.3);
+  box-shadow: inset 1px 1px 2px white, 1px 1px 1px rgba(0, 0, 0, 0.3);
+  border-radius: 3px;
+  -moz-border-radius: 3px;
+  -webkit-border-radius: 3px
+}
+.bt-switch-js {
+  float: right;
+  padding-top: 2px;
+  padding-right: 2px;
+  cursor: pointer;
+}
+.js-edit-field {
+  float: left;
+  width: 170px;
+}
+.js-edit-field-inner {
+  float: left;
+  height: 25px;
+  width: 160px;
+}
+.observer-form-buttons {
+  clear: both;
+  height: 25px;
+}
 .observer-form-buttons div, .observer-form-buttons form {
   float: left;
   padding: 2px;

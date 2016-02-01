@@ -1424,7 +1424,7 @@ button.cancel, input.Cancel, input.cancel, input.jGraduate_Cancel, button.cancel
   z-index: 10;
   color: #fff;
 }
-#workarea.rect, #workarea.line, #workarea.ellipse, #workarea.path, #workarea.shapelib, #workarea.iarea {
+#workarea.rect, #workarea.line, #workarea.ellipse, #workarea.path, #workarea.shapelib, #workarea.iarea, #workarea.input {
   cursor: crosshair;
 }
 #workarea.text {

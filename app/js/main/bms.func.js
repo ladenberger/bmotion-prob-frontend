@@ -27,29 +27,30 @@ define(['jquery'], function($) {
         }
       }
     },
-    _normalize: function(obj, exclude, origin) {
+    _normalize: function(obj, exclude, origin, container) {
       for (var property in obj) {
         if (obj.hasOwnProperty(property)) {
           if (origin !== undefined) {
-            $(origin).data(property, obj[property]);
+            origin.data(property, obj[property]);
           }
           if (typeof obj[property] == "object") {
-            api._normalize(obj[property], exclude, origin);
+            api._normalize(obj[property], exclude, origin, container);
           } else {
             if ($.inArray(property, exclude) === -1) {
-              if (api.isFunction(obj[property])) {
-                var r = origin !== undefined ? obj[property]($(origin)) : obj[property]();
+              obj[property] = api.callOrReturn(obj[property], origin, container);
+              /*if (api.isFunction(obj[property])) {
+                var r = origin !== undefined ? obj[property](origin, container) : obj[property]();
                 obj[property] = r;
-              }
+              }*/
             }
           }
         }
       }
     },
-    normalize: function(obj, exclude, origin) {
+    normalize: function(obj, exclude, origin, container) {
       exclude = exclude === 'undefined' ? [] : exclude;
       var obj2 = $.extend(true, {}, obj);
-      api._normalize(obj2, exclude, origin);
+      api._normalize(obj2, exclude, origin, container);
       return obj2
     },
     isFunction: function(functionToCheck) {
@@ -73,14 +74,14 @@ define(['jquery'], function($) {
       return api._s4() + api._s4() + '-' + api._s4() + '-' + api._s4() + '-' +
         api._s4() + '-' + api._s4() + api._s4() + api._s4();
     },
-    callOrReturn: function(subject, element) {
+    callOrReturn: function(subject, element, container) {
       if (api.isFunction(subject)) {
-        return subject.call(this, element);
+        return subject.call(this, element, container);
       } else {
         try {
           // Try to convert subject to function
-          var func = new Function('origin', subject);
-          return func(element);
+          var func = new Function('origin', 'container', subject);
+          return func(element, container);
         } catch (err) {
           return subject;
         }

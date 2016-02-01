@@ -66,7 +66,7 @@ define(['angular', 'bms.func', 'jquery', 'prob.observers', 'prob.modal'], functi
               if (vis.listener) {
                 angular.forEach(vis.listener[cause], function(l) {
                   if (!l.executed) {
-                    l.callback();
+                    l.callback(vis);
                     // Init listener should be called only once
                     if (cause === "ModelInitialised") l.executed = true;
                   }
@@ -104,16 +104,16 @@ define(['angular', 'bms.func', 'jquery', 'prob.observers', 'prob.modal'], functi
             };
 
             $scope.addEvent = function(type, data, list) {
-              var event = {
+              var ev = {
                 type: type,
                 data: data
               };
               // Add event ...
-              bmsVisualizationService.addEvent($scope.id, event, list);
+              bmsVisualizationService.addEvent($scope.id, ev, list);
               // ... and setup event
               var instance = $injector.get(type, "");
               if (instance) {
-                instance.setup($scope.sessionId, $scope.id, event, $scope.visualization.container.contents(), $scope.visualization.traceId);
+                instance.setup($scope.sessionId, $scope.id, ev, $scope.visualization.container.contents(), $scope.visualization.traceId);
               }
             };
 
@@ -170,8 +170,9 @@ define(['angular', 'bms.func', 'jquery', 'prob.observers', 'prob.modal'], functi
             $scope.on = function(what, callback) {
               var listener = bmsVisualizationService.addListener($scope.id, what, callback);
               if (what === "ModelInitialised" && $scope.visualization.initialised && listener) {
+                var vis = bmsVisualizationService.getVisualization($scope.id);
                 // Init listener should be called only once
-                listener.callback();
+                listener.callback(vis);
                 listener.executed = true;
               }
             };
@@ -431,12 +432,28 @@ define(['angular', 'bms.func', 'jquery', 'prob.observers', 'prob.modal'], functi
         }
       }
     ])
-    .directive('bmsWidget', [function() {
+    .directive('bmsWidget', ['bmsVisualizationService', function(bmsVisualizationService) {
       return {
-        link: function(scope, element, attr) {
+        link: function($scope, element, attr) {
           var type = attr["bmsWidget"];
           if (type === "iarea") {
             $(element).css("opacity", 0.1);
+          } else if (type === "input") {
+            var jele = $(element);
+            var offset = jele.offset();
+            var width = jele.attr("width");
+            var height = jele.attr("height");
+            var newInput = $('<input type="text"/>');
+            newInput
+              .attr("id", jele.attr("id"))
+              .css("position", "absolute")
+              .css("left", offset.left + "px")
+              .css("top", offset.top + "px")
+              .css("width", (jele.attr("width") - 4) + "px")
+              .css("height", (jele.attr("height") - 5) + "px");
+            jele.remove();
+            var vis = bmsVisualizationService.getVisualization($scope.id);
+            vis.container.contents().find("body").append(newInput);
           }
         }
       };

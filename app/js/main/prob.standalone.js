@@ -112,6 +112,8 @@ define(['angular', 'jquery', 'socketio', 'angularAMD', 'bms.func', 'bms.tabs', '
             modalInstance.result.then(function(view) {
 
               view.template = 'index.html';
+              view.observers = view.id + '.observers.json';
+              view.events = view.id + '.events.json';
               var manifest = {
                 views: [
                   view

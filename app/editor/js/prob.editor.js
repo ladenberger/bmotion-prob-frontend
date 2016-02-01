@@ -162,7 +162,7 @@ define(['angular', 'angularAMD', 'code-mirror!javascript', 'jquery.jgraduate', '
 
         openJsEditor: function(fn, el, doc) {
 
-          var code = el.data[fn];
+          var code = el[fn];
 
           if ($.isFunction(code)) {
             var entire = code.toString(); // this part may fail!
@@ -219,7 +219,7 @@ define(['angular', 'angularAMD', 'code-mirror!javascript', 'jquery.jgraduate', '
             backdrop: false
           });
           modalInstance.result.then(function(code) {
-            el.data[fn] = code;
+            el[fn] = code;
             //$scope.$emit('highlightObserver', false);
           }, function() {
             //$scope.$emit('highlightObserver', false);
@@ -247,52 +247,13 @@ define(['angular', 'angularAMD', 'code-mirror!javascript', 'jquery.jgraduate', '
 
         $scope.isMenu = false;
 
-        $scope.openJsEditor = function(fn, el) {
-          var doc = {
-            description: 'The ' + fn + '  function will be called after initialising the machine ' +
-              '(if the given refinement is '+ fn + 'd in the animation) with its ' +
-              '<i>origin</i> reference set to the graphical element that the observer is attached to. ' +
-              'The <i>origin</i> is a jQuery selector element. ' +
-              'Consult the <a href="http://api.jquery.com/" target="_blank">jQuery API</a> for more ' +
-              'information regarding accessing or manipulating the <i>origin</i> ' +
-              '(e.g. <a href="http://api.jquery.com/category/attributes/" target="_blank">set and get attributes</a>).',
-            parameter: [{
-              name: 'origin',
-              description: 'The reference set to the graphical element that the observer is attached to.'
-            }]
-          };
-          bmsJsEditorService.openJsEditor(fn, el, doc);
-        };
-
       }
 
     ])
-    .controller('bmsObserverFormulaCtrl', ['$scope', 'bmsJsEditorService',
-      function($scope, bmsJsEditorService) {
+    .controller('bmsObserverFormulaCtrl', ['$scope',
+      function($scope) {
 
         $scope.isMenu = false;
-
-        $scope.openJsEditor = function(fn, el) {
-          var doc = {
-            description: 'The trigger function will be called after every state change with its ' +
-              '<i>origin</i> reference set to the graphical element that the observer is attached to ' +
-              'and the <i>values</i> of the formulas. The <i>origin</i> is a jQuery selector element. ' +
-              'Consult the <a href="http://api.jquery.com/" target="_blank">jQuery API</a> for more ' +
-              'information regarding accessing or manipulating the <i>origin</i> ' +
-              '(e.g. <a href="http://api.jquery.com/category/attributes/" target="_blank">set and get attributes</a>).' +
-              'The <i>values</i> parameter contains the values of ' +
-              'the defined formulas in an array, e.g. use <i>values[0]</i> to obtain the result of ' +
-              'the first formula.',
-            parameter: [{
-              name: 'origin',
-              description: 'The reference set to the graphical element that the observer is attached to.'
-            }, {
-              name: 'values',
-              description: 'Contains the values of the defined formulas in an array, e.g. use <i>values[0]</i> to obtain the result of the first formula.'
-            }]
-          };
-          bmsJsEditorService.openJsEditor(fn, el, doc);
-        };
 
         $scope.showMenu = function() {
           $scope.isMenu = true;
@@ -313,54 +274,32 @@ define(['angular', 'angularAMD', 'code-mirror!javascript', 'jquery.jgraduate', '
       }
 
     ])
-    .controller('bmsExecuteEventCtrl', ['$scope', 'bmsJsEditorService', function($scope, bmsJsEditorService) {
+    .controller('bmsExecuteEventCtrl', ['$scope',
+      function($scope) {
 
-      $scope.isMenu = false;
+        $scope.isMenu = false;
 
-      $scope.openJsEditor = function(fn, el) {
-
-        var doc = {
-          description: 'The label function returns a custom label to be shown in the ' +
-            'tooltip when hovering the graphical element that the execute event handler ' +
-            'is attached to. You can also return an HTML element.',
-          parameter: [{
-            name: 'origin',
-            description: 'The reference set to the graphical element that the execute ' +
-              'event handler is attached to. The <i>origin</i> is a jQuery selector element. ' +
-              'Consult the <a href="http://api.jquery.com/" target="_blank">jQuery API</a> for more ' +
-              'information about accessing or manipulating the <i>origin</i>.'
-          }, {
-            name: 'event',
-            description: 'An object containing the information of the respective event. ' +
-              'Use <i>event.name</i> to obtain the name of the event and <i>event.predicate</i> ' +
-              'to obtain the predicate of the event respectively.'
-          }]
+        $scope.showMenu = function() {
+          $scope.isMenu = true;
         };
 
-        bmsJsEditorService.openJsEditor(fn, el, doc);
+        $scope.hideMenu = function() {
+          $scope.isMenu = false;
+        };
 
-      };
+        $scope.addEvent = function() {
+          $scope.event.data.events.push({
+            name: "",
+            predicate: ""
+          });
+        };
 
-      $scope.showMenu = function() {
-        $scope.isMenu = true;
-      };
+        $scope.removeEvent = function(index) {
+          $scope.event.data.events.splice(index, 1);
+        };
 
-      $scope.hideMenu = function() {
-        $scope.isMenu = false;
-      };
-
-      $scope.addEvent = function() {
-        $scope.event.data.events.push({
-          name: "",
-          predicate: ""
-        });
-      };
-
-      $scope.removeEvent = function(index) {
-        $scope.event.data.events.splice(index, 1);
-      };
-
-    }])
+      }
+    ])
     .controller('bmsObserverCspEventCtrl', ['$scope', function($scope) {
 
       $scope.isObserverMenu = false;
@@ -481,6 +420,11 @@ define(['angular', 'angularAMD', 'code-mirror!javascript', 'jquery.jgraduate', '
           return $scope.uiState[index]['isMenu'];
         };
 
+        $scope.switchToJs = function(fn, el) {
+          var newValue = el[fn + "Js"] ? !el[fn + "Js"] : true;
+          el[fn + "Js"] = newValue;
+        };
+
       }
     ])
     .controller('bmsEventsViewCtrl', ['$scope', 'bmsEditorCommonService', 'bmsParentService', '$rootScope',
@@ -540,10 +484,15 @@ define(['angular', 'angularAMD', 'code-mirror!javascript', 'jquery.jgraduate', '
           return $scope.uiState[index]['isMenu'];
         };
 
+        $scope.switchToJs = function(fn, el) {
+          var newValue = el[fn + "Js"] ? !el[fn + "Js"] : true;
+          el[fn + "Js"] = newValue;
+        };
+
       }
     ])
-    .controller('bmsEditorCtrl', ['$scope', 'bmsParentService', 'bmsEditorCommonService', '$http', '$parentScope',
-      function($scope, bmsParentService, bmsEditorCommonService, $http, $parentScope) {
+    .controller('bmsEditorCtrl', ['$scope', 'bmsParentService', 'bmsJsEditorService', 'bmsEditorCommonService', '$http', '$parentScope',
+      function($scope, bmsParentService, bmsJsEditorService, bmsEditorCommonService, $http, $parentScope) {
 
         var self = this;
         bmsParentService.init().then(function(obj) {
@@ -575,6 +524,95 @@ define(['angular', 'angularAMD', 'code-mirror!javascript', 'jquery.jgraduate', '
         $parentScope.$on('saveVisualization', function(evt, svg) {
           if (self.svg === svg) self.save();
         });
+
+        // TODO: We should save these docs in external files
+        var docs = {
+          "enable": {
+            description: 'The enable function will be called after initialising the machine ' +
+              '(if the given refinement enabled in the running animation) with its ' +
+              '<i>origin</i> reference set to the graphical element that the observer is attached to. ' +
+              'The <i>origin</i> is a jQuery selector element. ' +
+              'Consult the <a href="http://api.jquery.com/" target="_blank">jQuery API</a> for more ' +
+              'information regarding accessing or manipulating the <i>origin</i> ' +
+              '(e.g. <a href="http://api.jquery.com/category/attributes/" target="_blank">set and get attributes</a>).',
+            parameter: [{
+              name: 'origin',
+              description: 'The reference set to the graphical element that the observer is attached to.'
+            }, {
+              name: 'container',
+              description: 'The reference to the container element.'
+            }]
+          },
+          "disable": {
+            description: 'The disable function will be called after initialising the machine ' +
+              '(if the given refinement is disabled in the running animation) with its ' +
+              '<i>origin</i> reference set to the graphical element that the observer is attached to. ' +
+              'The <i>origin</i> is a jQuery selector element. ' +
+              'Consult the <a href="http://api.jquery.com/" target="_blank">jQuery API</a> for more ' +
+              'information regarding accessing or manipulating the <i>origin</i> ' +
+              '(e.g. <a href="http://api.jquery.com/category/attributes/" target="_blank">set and get attributes</a>).',
+            parameter: [{
+              name: 'origin',
+              description: 'The reference set to the graphical element that the observer is attached to.'
+            }, {
+              name: 'container',
+              description: 'The reference to the container element.'
+            }]
+          },
+          "label": {
+            description: 'The label function returns a custom label to be shown in the ' +
+              'tooltip when hovering the graphical element that the execute event handler ' +
+              'is attached to. You can also return an HTML element.',
+            parameter: [{
+              name: 'event',
+              description: 'An object containing the information of the respective event. ' +
+                'Use <i>event.name</i> to obtain the name of the event and <i>event.predicate</i> ' +
+                'to obtain the predicate of the event respectively.'
+            }, {
+              name: 'origin',
+              description: 'The reference set to the graphical element that the execute ' +
+                'event handler is attached to. The <i>origin</i> is a jQuery selector element. ' +
+                'Consult the <a href="http://api.jquery.com/" target="_blank">jQuery API</a> for more ' +
+                'information about accessing or manipulating the <i>origin</i>.'
+            }, {
+              name: 'container',
+              description: 'The reference to the container element.'
+            }]
+          },
+          "trigger": {
+            description: 'The trigger function will be called after every state change with its ' +
+              '<i>origin</i> reference set to the graphical element that the observer is attached to ' +
+              'and the <i>values</i> of the formulas. The <i>origin</i> is a jQuery selector element. ' +
+              'Consult the <a href="http://api.jquery.com/" target="_blank">jQuery API</a> for more ' +
+              'information regarding accessing or manipulating the <i>origin</i> ' +
+              '(e.g. <a href="http://api.jquery.com/category/attributes/" target="_blank">set and get attributes</a>).' +
+              'The <i>values</i> parameter contains the values of ' +
+              'the defined formulas in an array, e.g. use <i>values[0]</i> to obtain the result of ' +
+              'the first formula.',
+            parameter: [{
+              name: 'origin',
+              description: 'The reference set to the graphical element that the observer is attached to.'
+            }, {
+              name: 'values',
+              description: 'Contains the values of the defined formulas in an array, e.g. use <i>values[0]</i> to obtain the result of the first formula.'
+            }]
+          },
+          "default": {
+            description: '',
+            parameter: [{
+              name: 'origin',
+              description: 'The reference set to the graphical element that the observer is attached to.'
+            }, {
+              name: 'container',
+              description: 'The reference to the container element.'
+            }]
+          }
+        };
+
+        $scope.openJsEditor = function(fn, el) {
+          var doc = docs[fn] ? docs[fn] : docs["default"];
+          bmsJsEditorService.openJsEditor(fn, el, doc);
+        };
 
       }
     ])

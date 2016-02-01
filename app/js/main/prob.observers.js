@@ -538,17 +538,19 @@ define(['bms.func', 'jquery', 'angular', 'qtip', 'prob.modal'], function(bms, $,
 
           if (visRefinements) {
 
+            var jcontainer = $(container);
+
             var el = container.find(observer.data.selector);
             el.each(function(i, v) {
               var rr;
               var e = $(v);
-              var ref = bms.callOrReturn(observer.data["refinement"], e);
+              var ref = bms.callOrReturn(observer.data["refinement"], e, jcontainer);
               //var observerRefinements = Object.prototype.toString.call(refs) !== '[object Array]' ? [refs] : refs;
               // TODO: Maybe an intersection of both arrays (visRefinements and observerRefinements) would be more efficient.
               if ($.inArray(ref, visRefinements) > -1) {
-                rr = bms.callOrReturn(observer.data['enable'], e);
+                rr = bms.callOrReturn(observer.data['enable'], e, jcontainer);
               } else {
-                rr = bms.callOrReturn(observer.data['disable'], e);
+                rr = bms.callOrReturn(observer.data['disable'], e, jcontainer);
               }
               if (rr) {
                 var bmsid = bmsObserverService.getBmsIdForElement(e);
@@ -613,14 +615,15 @@ define(['bms.func', 'jquery', 'angular', 'qtip', 'prob.modal'], function(bms, $,
             var fvalues = {};
             var result = options.result;
             var element = container.find(observer.data.selector);
+            var jcontainer = $(container);
             element.each(function() {
               var ele = $(this);
               var returnValue;
               //var normalized = bms.normalize(observer.data, [], ele);
               if (result[0] === "TRUE") {
-                returnValue = bms.callOrReturn(observer.data.true);
+                returnValue = bms.callOrReturn(observer.data.true, ele, jcontainer);
               } else if (result[0] === "FALSE") {
-                returnValue = bms.callOrReturn(observer.data.false);
+                returnValue = bms.callOrReturn(observer.data.false, ele, jcontainer);
               }
               if (returnValue) {
                 var bmsid = bmsObserverService.getBmsIdForElement(ele);
@@ -698,7 +701,7 @@ define(['bms.func', 'jquery', 'angular', 'qtip', 'prob.modal'], function(bms, $,
       var ev = {
 
         getDefaultOptions: function(options) {
-          return bms.normalize($.extend({
+          return $.extend({
             events: [],
             tooltip: true,
             label: function(event) {
@@ -706,7 +709,7 @@ define(['bms.func', 'jquery', 'angular', 'qtip', 'prob.modal'], function(bms, $,
               return '<span aria-hidden="true"> ' + event.name + predicateStr + '</span>';
             },
             callback: function() {}
-          }, options), ["callback", "label", "predicate", "name"]);
+          }, options);
         },
         executeEvent: function(data, origin) {
           var settings = bms.normalize(data, ["callback"], origin);
@@ -725,15 +728,16 @@ define(['bms.func', 'jquery', 'angular', 'qtip', 'prob.modal'], function(bms, $,
           }
           return check;
         },
-        getTooltipContent: function(options, origin, api, sessionId, traceId) {
+        getTooltipContent: function(options, origin, container, api, sessionId, traceId) {
           var defer = $q.defer();
           ws.emit('initTooltip', {
             data: bms.normalize({
               id: sessionId,
               traceId: traceId,
               events: options.events
-            }, [], origin)
+            }, [], origin, container)
           }, function(data) {
+            var jcontainer = $(container);
             var container = $('<div class="qtiplinks"></div>');
             var ul = $('<ul style="display:table-cell;"></ul>');
             angular.forEach(data.events, function(v) {
@@ -745,13 +749,13 @@ define(['bms.func', 'jquery', 'angular', 'qtip', 'prob.modal'], function(bms, $,
               iconSpan.addClass(iconClass);
               var labelSpan;
               if (typeof options.label === 'function') {
-                labelSpan = $(options.label(v, origin));
+                labelSpan = $(options.label(v, origin, jcontainer));
               } else {
                 // Whenever the function comes from json, we need to convert
                 // the string function to a real javascript function
                 // TODO: We need to handle errors while converting the string function to a reals javascript function
-                var func = new Function('event', 'origin', options.label);
-                labelSpan = $(func(v, origin));
+                var func = new Function('event', 'origin', 'container', options.label);
+                labelSpan = $(func(v, origin, jcontainer));
               }
 
               if (v.canExecute) {
@@ -777,12 +781,12 @@ define(['bms.func', 'jquery', 'angular', 'qtip', 'prob.modal'], function(bms, $,
           });
           return defer.promise;
         },
-        initTooltip: function(element, options, sessionId, traceId) {
+        initTooltip: function(element, container, options, sessionId, traceId) {
 
           return element.qtip({ // Grab some elements to apply the tooltip to
             content: {
               text: function(event, api) {
-                return ev.getTooltipContent(options, element, api, sessionId, traceId)
+                return ev.getTooltipContent(options, element, container, api, sessionId, traceId)
                   .then(function(container) {
                     return container;
                   });
@@ -827,12 +831,14 @@ define(['bms.func', 'jquery', 'angular', 'qtip', 'prob.modal'], function(bms, $,
             var options = ev.getDefaultOptions(event.data);
             if (options.selector) {
 
-              var el = $(container).find(options.selector);
+              var jcontainer = $(container);
+
+              var el = jcontainer.find(options.selector);
               el.each(function(i2, v) {
 
                 var e = $(v);
                 e.css('cursor', 'pointer');
-                var tooltip = ev.initTooltip(e, options, sessionId, traceId);
+                var tooltip = ev.initTooltip(e, jcontainer, options, sessionId, traceId);
                 var api = tooltip.qtip('api');
 
                 e.click(function(event) {
@@ -842,7 +848,7 @@ define(['bms.func', 'jquery', 'angular', 'qtip', 'prob.modal'], function(bms, $,
                       id: sessionId,
                       traceId: traceId,
                       events: options.events
-                    }, [], e)
+                    }, [], e, jcontainer)
                   }, function(data) {
 
                     var enabledEvents = [];

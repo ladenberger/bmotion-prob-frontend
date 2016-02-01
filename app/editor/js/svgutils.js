@@ -647,14 +647,12 @@ var svgedit = svgedit || {};
       'rx': 0,
       'ry': 0
     }
-
     for (var attr in defaults) {
       var val = defaults[attr];
       if (element.getAttribute(attr) == val) {
         element.removeAttribute(attr);
       }
     }
-
     //svgroot_.unsuspendRedraw(handle);
   };
 

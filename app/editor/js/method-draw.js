@@ -268,6 +268,7 @@ define(["jquery", "touch", "jquery.hotkeys", "jquery.bbq",
           'text': 'text.png',
           'image': 'image.png',
           'iarea': 'iarea.png',
+          'input': 'input.png',
           'zoom': 'zoom.png',
           'delete': 'delete.png',
           'node_delete': 'node_delete.png',
@@ -291,6 +292,7 @@ define(["jquery", "touch", "jquery.hotkeys", "jquery.bbq",
           '#tool_text,#layer_rename': 'text',
           '#tool_image': 'image',
           '#tool_iarea': 'iarea',
+          '#tool_input': 'input',
           '#tool_zoom': 'zoom',
           '#tool_node_clone': 'node_clone',
           '#tool_node_delete': 'node_delete',
@@ -1360,8 +1362,7 @@ define(["jquery", "touch", "jquery.hotkeys", "jquery.bbq",
               //removed because multiselect shouldnt set color
               //Editor.paintBox.fill.update(false);
               //Editor.paintBox.stroke.update(false);
-
-              $('#stroke_width').val(selectedElement.getAttribute("stroke-width") || 0);
+              $('#stroke_width').val(selectedElement.getAttribute("stroke-width") || 1);
               var dash = selectedElement.getAttribute("stroke-dasharray") || "none"
               $('option', '#stroke_style').removeAttr('selected');
               $('#stroke_style option[value="' + dash + '"]').attr("selected", "selected");
@@ -1461,7 +1462,6 @@ define(["jquery", "touch", "jquery.hotkeys", "jquery.bbq",
 
           var jele = $(elem);
           var isBmsWidget = jele.attr("data-bms-widget") !== null ? jele.attr("data-bms-widget") : undefined;
-          //var isIArea = $(elem).attr("iarea") !== null;
           if (!isBmsWidget) $("#stroke_panel").show();
           var elname = elem.nodeName;
           var angle = svgCanvas.getRotationAngle(elem);
@@ -1532,6 +1532,7 @@ define(["jquery", "touch", "jquery.hotkeys", "jquery.bbq",
             a: [],
             rect: ['rx', 'width', 'height', 'x', 'y'],
             iarea: ['width', 'height', 'x', 'y'],
+            input: ['width', 'height', 'x', 'y'],
             image: ['width', 'height', 'x', 'y'],
             circle: ['cx', 'cy', 'r'],
             ellipse: ['cx', 'cy', 'rx', 'ry'],
@@ -1561,8 +1562,11 @@ define(["jquery", "touch", "jquery.hotkeys", "jquery.bbq",
             // corner radius has to live in a different panel
             // because otherwise it changes the position of the
             // of the elements
-            if (el_name == "rect" || el_name == "iarea") $("#cornerRadiusLabel").show()
-            else $("#cornerRadiusLabel").hide()
+            if (el_name == "rect" || el_name == "iarea") {
+              $("#common_panel").show();
+            } else {
+              $("#common_panel").hide();
+            }
 
             $.each(cur_panel, function(i, item) {
               var attrVal = elem.getAttribute(item);
@@ -2200,6 +2204,12 @@ define(["jquery", "touch", "jquery.hotkeys", "jquery.bbq",
       var clickIArea = function() {
         if (toolButtonClick('#tool_iarea')) {
           svgCanvas.setMode('iarea');
+        }
+      };
+
+      var clickInput = function() {
+        if (toolButtonClick('#tool_input')) {
+          svgCanvas.setMode('input');
         }
       };
 
@@ -3391,6 +3401,10 @@ define(["jquery", "touch", "jquery.hotkeys", "jquery.bbq",
             evt: 'mouseup',
             key: ['W', true]
           }, {
+            sel: '#tool_input',
+            fn: clickInput,
+            evt: 'mouseup'
+          }, {
             sel: '#tool_zoom',
             fn: clickZoom,
             evt: 'mouseup',
@@ -3905,21 +3919,7 @@ define(["jquery", "touch", "jquery.hotkeys", "jquery.bbq",
         cursor: false,
         dragAdjust: .1
       });
-      $('#rect_width').dragInput({
-        min: 1,
-        max: null,
-        step: 1,
-        callback: changeAttribute,
-        cursor: false
-      });
-      $('#rect_height').dragInput({
-        min: 1,
-        max: null,
-        step: 1,
-        callback: changeAttribute,
-        cursor: false
-      });
-      $('#iarea_height, #iarea_width').dragInput({
+      $('#rect_width, #rect_height, #iarea_width, #iarea_height, #input_width, #input_height').dragInput({
         min: 1,
         max: null,
         step: 1,
@@ -4066,29 +4066,8 @@ define(["jquery", "touch", "jquery.hotkeys", "jquery.bbq",
         callback: changeAttribute,
         cursor: false
       });
-      $('#rect_x').dragInput({
+      $('#rect_x, #rect_y, #iarea_x, #iarea_y, #input_x, #input_y').dragInput({
         min: null,
-        max: null,
-        step: 1,
-        callback: changeAttribute,
-        cursor: false
-      });
-      $('#rect_y').dragInput({
-        min: null,
-        max: null,
-        step: 1,
-        callback: changeAttribute,
-        cursor: false
-      });
-      $('#iarea_x, #iarea_y').dragInput({
-        min: null,
-        max: null,
-        step: 1,
-        callback: changeAttribute,
-        cursor: false
-      });
-      $('#iarea_rx').dragInput({
-        min: 1,
         max: null,
         step: 1,
         callback: changeAttribute,

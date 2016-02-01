@@ -229,7 +229,7 @@ $.SvgCanvas = function(container, config) {
   all_properties.text = $.extend(true, {}, all_properties.shape);
   $.extend(all_properties.text, {
     fill: "#000000",
-    stroke_width: 0,
+    stroke_width: 1,
     font_size: 24,
     font_family: 'Helvetica, Arial, sans-serif'
   });
@@ -2669,6 +2669,7 @@ $.SvgCanvas = function(container, config) {
               "id": getNextId(),
               "fill": "white",
               "stroke": "black",
+              "stroke-width": 1,
               "stroke-dasharray": "none",
               "opacity": cur_shape.opacity / 2
             }
@@ -2690,8 +2691,32 @@ $.SvgCanvas = function(container, config) {
               "fill": "#eaeaea",
               "fill-opacity": 0.5,
               "stroke": "#84b3ff",
+              "stroke-width": 1,
               "stroke-dasharray": "5,5",
               "data-bms-widget": "iarea",
+              "opacity": cur_shape.opacity / 2
+            }
+          });
+          break;
+        case "input":
+          started = true;
+          start_x = x;
+          start_y = y;
+          var iarea = addSvgElementFromJson({
+            "element": "rect",
+            "curStyles": true,
+            "attr": {
+              "x": x,
+              "y": y,
+              "width": 0,
+              "height": 0,
+              "id": getNextId(),
+              "fill": "#ffffff",
+              "fill-opacity": 1,
+              "stroke": "#000000",
+              "stroke-width": 1,
+              "stroke-dasharray": "none",
+              "data-bms-widget": "input",
               "opacity": cur_shape.opacity / 2
             }
           });
@@ -2732,6 +2757,7 @@ $.SvgCanvas = function(container, config) {
               "id": getNextId(),
               "fill": "white",
               "stroke": "black",
+              "stroke-width": 1,
               "stroke-dasharray": "none",
               "opacity": cur_shape.opacity / 2
             }
@@ -2750,6 +2776,7 @@ $.SvgCanvas = function(container, config) {
               "id": getNextId(),
               "fill": "white",
               "stroke": "black",
+              "stroke-width": 1,
               "stroke-dasharray": "none",
               "opacity": cur_shape.opacity / 2
             }
@@ -3097,6 +3124,7 @@ $.SvgCanvas = function(container, config) {
           // fall through
         case "rect":
         case "iarea":
+        case "input":
         case "image":
           var square = (current_mode == 'square') || evt.shiftKey,
             w = Math.abs(x - start_x),
@@ -3472,6 +3500,16 @@ $.SvgCanvas = function(container, config) {
             var attrs = ele.attr(["width", "height"]);
             if (attrs.width < 50) ele.attr("width", 50);
             if (attrs.height < 50) ele.attr("height", 50);
+          }
+          last_mouse_action = '';
+          keep = true;
+          break;
+        case "input":
+          if (last_mouse_action !== 'mouse_move') {
+            var ele = $(element);
+            var attrs = ele.attr(["width", "height"]);
+            if (attrs.width < 50) ele.attr("width", 75);
+            if (attrs.height < 50) ele.attr("height", 25);
           }
           last_mouse_action = '';
           keep = true;
