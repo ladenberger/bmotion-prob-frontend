@@ -253,34 +253,118 @@ $.SvgCanvas = function(container, config) {
   //
   // Returns: The new element
   var addSvgElementFromJson = this.addSvgElementFromJson = function(data) {
-    var shape = svgedit.utilities.getElem(data.attr.id);
-    // if shape is a path but we need to create a rect/ellipse, then remove the path
+
+    var shape;
     var current_layer = getCurrentDrawing().getCurrentLayer();
-    if (shape && data.element != shape.tagName) {
-      current_layer.removeChild(shape);
-      shape = null;
+
+    switch (data.element) {
+      case "iradio":
+        var x = data.attr.x;
+        var y = data.attr.y;
+        shape = svgdoc.createElementNS(svgns, 'g');
+        var circle1 = svgdoc.createElementNS(svgns, 'ellipse');
+        svgedit.utilities.assignAttributes(circle1, {
+          "cx": data.attr.x,
+          "cy": data.attr.y,
+          "ry": 6,
+          "rx": 6,
+          "fill": "lightgray",
+          "stroke": "black",
+          "stroke-width": 1
+        }, 100);
+        var circle2 = svgdoc.createElementNS(svgns, 'ellipse');
+        svgedit.utilities.assignAttributes(circle2, {
+          "cx": data.attr.x,
+          "cy": data.attr.y,
+          "ry": 3,
+          "rx": 3,
+          "fill": "black",
+          "class": "inner",
+          "opacity": 0
+        }, 100);
+        shape.appendChild(circle1);
+        shape.appendChild(circle2);
+        if (current_layer) {
+          (current_group || current_layer).appendChild(shape);
+        }
+        svgedit.utilities.assignAttributes(shape, {
+          "data-bms-widget": data.attr['data-bms-widget'],
+          "data-checked": false,
+          "id": data.attr.id,
+          "width": data.attr.width,
+          "height": data.attr.height
+        }, 100);
+        svgedit.utilities.cleanupElement(shape);
+        break;
+      case "icheckbox":
+        var x = data.attr.x;
+        var y = data.attr.y;
+        shape = svgdoc.createElementNS(svgns, 'g');
+        var rect1 = svgdoc.createElementNS(svgns, 'rect');
+        svgedit.utilities.assignAttributes(rect1, {
+          "x": data.attr.x,
+          "y": data.attr.y,
+          "rx": 1,
+          "ry": 1,
+          "width": 12,
+          "height": 12,
+          "fill": "lightgray",
+          "stroke": "black",
+          "stroke-width": 1
+        }, 100);
+        var checkmark = svgdoc.createElementNS(svgns, 'polygon');
+        svgedit.utilities.assignAttributes(checkmark, {
+          "points": "1.105,7.473 2.527,6.05 4.428,7.952 9.238,1 10.895,2.148 4.635,11",
+          "fill": "black",
+          "opacity": 1,
+          "transform": "translate(" + x + "," + y + ")",
+          "opacity": "0"
+        }, 100);
+        shape.appendChild(rect1);
+        shape.appendChild(checkmark);
+        if (current_layer) {
+          (current_group || current_layer).appendChild(shape);
+        }
+        svgedit.utilities.assignAttributes(shape, {
+          "data-bms-widget": data.attr['data-bms-widget'],
+          "data-checked": false,
+          "id": data.attr.id,
+          "width": data.attr.width,
+          "height": data.attr.height
+        }, 100);
+        svgedit.utilities.cleanupElement(shape);
+        break;
+      default:
+        shape = svgedit.utilities.getElem(data.attr.id);
+        // if shape is a path but we need to create a rect/ellipse, then remove the path
+        if (shape && data.element != shape.tagName) {
+          current_layer.removeChild(shape);
+          shape = null;
+        }
+        if (!shape) {
+          shape = svgdoc.createElementNS(svgns, data.element);
+          if (current_layer) {
+            (current_group || current_layer).appendChild(shape);
+          }
+        }
+        if (data.curStyles) {
+          svgedit.utilities.assignAttributes(shape, {
+            "fill": cur_shape.fill,
+            "stroke": cur_shape.stroke,
+            "stroke-width": cur_shape.stroke_width,
+            "stroke-dasharray": cur_shape.stroke_dasharray,
+            "stroke-opacity": cur_shape.stroke_opacity,
+            "fill-opacity": cur_shape.fill_opacity,
+            "opacity": cur_shape.opacity / 2,
+            "style": "pointer-events:inherit"
+          }, 100);
+        }
+        svgedit.utilities.assignAttributes(shape, data.attr, 100);
+        svgedit.utilities.cleanupElement(shape);
     }
-    if (!shape) {
-      shape = svgdoc.createElementNS(svgns, data.element);
-      if (current_layer) {
-        (current_group || current_layer).appendChild(shape);
-      }
-    }
-    if (data.curStyles) {
-      svgedit.utilities.assignAttributes(shape, {
-        "fill": cur_shape.fill,
-        "stroke": cur_shape.stroke,
-        "stroke-width": cur_shape.stroke_width,
-        "stroke-dasharray": cur_shape.stroke_dasharray,
-        "stroke-opacity": cur_shape.stroke_opacity,
-        "fill-opacity": cur_shape.fill_opacity,
-        "opacity": cur_shape.opacity / 2,
-        "style": "pointer-events:inherit"
-      }, 100);
-    }
-    svgedit.utilities.assignAttributes(shape, data.attr, 100);
-    svgedit.utilities.cleanupElement(shape);
+
     return shape;
+
   };
 
 
@@ -2397,6 +2481,8 @@ $.SvgCanvas = function(container, config) {
 
     while (mouse_target.parentNode && mouse_target.parentNode !== (current_group || current_layer)) {
       mouse_target = mouse_target.parentNode;
+      if (mouse_target.parentNode.tagName === 'svg')
+        break;
     }
 
     //
@@ -2718,6 +2804,23 @@ $.SvgCanvas = function(container, config) {
               "stroke-dasharray": "none",
               "data-bms-widget": "input",
               "opacity": cur_shape.opacity / 2
+            }
+          });
+          break;
+        case "iradio":
+        case "icheckbox":
+          started = true;
+          var newImage = addSvgElementFromJson({
+            "element": current_mode,
+            "curStyles": false,
+            "attr": {
+              "x": x,
+              "y": y,
+              "width": 12,
+              "height": 12,
+              "id": getNextId(),
+              "data-bms-widget": current_mode,
+              "opacity": 1
             }
           });
           break;
@@ -3125,6 +3228,8 @@ $.SvgCanvas = function(container, config) {
         case "rect":
         case "iarea":
         case "input":
+        case "iradio":
+        case "icheckbox":
         case "image":
           var square = (current_mode == 'square') || evt.shiftKey,
             w = Math.abs(x - start_x),
@@ -3514,6 +3619,12 @@ $.SvgCanvas = function(container, config) {
           last_mouse_action = '';
           keep = true;
           break;
+        case "iradio":
+        case "icheckbox":
+          var ele = $(element);
+          ele.attr("width", 12).attr("height", 12);
+          keep = true;
+          break;
         case "image":
           var attrs = $(element).attr(["width", "height"]);
           // Image should be kept regardless of size (use inherit dimensions later)
@@ -3723,6 +3834,13 @@ $.SvgCanvas = function(container, config) {
         mouse_target = selectedElements[0];
         clearSelection(true);
       }
+
+      // If interactive radio element return
+      var bmsWidget = $(mouse_target).attr("data-bms-widget");
+      if (bmsWidget === "iradio" || bmsWidget === "icheckbox") {
+        return;
+      }
+
       // Reset context
       if (current_group) {
         leaveContext();
@@ -3734,7 +3852,9 @@ $.SvgCanvas = function(container, config) {
         // Escape from in-group edit
         return;
       }
+
       setContext(mouse_target);
+
     }
 
     // prevent links from being followed in the canvas
@@ -6259,10 +6379,13 @@ $.SvgCanvas = function(container, config) {
             }).attr('src', url);
           }
         } else {
-          // adapt image path
-          var vis = methodDraw.getVisualization(val);
-          val = vis['templateFolder'] + '/' + val;
-          $(this).attr('xlink:href', val);
+          var jimage = $(this);
+          if (!jimage.attr("data-bms-widget")) {
+            // adapt image path
+            var vis = methodDraw.getVisualization(val);
+            val = vis['templateFolder'] + '/' + val;
+            jimage.attr('xlink:href', val);
+          }
         }
         // Add to encodableImages if it loads
         canvas.embedImage(val);
@@ -6928,6 +7051,7 @@ $.SvgCanvas = function(container, config) {
 
     clearSelection();
     call("contextset", current_group);
+
   }
 
   // Group: Document functions

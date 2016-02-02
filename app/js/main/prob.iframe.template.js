@@ -432,32 +432,113 @@ define(['angular', 'bms.func', 'jquery', 'prob.observers', 'prob.modal'], functi
         }
       }
     ])
-    .directive('bmsWidget', ['bmsVisualizationService', function(bmsVisualizationService) {
-      return {
-        link: function($scope, element, attr) {
-          var type = attr["bmsWidget"];
-          if (type === "iarea") {
-            $(element).css("opacity", 0.1);
-          } else if (type === "input") {
-            var jele = $(element);
-            var offset = jele.offset();
-            var width = jele.attr("width");
-            var height = jele.attr("height");
-            var newInput = $('<input type="text"/>');
-            newInput
-              .attr("id", jele.attr("id"))
-              .css("position", "absolute")
-              .css("left", offset.left + "px")
-              .css("top", offset.top + "px")
-              .css("width", (jele.attr("width") - 4) + "px")
-              .css("height", (jele.attr("height") - 5) + "px");
-            jele.remove();
-            var vis = bmsVisualizationService.getVisualization($scope.id);
-            vis.container.contents().find("body").append(newInput);
+    .factory('bmsWidgetService', ['bmsVisualizationService',
+      function(bmsVisualizationService) {
+
+        var fieldSetElements = {};
+
+        return {
+          getFieldSet: function(visid, id) {
+            var fieldSetElement = fieldSetElements[id];
+            if (!fieldSetElement) {
+              fieldSetElement = $("<fieldset>");
+              fieldSetElement.attr("id", id);
+              var vis = bmsVisualizationService.getVisualization(visid);
+              vis.container.contents().find("body").append(fieldSetElement);
+              fieldSetElements[id] = fieldSetElement;
+            }
+            return fieldSetElement;
           }
+
         }
-      };
-    }]);
+
+      }
+    ])
+    .directive('bmsWidget', ['bmsVisualizationService', 'bmsWidgetService',
+      function(bmsVisualizationService, bmsWidgetService) {
+        return {
+          link: function($scope, element, attr) {
+            var type = attr["bmsWidget"];
+            switch (type) {
+              case "iarea":
+                $(element).css("opacity", 0.1);
+                break;
+              case "iradio":
+
+                var jele = $(element);
+                var offset = jele.offset();
+
+                // Create new radio button
+                var newInput = $('<input type="radio"/>');
+                newInput
+                  .attr("value", jele.attr("data-value"))
+                  .attr("checked", jele.attr("data-checked") === "true" ? true : false)
+                  .attr("id", jele.attr("id"))
+                  .css("position", "absolute")
+                  .css("left", offset.left - 5 + "px")
+                  .css("top", offset.top - 3 + "px");
+
+                var parent = $(jele.parent());
+                if (parent.prop("tagName") === "g") {
+                  newInput.attr("name", parent.attr("id"));
+                }
+
+                //var fieldsetElement = bmsWidgetService.getFieldSet($scope.id, parentId);
+                var vis = bmsVisualizationService.getVisualization($scope.id);
+                vis.container.contents().find("body").append(newInput);
+                //fieldsetElement.append(newInput);
+                jele.remove();
+
+                break;
+              case "icheckbox":
+
+                var jele = $(element);
+                var offset = jele.offset();
+                // Create new radio button
+                var newInput = $('<input type="checkbox"/>');
+                newInput
+                  .attr("value", jele.attr("data-value"))
+                  .attr("id", jele.attr("id"))
+                  .attr("checked", jele.attr("data-checked") === "true" ? true : false)
+                  .css("position", "absolute")
+                  .css("left", offset.left - 5 + "px")
+                  .css("top", offset.top - 2 + "px");
+
+                var parent = $(jele.parent());
+                if (parent.prop("tagName") === "g") {
+                  newInput.attr("name", parent.attr("id"));
+                }
+
+                //var fieldsetElement = bmsWidgetService.getFieldSet($scope.id, parentId);
+                var vis = bmsVisualizationService.getVisualization($scope.id);
+                vis.container.contents().find("body").append(newInput);
+                //fieldsetElement.append(newInput);
+                jele.remove();
+
+                break;
+              case "input":
+                var jele = $(element);
+                var offset = jele.offset();
+                var width = jele.attr("width");
+                var height = jele.attr("height");
+                var newInput = $('<input type="text"/>');
+                newInput
+                  .attr("id", jele.attr("id"))
+                  .css("position", "absolute")
+                  .css("left", offset.left + "px")
+                  .css("top", offset.top + "px")
+                  .css("width", (jele.attr("width") - 4) + "px")
+                  .css("height", (jele.attr("height") - 5) + "px");
+                jele.remove();
+                var vis = bmsVisualizationService.getVisualization($scope.id);
+                vis.container.contents().find("body").append(newInput);
+                break;
+            }
+
+          }
+        };
+      }
+    ]);
 
   return module;
 

@@ -224,6 +224,60 @@
               </label>
             </div>
 
+            <div id="iradio_panel" class="context_panel">
+
+              <h4 class="clearfix">Interactive Radio Button</h4>
+              <label>
+                <input id="iradio_x" class="attr_changer" data-title="Change X coordinate" size="3" data-attr="x" pattern="[0-9]*" />
+                <span>X</span>
+              </label>
+              <label>
+                <input id="iradio_y" class="attr_changer" data-title="Change Y coordinate" size="3" data-attr="y" pattern="[0-9]*" />
+                <span>Y</span>
+              </label>
+
+              <div class="clearfix"></div>
+
+              <h4 class="clearfix">Data Attributes</h4>
+                  <label class="idLabel" title="Value of the interactive radio button">
+                    <input id="iradio_data_value" class="data_attribute_changer" data-attr="value" size="10" type="text" />
+                    <span>Value</span>
+                  </label>
+
+                  <label class="idLabel" title="Interactive radio button checked?">
+                    <div id="iradio_data_checked" class="data_attribute_changer_boolean" data-attr="checked"></div>
+                    <span>Checked</span>
+                  </label>
+
+            </div>
+
+            <div id="icheckbox_panel" class="context_panel">
+
+              <h4 class="clearfix">Interactive Checkbox</h4>
+              <label>
+                <input id="icheckbox_x" class="attr_changer" data-title="Change X coordinate" size="3" data-attr="x" pattern="[0-9]*" />
+                <span>X</span>
+              </label>
+              <label>
+                <input id="icheckbox_y" class="attr_changer" data-title="Change Y coordinate" size="3" data-attr="y" pattern="[0-9]*" />
+                <span>Y</span>
+              </label>
+
+              <div class="clearfix"></div>
+
+              <h4 class="clearfix">Data Attributes</h4>
+              <label class="idLabel" title="Value of the interactive checkbox">
+                <input id="icheckbox_data_value" class="data_attribute_changer" data-attr="value" size="10" type="text" />
+                <span>Value</span>
+              </label>
+
+              <label class="idLabel" title="Interactive checkbox checked?">
+                <div id="icheckbox_data_checked" class="data_attribute_changer_boolean" data-attr="checked"></div>
+                <span>Checked</span>
+              </label>
+
+            </div>
+
             <div id="path_panel" class="context_panel clearfix">
               <h4 class="clearfix">Path</h4>
               <label>
@@ -418,8 +472,7 @@
               </label>
             </div>
 
-            <!-- Buttons when a single element is selected -->
-            <div id="selected_panel" class="context_panel">
+            <div id="opacity_blur_panel" class="context_panel">
 
               <label class="toolset" id="tool_opacity" data-title="Change selected item opacity">
                 <input id="group_opacity" class="attr_changer" data-attr="opacity" data-multiplier="0.01" size="3" value="100" step="5" min="0" max="100" />
@@ -433,63 +486,6 @@
                 </label>
               </div>
 
-              <div class="clearfix"></div>
-
-              <div id="align_tools">
-                <h4>Align</h4>
-
-                <div class="toolset align_buttons" id="tool_position">
-                  <label>
-                    <div class="col last clear" id="position_opts">
-                      <div class="draginput_cell" id="tool_posleft" title="Align Left"></div>
-                      <div class="draginput_cell" id="tool_poscenter" title="Align Center"></div>
-                      <div class="draginput_cell" id="tool_posright" title="Align Right"></div>
-                      <div class="draginput_cell" id="tool_postop" title="Align Top"></div>
-                      <div class="draginput_cell" id="tool_posmiddle" title="Align Middle"></div>
-                      <div class="draginput_cell" id="tool_posbottom" title="Align Bottom"></div>
-                    </div>
-                  </label>
-                </div>
-              </div>
-
-              <div class="clearfix"></div>
-
-            </div>
-
-            <div id="attributes_panel" class="context_panel">
-              <div class="clearfix"></div>
-              <h4>Attributes</h4>
-              <label class="idLabel" title="Identify the element">
-                <input id="elem_id" class="id_changer" data-attr="id" size="10" type="text" />
-                <span>ID</span>
-              </label>
-            </div>
-
-            <!-- Buttons when multiple elements are selected -->
-            <div id="multiselected_panel" class="context_panel clearfix">
-
-              <div class="clearfix"></div>
-
-              <h4 class="hidable">Multiple Elements</h4>
-
-              <div class="toolset align_buttons" style="position: relative">
-                <label id="tool_align_relative" style="margin-top: 10px;">
-                  <select id="align_relative_to" title="Align relative to ...">
-                    <option id="selected_objects" value="selected">Align to objects</option>
-                    <option id="page" value="page">Align to page</option>
-                  </select>
-                </label>
-                <h4>.</h4>
-
-                <div class="col last clear">
-                  <div class="draginput_cell" id="tool_alignleft" title="Align Left"></div>
-                  <div class="draginput_cell" id="tool_aligncenter" title="Align Center"></div>
-                  <div class="draginput_cell" id="tool_alignright" title="Align Right"></div>
-                  <div class="draginput_cell" id="tool_aligntop" title="Align Top"></div>
-                  <div class="draginput_cell" id="tool_alignmiddle" title="Align Middle"></div>
-                  <div class="draginput_cell" id="tool_alignbottom" title="Align Bottom"></div>
-                </div>
-              </div>
               <div class="clearfix"></div>
 
             </div>
@@ -525,6 +521,69 @@
               <label style="display: none;">
                 <span class="icon_label">Stroke Cap</span>
               </label>
+            </div>
+
+            <div class="clearfix"></div>
+
+            <div id="attributes_panel" class="context_panel">
+              <h4 class="clearfix">ID</h4>
+              <label class="idLabel" title="Identify the element">
+                <input id="elem_id" class="id_changer" data-attr="id" size="10" type="text" />
+                <span>ID</span>
+              </label>
+            </div>
+
+            <div class="clearfix"></div>
+
+            <div id="selected_panel" class="context_panel">
+
+              <div id="align_tools">
+                <h4>Align</h4>
+                <div class="toolset align_buttons" id="tool_position">
+                  <label>
+                    <div class="col last clear" id="position_opts">
+                      <div class="draginput_cell" id="tool_posleft" title="Align Left"></div>
+                      <div class="draginput_cell" id="tool_poscenter" title="Align Center"></div>
+                      <div class="draginput_cell" id="tool_posright" title="Align Right"></div>
+                      <div class="draginput_cell" id="tool_postop" title="Align Top"></div>
+                      <div class="draginput_cell" id="tool_posmiddle" title="Align Middle"></div>
+                      <div class="draginput_cell" id="tool_posbottom" title="Align Bottom"></div>
+                    </div>
+                  </label>
+                </div>
+              </div>
+
+              <div class="clearfix"></div>
+
+            </div>
+
+            <!-- Buttons when multiple elements are selected -->
+            <div id="multiselected_panel" class="context_panel clearfix">
+
+              <div class="clearfix"></div>
+
+              <h4 class="hidable">Multiple Elements</h4>
+
+              <div class="toolset align_buttons" style="position: relative">
+                <label id="tool_align_relative" style="margin-top: 10px;">
+                  <select id="align_relative_to" title="Align relative to ...">
+                    <option id="selected_objects" value="selected">Align to objects</option>
+                    <option id="page" value="page">Align to page</option>
+                  </select>
+                </label>
+                <h4>.</h4>
+
+                <div class="col last clear">
+                  <div class="draginput_cell" id="tool_alignleft" title="Align Left"></div>
+                  <div class="draginput_cell" id="tool_aligncenter" title="Align Center"></div>
+                  <div class="draginput_cell" id="tool_alignright" title="Align Right"></div>
+                  <div class="draginput_cell" id="tool_aligntop" title="Align Top"></div>
+                  <div class="draginput_cell" id="tool_alignmiddle" title="Align Middle"></div>
+                  <div class="draginput_cell" id="tool_alignbottom" title="Align Bottom"></div>
+                </div>
+              </div>
+              <div class="clearfix"></div>
+
             </div>
 
           </div>
@@ -643,6 +702,8 @@
       <div class="tool_button" id="tool_image" title="Image Tool [I]"></div>
       <div class="tool_button" id="tool_iarea" title="Interactive Button Area Tool [W]"></div>
       <div class="tool_button" id="tool_input" title="Input Field"></div>
+      <div class="tool_button" id="tool_iradio" title="Radio Button"></div>
+      <div class="tool_button" id="tool_icheckbox" title="Checkbox"></div>
       <div class="tool_button" id="tool_zoom" title="Zoom Tool [Z]"></div>
 
       <div id="color_tools">

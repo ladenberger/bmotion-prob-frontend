@@ -1424,7 +1424,7 @@ button.cancel, input.Cancel, input.cancel, input.jGraduate_Cancel, button.cancel
   z-index: 10;
   color: #fff;
 }
-#workarea.rect, #workarea.line, #workarea.ellipse, #workarea.path, #workarea.shapelib, #workarea.iarea, #workarea.input {
+#workarea.rect, #workarea.line, #workarea.ellipse, #workarea.path, #workarea.shapelib, #workarea.iarea, #workarea.input, #workarea.iradio {
   cursor: crosshair;
 }
 #workarea.text {
@@ -1546,6 +1546,20 @@ button.cancel, input.Cancel, input.cancel, input.jGraduate_Cancel, button.cancel
   height: 8px;
   position: relative;
   z-index: 2;
+}
+.idLabel div {
+  border: none;
+  background: transparent;
+  font: 12px sans-serif;
+  text-align: center;
+  color: darkblue;
+  padding: 15px 0 16px;
+  width: 100%;
+  height: 8px;
+  position: relative;
+  z-index: 2;
+  cursor: pointer;
+  text-transform: uppercase;
 }
 .draginput {
   background: #E8E8E8;

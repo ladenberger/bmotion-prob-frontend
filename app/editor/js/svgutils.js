@@ -627,6 +627,31 @@ var svgedit = svgedit || {};
     //if (!svgedit.browser.isOpera()) svgroot_.unsuspendRedraw(handle);
   };
 
+  svgedit.utilities.hasIElement = function(jelem) {
+    var has = false;
+    if (jelem.prop('tagName') === 'g') {
+      var bmsWidget = jelem.attr("data-bms-widget");
+      if (bmsWidget === 'iradio' || bmsWidget === 'icheckbox') {
+        return true;
+      }
+      jelem.children().each(function(i, c) {
+        has = svgedit.utilities.hasIElement($(c)) || has;
+      });
+    }
+    return has;
+  };
+
+  svgedit.utilities.hasBmsWidget = function(jelem) {
+    var has = false;
+    if (jelem.attr("data-bms-widget")) {
+      return true;
+    }
+    jelem.children().each(function(i, c) {
+      has = svgedit.utilities.hasBmsWidget($(c)) || has;
+    });
+    return has;
+  };
+
   // Function: cleanupElement
   // Remove unneeded (default) attributes, makes resulting SVG smaller
   //

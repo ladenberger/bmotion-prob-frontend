@@ -125,27 +125,29 @@ var svgedit = svgedit || {};
   // Parameters:
   // show - boolean indicating whether grips should be shown or not
   svgedit.select.Selector.prototype.showGrips = function(show) {
+
     // TODO: use suspendRedraw() here
     var bShow = show ? 'inline' : 'none';
     selectorManager_.selectorGripsGroup.setAttribute('display', bShow);
+    var elem = this.selectedElement;
 
-    // Disable rotation for input fields
-    var bmsWidget = $(this.selectedElement).attr("data-bms-widget");
-    var rotationCircles = $(selectorManager_.selectorGripsGroup).find("circle");
-    if (bmsWidget) {
-      if (bmsWidget === "input") {
-        rotationCircles.css("display", "none");
-      }
-    } else {
-      rotationCircles.css("display", "inline");
+    var jelem = $(elem);
+    var bmsWidget = jelem.attr("data-bms-widget");
+    var jSelectorElement = $(selectorManager_.selectorGripsGroup);
+    //var rotationCircles = jSelectorElement.find("circle");
+    jSelectorElement.css("display", "inline");
+
+    // Disable grips for BMS Widgets
+    if (jelem.prop('tagName') === 'g' && svgedit.utilities.hasBmsWidget(jelem)) {
+      jSelectorElement.css("display", "none");
     }
 
-    var elem = this.selectedElement;
     this.hasGrips = show;
     if (elem && show) {
       this.selectorGroup.appendChild(selectorManager_.selectorGripsGroup);
       this.updateGripCursors(svgedit.utilities.getRotationAngle(elem));
     }
+
   };
 
   // Function: svgedit.select.Selector.resize

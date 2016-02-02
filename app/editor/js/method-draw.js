@@ -269,6 +269,7 @@ define(["jquery", "touch", "jquery.hotkeys", "jquery.bbq",
           'image': 'image.png',
           'iarea': 'iarea.png',
           'input': 'input.png',
+          'radio': 'input.png',
           'zoom': 'zoom.png',
           'delete': 'delete.png',
           'node_delete': 'node_delete.png',
@@ -293,6 +294,8 @@ define(["jquery", "touch", "jquery.hotkeys", "jquery.bbq",
           '#tool_image': 'image',
           '#tool_iarea': 'iarea',
           '#tool_input': 'input',
+          '#tool_iradio': 'iradio',
+          '#tool_icheckbox': 'icheckbox',
           '#tool_zoom': 'zoom',
           '#tool_node_clone': 'node_clone',
           '#tool_node_delete': 'node_delete',
@@ -540,11 +543,12 @@ define(["jquery", "touch", "jquery.hotkeys", "jquery.bbq",
       // called when we've selected a different element
       var selectedChanged = function(window, elems) {
 
-        // If elemen is bms widget, hide color tools
+        // Hide color tools for BMS Widgets
         var color_tools = $('#color_tools, #palette');
         color_tools.css("visibility", "visible");
         elems.forEach(function(e) {
-          if ($(e).attr("data-bms-widget")) {
+          var je = $(e);
+          if (svgedit.utilities.hasBmsWidget(je)) {
             color_tools.css("visibility", "hidden");
             return;
           }
@@ -1372,15 +1376,32 @@ define(["jquery", "touch", "jquery.hotkeys", "jquery.bbq",
               $.fn.dragInput.updateCursor($('#blur')[0])
           }
 
-        }
-
-        // All elements including image and group have opacity
-        if (selectedElement != null) {
+          // All elements including image and group have opacity
           var opac_perc = ((selectedElement.getAttribute("opacity") || 1.0) * 100);
           $('#group_opacity').val(opac_perc);
           $('#elem_id').val(selectedElement.getAttribute("id"));
+
+          // Handle custom data attributes
+          var jele = $(selectedElement);
+          var isBmsWidget = jele.attr("data-bms-widget") !== null ? jele.attr("data-bms-widget") : undefined;
+          var el_name = isBmsWidget ? isBmsWidget : jele.prop("tagName");
+          $("input[id^='" + el_name + "_data_']").val("");
+          for (d in jele.data()) {
+            var iele = $("#" + el_name + "_data_" + d);
+            if (iele.length) {
+              var nvalue = jele.attr("data-" + d);
+              if (nvalue === "true" || nvalue === "false") {
+                iele.html(nvalue);
+              } else {
+                iele.val(nvalue);
+              }
+            }
+          }
+
           $.fn.dragInput.updateCursor($('#group_opacity')[0])
+
         }
+
       };
 
       var setImageURL = Editor.setImageURL = function(url) {
@@ -1398,7 +1419,6 @@ define(["jquery", "touch", "jquery.hotkeys", "jquery.bbq",
       var updateContextPanel = function(e) {
 
         var elem = selectedElement;
-
         // If element has just been deleted, consider it null
         if (elem != null && !elem.parentNode) elem = null;
         if (multiselected && multiselected[0] != null && !multiselected[0].parentNode) multiselected = false;
@@ -1462,8 +1482,9 @@ define(["jquery", "touch", "jquery.hotkeys", "jquery.bbq",
 
           var jele = $(elem);
           var isBmsWidget = jele.attr("data-bms-widget") !== null ? jele.attr("data-bms-widget") : undefined;
+          var el_name = isBmsWidget ? isBmsWidget : elem.tagName;
           if (!isBmsWidget) $("#stroke_panel").show();
-          var elname = elem.nodeName;
+          //var elname = elem.nodeName;
           var angle = svgCanvas.getRotationAngle(elem);
           $('#angle').val(Math.round(angle));
 
@@ -1474,11 +1495,12 @@ define(["jquery", "touch", "jquery.hotkeys", "jquery.bbq",
 
             $('#attributes_panel').show();
             $('#common_panel').show();
-            if (!isBmsWidget) $('#selected_panel').show();
+            $('#selected_panel').show();
+            if (!isBmsWidget) $('#opacity_blur_panel').show();
             $('.action_selected').removeClass('disabled');
             // Elements in this array already have coord fields
             var x, y
-            if (['g', 'polyline', 'path'].indexOf(elname) >= 0) {
+            if (['g', 'polyline', 'path', 'iradio', 'icheckbox'].indexOf(el_name) >= 0) {
               var bb = svgCanvas.getStrokedBBox([elem]);
               if (bb) {
                 x = bb.x;
@@ -1491,18 +1513,18 @@ define(["jquery", "touch", "jquery.hotkeys", "jquery.bbq",
               y = svgedit.units.convertUnit(y);
             }
 
-            $("#" + elname + "_x").val(Math.round(x))
-            $("#" + elname + "_y").val(Math.round(y))
-            if (elname === "polyline") {
+            $("#" + el_name + "_x").val(Math.round(x))
+            $("#" + el_name + "_y").val(Math.round(y))
+            if (el_name === "polyline") {
               //we're acting as if polylines were paths
               $("#path_x").val(Math.round(x))
               $("#path_y").val(Math.round(y))
             }
 
             // Elements in this array cannot be converted to a path
-            var no_path = ['image', 'text', 'path', 'g', 'use'].indexOf(elname) == -1 || isBmsWidget;
+            var no_path = ['image', 'text', 'path', 'g', 'use'].indexOf(el_name) == -1 || isBmsWidget;
             if (no_path) $('.action_path_convert_selected').removeClass('disabled');
-            if (elname === "path") $('.action_path_selected').removeClass('disabled');
+            if (el_name === "path") $('.action_path_selected').removeClass('disabled');
 
           }
 
@@ -1533,6 +1555,9 @@ define(["jquery", "touch", "jquery.hotkeys", "jquery.bbq",
             rect: ['rx', 'width', 'height', 'x', 'y'],
             iarea: ['width', 'height', 'x', 'y'],
             input: ['width', 'height', 'x', 'y'],
+            iradio: [],
+            icheckbox: [],
+            radio: ['x', 'y'],
             image: ['width', 'height', 'x', 'y'],
             circle: ['cx', 'cy', 'r'],
             ellipse: ['cx', 'cy', 'rx', 'ry'],
@@ -1541,8 +1566,6 @@ define(["jquery", "touch", "jquery.hotkeys", "jquery.bbq",
             'use': [],
             path: []
           };
-
-          var el_name = isBmsWidget ? isBmsWidget : elem.tagName;
 
           if ($(elem).data('gsvg')) {
             $('#g_panel').show();
@@ -1567,7 +1590,6 @@ define(["jquery", "touch", "jquery.hotkeys", "jquery.bbq",
             } else {
               $("#common_panel").hide();
             }
-
             $.each(cur_panel, function(i, item) {
               var attrVal = elem.getAttribute(item);
               if (curConfig.baseUnit !== 'px' && elem[item]) {
@@ -1773,6 +1795,33 @@ define(["jquery", "touch", "jquery.hotkeys", "jquery.bbq",
         elem.id = val;
         svgCanvas.addToSelection([elem], true);
         $(this).blur();
+      });
+
+      $('.data_attribute_changer').change(function(attr) {
+        var elem = $(selectedElement);
+        var input = $(this);
+        var val = input.val();
+        var attr = input.attr("data-attr");
+        elem.attr("data-" + attr, val);
+        elem.data(attr, val);
+        input.blur();
+      });
+
+      $('.data_attribute_changer_boolean').click(function() {
+        var elem = $(selectedElement);
+        var input = $(this);
+        var attr = input.attr("data-attr");
+        var currentValue = elem.attr("data-" + attr);
+        var b = currentValue === "true" ? true : false;
+        elem.attr("data-" + attr, !b).data(attr, !b);
+        input.text(!b);
+        var type = elem.attr("data-bms-widget");
+        if (type === "iradio") {
+          elem.find(".inner").attr("opacity", !b ? 1 : 0);
+        } else if (type === "icheckbox") {
+          elem.find("polygon").attr("opacity", !b ? 1 : 0);
+        }
+        input.blur();
       });
 
       $('.path_changer').change(function() {
@@ -2213,6 +2262,18 @@ define(["jquery", "touch", "jquery.hotkeys", "jquery.bbq",
         }
       };
 
+      var clickIRadio = function() {
+        if (toolButtonClick('#tool_iradio')) {
+          svgCanvas.setMode('iradio');
+        }
+      };
+
+      var clickICheckbox = function() {
+        if (toolButtonClick('#tool_icheckbox')) {
+          svgCanvas.setMode('icheckbox');
+        }
+      };
+
       var clickFHRect = function() {
         if (toolButtonClick('#tool_fhrect')) {
           svgCanvas.setMode('fhrect');
@@ -2509,7 +2570,15 @@ define(["jquery", "touch", "jquery.hotkeys", "jquery.bbq",
           svgCanvas.groupSelectedElements();
         }
         // ungroup
-        else if (selectedElement) {
+        /*else if (selectedElement) {
+          flash($('#object_menu'));
+          svgCanvas.ungroupSelectedElement();
+        }*/
+      };
+
+      var clickUngroup = function() {
+        // ungroup
+        if (selectedElement && !$(selectedElement).attr("data-bms-widget")) {
           flash($('#object_menu'));
           svgCanvas.ungroupSelectedElement();
         }
@@ -3405,6 +3474,14 @@ define(["jquery", "touch", "jquery.hotkeys", "jquery.bbq",
             fn: clickInput,
             evt: 'mouseup'
           }, {
+            sel: '#tool_iradio',
+            fn: clickIRadio,
+            evt: 'mouseup'
+          }, {
+            sel: '#tool_icheckbox',
+            fn: clickICheckbox,
+            evt: 'mouseup'
+          }, {
             sel: '#tool_zoom',
             fn: clickZoom,
             evt: 'mouseup',
@@ -3529,7 +3606,7 @@ define(["jquery", "touch", "jquery.hotkeys", "jquery.bbq",
             key: [modKey + 'G', true]
           }, {
             sel: '#tool_ungroup',
-            fn: clickGroup,
+            fn: clickUngroup,
             evt: 'click',
             key: modKey + 'shift+G'
           }, {
@@ -4066,7 +4143,7 @@ define(["jquery", "touch", "jquery.hotkeys", "jquery.bbq",
         callback: changeAttribute,
         cursor: false
       });
-      $('#rect_x, #rect_y, #iarea_x, #iarea_y, #input_x, #input_y').dragInput({
+      $('#rect_x, #rect_y, #iarea_x, #iarea_y, #input_x, #input_y, #iradio_x, #iradio_y, #icheckbox_x, #icheckbox_y').dragInput({
         min: null,
         max: null,
         step: 1,
