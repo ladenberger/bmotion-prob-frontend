@@ -396,7 +396,7 @@ define(['angular', 'jquery', 'bms.visualization', 'prob.observers'], function(an
               if (observerInstance && (typeof observerInstance.shouldBeChecked === "function")) {
                 var check = observerInstance.shouldBeChecked(visualizationId, o);
               }
-              if (check) {
+              if (check && o.data.selector) {
                 var oe = container.find(o.data.selector);
                 if (oe.length) { // If element(s) exist(s)
                   oe.each(function() {
@@ -505,8 +505,10 @@ define(['angular', 'jquery', 'bms.visualization', 'prob.observers'], function(an
           var elementIds = [];
 
           var visualizationId = bmsVisualizationService.getCurrentVisualizationId();
-
           var observers = bmsVisualizationService.getObservers(visualizationId);
+          var vis = bmsVisualizationService.getVisualization(visualizationId);
+          var container = vis.container;
+
           angular.forEach(observers, function(o) {
 
             try {
@@ -515,7 +517,7 @@ define(['angular', 'jquery', 'bms.visualization', 'prob.observers'], function(an
               // TODO: Return some error
             } finally {
               if (observerInstance && (typeof observerInstance.shouldBeChecked === "function")) {
-                if (observerInstance.shouldBeChecked(visualizationId, o)) {
+                if (observerInstance.shouldBeChecked(visualizationId, o) && isValidSelector(container.contents(), o.data.selector) === undefined) {
                   elementIds.push({
                     selector: o.data.selector
                   });

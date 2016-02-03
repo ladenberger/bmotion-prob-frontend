@@ -28,7 +28,9 @@ requirejs.config({
         "bms.electron": "js/main/bms.electron",
         "bms.nodejs": "js/main/bms.nodejs",
         "bms.tabs": "js/main/bms.tabs",
-        
+        "bms.api": "js/main/bms.api",
+        "bms.api.extern": "js/main/bms.api.extern",
+
         "prob.ui": "js/main/prob.ui",
         "prob.modal": "js/main/prob.modal",
         "prob.graph": "js/main/prob.graph",

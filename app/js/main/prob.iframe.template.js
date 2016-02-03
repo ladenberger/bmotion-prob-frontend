@@ -2,11 +2,11 @@
  * BMotion Studio for ProB IFrame Module
  *
  */
-define(['angular', 'bms.func', 'jquery', 'prob.observers', 'prob.modal'], function(angular, bms, $) {
+define(['angular', 'bms.func', 'jquery', 'prob.modal', 'bms.api', 'bms.api.extern'], function(angular, bms, $) {
 
-  var module = angular.module('prob.iframe.template', ['prob.observers', 'prob.modal'])
-    .directive('bmsVisualisationView', ['$rootScope', 'bmsSessionService', 'bmsVisualizationService', 'bmsObserverService', 'ws', '$injector', 'bmsModalService', 'trigger', '$compile', '$http', '$timeout', '$q',
-      function($rootScope, bmsSessionService, bmsVisualizationService, bmsObserverService, ws, $injector, bmsModalService, trigger, $compile, $http, $timeout, $q) {
+  var module = angular.module('prob.iframe.template', ['prob.modal', 'bms.api'])
+    .directive('bmsVisualisationView', ['$rootScope', 'bmsApiService', 'bmsSessionService', 'bmsVisualizationService', 'ws', 'bmsModalService', 'trigger', '$compile', '$http', '$q',
+      function($rootScope, bmsApiService, bmsSessionService, bmsVisualizationService, ws, bmsModalService, trigger, $compile, $http, $q) {
         return {
           replace: false,
           scope: {
@@ -18,164 +18,11 @@ define(['angular', 'bms.func', 'jquery', 'prob.observers', 'prob.modal'], functi
 
             $scope.id = bms.uuid(); // Visualization ID
             $scope.attrs = {};
-            $scope.values = {};
+            $scope.values = bmsApiService.getValues($scope.id);
 
             bmsVisualizationService.setCurrentVisualizationId($scope.id);
             $scope.visualization = bmsVisualizationService.getVisualization($scope.id);
 
-            $scope.checkObservers = function(observers, stateId, cause) {
-
-              var stateId = stateId ? stateId : $scope.visualization.stateId;
-              var cause = cause ? cause : trigger.TRIGGER_ANIMATION_CHANGED;
-              var initialised = $scope.visualization.initialised ? $scope.visualization.initialised : false;
-
-              if (stateId && initialised) {
-
-                // Collect values from observers
-                bmsObserverService.checkObservers($scope.sessionId, $scope.id, observers, $scope.visualization.container.contents(), stateId, cause)
-                  .then(function(data) {
-                    angular.forEach(data, function(value) {
-                      if (value !== undefined) {
-                        $.extend(true, $scope.values, value);
-                      }
-                    });
-                    if (!bms.isEmpty($scope.values)) {
-                      $scope.applyValues();
-                    }
-                  });
-
-              }
-
-            };
-
-            $scope.triggerObserver = function(observer, stateId, cause) {
-              $scope.checkObservers([observer], stateId, cause);
-            };
-
-            $scope.triggerJsonObservers = function(stateId, cause) {
-              $scope.triggerObservers(stateId, cause, 'json');
-            };
-
-            $scope.triggerObservers = function(stateId, cause, list) {
-              var observers = bmsVisualizationService.getObservers($scope.id, list);
-              $scope.checkObservers(observers, stateId, cause);
-            };
-
-            $scope.triggerListeners = function(cause) {
-              var vis = bmsVisualizationService.getVisualization($scope.id);
-              if (vis.listener) {
-                angular.forEach(vis.listener[cause], function(l) {
-                  if (!l.executed) {
-                    l.callback(vis);
-                    // Init listener should be called only once
-                    if (cause === "ModelInitialised") l.executed = true;
-                  }
-                });
-              }
-            };
-
-            $scope.setupEvents = function(list) {
-              var events = bmsVisualizationService.getEvents($scope.id, list);
-              bmsObserverService.setupEvents($scope.sessionId, $scope.id, events, $scope.visualization.container.contents(), $scope.visualization.traceId);
-            };
-
-            $scope.setupJsonEvents = function() {
-              $scope.setupEvents('json');
-            };
-
-            $scope.setupEvent = function(evt) {
-              bmsObserverService.setupEvent($scope.sessionId, $scope.id, evt, $scope.visualization.container.contents(), $scope.visualization.traceId);
-            };
-
-            // --------------------------------------
-            // Parent API (called from prob.template)
-            // --------------------------------------
-            $scope.addObserver = function(type, data, list) {
-              var observer = {
-                type: type,
-                data: data
-              };
-              // Add observer ..
-              bmsVisualizationService.addObserver($scope.id, observer, list);
-              // ... and trigger observer
-              if ($scope.visualization.stateId !== 'root' && $scope.visualization.initialised && $scope.visualization.lastOperation !== '$setup_constants') {
-                $scope.triggerObserver(observer, $scope.visualization.stateId, data.cause);
-              }
-            };
-
-            $scope.addEvent = function(type, data, list) {
-              var ev = {
-                type: type,
-                data: data
-              };
-              // Add event ...
-              bmsVisualizationService.addEvent($scope.id, ev, list);
-              // ... and setup event
-              var instance = $injector.get(type, "");
-              if (instance) {
-                instance.setup($scope.sessionId, $scope.id, ev, $scope.visualization.container.contents(), $scope.visualization.traceId);
-              }
-            };
-
-            $scope.eval = function(options) {
-
-              var options = bms.normalize($.extend({
-                formulas: [],
-                translate: false,
-                trigger: function() {}
-              }, options), ["trigger"]);
-
-              ws.emit('evaluateFormulas', {
-                data: {
-                  id: $scope.sessionId,
-                  formulas: options.formulas.map(function(f) {
-                    return {
-                      formula: f,
-                      translate: options.translate
-                    }
-                  })
-                }
-              }, function(r) {
-
-                var errors = [];
-                var results = [];
-
-                angular.forEach(options.formulas, function(f) {
-                  if (r[f]['error']) {
-                    var errorMsg = r[f]['error'] + " ("
-                    if (options.selector) {
-                      errorMsg = errorMsg + "selector: " + options.selector + ", ";
-                    }
-                    errorMsg = errorMsg + "formula: " + f + ")";
-                    errors.push(errorMsg);
-                  } else {
-                    results.push(r[f]['trans'] !== undefined ? r[f]['trans'] : r[f]['result']);
-                  }
-                });
-
-                if (errors.length === 0) {
-                  if (options.selector) {
-                    options.trigger($scope.visualization.container.contents().find(options.selector), results);
-                  } else {
-                    options.trigger(results);
-                  }
-                } else {
-                  bmsModalService.openErrorDialog(errors);
-                }
-
-              });
-
-            };
-
-            $scope.on = function(what, callback) {
-              var listener = bmsVisualizationService.addListener($scope.id, what, callback);
-              if (what === "ModelInitialised" && $scope.visualization.initialised && listener) {
-                var vis = bmsVisualizationService.getVisualization($scope.id);
-                // Init listener should be called only once
-                listener.callback(vis);
-                listener.executed = true;
-              }
-            };
             // --------------------------------------
 
             ws.on('checkObserver', function(cause, s) {
@@ -188,8 +35,8 @@ define(['angular', 'bms.func', 'jquery', 'prob.observers', 'prob.modal'], functi
                 $scope.visualization.setupConstants = true;
               }
               if ($scope.visualization.traceId == s.traceId) {
-                $scope.triggerObservers(s.stateId, cause);
-                $scope.triggerListeners(cause);
+                bmsApiService.triggerObservers($scope.id, s.stateId, cause);
+                bmsApiService.triggerListeners($scope.id, cause);
               }
             });
 
@@ -197,19 +44,19 @@ define(['angular', 'bms.func', 'jquery', 'prob.observers', 'prob.modal'], functi
               ws.removeAllListeners("checkObserver");
             });
 
-            $scope.reloadTemplate = function() {
-              bmsObserverService.clearBmsIdCache($scope.id);
-              $scope.attrs = {};
-              $scope.triggerObservers();
-              $scope.setupEvents();
-            };
-
           }],
           link: function($scope, $element, attrs, ctrl) {
 
             var iframe = $($element.contents());
             var iframeContents;
             $scope.visualization.container = iframe;
+
+            $scope.$watch(function() {
+              return bmsApiService.getValues($scope.id);
+            }, function(newValue) {
+              $scope.values = newValue;
+              $scope.applyValues();
+            }, true);
 
             $scope.getValue = function(bmsid, attr, defaultValue) {
               var returnValue = defaultValue === 'undefined' ? undefined : defaultValue;
@@ -251,11 +98,10 @@ define(['angular', 'bms.func', 'jquery', 'prob.observers', 'prob.modal'], functi
               bmsVisualizationService.clearEvents($scope.id, 'js');
               bmsVisualizationService.clearListeners($scope.id);
               iframe.attr('src', iframe.attr('src'));
-              //document.getElementById($scope.id).contentWindow.location.reload();
               svgItem.defer.promise
                 .then(function() {
-                  $scope.triggerJsonObservers();
-                  $scope.setupJsonEvents();
+                  bmsApiService.triggerJsonObservers($scope.id);
+                  bmsApiService.setupJsonEvents($scope.id);
                 });
 
             });
@@ -316,7 +162,7 @@ define(['angular', 'bms.func', 'jquery', 'prob.observers', 'prob.modal'], functi
                   .success(function(data) {
                     // TODO: We need to validate the schema of the view data json file!
                     angular.forEach(data['events'], function(e) {
-                      $scope.addEvent(e['type'], e['data'], 'json');
+                      bmsApiService.addEvent($scope.id, e['type'], e['data'], 'json');
                     });
                     defer.resolve();
                   })
@@ -344,7 +190,7 @@ define(['angular', 'bms.func', 'jquery', 'prob.observers', 'prob.modal'], functi
                   .success(function(data) {
                     // TODO: We need to validate the schema of the view data json file!
                     angular.forEach(data['observers'], function(o) {
-                      $scope.addObserver(o.type, o.data, 'json');
+                      bmsApiService.addObserver($scope.id, o.type, o.data, 'json');
                     });
                     defer.resolve();
                   })
@@ -432,30 +278,8 @@ define(['angular', 'bms.func', 'jquery', 'prob.observers', 'prob.modal'], functi
         }
       }
     ])
-    .factory('bmsWidgetService', ['bmsVisualizationService',
+    .directive('bmsWidget', ['bmsVisualizationService',
       function(bmsVisualizationService) {
-
-        var fieldSetElements = {};
-
-        return {
-          getFieldSet: function(visid, id) {
-            var fieldSetElement = fieldSetElements[id];
-            if (!fieldSetElement) {
-              fieldSetElement = $("<fieldset>");
-              fieldSetElement.attr("id", id);
-              var vis = bmsVisualizationService.getVisualization(visid);
-              vis.container.contents().find("body").append(fieldSetElement);
-              fieldSetElements[id] = fieldSetElement;
-            }
-            return fieldSetElement;
-          }
-
-        }
-
-      }
-    ])
-    .directive('bmsWidget', ['bmsVisualizationService', 'bmsWidgetService',
-      function(bmsVisualizationService, bmsWidgetService) {
         return {
           link: function($scope, element, attr) {
             var type = attr["bmsWidget"];
@@ -483,10 +307,8 @@ define(['angular', 'bms.func', 'jquery', 'prob.observers', 'prob.modal'], functi
                   newInput.attr("name", parent.attr("id"));
                 }
 
-                //var fieldsetElement = bmsWidgetService.getFieldSet($scope.id, parentId);
                 var vis = bmsVisualizationService.getVisualization($scope.id);
                 vis.container.contents().find("body").append(newInput);
-                //fieldsetElement.append(newInput);
                 jele.remove();
 
                 break;
@@ -509,10 +331,8 @@ define(['angular', 'bms.func', 'jquery', 'prob.observers', 'prob.modal'], functi
                   newInput.attr("name", parent.attr("id"));
                 }
 
-                //var fieldsetElement = bmsWidgetService.getFieldSet($scope.id, parentId);
                 var vis = bmsVisualizationService.getVisualization($scope.id);
                 vis.container.contents().find("body").append(newInput);
-                //fieldsetElement.append(newInput);
                 jele.remove();
 
                 break;

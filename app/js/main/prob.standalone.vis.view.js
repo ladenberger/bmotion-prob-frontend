@@ -2,14 +2,15 @@
  * BMotion Studio for ProB Standalone View Module
  *
  */
-define(['bms.electron', 'bms.visualization', 'ng-electron'], function() {
+define(['bms.electron', 'bms.visualization', 'ng-electron', 'bms.session'], function() {
 
-  var module = angular.module('prob.standalone.vis.view', ['bms.electron', 'bms.visualization', 'ngElectron'])
-    .controller('bmsVisualizationCtrl', ['$scope', '$location', '$routeParams',
-      function($scope, $location, $routeParams) {
+  var module = angular.module('prob.standalone.vis.view', ['bms.electron', 'bms.visualization', 'ngElectron', 'bms.session'])
+    .controller('bmsVisualizationCtrl', ['$scope', '$location', '$routeParams', 'bmsSessionService',
+      function($scope, $location, $routeParams, bmsSessionService) {
         var self = this;
         self.view = $routeParams.view;
         self.sessionId = $routeParams.sessionId;
+        bmsSessionService.setSessionId(self.sessionId);
         self.file = $routeParams.file;
       }
     ])

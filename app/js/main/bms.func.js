@@ -75,7 +75,9 @@ define(['jquery'], function($) {
         api._s4() + '-' + api._s4() + api._s4() + api._s4();
     },
     callOrReturn: function(subject, element, container) {
-      if (api.isFunction(subject)) {
+      if (typeof subject === "boolean") {
+        return subject;
+      } else if (api.isFunction(subject)) {
         return subject.call(this, element, container);
       } else {
         try {
