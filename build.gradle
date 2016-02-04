@@ -145,7 +145,7 @@ targets.each() { target, cliTarget ->
     }
 
     task "grunt_standalone_${target}"(dependsOn: [npmDeps], type: GruntTask) {
-        gruntArgs = "template standalone_${target} --force"
+        gruntArgs = "standalone_${target} --force"
     }
 
     task "standalone_${target}"(dependsOn: ["zip_${target}"]) {}

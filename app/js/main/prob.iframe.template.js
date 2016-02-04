@@ -48,6 +48,7 @@ define(['angular', 'bms.func', 'jquery', 'prob.modal', 'bms.api', 'bms.api.exter
           link: function($scope, $element, attrs, ctrl) {
 
             var iframe = $($element.contents());
+            iframe.attr("id", $scope.id);
             var iframeContents;
             $scope.visualization.container = iframe;
 
@@ -216,6 +217,7 @@ define(['angular', 'bms.func', 'jquery', 'prob.modal', 'bms.api', 'bms.api.exter
 
               bmsSessionService.loadServerData(sessionId)
                 .then(function(serverData) {
+
                   $rootScope.$broadcast('setProBViewTraceId', serverData['traceId']);
                   $scope.visualization = $.extend($scope.visualization, serverData);
                   var templateFolder = serverData['templateFolder'];

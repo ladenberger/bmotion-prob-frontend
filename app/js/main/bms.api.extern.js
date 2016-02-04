@@ -11,50 +11,50 @@ define(['angular'], function(angular) {
 
       apis[visId] = {
         eval: function(options) {
-          setTimeout(function() {
+          //setTimeout(function() {
             var elem = angular.element(document.querySelector('[ng-controller]'));
             var injector = elem.injector();
             var service = injector.get('bmsApiService');
             service.eval(options);
-          }, 0);
+          //}, 0);
         },
         getModelData: function(what, options) {
-          setTimeout(function() {
+          //setTimeout(function() {
             var elem = angular.element(document.querySelector('[ng-controller]'));
             var injector = elem.injector();
             var service = injector.get('bmsApiService');
-            service.getModelData(visId, what, options);
-          }, 0);
+            return service.getModelData(visId, what, options);
+          //}, 0);
         },
-        getModelTransitions: function(options) {
-          this.getModelData("transitions", options);
+        getModelEvents: function(options) {
+          return this.getModelData("events", options);
         },
         observe: function(what, options) {
-          setTimeout(function() {
+          //setTimeout(function() {
             var elem = angular.element(document.querySelector('[ng-controller]'));
             var injector = elem.injector();
             var service = injector.get('bmsApiService');
             service.addObserver(visId, what, options, 'js');
-          }, 0);
+          //}, 0);
         },
         registerEvent: function(type, options) {
-          setTimeout(function() {
+          //setTimeout(function() {
             var elem = angular.element(document.querySelector('[ng-controller]'));
             var injector = elem.injector();
             var service = injector.get('bmsApiService');
             service.addEvent(visId, type, options, 'js');
-          }, 0);
+          //}, 0);
         },
         executeEvent: function(options) {
           this.registerEvent('executeEvent', options);
         },
         on: function(what, callback) {
-          setTimeout(function() {
+          //setTimeout(function() {
             var elem = angular.element(document.querySelector('[ng-controller]'));
             var injector = elem.injector();
             var service = injector.get('bmsApiService');
             service.on(visId, what, callback);
-          }, 0);
+          //}, 0);
         },
         init: function(callback) {
           this.on("ModelInitialised", callback);

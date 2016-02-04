@@ -295,7 +295,7 @@ define(['bms.func', 'jquery', 'angular', 'qtip', 'prob.modal'], function(bms, $,
         shouldBeChecked: function(visId, obj) {
           var visualization = bmsVisualizationService.getVisualization(visId);
           var check = true;
-          if (obj.data.refinement !== undefined && !bms.inArray(obj.data.refinement, visualization.refinements)) {
+          if (obj.data.refinement !== undefined && !bms.inArray(obj.data.refinement, visualization["model"]["refinements"])) {
             check = false;
           }
           return check;
@@ -449,7 +449,7 @@ define(['bms.func', 'jquery', 'angular', 'qtip', 'prob.modal'], function(bms, $,
         shouldBeChecked: function(visId, obj) {
           var visualization = bmsVisualizationService.getVisualization(visId);
           var check = true;
-          if (obj.data.refinement !== undefined && !bms.inArray(obj.data.refinement, visualization.refinements)) {
+          if (obj.data.refinement !== undefined && !bms.inArray(obj.data.refinement, visualization["model"]["refinements"])) {
             check = false;
           }
           return check;
@@ -527,7 +527,7 @@ define(['bms.func', 'jquery', 'angular', 'qtip', 'prob.modal'], function(bms, $,
       return bsetObserver;
 
     }])
-    .service('nextTransitions', ['ws', '$q', function(ws, $q) {
+    .service('nextEvents', ['ws', '$q', function(ws, $q) {
 
       var oservice = {
         apply: function(sessionId, visId, observer, container, data) {
@@ -575,7 +575,7 @@ define(['bms.func', 'jquery', 'angular', 'qtip', 'prob.modal'], function(bms, $,
         },
         check: function(sessionId, visId, observer, container, stateId, trigger) {
           var defer = $q.defer();
-          ws.emit("observeNextTransitions", {
+          ws.emit("observeNextEvents", {
             data: {
               id: sessionId,
               stateId: stateId
@@ -687,7 +687,7 @@ define(['bms.func', 'jquery', 'angular', 'qtip', 'prob.modal'], function(bms, $,
 
           var obj = {};
           var vis = bmsVisualizationService.getVisualization(visId);
-          var visRefinements = vis.refinements;
+          var visRefinements = vis["model"]["refinements"];
 
           if (visRefinements) {
 
@@ -755,7 +755,7 @@ define(['bms.func', 'jquery', 'angular', 'qtip', 'prob.modal'], function(bms, $,
         shouldBeChecked: function(visId, obj) {
           var visualization = bmsVisualizationService.getVisualization(visId);
           var check = true;
-          if (obj.data.refinement !== undefined && !bms.inArray(obj.data.refinement, visualization.refinements)) {
+          if (obj.data.refinement !== undefined && !bms.inArray(obj.data.refinement, visualization["model"]["refinements"])) {
             check = false;
           }
           return check;
@@ -876,7 +876,7 @@ define(['bms.func', 'jquery', 'angular', 'qtip', 'prob.modal'], function(bms, $,
         shouldBeChecked: function(visId, obj) {
           var visualization = bmsVisualizationService.getVisualization(visId);
           var check = true;
-          if (obj.data.refinement !== undefined && !bms.inArray(obj.data.refinement, visualization.refinements)) {
+          if (obj.data.refinement !== undefined && !bms.inArray(obj.data.refinement, visualization["model"]["refinements"])) {
             check = false;
           }
           return check;

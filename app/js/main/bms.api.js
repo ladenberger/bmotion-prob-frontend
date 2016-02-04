@@ -1,7 +1,7 @@
 define(['angular', 'jquery', 'bms.func', 'prob.modal', 'bms.session', 'prob.observers'], function(angular, $, bms) {
 
   angular.module('bms.api', ['prob.modal', 'bms.session', 'prob.observers'])
-    .factory('bmsApiService', ['ws', '$injector', 'trigger', 'bmsSessionService', 'bmsObserverService', 'bmsVisualizationService', 'bmsObserverService', 'bmsModalService',
+    .factory('bmsApiService', ['ws', '$injector', 'trigger', 'bmsSessionService', 'bmsObserverService', 'bmsVisualizationService', 'bmsModalService',
       function(ws, $injector, trigger, bmsSessionService, bmsObserverService, bmsVisualizationService, bmsModalService) {
 
         var attributeValues = {};
@@ -130,15 +130,8 @@ define(['angular', 'jquery', 'bms.func', 'prob.modal', 'bms.session', 'prob.obse
         };
 
         var getModelData = function(visId, what, options) {
-          ws.emit('getModelData', {
-            data: {
-              id: bmsSessionService.getSessionId(),
-              what: what
-            }
-          }, function(r) {
-            console.log(options)
-            options.trigger(r);
-          });
+          var vis = bmsVisualizationService.getVisualization(visId);
+          return vis["model"][what];
         };
 
         var eval = function(options) {
