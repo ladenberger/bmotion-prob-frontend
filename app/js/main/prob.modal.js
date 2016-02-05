@@ -30,6 +30,10 @@ define(['ui-bootstrap', 'ui-bootstrap-tpls', 'angular-sanitize'], function() {
         $scope.dialog = d;
       };
 
+      $modalInstance.getState = function() {
+        return $scope.state;
+      };
+
       $modalInstance.setMessage = function(msg, s) {
         if (Object.prototype.toString.call(msg) === '[object Array]') {
           $scope.message = msg.join("<br>");

@@ -183,66 +183,65 @@ define(['bms.func', 'jquery', 'angular', 'qtip', 'prob.modal'], function(bms, $,
 
           var stateId = options.stateId;
 
-          ws.emit("getHistory", {
+          ws.emit("observeHistory", {
             data: {
               id: sessionId,
               stateId: stateId
             }
           }, function(data) {
-            /**
-             * { data:
-             *    {
-             *      events: [
-             *       { name: <event name>, parameter: <parameter as list> },
-             *       ...
-             *      ]
-             *    }
-             * }
-             */
+
             getExpression(sessionId, visId, observer, stateId).then(function(expressions) {
 
               var fmap = {};
 
-              angular.forEach(data.events, function(t) {
+              var keepGoing = true;
 
-                angular.forEach(observer.data.observers, function(o) {
+              angular.forEach(data, function(t) {
 
-                  var events = [];
-                  if (o.exp) {
-                    var eventsFromExp = expressions[o.exp].trans;
-                    if (eventsFromExp) {
-                      events = events.concat(eventsFromExp);
-                    }
-                  }
-                  if (o.events) {
-                    events = events.concat(o.events);
-                  }
+                if (keepGoing) {
 
-                  if ($.inArray(t.name, events) > -1) {
-                    if (o.trigger) {
-                      o.trigger.call(this, t);
-                    }
-                    angular.forEach(o.actions, function(a) {
-                      var selector;
-                      if (bms.isFunction(a.selector)) {
-                        selector = a.selector.call(this, t);
-                      } else {
-                        selector = replaceParameter(a.selector, t.parameter);
+                  angular.forEach(observer.data.observers, function(o) {
+
+                    var events = [];
+                    if (o.exp) {
+                      var eventsFromExp = expressions[o.exp].trans;
+                      if (eventsFromExp) {
+                        events = events.concat(eventsFromExp);
                       }
-                      var attr = replaceParameter(a.attr, t.parameter);
-                      var value = replaceParameter(a.value, t.parameter);
+                    }
+                    if (o.events) {
+                      events = events.concat(o.events);
+                    }
 
-                      var bmsids = bmsObserverService.getBmsIds(visId, selector, container);
-                      angular.forEach(bmsids, function(id) {
-                        if (fmap[id] === undefined) {
-                          fmap[id] = {};
+                    if ($.inArray(t['opString'], events) > -1) {
+                      if (o.trigger) {
+                        o.trigger.call(this, t);
+                      }
+                      angular.forEach(o.actions, function(a) {
+                        var selector;
+                        if (bms.isFunction(a.selector)) {
+                          selector = a.selector.call(this, t);
+                        } else {
+                          selector = replaceParameter(a.selector, t['parameter']);
                         }
-                        fmap[id][attr] = value;
-                      });
-                    });
-                  }
+                        var attr = replaceParameter(a.attr, t['parameter']);
+                        var value = replaceParameter(a.value, t['parameter']);
 
-                });
+                        var bmsids = bmsObserverService.getBmsIds(visId, selector, container);
+                        angular.forEach(bmsids, function(id) {
+                          if (fmap[id] === undefined) {
+                            fmap[id] = {};
+                          }
+                          fmap[id][attr] = value;
+                        });
+                      });
+                    }
+
+                  });
+
+                }
+
+                keepGoing = !t['current'];
 
               });
 
@@ -864,8 +863,8 @@ define(['bms.func', 'jquery', 'angular', 'qtip', 'prob.modal'], function(bms, $,
             callback: function() {}
           }, options);
         },
-        executeEvent: function(data, origin) {
-          var settings = bms.normalize(data, ["callback"], origin);
+        executeEvent: function(data, origin, container) {
+          var settings = bms.normalize(data, ["callback"], origin, container);
           ws.emit("executeEvent", {
             data: settings
           }, function(result) {
@@ -916,7 +915,7 @@ define(['bms.func', 'jquery', 'angular', 'qtip', 'prob.modal'], function(bms, $,
                   ev.executeEvent({
                     id: sessionId,
                     traceId: traceId,
-                    events: [v],
+                    event: v,
                     callback: function() {
                       api.hide();
                     }
@@ -985,7 +984,6 @@ define(['bms.func', 'jquery', 'angular', 'qtip', 'prob.modal'], function(bms, $,
             if (options.selector) {
 
               var jcontainer = $(container);
-
               var el = jcontainer.find(options.selector);
               el.each(function(i2, v) {
 
@@ -1015,11 +1013,11 @@ define(['bms.func', 'jquery', 'angular', 'qtip', 'prob.modal'], function(bms, $,
                       ev.executeEvent({
                         id: sessionId,
                         traceId: traceId,
-                        events: [enabledEvents[0]],
+                        event: enabledEvents[0],
                         callback: function() {
                           api.hide();
                         }
-                      }, e);
+                      }, e, jcontainer);
                     } else {
                       // Else show a popup displaying the available events
                       api.show('click');
