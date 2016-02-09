@@ -37,11 +37,7 @@ define(['jquery'], function($) {
             api._normalize(obj[property], exclude, origin, container);
           } else {
             if ($.inArray(property, exclude) === -1) {
-              obj[property] = api.callOrReturn(obj[property], origin, container);
-              /*if (api.isFunction(obj[property])) {
-                var r = origin !== undefined ? obj[property](origin, container) : obj[property]();
-                obj[property] = r;
-              }*/
+              obj[property] = api.callOrReturn(obj[property], origin, container, obj[property + "Js"]);
             }
           }
         }
@@ -52,6 +48,22 @@ define(['jquery'], function($) {
       var obj2 = $.extend(true, {}, obj);
       api._normalize(obj2, exclude, origin, container);
       return obj2
+    },
+    callOrReturn: function(subject, element, container, isJsString) {
+      if (typeof subject === "boolean") {
+        return subject;
+      } else if (api.isFunction(subject)) {
+        return subject.call(this, element, container);
+      } else if (isJsString) {
+        try {
+          var func = new Function('origin', 'container', subject);
+          return func(element, container);
+        } catch (err) {
+          return subject;
+        }
+      } else {
+        return subject;
+      }
     },
     isFunction: function(functionToCheck) {
       var getType = {};
@@ -73,21 +85,6 @@ define(['jquery'], function($) {
     uuid: function() {
       return api._s4() + api._s4() + '-' + api._s4() + '-' + api._s4() + '-' +
         api._s4() + '-' + api._s4() + api._s4() + api._s4();
-    },
-    callOrReturn: function(subject, element, container) {
-      if (typeof subject === "boolean") {
-        return subject;
-      } else if (api.isFunction(subject)) {
-        return subject.call(this, element, container);
-      } else {
-        try {
-          // Try to convert subject to function
-          var func = new Function('origin', 'container', subject);
-          return func(element, container);
-        } catch (err) {
-          return subject;
-        }
-      }
     }
   };
 

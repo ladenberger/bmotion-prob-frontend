@@ -2803,6 +2803,7 @@ $.SvgCanvas = function(container, config) {
               "stroke-width": 1,
               "stroke-dasharray": "none",
               "data-bms-widget": "input",
+              "data-btype": "INTEGER",
               "opacity": cur_shape.opacity / 2
             }
           });

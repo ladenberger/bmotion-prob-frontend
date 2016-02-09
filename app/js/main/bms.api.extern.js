@@ -12,18 +12,18 @@ define(['angular'], function(angular) {
       apis[visId] = {
         eval: function(options) {
           //setTimeout(function() {
-            var elem = angular.element(document.querySelector('[ng-controller]'));
-            var injector = elem.injector();
-            var service = injector.get('bmsApiService');
-            service.eval(options);
+          var elem = angular.element(document.querySelector('[ng-controller]'));
+          var injector = elem.injector();
+          var service = injector.get('bmsApiService');
+          service.evalExtern(visId, options);
           //}, 0);
         },
         getModelData: function(what, options) {
           //setTimeout(function() {
-            var elem = angular.element(document.querySelector('[ng-controller]'));
-            var injector = elem.injector();
-            var service = injector.get('bmsApiService');
-            return service.getModelData(visId, what, options);
+          var elem = angular.element(document.querySelector('[ng-controller]'));
+          var injector = elem.injector();
+          var service = injector.get('bmsApiService');
+          return service.getModelData(visId, what, options);
           //}, 0);
         },
         getModelEvents: function(options) {
@@ -31,29 +31,36 @@ define(['angular'], function(angular) {
         },
         observe: function(what, options) {
           //setTimeout(function() {
-            var elem = angular.element(document.querySelector('[ng-controller]'));
-            var injector = elem.injector();
-            var service = injector.get('bmsApiService');
-            service.addObserver(visId, what, options, 'js');
+          var elem = angular.element(document.querySelector('[ng-controller]'));
+          var injector = elem.injector();
+          var service = injector.get('bmsApiService');
+          service.addObserver(visId, what, options, 'js');
           //}, 0);
         },
         registerEvent: function(type, options) {
           //setTimeout(function() {
-            var elem = angular.element(document.querySelector('[ng-controller]'));
-            var injector = elem.injector();
-            var service = injector.get('bmsApiService');
-            service.addEvent(visId, type, options, 'js');
+          var elem = angular.element(document.querySelector('[ng-controller]'));
+          var injector = elem.injector();
+          var service = injector.get('bmsApiService');
+          service.addEvent(visId, type, options, 'js');
           //}, 0);
         },
         executeEvent: function(options) {
-          this.registerEvent('executeEvent', options);
-        },
-        on: function(what, callback) {
-          //setTimeout(function() {
+          if (options.selectr) {
+            this.registerEvent('executeEvent', options);
+          } else {
             var elem = angular.element(document.querySelector('[ng-controller]'));
             var injector = elem.injector();
             var service = injector.get('bmsApiService');
-            service.on(visId, what, callback);
+            return service.executeEvent(visId, options);
+          }
+        },
+        on: function(what, callback) {
+          //setTimeout(function() {
+          var elem = angular.element(document.querySelector('[ng-controller]'));
+          var injector = elem.injector();
+          var service = injector.get('bmsApiService');
+          service.on(visId, what, callback);
           //}, 0);
         },
         init: function(callback) {

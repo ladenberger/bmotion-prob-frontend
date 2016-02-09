@@ -274,8 +274,8 @@ define(['angular', 'angularAMD', 'code-mirror!javascript', 'jquery.jgraduate', '
       }
 
     ])
-    .controller('bmsExecuteEventCtrl', ['$scope',
-      function($scope) {
+    .controller('bmsExecuteEventCtrl', ['$scope', 'bmsEditorCommonService',
+      function($scope, bmsEditorCommonService) {
 
         $scope.isMenu = false;
 
@@ -430,9 +430,17 @@ define(['angular', 'angularAMD', 'code-mirror!javascript', 'jquery.jgraduate', '
     .controller('bmsEventsViewCtrl', ['$scope', 'bmsEditorCommonService', 'bmsParentService', '$rootScope',
       function($scope, bmsEditorCommonService, bmsParentService, $rootScope) {
 
+        $scope.events = [];
+
         bmsEditorCommonService.isInitialised.promise.then(function() {
           $scope.data = bmsEditorCommonService.getEvents();
           $scope.uiState = bmsEditorCommonService.getUiState('events');
+          angular.forEach(bmsEditorCommonService.getVisualization()['model']['events'], function(ev) {
+            $scope.events.push({
+              value: ev.name,
+              text: ev.name
+            });
+          });
         });
 
         $scope.dynamicPopover = {
@@ -512,6 +520,11 @@ define(['angular', 'angularAMD', 'code-mirror!javascript', 'jquery.jgraduate', '
           bmsParentService.bmsModalService.openErrorDialog("An error occurred while initialising editor: " + error);
           bmsParentService.disableEditor("An error occurred while initialising editor: " + error);
         });
+
+        /*self.getModel = function() {
+          console.log(self.visualization.model);
+            return self.visualization.model;
+        };*/
 
         self.save = function() {
           // remove the selected outline before serializing

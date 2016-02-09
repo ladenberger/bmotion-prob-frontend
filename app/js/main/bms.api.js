@@ -1,8 +1,8 @@
 define(['angular', 'jquery', 'bms.func', 'prob.modal', 'bms.session', 'prob.observers'], function(angular, $, bms) {
 
   angular.module('bms.api', ['prob.modal', 'bms.session', 'prob.observers'])
-    .factory('bmsApiService', ['ws', '$injector', 'trigger', 'bmsSessionService', 'bmsObserverService', 'bmsVisualizationService', 'bmsModalService',
-      function(ws, $injector, trigger, bmsSessionService, bmsObserverService, bmsVisualizationService, bmsModalService) {
+    .factory('bmsApiService', ['ws', '$injector', '$q', 'trigger', 'bmsSessionService', 'bmsObserverService', 'bmsVisualizationService', 'bmsModalService',
+      function(ws, $injector, $q, trigger, bmsSessionService, bmsObserverService, bmsVisualizationService, bmsModalService) {
 
         var attributeValues = {};
 
@@ -134,13 +134,25 @@ define(['angular', 'jquery', 'bms.func', 'prob.modal', 'bms.session', 'prob.obse
           return vis["model"][what];
         };
 
-        var eval = function(options) {
+        var evalExtern = function(visId, options) {
+          eval(visId, options)
+            .then(function(result) {}, function(err) {
+              bmsModalService.openDialog(err);
+            });
+        };
+
+        var eval = function(visId, options) {
+
+          var defer = $q.defer();
+
+          var vis = bmsVisualizationService.getVisualization(visId);
 
           var options = bms.normalize($.extend({
             formulas: [],
             translate: false,
-            trigger: function() {}
-          }, options), ["trigger"]);
+            trigger: function() {},
+            error: function() {}
+          }, options), ["trigger", "error"]);
 
           ws.emit('evaluateFormulas', {
             data: {
@@ -172,22 +184,45 @@ define(['angular', 'jquery', 'bms.func', 'prob.modal', 'bms.session', 'prob.obse
 
             if (errors.length === 0) {
               if (options.selector) {
-                options.trigger($scope.visualization.container.contents().find(options.selector), results);
+                options.trigger(vis.container.contents().find(options.selector), results);
               } else {
                 options.trigger(results);
               }
+              defer.resolve(results);
             } else {
-              bmsModalService.openErrorDialog(errors);
+              options.error(errors);
+              defer.reject(errors);
             }
 
           });
 
+          return defer.promise;
+
+        };
+
+        var executeEvent = function(visId, options) {
+          var vis = bmsVisualizationService.getVisualization(visId);
+          var settings = bms.normalize(options, ["callback"], vis["container"]);
+          ws.emit("executeEvent", {
+            data: {
+              id: vis.id,
+              traceId: vis.traceId,
+              event: {
+                name: settings.name,
+                predicate: settings.predicate
+              }
+            }
+          }, function(result) {
+            if (settings.callback) settings.callback.call(this, result);
+          });
         };
 
         return {
           eval: eval,
+          evalExtern: evalExtern,
           addObserver: addObserver,
           addEvent: addEvent,
+          executeEvent: executeEvent,
           getValues: getValues,
           triggerObservers: triggerObservers,
           triggerJsonObservers: triggerJsonObservers,

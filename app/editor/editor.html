@@ -222,6 +222,19 @@
                 <input id="input_height" class="attr_changer" size="3" data-attr="height" type="text" pattern="[0-9]*" />
                 <span class="icon_label">Height</span>
               </label>
+
+              <h4 class="clearfix">Data Attributes</h4>
+              <label class="idLabel" title="Value of the interactive radio button">
+                <select id="input_data_btype" class="data_attribute_changer" data-attr="btype">
+                  <option value="INTEGER">INTEGER</option>
+                  <option value="NAT">NAT</option>
+                  <option value="NAT1">NAT1</option>
+                  <option value="STRING">STRING</option>
+                  <option ng-repeat="set in ctrl.visualization.model.sets track by $index" value="{{set}}">{{set}}</option>
+                </select>
+                <span>BType</span>
+              </label>
+
             </div>
 
             <div id="iradio_panel" class="context_panel">
@@ -239,15 +252,15 @@
               <div class="clearfix"></div>
 
               <h4 class="clearfix">Data Attributes</h4>
-                  <label class="idLabel" title="Value of the interactive radio button">
-                    <input id="iradio_data_value" class="data_attribute_changer" data-attr="value" size="10" type="text" />
-                    <span>Value</span>
-                  </label>
+              <label class="idLabel" title="Value of the interactive radio button">
+                <input id="iradio_data_value" class="data_attribute_changer" data-attr="value" size="10" type="text" />
+                <span>Value</span>
+              </label>
 
-                  <label class="idLabel" title="Interactive radio button checked?">
-                    <div id="iradio_data_checked" class="data_attribute_changer_boolean" data-attr="checked"></div>
-                    <span>Checked</span>
-                  </label>
+              <label class="idLabel" title="Interactive radio button checked?">
+                <div id="iradio_data_checked" class="data_attribute_changer_boolean" data-attr="checked"></div>
+                <span>Checked</span>
+              </label>
 
             </div>
 
@@ -652,9 +665,7 @@
                 <a href="" uib-popover-template="dynamicPopover.templateUrl" popover-trigger="focus" popover-placement="bottom"><i class="fa fa-plus"></i> Add Event</a>
                 <script type="text/ng-template" id="eventsMenuTemplate.html">
                   <div>
-                    <a href="" ng-click="addExecuteEventEvent()"><i class="fa fa-eye"></i> Execute
-                                        Event
-                                        Handler</a>
+                    <a href="" ng-click="addExecuteEventEvent()"><i class="fa fa-eye"></i> Execute Event Handler</a>
                     <br/>
                   </div>
                 </script>

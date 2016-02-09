@@ -2,7 +2,7 @@
  * BMotion Studio for ProB IFrame Module
  *
  */
-define(['angular', 'bms.func', 'jquery', 'prob.modal', 'bms.api', 'bms.api.extern'], function(angular, bms, $) {
+define(['angular', 'bms.func', 'jquery', 'bms.api', 'bms.api.extern', 'prob.modal'], function(angular, bms, $) {
 
   var module = angular.module('prob.iframe.template', ['prob.modal', 'bms.api'])
     .directive('bmsVisualisationView', ['$rootScope', 'bmsApiService', 'bmsSessionService', 'bmsVisualizationService', 'ws', 'bmsModalService', 'trigger', '$compile', '$http', '$q',
@@ -280,8 +280,8 @@ define(['angular', 'bms.func', 'jquery', 'prob.modal', 'bms.api', 'bms.api.exter
         }
       }
     ])
-    .directive('bmsWidget', ['bmsVisualizationService',
-      function(bmsVisualizationService) {
+    .directive('bmsWidget', ['bmsVisualizationService', 'bmsApiService',
+      function(bmsVisualizationService, bmsApiService) {
         return {
           link: function($scope, element, attr) {
             var type = attr["bmsWidget"];
@@ -343,6 +343,7 @@ define(['angular', 'bms.func', 'jquery', 'prob.modal', 'bms.api', 'bms.api.exter
                 var offset = jele.offset();
                 var width = jele.attr("width");
                 var height = jele.attr("height");
+                var btype = jele.attr("data-btype");
                 var newInput = $('<input type="text"/>');
                 newInput
                   .attr("id", jele.attr("id"))
@@ -354,6 +355,48 @@ define(['angular', 'bms.func', 'jquery', 'prob.modal', 'bms.api', 'bms.api.exter
                 jele.remove();
                 var vis = bmsVisualizationService.getVisualization($scope.id);
                 vis.container.contents().find("body").append(newInput);
+                newInput.qtip({
+                  content: {
+                    text: ''
+                  },
+                  position: {
+                    my: 'bottom left',
+                    at: 'top right',
+                    effect: false,
+                    viewport: $(window),
+                    adjust: {
+                      y: 45
+                    }
+                  },
+                  show: {
+                    event: false
+                  },
+                  hide: {
+                    fixed: true,
+                    delay: 2000
+                  },
+                  style: {
+                    classes: 'qtip-red'
+                  }
+                });
+                newInput.on('input', function() {
+                  var input = $(this);
+                  //var data = btype === 'STRING' ? "\"" + input.val() + "\"" : input.val();
+                  var data = input.val();
+                  bmsApiService.eval($scope.id, {
+                    formulas: ["bool(" + data + " : " + btype + ")"],
+                    trigger: function(values) {
+                      if (values[0] === 'FALSE') {
+                        input.qtip('option', 'content.text', "Please enter a valid <strong>" + btype + "</strong>").qtip('show');
+                      } else {
+                        input.qtip('hide');
+                      }
+                    },
+                    error: function(errors) {
+                      input.qtip('option', 'content.text', "Please enter a valid <strong>" + btype + "</strong>").qtip('show');
+                    }
+                  });
+                });
                 break;
             }
 

@@ -1543,7 +1543,19 @@ button.cancel, input.Cancel, input.cancel, input.jGraduate_Cancel, button.cancel
   color: darkblue;
   padding: 15px 0 16px;
   width: 100%;
-  height: 8px;
+  height: 15px;
+  position: relative;
+  z-index: 2;
+}
+.idLabel select {
+  border: none;
+  background: transparent;
+  font: 12px sans-serif;
+  text-align: center;
+  padding-left: 70px;
+  color: darkblue;
+  width: 100%;
+  height: 40px;
   position: relative;
   z-index: 2;
 }

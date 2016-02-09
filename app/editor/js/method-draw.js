@@ -1388,12 +1388,15 @@ define(["jquery", "touch", "jquery.hotkeys", "jquery.bbq",
           $("input[id^='" + el_name + "_data_']").val("");
           for (d in jele.data()) {
             var iele = $("#" + el_name + "_data_" + d);
+            var itagname = iele.prop('tagName');
             if (iele.length) {
               var nvalue = jele.attr("data-" + d);
               if (nvalue === "true" || nvalue === "false") {
                 iele.html(nvalue);
-              } else {
+              } else if (itagname === 'INPUT') {
                 iele.val(nvalue);
+              } else if (itagname === 'SELECT') {
+                iele.find('option[value="' + nvalue + '"]').attr('selected', 'selected')
               }
             }
           }

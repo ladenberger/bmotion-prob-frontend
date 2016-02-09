@@ -28,7 +28,9 @@
                 Func</span>
             </div>
             <div ng-if="!e.nameJs">
-              <span editable-text="e.name" e-name="name" e-form="rowform">{{ (e.name | cut:true:15:' ...') || "event" }}</span>
+              <span editable-select="e.name" e-ng-options="s.value as s.text for s in events" e-name="name" e-form="rowform">
+                {{ (e.name | cut:true:15:' ...') || "event" }}
+              </span>
             </div>
           </div>
           <div class="bt-switch-js">
