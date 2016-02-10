@@ -136,6 +136,7 @@ var svgedit = svgedit || {};
     var jSelectorElement = $(selectorManager_.selectorGripsGroup);
     //var rotationCircles = jSelectorElement.find("circle");
     jSelectorElement.css("display", "inline");
+    //rotationCircles.css("display", "inline");
 
     // Disable grips for BMS Widgets
     if (jelem.prop('tagName') === 'g' && svgedit.utilities.hasBmsWidget(jelem)) {

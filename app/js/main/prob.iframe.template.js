@@ -299,6 +299,7 @@ define(['angular', 'bms.func', 'jquery', 'bms.api', 'bms.api.extern', 'prob.moda
                 newInput
                   .attr("value", jele.attr("data-value"))
                   .attr("checked", jele.attr("data-checked") === "true" ? true : false)
+                  .attr("class", jele.attr("class"))
                   .attr("id", jele.attr("id"))
                   .css("position", "absolute")
                   .css("left", offset.left - 5 + "px")
@@ -322,6 +323,7 @@ define(['angular', 'bms.func', 'jquery', 'bms.api', 'bms.api.extern', 'prob.moda
                 var newInput = $('<input type="checkbox"/>');
                 newInput
                   .attr("value", jele.attr("data-value"))
+                  .attr("class", jele.attr("class"))
                   .attr("id", jele.attr("id"))
                   .attr("checked", jele.attr("data-checked") === "true" ? true : false)
                   .css("position", "absolute")
@@ -338,6 +340,23 @@ define(['angular', 'bms.func', 'jquery', 'bms.api', 'bms.api.extern', 'prob.moda
                 jele.remove();
 
                 break;
+              case "ibutton":
+
+                var jele = $(element);
+                var offset = jele.offset();
+                // Create new radio button
+                var newInput = $('<button>' + jele.attr('data-text') + '</button>');
+                newInput
+                  .attr("class", jele.attr("class"))
+                  .attr("id", jele.attr("id"))
+                  .css("position", "absolute")
+                  .css("left", offset.left - 5 + "px")
+                  .css("top", offset.top - 2 + "px");
+                var vis = bmsVisualizationService.getVisualization($scope.id);
+                vis.container.contents().find("body").append(newInput);
+                jele.remove();
+
+                break;
               case "input":
                 var jele = $(element);
                 var offset = jele.offset();
@@ -346,6 +365,7 @@ define(['angular', 'bms.func', 'jquery', 'bms.api', 'bms.api.extern', 'prob.moda
                 var btype = jele.attr("data-btype");
                 var newInput = $('<input type="text"/>');
                 newInput
+                  .attr("class", jele.attr("class"))
                   .attr("id", jele.attr("id"))
                   .css("position", "absolute")
                   .css("left", offset.left + "px")

@@ -268,6 +268,7 @@ define(["jquery", "touch", "jquery.hotkeys", "jquery.bbq",
           'text': 'text.png',
           'image': 'image.png',
           'iarea': 'iarea.png',
+          'ibutton': 'ibutton.png',
           'input': 'input.png',
           'radio': 'input.png',
           'zoom': 'zoom.png',
@@ -295,6 +296,7 @@ define(["jquery", "touch", "jquery.hotkeys", "jquery.bbq",
           '#tool_iarea': 'iarea',
           '#tool_input': 'input',
           '#tool_iradio': 'iradio',
+          '#tool_ibutton': 'ibutton',
           '#tool_icheckbox': 'icheckbox',
           '#tool_zoom': 'zoom',
           '#tool_node_clone': 'node_clone',
@@ -1379,18 +1381,27 @@ define(["jquery", "touch", "jquery.hotkeys", "jquery.bbq",
           // All elements including image and group have opacity
           var opac_perc = ((selectedElement.getAttribute("opacity") || 1.0) * 100);
           $('#group_opacity').val(opac_perc);
-          $('#elem_id').val(selectedElement.getAttribute("id"));
+
+          var selectedJElement = $(selectedElement);
+
+          // Handle common attributes
+          var iele = $('.attribute_changer');
+          iele.val('');
+          iele.each(function(i, e) {
+            var je = $(e);
+            var attr = je.attr("data-attr");
+            je.val(selectedJElement.attr(attr));
+          });
 
           // Handle custom data attributes
-          var jele = $(selectedElement);
-          var isBmsWidget = jele.attr("data-bms-widget") !== null ? jele.attr("data-bms-widget") : undefined;
-          var el_name = isBmsWidget ? isBmsWidget : jele.prop("tagName");
+          var isBmsWidget = selectedJElement.attr("data-bms-widget") !== null ? selectedJElement.attr("data-bms-widget") : undefined;
+          var el_name = isBmsWidget ? isBmsWidget : selectedJElement.prop("tagName");
           $("input[id^='" + el_name + "_data_']").val("");
-          for (d in jele.data()) {
+          for (d in selectedJElement.data()) {
             var iele = $("#" + el_name + "_data_" + d);
             var itagname = iele.prop('tagName');
             if (iele.length) {
-              var nvalue = jele.attr("data-" + d);
+              var nvalue = selectedJElement.attr("data-" + d);
               if (nvalue === "true" || nvalue === "false") {
                 iele.html(nvalue);
               } else if (itagname === 'INPUT') {
@@ -1503,7 +1514,7 @@ define(["jquery", "touch", "jquery.hotkeys", "jquery.bbq",
             $('.action_selected').removeClass('disabled');
             // Elements in this array already have coord fields
             var x, y
-            if (['g', 'polyline', 'path', 'iradio', 'icheckbox'].indexOf(el_name) >= 0) {
+            if (['g', 'polyline', 'path', 'iradio', 'icheckbox', 'ibutton'].indexOf(el_name) >= 0) {
               var bb = svgCanvas.getStrokedBBox([elem]);
               if (bb) {
                 x = bb.x;
@@ -1514,6 +1525,11 @@ define(["jquery", "touch", "jquery.hotkeys", "jquery.bbq",
             if (unit) {
               x = svgedit.units.convertUnit(x);
               y = svgedit.units.convertUnit(y);
+            }
+
+            if (['ibutton'].indexOf(el_name) >= 0) {
+              $("#" + el_name + "_width").val(Math.round(bb.width))
+              $("#" + el_name + "_height").val(Math.round(bb.height))
             }
 
             $("#" + el_name + "_x").val(Math.round(x))
@@ -1559,6 +1575,7 @@ define(["jquery", "touch", "jquery.hotkeys", "jquery.bbq",
             iarea: ['width', 'height', 'x', 'y'],
             input: ['width', 'height', 'x', 'y'],
             iradio: [],
+            ibutton: [],
             icheckbox: [],
             radio: ['x', 'y'],
             image: ['width', 'height', 'x', 'y'],
@@ -1791,13 +1808,13 @@ define(["jquery", "touch", "jquery.hotkeys", "jquery.bbq",
         svgCanvas.setTextContent(this.value);
       });
 
-      $('.id_changer').change(function() {
-        var elem = selectedElement;
-        var val = $(this).val();
-        svgCanvas.clearSelection();
-        elem.id = val;
-        svgCanvas.addToSelection([elem], true);
-        $(this).blur();
+      $('.attribute_changer').change(function() {
+        var elem = $(selectedElement);
+        var iele = $(this);
+        var val = iele.val();
+        var attr = iele.attr("data-attr");
+        elem.attr(attr, val);
+        iele.blur();
       });
 
       $('.data_attribute_changer').change(function(attr) {
@@ -1808,6 +1825,38 @@ define(["jquery", "touch", "jquery.hotkeys", "jquery.bbq",
         elem.attr("data-" + attr, val);
         elem.data(attr, val);
         input.blur();
+      });
+
+      $('.data_attribute_changer_text').change(function(attr) {
+
+        var input = $(this);
+        var val = input.val();
+        var attr = input.attr("data-attr");
+
+        var elems = $(svgCanvas.getSelectedElems());
+
+        elems.each(function(i, e) {
+
+          var je = $(e);
+          var text = je.find("text");
+          var rect = je.find("rect");
+          je.attr("data-" + attr, val);
+          je.data(attr, val);
+          text.html(val);
+          // Set new width of rect
+          var newWidth = text.width() + 20;
+          rect.attr("width", newWidth);
+          // Recenter text
+          var newY = rect.attr("y") + 17;
+          var newX = rect.attr("x") + 10;
+          text.attr("x", newX).attr("y", newY);
+
+        });
+
+        svgCanvas.updateRequestSelector();
+
+        input.blur();
+
       });
 
       $('.data_attribute_changer_boolean').click(function() {
@@ -2268,6 +2317,12 @@ define(["jquery", "touch", "jquery.hotkeys", "jquery.bbq",
       var clickIRadio = function() {
         if (toolButtonClick('#tool_iradio')) {
           svgCanvas.setMode('iradio');
+        }
+      };
+
+      var clickIButton = function() {
+        if (toolButtonClick('#tool_ibutton')) {
+          svgCanvas.setMode('ibutton');
         }
       };
 
@@ -3481,6 +3536,10 @@ define(["jquery", "touch", "jquery.hotkeys", "jquery.bbq",
             fn: clickIRadio,
             evt: 'mouseup'
           }, {
+            sel: '#tool_ibutton',
+            fn: clickIButton,
+            evt: 'mouseup'
+          }, {
             sel: '#tool_icheckbox',
             fn: clickICheckbox,
             evt: 'mouseup'
@@ -3999,7 +4058,7 @@ define(["jquery", "touch", "jquery.hotkeys", "jquery.bbq",
         cursor: false,
         dragAdjust: .1
       });
-      $('#rect_width, #rect_height, #iarea_width, #iarea_height, #input_width, #input_height').dragInput({
+      $('#rect_width, #rect_height, #iarea_width, #iarea_height, #input_width, #input_height, #ibutton_width, #ibutton_height').dragInput({
         min: 1,
         max: null,
         step: 1,
@@ -4146,7 +4205,7 @@ define(["jquery", "touch", "jquery.hotkeys", "jquery.bbq",
         callback: changeAttribute,
         cursor: false
       });
-      $('#rect_x, #rect_y, #iarea_x, #iarea_y, #input_x, #input_y, #iradio_x, #iradio_y, #icheckbox_x, #icheckbox_y').dragInput({
+      $('#rect_x, #rect_y, #iarea_x, #iarea_y, #input_x, #input_y, #iradio_x, #iradio_y, #icheckbox_x, #icheckbox_y, #ibutton_x, #ibutton_y').dragInput({
         min: null,
         max: null,
         step: 1,

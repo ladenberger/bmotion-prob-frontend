@@ -258,6 +258,41 @@ $.SvgCanvas = function(container, config) {
     var current_layer = getCurrentDrawing().getCurrentLayer();
 
     switch (data.element) {
+      case "ibutton":
+        var x = data.attr.x;
+        var y = data.attr.y;
+        shape = svgdoc.createElementNS(svgns, 'g');
+        var rect = svgdoc.createElementNS(svgns, 'rect');
+        svgedit.utilities.assignAttributes(rect, {
+          "x": data.attr.x,
+          "y": data.attr.y,
+          "width": data.attr.width,
+          "height": data.attr.height,
+          "fill": "lightgray",
+          "stroke": "black",
+          "stroke-width": 1
+        }, 100);
+        var text = svgdoc.createElementNS(svgns, 'text');
+        svgedit.utilities.assignAttributes(text, {
+          "x": data.attr.x + 20,
+          "y": data.attr.y + 18,
+          "fill": "black"
+        }, 100);
+        text.textContent = "My Button";
+        shape.appendChild(rect);
+        shape.appendChild(text);
+        if (current_layer) {
+          (current_group || current_layer).appendChild(shape);
+        }
+        svgedit.utilities.assignAttributes(shape, {
+          "data-bms-widget": data.attr['data-bms-widget'],
+          "data-text": "My Button",
+          "id": data.attr.id,
+          "width": data.attr.width,
+          "height": data.attr.height
+        }, 100);
+        svgedit.utilities.cleanupElement(shape);
+        break;
       case "iradio":
         var x = data.attr.x;
         var y = data.attr.y;
@@ -2825,6 +2860,22 @@ $.SvgCanvas = function(container, config) {
             }
           });
           break;
+        case "ibutton":
+          started = true;
+          var newImage = addSvgElementFromJson({
+            "element": current_mode,
+            "curStyles": false,
+            "attr": {
+              "x": x,
+              "y": y,
+              "width": 100,
+              "height": 25,
+              "id": getNextId(),
+              "data-bms-widget": current_mode,
+              "opacity": 1
+            }
+          });
+          break;
         case "line":
           started = true;
           var stroke_w = cur_shape.stroke_width == 0 ? 1 : cur_shape.stroke_width;
@@ -3230,6 +3281,7 @@ $.SvgCanvas = function(container, config) {
         case "iarea":
         case "input":
         case "iradio":
+        case "ibutton":
         case "icheckbox":
         case "image":
           var square = (current_mode == 'square') || evt.shiftKey,
@@ -3611,6 +3663,7 @@ $.SvgCanvas = function(container, config) {
           keep = true;
           break;
         case "input":
+        case "ibutton":
           if (last_mouse_action !== 'mouse_move') {
             var ele = $(element);
             var attrs = ele.attr(["width", "height"]);
@@ -3838,7 +3891,7 @@ $.SvgCanvas = function(container, config) {
 
       // If interactive radio element return
       var bmsWidget = $(mouse_target).attr("data-bms-widget");
-      if (bmsWidget === "iradio" || bmsWidget === "icheckbox") {
+      if (bmsWidget === "iradio" || bmsWidget === "icheckbox" || bmsWidget === 'ibutton') {
         return;
       }
 
@@ -8477,6 +8530,18 @@ $.SvgCanvas = function(container, config) {
     }
   };
 
+  var updateRequestSelector = this.updateRequestSelector = function(elems) {
+    var elems = elems || selectedElements;
+    var i = elems.length;
+    while (i--) {
+      var elem = elems[i];
+      if (elem == null) continue;
+      if (selectedElements.indexOf(elem) >= 0) {
+        if (!elem.parentNode) return;
+        selectorManager.requestSelector(elem).resize();
+      }
+    }
+  }
 
   // Function: changeSelectedAttributeNoUndo
   // This function makes the changes to the elements. It does not add the change
@@ -8519,10 +8584,11 @@ $.SvgCanvas = function(container, config) {
         if (attr == "#text") {
           var old_w = svgedit.utilities.getBBox(elem).width;
           elem.textContent = newValue;
-
         } else if (attr == "#href") {
           setHref(elem, newValue);
-        } else elem.setAttribute(attr, newValue);
+        } else {
+          elem.setAttribute(attr, newValue);
+        }
 
         // Timeout needed for Opera & Firefox
         // codedread: it is now possible for this function to be called with elements
@@ -8547,7 +8613,6 @@ $.SvgCanvas = function(container, config) {
             if (xform.type == 4) {
               // remove old rotate
               tlist.removeItem(n);
-
               var box = svgedit.utilities.getBBox(elem);
               var center = transformPoint(box.x + box.width / 2, box.y + box.height / 2, transformListToTransform(tlist).matrix);
               var cx = center.x,

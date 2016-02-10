@@ -204,6 +204,24 @@
               </label>
             </div>
 
+            <div id="ibutton_panel" class="context_panel">
+              <h4 class="clearfix">Ineractive Button</h4>
+              <label>
+                <input id="ibutton_x" class="attr_changer" data-title="Change X coordinate" size="3" data-attr="x" pattern="[0-9]*" />
+                <span>X</span>
+              </label>
+              <label>
+                <input id="ibutton_y" class="attr_changer" data-title="Change Y coordinate" size="3" data-attr="y" pattern="[0-9]*" />
+                <span>Y</span>
+              </label>
+              <div class="clearfix"></div>
+              <h4 class="clearfix">Data Attributes</h4>
+              <label class="idLabel" title="Text of the interactive button">
+                <input id="ibutton_data_text" class="data_attribute_changer_text" data-attr="text" size="10" type="text" />
+                <span>Text</span>
+              </label>
+            </div>
+
             <div id="input_panel" class="context_panel">
               <h4 class="clearfix">Interactive Input Field</h4>
               <label>
@@ -539,10 +557,14 @@
             <div class="clearfix"></div>
 
             <div id="attributes_panel" class="context_panel">
-              <h4 class="clearfix">ID</h4>
+              <h4 class="clearfix">Common Attributes</h4>
               <label class="idLabel" title="Identify the element">
-                <input id="elem_id" class="id_changer" data-attr="id" size="10" type="text" />
+                <input id="elem_id" class="attribute_changer" data-attr="id" size="10" type="text" />
                 <span>ID</span>
+              </label>
+              <label class="idLabel" title="CSS class of the element">
+                <input id="elem_class" class="attribute_changer" data-attr="class" size="10" type="text" />
+                <span>Class</span>
               </label>
             </div>
 
@@ -712,6 +734,7 @@
       <div class="tool_button" id="tool_text" title="Text Tool [T]"></div>
       <div class="tool_button" id="tool_image" title="Image Tool [I]"></div>
       <div class="tool_button" id="tool_iarea" title="Interactive Button Area Tool [W]"></div>
+      <div class="tool_button" id="tool_ibutton" title="Button"></div>
       <div class="tool_button" id="tool_input" title="Input Field"></div>
       <div class="tool_button" id="tool_iradio" title="Radio Button"></div>
       <div class="tool_button" id="tool_icheckbox" title="Checkbox"></div>
