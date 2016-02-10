@@ -269,7 +269,7 @@ define(["jquery", "touch", "jquery.hotkeys", "jquery.bbq",
           'image': 'image.png',
           'iarea': 'iarea.png',
           'ibutton': 'ibutton.png',
-          'input': 'input.png',
+          'iinput': 'iinput.png',
           'radio': 'input.png',
           'zoom': 'zoom.png',
           'delete': 'delete.png',
@@ -294,7 +294,7 @@ define(["jquery", "touch", "jquery.hotkeys", "jquery.bbq",
           '#tool_text,#layer_rename': 'text',
           '#tool_image': 'image',
           '#tool_iarea': 'iarea',
-          '#tool_input': 'input',
+          '#tool_iinput': 'iinput',
           '#tool_iradio': 'iradio',
           '#tool_ibutton': 'ibutton',
           '#tool_icheckbox': 'icheckbox',
@@ -1514,7 +1514,7 @@ define(["jquery", "touch", "jquery.hotkeys", "jquery.bbq",
             $('.action_selected').removeClass('disabled');
             // Elements in this array already have coord fields
             var x, y
-            if (['g', 'polyline', 'path', 'iradio', 'icheckbox', 'ibutton'].indexOf(el_name) >= 0) {
+            if (['g', 'polyline', 'path', 'iradio', 'icheckbox', 'ibutton', 'iinput'].indexOf(el_name) >= 0) {
               var bb = svgCanvas.getStrokedBBox([elem]);
               if (bb) {
                 x = bb.x;
@@ -1527,7 +1527,7 @@ define(["jquery", "touch", "jquery.hotkeys", "jquery.bbq",
               y = svgedit.units.convertUnit(y);
             }
 
-            if (['ibutton'].indexOf(el_name) >= 0) {
+            if (['ibutton', 'iinput'].indexOf(el_name) >= 0) {
               $("#" + el_name + "_width").val(Math.round(bb.width))
               $("#" + el_name + "_height").val(Math.round(bb.height))
             }
@@ -1573,7 +1573,7 @@ define(["jquery", "touch", "jquery.hotkeys", "jquery.bbq",
             a: [],
             rect: ['rx', 'width', 'height', 'x', 'y'],
             iarea: ['width', 'height', 'x', 'y'],
-            input: ['width', 'height', 'x', 'y'],
+            iinput: [],
             iradio: [],
             ibutton: [],
             icheckbox: [],
@@ -1846,6 +1846,7 @@ define(["jquery", "touch", "jquery.hotkeys", "jquery.bbq",
           var textWidth = text.width();
           var rectWidth = rect.attr("width");
           var rectHeight = rect.attr("height");
+          var bmsWidget = je.attr("data-bms-widget");
           var offset = 0;
           if (rectWidth - 20 < textWidth) {
             // Set new width of rect
@@ -1854,10 +1855,11 @@ define(["jquery", "touch", "jquery.hotkeys", "jquery.bbq",
             offset = 10;
           }
           // Recenter text
-          var diff = rectWidth - textWidth;
-          var newX = rect.attr("x") + Math.round(diff / 2) + offset;
-          var newY = rect.attr("y") + Math.round(rectHeight / 2) + 2;
-          text.attr("x", newX).attr("y", newY);
+          if (bmsWidget === 'ibutton') {
+            var diff = rectWidth - textWidth;
+            text.attr("x", rect.attr("x") + Math.round(diff / 2) + offset);
+          }
+          text.attr("y", rect.attr("y") + Math.round(rectHeight / 2) + 5);
 
         });
 
@@ -2316,9 +2318,9 @@ define(["jquery", "touch", "jquery.hotkeys", "jquery.bbq",
         }
       };
 
-      var clickInput = function() {
-        if (toolButtonClick('#tool_input')) {
-          svgCanvas.setMode('input');
+      var clickIInput = function() {
+        if (toolButtonClick('#tool_iinput')) {
+          svgCanvas.setMode('iinput');
         }
       };
 
@@ -3536,8 +3538,8 @@ define(["jquery", "touch", "jquery.hotkeys", "jquery.bbq",
             evt: 'mouseup',
             key: ['W', true]
           }, {
-            sel: '#tool_input',
-            fn: clickInput,
+            sel: '#tool_iinput',
+            fn: clickIInput,
             evt: 'mouseup'
           }, {
             sel: '#tool_iradio',
@@ -4066,7 +4068,7 @@ define(["jquery", "touch", "jquery.hotkeys", "jquery.bbq",
         cursor: false,
         dragAdjust: .1
       });
-      $('#rect_width, #rect_height, #iarea_width, #iarea_height, #input_width, #input_height, #ibutton_width, #ibutton_height').dragInput({
+      $('#rect_width, #rect_height, #iarea_width, #iarea_height, #iinput_width, #iinput_height, #ibutton_width, #ibutton_height').dragInput({
         min: 1,
         max: null,
         step: 1,
@@ -4213,7 +4215,7 @@ define(["jquery", "touch", "jquery.hotkeys", "jquery.bbq",
         callback: changeAttribute,
         cursor: false
       });
-      $('#rect_x, #rect_y, #iarea_x, #iarea_y, #input_x, #input_y, #iradio_x, #iradio_y, #icheckbox_x, #icheckbox_y, #ibutton_x, #ibutton_y').dragInput({
+      $('#rect_x, #rect_y, #iarea_x, #iarea_y, #iinput_x, #iinput_y, #iradio_x, #iradio_y, #icheckbox_x, #icheckbox_y, #ibutton_x, #ibutton_y').dragInput({
         min: null,
         max: null,
         step: 1,

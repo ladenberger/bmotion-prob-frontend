@@ -361,21 +361,21 @@ define(['angular', 'bms.func', 'jquery', 'bms.api', 'bms.api.extern', 'prob.moda
                 jele.remove();
 
                 break;
-              case "input":
+              case "iinput":
                 var jele = $(element);
+                var rect = jele.find("rect");
                 var offset = jele.offset();
-                var width = jele.attr("width");
-                var height = jele.attr("height");
                 var btype = jele.attr("data-btype");
                 var newInput = $('<input type="text"/>');
                 newInput
                   .attr("class", jele.attr("class"))
                   .attr("id", jele.attr("id"))
+                  .attr("placeholder", jele.attr("data-placeholder"))
                   .css("position", "absolute")
                   .css("left", offset.left + "px")
                   .css("top", offset.top + "px")
-                  .css("width", (jele.attr("width") - 4) + "px")
-                  .css("height", (jele.attr("height") - 5) + "px");
+                  .css("width", parseInt(rect.attr("width")) - 4 + "px")
+                  .css("height", parseInt(rect.attr("height")) - 5 + "px");
                 jele.remove();
                 var vis = bmsVisualizationService.getVisualization($scope.id);
                 vis.container.contents().find("body").append(newInput);

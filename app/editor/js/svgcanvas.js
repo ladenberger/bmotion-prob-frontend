@@ -258,6 +258,42 @@ $.SvgCanvas = function(container, config) {
     var current_layer = getCurrentDrawing().getCurrentLayer();
 
     switch (data.element) {
+      case "iinput":
+        var x = data.attr.x;
+        var y = data.attr.y;
+        shape = svgdoc.createElementNS(svgns, 'g');
+        var rect = svgdoc.createElementNS(svgns, 'rect');
+        svgedit.utilities.assignAttributes(rect, {
+          "x": data.attr.x,
+          "y": data.attr.y,
+          "width": data.attr.width,
+          "height": data.attr.height,
+          "fill": "white",
+          "stroke": "black",
+          "stroke-width": 1
+        }, 100);
+        var text = svgdoc.createElementNS(svgns, 'text');
+        svgedit.utilities.assignAttributes(text, {
+          "x": data.attr.x + 2,
+          "y": data.attr.y + 18,
+          "fill": "lightgray"
+        }, 100);
+        text.textContent = "Placeholder";
+        shape.appendChild(rect);
+        shape.appendChild(text);
+        if (current_layer) {
+          (current_group || current_layer).appendChild(shape);
+        }
+        svgedit.utilities.assignAttributes(shape, {
+          "data-bms-widget": data.attr['data-bms-widget'],
+          "data-placeholder": "Placeholder",
+          "data-btype": "INTEGER",
+          "id": data.attr.id,
+          "width": data.attr.width,
+          "height": data.attr.height
+        }, 100);
+        svgedit.utilities.cleanupElement(shape);
+        break;
       case "ibutton":
         var x = data.attr.x;
         var y = data.attr.y;
@@ -2819,30 +2855,6 @@ $.SvgCanvas = function(container, config) {
             }
           });
           break;
-        case "input":
-          started = true;
-          start_x = x;
-          start_y = y;
-          var iarea = addSvgElementFromJson({
-            "element": "rect",
-            "curStyles": true,
-            "attr": {
-              "x": x,
-              "y": y,
-              "width": 0,
-              "height": 0,
-              "id": getNextId(),
-              "fill": "#ffffff",
-              "fill-opacity": 1,
-              "stroke": "#000000",
-              "stroke-width": 1,
-              "stroke-dasharray": "none",
-              "data-bms-widget": "input",
-              "data-btype": "INTEGER",
-              "opacity": cur_shape.opacity / 2
-            }
-          });
-          break;
         case "iradio":
         case "icheckbox":
           started = true;
@@ -2873,6 +2885,25 @@ $.SvgCanvas = function(container, config) {
               "id": getNextId(),
               "data-bms-widget": current_mode,
               "opacity": 1
+            }
+          });
+          break;
+        case "iinput":
+          started = true;
+          start_x = x;
+          start_y = y;
+          var iinput = addSvgElementFromJson({
+            "element": current_mode,
+            "curStyles": true,
+            "attr": {
+              "x": x,
+              "y": y,
+              "width": 100,
+              "height": 25,
+              "id": getNextId(),
+              "data-bms-widget": current_mode,
+              "data-btype": "INTEGER",
+              "opacity": cur_shape.opacity / 2
             }
           });
           break;
@@ -3279,7 +3310,7 @@ $.SvgCanvas = function(container, config) {
           // fall through
         case "rect":
         case "iarea":
-        case "input":
+        case "iinput":
         case "iradio":
         case "ibutton":
         case "icheckbox":
@@ -3662,7 +3693,7 @@ $.SvgCanvas = function(container, config) {
           last_mouse_action = '';
           keep = true;
           break;
-        case "input":
+        case "iinput":
         case "ibutton":
           if (last_mouse_action !== 'mouse_move') {
             var ele = $(element);
@@ -3891,7 +3922,7 @@ $.SvgCanvas = function(container, config) {
 
       // If interactive radio element return
       var bmsWidget = $(mouse_target).attr("data-bms-widget");
-      if (bmsWidget === "iradio" || bmsWidget === "icheckbox" || bmsWidget === 'ibutton') {
+      if (bmsWidget === "iradio" || bmsWidget === "icheckbox" || bmsWidget === 'ibutton' || bmsWidget === 'iinput') {
         return;
       }
 
@@ -8590,25 +8621,25 @@ $.SvgCanvas = function(container, config) {
 
           var jelem = $(elem);
 
-          if (jelem.attr('data-bms-widget') === 'ibutton') {
+          if (['ibutton', 'iinput'].indexOf(jelem.attr('data-bms-widget')) >= 0) {
 
             var text = jelem.find("text");
             var rect = jelem.find("rect");
 
-            if(attr === 'width') {
+            if (attr === 'width') {
               // Set new width of rect
               rect.attr("width", newValue);
-              // Recenter text
-              var textWidth = text.width();
-              var diff = newValue - textWidth;
-              var newX = rect.attr("x") + Math.round(diff / 2);
-              text.attr("x", newX);
-            } else if(attr === 'height') {
+              if (jelem.attr('data-bms-widget') === 'ibutton') {
+                var textWidth = text.width();
+                var diff = newValue - textWidth;
+                var newX = rect.attr("x") + Math.round(diff / 2);
+                text.attr("x", newX);
+              }
+            } else if (attr === 'height') {
               var textHeight = text.height();
               var diff = newValue - textHeight;
               // Set new width of rect
               rect.attr("height", newValue);
-              // Recenter text
               var newX = rect.attr("y") + Math.round(diff / 2) + Math.round(textHeight);
               text.attr("y", newX - 4);
             }
