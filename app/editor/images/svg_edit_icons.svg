@@ -99,6 +99,26 @@
     </svg>
   </g>
 
+  <g id="ibutton">
+    <svg viewBox="0 0 24 24">
+      <rect ry="1" rx="1" stroke="#666666" id="svg_1" height="9.3125" width="18.71277" y="7.6875" x="2.54987" stroke-linecap="null" stroke-linejoin="null" stroke-dasharray="null" stroke-width="null" fill="#dedede"/>
+      <text
+        stroke="#666666"
+        transform="matrix(0.31211307307762554,0,0,0.31211307307762554,-120.95000095640742,-54.717848878448144) "
+        text-anchor="middle"
+        font-family="Monospace"
+        font-size="24"
+        id="svg_2"
+        y="223.72678"
+        x="424.89992"
+        stroke-linecap="null"
+        stroke-linejoin="null"
+        stroke-dasharray="null"
+        stroke-width="0"
+        fill="#000000">BT</text>
+    </svg>
+  </g>
+
   <g id="icheckbox">
     <svg viewBox="0 0 24 24">
       <rect x="6" y="7" ry="2" rx="2" width="12" height="12" fill="lightgray" stroke="black" stroke-width="1"/>
