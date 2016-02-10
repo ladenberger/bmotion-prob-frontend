@@ -1843,18 +1843,26 @@ define(["jquery", "touch", "jquery.hotkeys", "jquery.bbq",
           je.attr("data-" + attr, val);
           je.data(attr, val);
           text.html(val);
-          // Set new width of rect
-          var newWidth = text.width() + 20;
-          rect.attr("width", newWidth);
+          var textWidth = text.width();
+          var rectWidth = rect.attr("width");
+          var rectHeight = rect.attr("height");
+          var offset = 0;
+          if (rectWidth - 20 < textWidth) {
+            // Set new width of rect
+            rectWidth = text.width();
+            rect.attr("width", rectWidth + 20);
+            offset = 10;
+          }
           // Recenter text
-          var newY = rect.attr("y") + 17;
-          var newX = rect.attr("x") + 10;
+          var diff = rectWidth - textWidth;
+          var newX = rect.attr("x") + Math.round(diff / 2) + offset;
+          var newY = rect.attr("y") + Math.round(rectHeight / 2) + 2;
           text.attr("x", newX).attr("y", newY);
 
         });
 
+        updateToolbar();
         svgCanvas.updateRequestSelector();
-
         input.blur();
 
       });

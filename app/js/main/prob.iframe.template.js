@@ -344,14 +344,18 @@ define(['angular', 'bms.func', 'jquery', 'bms.api', 'bms.api.extern', 'prob.moda
 
                 var jele = $(element);
                 var offset = jele.offset();
+
+                var rect = jele.find("rect");
                 // Create new radio button
                 var newInput = $('<button>' + jele.attr('data-text') + '</button>');
                 newInput
                   .attr("class", jele.attr("class"))
                   .attr("id", jele.attr("id"))
                   .css("position", "absolute")
-                  .css("left", offset.left - 5 + "px")
-                  .css("top", offset.top - 2 + "px");
+                  .css("width", parseInt(rect.attr("width")) + "px")
+                  .css("height", parseInt(rect.attr("height")) + "px")
+                  .css("left", offset.left + "px")
+                  .css("top", offset.top + "px");
                 var vis = bmsVisualizationService.getVisualization($scope.id);
                 vis.container.contents().find("body").append(newInput);
                 jele.remove();

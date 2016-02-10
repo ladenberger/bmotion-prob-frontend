@@ -8587,7 +8587,37 @@ $.SvgCanvas = function(container, config) {
         } else if (attr == "#href") {
           setHref(elem, newValue);
         } else {
-          elem.setAttribute(attr, newValue);
+
+          var jelem = $(elem);
+
+          if (jelem.attr('data-bms-widget') === 'ibutton') {
+
+            var text = jelem.find("text");
+            var rect = jelem.find("rect");
+
+            if(attr === 'width') {
+              // Set new width of rect
+              rect.attr("width", newValue);
+              // Recenter text
+              var textWidth = text.width();
+              var diff = newValue - textWidth;
+              var newX = rect.attr("x") + Math.round(diff / 2);
+              text.attr("x", newX);
+            } else if(attr === 'height') {
+              var textHeight = text.height();
+              var diff = newValue - textHeight;
+              // Set new width of rect
+              rect.attr("height", newValue);
+              // Recenter text
+              var newX = rect.attr("y") + Math.round(diff / 2) + Math.round(textHeight);
+              text.attr("y", newX - 4);
+            }
+
+
+          } else {
+            elem.setAttribute(attr, newValue);
+          }
+
         }
 
         // Timeout needed for Opera & Firefox
