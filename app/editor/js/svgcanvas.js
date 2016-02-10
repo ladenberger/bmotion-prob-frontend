@@ -304,7 +304,7 @@ $.SvgCanvas = function(container, config) {
           "y": data.attr.y,
           "width": data.attr.width,
           "height": data.attr.height,
-          "fill": "lightgray",
+          "fill": "#ededed",
           "stroke": "black",
           "stroke-width": 1
         }, 100);

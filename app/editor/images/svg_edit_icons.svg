@@ -65,8 +65,8 @@
   </g>
 
   <g id="iarea">
-    <svg xmlns:xlink="http://www.w3.org/1999/xlink" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24">
-      <rect x="2.6343827" y="2.8377724" width="18.595642" height="18.595642" id="svg_1" style="fill:#e3edf1;stroke:#1b6dad;stroke-width:0.92978203;stroke-opacity:1;fill-opacity:1"/>
+    <svg viewBox="0 0 24 24">
+      <rect x="2.6343827" y="2.8377724" width="18.595642" height="18.595642" style="fill:#e3edf1;stroke:#1b6dad;stroke-width:0.92978203;stroke-opacity:1;fill-opacity:1"/>
       <rect style="fill:#e3edf1;fill-opacity:1;stroke:#436dad;stroke-width:0.75;stroke-linejoin:miter;stroke-miterlimit:4;stroke-dasharray:none;stroke-opacity:1" id="rect4142" width="3.6851895" height="3.6619201" x="1.4886589" y="1.2098837"/>
       <rect style="fill:#e3edf1;fill-opacity:1;stroke:#436dad;stroke-width:0.75;stroke-linejoin:miter;stroke-miterlimit:4;stroke-dasharray:none;stroke-opacity:1" id="rect4142-7" width="3.6851895" height="3.6619201" x="18.804953" y="1.2098837"/>
       <rect style="fill:#e3edf1;fill-opacity:1;stroke:#436dad;stroke-width:0.75;stroke-linejoin:miter;stroke-miterlimit:4;stroke-dasharray:none;stroke-opacity:1" id="rect4142-7-4" width="3.6851895" height="3.6619201" x="18.804953" y="18.980904"/>
@@ -78,7 +78,6 @@
     <svg viewBox="0 0 24 24">
       <rect
         style="fill:#e3edf1;fill-opacity:1;stroke:#1b6dad;stroke-width:1.5;stroke-miterlimit:4;stroke-dasharray:none;stroke-opacity:1;stroke-linejoin:round;stroke-linecap:butt"
-        id="svg_1"
         height="10.296079"
         width="20.935705"
         y="6.6861763"
@@ -101,16 +100,14 @@
 
   <g id="ibutton">
     <svg viewBox="0 0 24 24">
-      <rect ry="1" rx="1" stroke="#666666" id="svg_1" height="9.3125" width="18.71277" y="7.6875" x="2.54987" stroke-linecap="null" stroke-linejoin="null" stroke-dasharray="null" stroke-width="null" fill="#dedede"/>
+      <rect ry="1" rx="1" stroke="#000000" height="10" width="21" y="10" x="2" stroke-linecap="null" stroke-linejoin="null" stroke-dasharray="null" stroke-width="null" fill="#dedede"/>
       <text
-        stroke="#666666"
-        transform="matrix(0.31211307307762554,0,0,0.31211307307762554,-120.95000095640742,-54.717848878448144) "
+        stroke="#000000"
         text-anchor="middle"
         font-family="Monospace"
-        font-size="24"
-        id="svg_2"
-        y="223.72678"
-        x="424.89992"
+        font-size="10"
+        y="18"
+        x="12"
         stroke-linecap="null"
         stroke-linejoin="null"
         stroke-dasharray="null"
