@@ -858,87 +858,85 @@ define(['bms.func', 'jquery', 'angular', 'qtip', 'prob.modal'], function(bms, $,
             tooltip: true,
             label: function(event) {
               var predicateStr = event.predicate ? '(' + event.predicate + ')' : '';
-              return '<span aria-hidden="true"> ' + event.name + predicateStr + '</span>';
+              return '<span>' + event.name + predicateStr + '</span>';
             },
             callback: function() {}
           }, options);
         },
-        executeEvent: function(data, origin, container) {
+        executeEvent: function(data, origin, container, callback) {
           var settings = bms.normalize(data, ["callback"], origin, container);
           ws.emit("executeEvent", {
             data: settings
           }, function(result) {
-            settings.callback.call(this, result)
+            if (settings.callback) settings.callback.call(this, result, origin, container);
+            callback.call(this);
           });
           return settings
         },
         shouldBeChecked: function(visId, obj) {
           var visualization = bmsVisualizationService.getVisualization(visId);
-          var check = true;
-          if (obj.data.refinement !== undefined && !bms.inArray(obj.data.refinement, visualization["model"]["refinements"])) {
-            check = false;
-          }
-          return check;
+          return !(obj.data.refinement !== undefined && !bms.inArray(obj.data.refinement, visualization["model"]["refinements"]));
         },
-        getTooltipContent: function(options, origin, container, api, sessionId, traceId) {
+        getTooltipContent: function(element, container, options, sessionId, traceId, api) {
+
           var defer = $q.defer();
-          ws.emit('initTooltip', {
+
+          ws.emit('checkEvents', {
             data: bms.normalize({
               id: sessionId,
               traceId: traceId,
               events: options.events
-            }, [], origin, container)
+            }, [], element, container)
           }, function(data) {
-            var jcontainer = $(container);
-            var container = $('<div class="qtiplinks"></div>');
-            var ul = $('<ul style="display:table-cell;"></ul>');
-            angular.forEach(data.events, function(v) {
-              var iconSpan = $('<span aria-hidden="true"></span>');
-              var iconClass = 'glyphicon glyphicon-remove-circle';
-              if (v.canExecute) {
-                iconClass = 'glyphicon glyphicon-ok-circle cursor-pointer';
-              }
-              iconSpan.addClass(iconClass);
-              var labelSpan;
-              if (typeof options.label === 'function') {
-                labelSpan = $(options.label(v, origin, jcontainer));
-              } else {
-                // Whenever the function comes from json, we need to convert
-                // the string function to a real javascript function
-                // TODO: We need to handle errors while converting the string function to a reals javascript function
-                var func = new Function('event', 'origin', 'container', options.label);
-                labelSpan = $(func(v, origin, jcontainer));
-              }
 
-              if (v.canExecute) {
+            // Build tooltip content
+            var tt_container = $('<div class="qtiplinks"></div>');
+            var tt_ul = $('<ul style="display:table-cell;"></ul>');
+            angular.forEach(data.events, function(evt) {
+
+              var iconSpan = $('<span></span>')
+                .css("margin-right", "2px")
+                .addClass('glyphicon')
+                .addClass(evt.canExecute ? 'glyphicon-ok-circle' : 'glyphicon-remove-circle');
+
+              var labelSpan = $(bms.convertFunction('event,origin,container', options.label)(evt, element, container));
+              if (evt.canExecute) {
+                var callbackFunc = bms.convertFunction('data,origin,container', options.callback);
                 labelSpan.click(function() {
                   ev.executeEvent({
                     id: sessionId,
                     traceId: traceId,
-                    event: v,
-                    callback: function() {
-                      api.hide();
-                    }
+                    event: evt,
+                    callback: callbackFunc
+                  }, element, container, function() {
+                    api.hide();
                   })
                 });
               }
-              ul.append($('<li></li>')
-                .addClass(v.canExecute ? 'enabled' : 'disabled')
-                .addClass('cursor-pointer')
+
+              tt_ul.append($('<li></li>')
+                .addClass(evt.canExecute ? 'enabled' : 'disabled')
+                .addClass(evt.canExecute ? 'cursor-pointer' : 'cursor-default')
                 .append(iconSpan)
                 .append(labelSpan));
+
             });
-            container.append(ul);
-            defer.resolve(container);
+
+            tt_container.append(tt_ul);
+
+            defer.resolve(tt_container);
+
           });
+
           return defer.promise;
+
         },
         initTooltip: function(element, container, options, sessionId, traceId) {
 
-          return element.qtip({ // Grab some elements to apply the tooltip to
+          return element.qtip({
             content: {
               text: function(event, api) {
-                return ev.getTooltipContent(options, element, container, api, sessionId, traceId)
+                return ev.getTooltipContent(element, container, options, sessionId, traceId, api)
                   .then(function(container) {
                     return container;
                   });
@@ -969,8 +967,6 @@ define(['bms.func', 'jquery', 'angular', 'qtip', 'prob.modal'], function(bms, $,
             style: {
               classes: 'qtip-light qtip-bootstrap'
             }
-          }).click(function() {
-
           });
 
         },
@@ -981,25 +977,26 @@ define(['bms.func', 'jquery', 'angular', 'qtip', 'prob.modal'], function(bms, $,
           if (ev.shouldBeChecked(visId, event)) {
 
             var options = ev.getDefaultOptions(event.data);
+
             if (options.selector) {
 
               var jcontainer = $(container);
-              var el = jcontainer.find(options.selector);
-              el.each(function(i2, v) {
+              jcontainer.find(options.selector).each(function(i, ele) {
 
-                var e = $(v);
-                e.css('cursor', 'pointer');
-                var tooltip = ev.initTooltip(e, jcontainer, options, sessionId, traceId);
+                var jele = $(ele);
+                jele.css('cursor', 'pointer');
+                var tooltip = ev.initTooltip(jele, jcontainer, options, sessionId, traceId);
                 var api = tooltip.qtip('api');
+                var callbackFunc = bms.convertFunction('data,origin,container', options.callback);
 
-                e.click(function(event) {
+                jele.click(function(event) {
 
-                  ws.emit('initTooltip', {
+                  ws.emit('checkEvents', {
                     data: bms.normalize({
                       id: sessionId,
                       traceId: traceId,
                       events: options.events
-                    }, [], e, jcontainer)
+                    }, [], jele, jcontainer)
                   }, function(data) {
 
                     var enabledEvents = [];
@@ -1014,21 +1011,21 @@ define(['bms.func', 'jquery', 'angular', 'qtip', 'prob.modal'], function(bms, $,
                         id: sessionId,
                         traceId: traceId,
                         event: enabledEvents[0],
-                        callback: function() {
-                          api.hide();
-                        }
-                      }, e, jcontainer);
+                        callback: callbackFunc
+                      }, jele, jcontainer, function() {
+                        api.hide();
+                      });
                     } else {
                       // Else show a popup displaying the available events
                       api.show('click');
                     }
 
-                    e.data('qtip-disable', true);
+                    jele.data('qtip-disable', true);
 
                   });
 
                 }).mouseout(function() {
-                  e.data('qtip-disable', false);
+                  jele.data('qtip-disable', false);
                 });
 
               });

@@ -65,6 +65,16 @@ define(['jquery'], function($) {
         return subject;
       }
     },
+    convertFunction: function(parameters, func) {
+      if (typeof func === 'function') {
+        return func;
+      } else {
+        // Whenever the function comes from json, we need to convert
+        // the string function to a real javascript function
+        // TODO: We need to handle errors while converting the string function to a reals javascript function
+        return new Function(parameters, func);
+      }
+    },
     isFunction: function(functionToCheck) {
       var getType = {};
       return functionToCheck && getType.toString.call(functionToCheck) === '[object Function]';

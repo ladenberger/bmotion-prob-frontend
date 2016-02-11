@@ -213,7 +213,7 @@ define(['angular', 'jquery', 'bms.func', 'prob.modal', 'bms.session', 'prob.obse
               }
             }
           }, function(result) {
-            if (settings.callback) settings.callback.call(this, result);
+            if (settings.callback) settings.callback.call(this, result, vis["container"]);
           });
         };
 

@@ -196,6 +196,9 @@ html, body {
 .cursor-pointer {
   cursor: pointer;
 }
+.cursor-default {
+  cursor: auto;
+}
 .form-group .help-block {
   display: none;
 }
