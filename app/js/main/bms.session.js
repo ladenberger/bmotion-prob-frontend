@@ -39,13 +39,12 @@ define(['angular', 'bms.socket'], function(angular) {
           });
           return defer.promise;
         },
-        init: function(modelPath, tool, options, manifestFilePath) {
+        init: function(modelPath, options, manifestFilePath) {
           var defer = $q.defer();
           ws.emit('initSession', {
             data: {
               manifest: manifestFilePath,
               model: modelPath,
-              tool: tool,
               options: options
             }
           }, function(r) {
@@ -58,9 +57,9 @@ define(['angular', 'bms.socket'], function(angular) {
           });
           return defer.promise;
         },
-        initFormalModelOnlySession: function(modelPath, tool, options) {
+        initFormalModelOnlySession: function(modelPath, options) {
           var defer = $q.defer();
-          factory.init(modelPath, tool, options)
+          factory.init(modelPath, options)
             .then(function(sid) {
               defer.resolve(sid);
             }, function(errors) {

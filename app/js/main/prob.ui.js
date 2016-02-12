@@ -21,7 +21,7 @@ define(['jquery', 'angular', 'jquery-ui', 'ui-bootstrap', 'bms.config'], functio
 
         self.isBAnimation = function() {
           var vis = bmsVisualizationService.getCurrentVisualization();
-          return vis && vis['manifest'] && vis['manifest']['tool'] === 'BAnimation';
+          return vis && (vis['tool'] === 'EventBVisualisation' || vis['tool'] === 'ClassicalBVisualisation');
         };
 
         self.reloadVisualization = function() {

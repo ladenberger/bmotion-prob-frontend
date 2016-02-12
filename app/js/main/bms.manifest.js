@@ -93,9 +93,6 @@ define(['tv4', 'angular'], function (tv4, angular) {
                         return defer.promise;
                     },
                     normalize: function (manifestData) {
-                        if (manifestData['tool'] === undefined) {
-                            manifestData['tool'] = 'BAnimation';
-                        }
                         if (manifestData['prob'] === undefined) {
                             manifestData['prob'] = {
                                 preferences: {}

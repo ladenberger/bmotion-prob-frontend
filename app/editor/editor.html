@@ -255,8 +255,8 @@
                   <option value="INTEGER">INTEGER</option>
                   <option value="NAT">NAT</option>
                   <option value="NAT1">NAT1</option>
-                  <option value="STRING">STRING</option>
-                  <option ng-repeat="set in ctrl.visualization.model.sets track by $index" value="{{set}}">{{set}}</option>
+                  <option value="STRING" ng-show="ctrl.isClassicalBVisualisation">STRING</option>
+                  <option ng-repeat="set in ctrl.visualization.model.sets track by $index" value="{{set.name}}">{{set.name}}</option>
                 </select>
                 <span>BType</span>
               </label>

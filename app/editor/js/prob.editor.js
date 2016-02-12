@@ -63,6 +63,18 @@ define(['angular', 'angularAMD', 'code-mirror!javascript', 'jquery.jgraduate', '
       });
 
       var service = {
+        isClassicalBVisualisation: function() {
+          return visualization['tool'] === 'ClassicalBVisualisation'
+        },
+        isEventBVisualisation: function() {
+          return visualization['tool'] === 'EventBVisualisation'
+        },
+        isBVisualisation: function() {
+          return this.isClassicalBVisualisation() || this.isEventBVisualisation()
+        },
+        isCSPVisualisation: function() {
+          return visualization['tool'] === 'CSPVisualisation'
+        },
         setVisualization: function(vis) {
           visualization = vis;
         },
@@ -516,6 +528,11 @@ define(['angular', 'angularAMD', 'code-mirror!javascript', 'jquery.jgraduate', '
           if (obj.svgContent) methodDraw.loadFromString(obj.svgContent);
           bmsEditorCommonService.isInitialised.resolve();
 
+          self.isBVisualisation = bmsEditorCommonService.isBVisualisation();
+          self.isEventBVisualisation = bmsEditorCommonService.isEventBVisualisation();
+          self.isCSPVisualisation = bmsEditorCommonService.isCSPVisualisation();
+          self.isBVisualisation = bmsEditorCommonService.isBVisualisation();
+
         }, function(error) {
           bmsParentService.bmsModalService.openErrorDialog("An error occurred while initialising editor: " + error);
           bmsParentService.disableEditor("An error occurred while initialising editor: " + error);
@@ -634,16 +651,6 @@ define(['angular', 'angularAMD', 'code-mirror!javascript', 'jquery.jgraduate', '
 
         var self = this;
 
-        var isBAnimation = function() {
-          var vis = bmsEditorCommonService.getVisualization();
-          return vis && vis['manifest'] && vis['manifest']['tool'] === 'BAnimation'
-        };
-
-        var isCSPAnimation = function() {
-          var vis = bmsEditorCommonService.getVisualization();
-          return vis && vis['manifest'] && vis['manifest']['tool'] === 'CSPAnimation'
-        };
-
         var addObserverEvent = function(list, type, data) {
           var selectedElements = methodDraw.getSvgCanvas().getSelectedElems();
           if (selectedElements) {
@@ -661,7 +668,7 @@ define(['angular', 'angularAMD', 'code-mirror!javascript', 'jquery.jgraduate', '
 
           self.addObserverItems = [{
             label: "Add Formula Observer",
-            show: isBAnimation(),
+            show: bmsEditorCommonService.isBVisualisation(),
             click: function() {
               addObserverEvent("observers", "formula", {
                 formulas: []
@@ -669,7 +676,7 @@ define(['angular', 'angularAMD', 'code-mirror!javascript', 'jquery.jgraduate', '
             }
           }, {
             label: "Add Refinement Observer",
-            show: isBAnimation(),
+            show: bmsEditorCommonService.isEventBVisualisation(),
             click: function() {
               addObserverEvent("observers", "refinement", {
                 refinement: ""
@@ -677,7 +684,7 @@ define(['angular', 'angularAMD', 'code-mirror!javascript', 'jquery.jgraduate', '
             }
           }, {
             label: "Add CSP Observer",
-            show: isCSPAnimation(),
+            show: bmsEditorCommonService.isCSPVisualisation(),
             click: function() {
               addObserverEvent("observers", "csp-event", {
                 observers: []
@@ -687,7 +694,7 @@ define(['angular', 'angularAMD', 'code-mirror!javascript', 'jquery.jgraduate', '
 
           self.addEventItems = [{
             label: "Add Execute Event Handler",
-            show: true,
+            show: bmsEditorCommonService.isBVisualisation(),
             click: function() {
               addObserverEvent("events", "executeEvent", {
                 events: []

@@ -308,7 +308,7 @@ define(['angularAMD', 'angular', 'prob.graph', 'prob.iframe.template', 'prob.ui'
             var fileExtension = filename.split('.').pop();
             var tool = fileExtension === 'csp' ? 'CSPAnimation' : 'BAnimation';
 
-            bmsSessionService.initFormalModelOnlySession(modelPath, tool, {
+            bmsSessionService.initFormalModelOnlySession(modelPath, {
                 preferences: {}
               })
               .then(function(sessionId) {

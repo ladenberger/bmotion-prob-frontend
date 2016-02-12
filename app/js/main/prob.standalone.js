@@ -165,7 +165,7 @@ define(['angular', 'jquery', 'socketio', 'angularAMD', 'bms.func', 'bms.tabs', '
             var fileExtension = filename.split('.').pop();
             var tool = fileExtension === 'csp' ? 'CSPAnimation' : 'BAnimation';
 
-            bmsSessionService.initFormalModelOnlySession(modelPath, tool, {
+            bmsSessionService.initFormalModelOnlySession(modelPath, {
                 preferences: {}
               })
               .then(function(sessionId) {
@@ -259,11 +259,11 @@ define(['angular', 'jquery', 'socketio', 'angularAMD', 'bms.func', 'bms.tabs', '
             return defer.promise;
           };
 
-          var initVisualizationSession = function(modelPath, tool, options, manifestFilePath) {
+          var initVisualizationSession = function(modelPath, options, manifestFilePath) {
             var defer = $q.defer();
             getModel(modelPath)
               .then(function(finalModelPath) {
-                bmsSessionService.init(finalModelPath, tool, options, manifestFilePath)
+                bmsSessionService.init(finalModelPath, options, manifestFilePath)
                   .then(function(data) {
                     defer.resolve(data);
                   }, function(errors) {
@@ -296,7 +296,7 @@ define(['angular', 'jquery', 'socketio', 'angularAMD', 'bms.func', 'bms.tabs', '
                   bmsSessionService.destroy($routeParams.sessionId);
                 }
 
-                initVisualizationSession(normalizedManifestData['model'], normalizedManifestData['tool'], normalizedManifestData['prob'], manifestFilePath)
+                initVisualizationSession(normalizedManifestData['model'], normalizedManifestData['prob'], manifestFilePath)
                   .then(function(sessionId) {
                     var filename = manifestFilePath.replace(/^.*[\\\/]/, '');
                     var views = normalizedManifestData['views'];

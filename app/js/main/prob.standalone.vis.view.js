@@ -23,7 +23,7 @@ define(['bms.electron', 'bms.visualization', 'ng-electron', 'bms.session'], func
           win.setTitle(title);
           electron.send({
             type: "buildVisualizationMenu",
-            tool: visualization['manifest']['tool'],
+            tool: visualization['tool'],
             addMenu: false,
             win: winId
           }, win);
@@ -40,7 +40,7 @@ define(['bms.electron', 'bms.visualization', 'ng-electron', 'bms.session'], func
           win.setTitle(title);
           electron.send({
             type: "buildVisualizationMenu",
-            tool: visualization['manifest']['tool'],
+            tool: visualization['tool'],
             addMenu: true,
             win: winId
           }, win);

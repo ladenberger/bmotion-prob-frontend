@@ -13,12 +13,8 @@ define(['angular', 'jquery', 'prob.modal'], function(angular, $) {
       var visualizationService = {
 
         isBAnimation: function(visId) {
-          var vis = visualizations[visId];
-          if (vis) {
-            return vis && vis['manifest'] && vis['manifest']['tool'] === 'BAnimation';
-          } else {
-            bmsModalService.openErrorDialog("No Visualization found with id " + visId);
-          }
+          var vis = bmsVisualizationService.getCurrentVisualization();
+          return vis && (vis['tool'] === 'EventBVisualisation' || vis['tool'] === 'ClassicalBVisualisation');
         },
         getDisabledTabs: function() {
           return disabledTabs;

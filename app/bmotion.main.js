@@ -213,7 +213,7 @@ var buildDiagramMenu = function(mainMenu, tool) {
         type: 'openElementProjectionModal'
       });
     },
-    enabled: tool === 'BAnimation'
+    enabled: tool === 'EventBVisualisation' || tool === 'ClassicalBVisualisation'
   }));
 
   mainMenu.append(new MenuItem({
@@ -502,7 +502,7 @@ app.on('ready', function() {
     } else if (data.type === 'buildModelMenu') {
       var mainMenu = new Menu();
       var win = BrowserWindow.fromId(data['win']);
-      buildModelMenu(mainMenu, data['tool'], data['addMenu']);
+      buildModelMenu(mainMenu);
       if (process.platform == 'darwin' && data['win'] === 1) {
         Menu.setApplicationMenu(mainMenu);
       }
