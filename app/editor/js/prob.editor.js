@@ -366,9 +366,6 @@ define(['angular', 'angularAMD', 'code-mirror!javascript', 'jquery.jgraduate', '
 
         // Get json observers
         bmsEditorCommonService.isInitialised.promise.then(function() {
-          $scope.dynamicPopover = {
-            templateUrl: 'observerMenu' + bmsEditorCommonService.getVisualization()['manifest']['tool'] + 'Template.html'
-          };
           $scope.data = bmsEditorCommonService.getObservers();
           $scope.uiState = bmsEditorCommonService.getUiState('observers');
         });
@@ -384,27 +381,6 @@ define(['angular', 'angularAMD', 'code-mirror!javascript', 'jquery.jgraduate', '
                 bmsEditorCommonService.removeObserver(index);
               });
             }
-          });
-        };
-
-        $scope.addFormulaObserver = function() {
-          bmsEditorCommonService.addObserver("formula", {
-            selector: "",
-            trigger: ""
-          });
-        };
-
-        $scope.addRefinementObserver = function() {
-          bmsEditorCommonService.addObserver("refinement", {
-            selector: "",
-            refinement: ""
-          });
-        };
-
-        $scope.addCSPEventObserver = function() {
-          bmsEditorCommonService.addObserver("csp-event", {
-            selector: "",
-            observers: []
           });
         };
 
@@ -473,13 +449,6 @@ define(['angular', 'angularAMD', 'code-mirror!javascript', 'jquery.jgraduate', '
           });
         };
 
-        $scope.addExecuteEventEvent = function() {
-          bmsEditorCommonService.addEvent("executeEvent", {
-            selector: "",
-            events: []
-          });
-        };
-
         $scope.duplicateEvent = function(index) {
           bmsEditorCommonService.duplicateEvent(index);
         };
@@ -511,10 +480,24 @@ define(['angular', 'angularAMD', 'code-mirror!javascript', 'jquery.jgraduate', '
 
       }
     ])
-    .controller('bmsEditorCtrl', ['$scope', 'bmsParentService', 'bmsJsEditorService', 'bmsEditorCommonService', '$http', '$parentScope',
-      function($scope, bmsParentService, bmsJsEditorService, bmsEditorCommonService, $http, $parentScope) {
+    .controller('bmsEditorCtrl', ['$scope', 'bmsParentService', 'bmsJsEditorService', 'bmsEditorCommonService', 'bmsEditorTabsService', '$http', '$parentScope',
+      function($scope, bmsParentService, bmsJsEditorService, bmsEditorCommonService, bmsEditorTabsService, $http, $parentScope) {
 
         var self = this;
+
+        var addObserverEvent = function(list, type, data) {
+          var selectedElements = methodDraw.getSvgCanvas().getSelectedElems();
+          if (selectedElements) {
+            var selectors = selectedElements.map(function(element) {
+              return "#" + $(element).attr("id");
+            });
+            data.selector = selectors.join(",");
+            var index = bmsEditorCommonService.addObserverEvent(list, type, data);
+            bmsEditorTabsService.activateTab(list);
+            bmsEditorCommonService.toggleCollapse(list, index);
+          }
+        };
+
         bmsParentService.init().then(function(obj) {
 
           self.visualization = obj.vis;
@@ -528,10 +511,50 @@ define(['angular', 'angularAMD', 'code-mirror!javascript', 'jquery.jgraduate', '
           if (obj.svgContent) methodDraw.loadFromString(obj.svgContent);
           bmsEditorCommonService.isInitialised.resolve();
 
-          self.isBVisualisation = bmsEditorCommonService.isBVisualisation();
+          self.isClassicalBVisualisation = bmsEditorCommonService.isClassicalBVisualisation();
           self.isEventBVisualisation = bmsEditorCommonService.isEventBVisualisation();
-          self.isCSPVisualisation = bmsEditorCommonService.isCSPVisualisation();
           self.isBVisualisation = bmsEditorCommonService.isBVisualisation();
+          self.isCSPVisualisation = bmsEditorCommonService.isCSPVisualisation();
+
+          self.dynamicPopover = {
+            templateUrl: 'observerMenuTemplate.html'
+          };
+
+          self.addObserverItems = [{
+            label: "Add Formula Observer",
+            show: bmsEditorCommonService.isBVisualisation(),
+            click: function() {
+              addObserverEvent("observers", "formula", {
+                formulas: []
+              });
+            }
+          }, {
+            label: "Add Refinement Observer",
+            show: bmsEditorCommonService.isEventBVisualisation(),
+            click: function() {
+              addObserverEvent("observers", "refinement", {
+                refinement: ""
+              });
+            }
+          }, {
+            label: "Add CSP Observer",
+            show: bmsEditorCommonService.isCSPVisualisation(),
+            click: function() {
+              addObserverEvent("observers", "csp-event", {
+                observers: []
+              });
+            }
+          }];
+
+          self.addEventItems = [{
+            label: "Add Execute Event Handler",
+            show: bmsEditorCommonService.isBVisualisation(),
+            click: function() {
+              addObserverEvent("events", "executeEvent", {
+                events: []
+              });
+            }
+          }];
 
         }, function(error) {
           bmsParentService.bmsModalService.openErrorDialog("An error occurred while initialising editor: " + error);
@@ -643,66 +666,6 @@ define(['angular', 'angularAMD', 'code-mirror!javascript', 'jquery.jgraduate', '
           var doc = docs[fn] ? docs[fn] : docs["default"];
           bmsJsEditorService.openJsEditor(fn, el, doc);
         };
-
-      }
-    ])
-    .controller('bmsEditorContextMenuCtrl', ['$scope', 'bmsEditorCommonService', 'bmsEditorTabsService', '$parentScope',
-      function($scope, bmsEditorCommonService, bmsEditorTabsService, $parentScope) {
-
-        var self = this;
-
-        var addObserverEvent = function(list, type, data) {
-          var selectedElements = methodDraw.getSvgCanvas().getSelectedElems();
-          if (selectedElements) {
-            var selectors = selectedElements.map(function(element) {
-              return "#" + $(element).attr("id");
-            });
-            data.selector = selectors.join(",");
-            var index = bmsEditorCommonService.addObserverEvent(list, type, data);
-            bmsEditorTabsService.activateTab(list);
-            bmsEditorCommonService.toggleCollapse(list, index);
-          }
-        };
-
-        bmsEditorCommonService.isInitialised.promise.then(function() {
-
-          self.addObserverItems = [{
-            label: "Add Formula Observer",
-            show: bmsEditorCommonService.isBVisualisation(),
-            click: function() {
-              addObserverEvent("observers", "formula", {
-                formulas: []
-              });
-            }
-          }, {
-            label: "Add Refinement Observer",
-            show: bmsEditorCommonService.isEventBVisualisation(),
-            click: function() {
-              addObserverEvent("observers", "refinement", {
-                refinement: ""
-              });
-            }
-          }, {
-            label: "Add CSP Observer",
-            show: bmsEditorCommonService.isCSPVisualisation(),
-            click: function() {
-              addObserverEvent("observers", "csp-event", {
-                observers: []
-              });
-            }
-          }];
-
-          self.addEventItems = [{
-            label: "Add Execute Event Handler",
-            show: bmsEditorCommonService.isBVisualisation(),
-            click: function() {
-              addObserverEvent("events", "executeEvent", {
-                events: []
-              });
-            }
-          }];
-
-        });
 
       }
     ])
