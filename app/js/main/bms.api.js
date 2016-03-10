@@ -14,7 +14,11 @@ define(['angular', 'jquery', 'bms.func', 'prob.modal', 'bms.session', 'bms.obser
         };
 
         var setValues = function(visId, values) {
-          $.extend(true, getValues(visId), values);
+          if (!attributeValues[visId]) {
+            attributeValues[visId] = {};
+          }
+          attributeValues[visId] = values;
+          //$.extend(true, getValues(visId), values);
         };
 
         var triggerObservers = function(visId, stateId, cause, list) {

@@ -100,7 +100,6 @@ define(['bms.func', 'jquery', 'angular', 'prob.modal'], function(bms, $, angular
                       if (o.events) {
                         events = events.concat(o.events);
                       }
-
                       if ($.inArray(t['opString'], events) > -1) {
                         if (o.trigger) {
                           o.trigger.call(this, t);
@@ -129,7 +128,7 @@ define(['bms.func', 'jquery', 'angular', 'prob.modal'], function(bms, $, angular
 
                   }
 
-                  keepGoing = !t['current'];
+                  keepGoing = !(t['group'] === 'future');
 
                 });
 
