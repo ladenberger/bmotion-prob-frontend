@@ -2,10 +2,10 @@
  * BMotion Studio for ProB Standalone Module
  *
  */
-define(['angularAMD', 'angular', 'prob.graph', 'prob.iframe.template', 'prob.ui', 'bms.manifest', 'prob.modal', 'bms.common', 'bms.session', 'angular-route'],
+define(['angularAMD', 'angular', 'bms.api.extern', 'bms.visualization', 'bms.directive', 'bms.observers', 'bms.handlers', 'prob.ui', 'bms.manifest', 'prob.modal', 'bms.common', 'bms.session', 'angular-route'],
   function(angularAMD, angular) {
 
-    var module = angular.module('prob.online', ['prob.graph', 'prob.iframe.template', 'prob.ui', 'prob.modal', 'bms.manifest', 'bms.common', 'bms.session', 'ngRoute'])
+    var module = angular.module('prob.online', ['bms.visualization', 'bms.directive', 'bms.observers', 'bms.handlers', 'prob.ui', 'bms.manifest', 'prob.modal', 'bms.common', 'bms.session', 'ngRoute'])
       .run(['bmsMainService',
         function(bmsMainService) {
           bmsMainService.mode = 'ModeOnline';
@@ -17,7 +17,7 @@ define(['angularAMD', 'angular', 'prob.graph', 'prob.iframe.template', 'prob.ui'
             .when('/', {
               template: '<div class="navbar navbar-default navbar-fixed-bottom" role="navigation">' +
                 '<div class="container-fluid">' +
-                '<div class="navbar-header"><a class="navbar-brand" href="">BMotion Studio for ProB</a></div>' +
+                '<div class="navbar-header"><a class="navbar-brand" href="">BMotionWeb</a></div>' +
                 '</div>' +
                 '</div>',
               controller: 'bmsOnlineHomeCtrl'
@@ -29,7 +29,7 @@ define(['angularAMD', 'angular', 'prob.graph', 'prob.iframe.template', 'prob.ui'
                 '<div class="navbar navbar-default navbar-fixed-bottom" role="navigation">' +
                 '<div class="container-fluid">' +
                 '<div class="navbar-header">' +
-                '<a class="navbar-brand" href="">BMotion Studio for ProB</a>' +
+                '<a class="navbar-brand" href="">BMotionWeb</a>' +
                 '</div>' +
                 '<div class="collapse navbar-collapse">' +
                 '<ul class="nav navbar-nav navbar-right" id="bmotion-navigation">' +
@@ -83,7 +83,7 @@ define(['angularAMD', 'angular', 'prob.graph', 'prob.iframe.template', 'prob.ui'
                 '<div class="navbar navbar-default navbar-fixed-bottom" role="navigation">' +
                 '<div class="container-fluid">' +
                 '<div class="navbar-header">' +
-                '<a class="navbar-brand" href="">BMotion Studio for ProB</a>' +
+                '<a class="navbar-brand" href="">BMotionWeb</a>' +
                 '</div>' +
                 '<div class="collapse navbar-collapse">' +
                 '<ul class="nav navbar-nav navbar-right" id="bmotion-navigation">' +
@@ -150,12 +150,14 @@ define(['angularAMD', 'angular', 'prob.graph', 'prob.iframe.template', 'prob.ui'
             });
         }
       ])
-      .controller('bmsVisualizationCtrl', ['$scope', '$routeParams',
-        function($scope, $routeParams) {
+      .controller('bmsVisualizationCtrl', ['$scope', '$routeParams', 'bmsSessionService',
+        function($scope, $routeParams, bmsSessionService) {
           var self = this;
           self.view = $routeParams.view;
           self.sessionId = $routeParams.sessionId;
           self.file = $routeParams.file;
+          $scope.sessionId = $routeParams.sessionId;
+          bmsSessionService.setSessionId(self.sessionId);
         }
       ])
       .directive('bmsVisualization', ['$routeParams', '$compile', 'initVisualizationService', 'bmsModalService', 'bmsManifestService',
@@ -165,10 +167,7 @@ define(['angularAMD', 'angular', 'prob.graph', 'prob.iframe.template', 'prob.ui'
             scope: {},
             controller: ['$scope', function($scope) {}],
             link: function($scope, element, attrs) {
-
               element.attr('class', 'fullWidthHeight');
-              element.append($compile('<div ng-view class="fullWidthHeight"></div>')($scope));
-
               var path = attrs['bmsVisualization'];
               if (path) {
                 bmsModalService.loading("Initialising visualization ...");
@@ -177,9 +176,8 @@ define(['angularAMD', 'angular', 'prob.graph', 'prob.iframe.template', 'prob.ui'
                     bmsModalService.endLoading();
                   });
               } else {
-                bmsModalService.setMessage("Please provide path to BMotion Studio manifest file.");
+                bmsModalService.setMessage("Please provide path to BMotionWeb manifest file (bmotion.json).");
               }
-
             }
           }
         }
@@ -272,7 +270,6 @@ define(['angularAMD', 'angular', 'prob.graph', 'prob.iframe.template', 'prob.ui'
 
                   initVisualizationSession(
                     data['model'],
-                    data['tool'],
                     data['prob'],
                     manifestPath
                   ).then(function(sessionId) {

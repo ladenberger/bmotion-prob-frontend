@@ -117,9 +117,9 @@ var buildFileMenu = function(mainMenu) {
     })(),
     click: function() {
       Dialog.showOpenDialog({
-          title: 'Open BMotion Studio Visualization',
+          title: 'Open BMotionWeb Visualisation',
           filters: [{
-            name: 'BMotion Studio Visualization (*.json)',
+            name: 'BMotionWeb Manifest (bmotion.json)',
             extensions: ['json']
           }, {
             name: 'Formal Model (*.mch, *.csp, *.bcm, *.bcc)',

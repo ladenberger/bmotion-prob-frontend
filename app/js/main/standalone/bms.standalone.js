@@ -2,10 +2,10 @@
  * BMotion Studio for ProB Standalone Module
  *
  */
-define(['angular', 'jquery', 'socketio', 'angularAMD', 'bms.func', 'bms.api.extern', 'bms.tabs', 'bms.common', 'bms.session', 'bms.manifest', 'bms.config', 'prob.graph', 'prob.iframe.editor', 'prob.ui', 'prob.modal', 'bms.views.user.interactions', 'angular-route', 'bms.directive', 'bms.standalone.vis.view', 'bms.standalone.model.view', 'bms.electron', 'bms.nodejs', 'ng-electron'],
+define(['angular', 'jquery', 'socketio', 'angularAMD', 'bms.func', 'bms.observers', 'bms.handlers', 'bms.api.extern', 'bms.tabs', 'bms.common', 'bms.session', 'bms.manifest', 'bms.config', 'prob.graph', 'prob.iframe.editor', 'prob.ui', 'prob.modal', 'bms.views.user.interactions', 'angular-route', 'bms.directive', 'bms.standalone.vis.view', 'bms.standalone.model.view', 'bms.electron', 'bms.nodejs', 'ng-electron'],
   function(angular, $, io, angularAMD, bms) {
 
-    var module = angular.module('prob.standalone', ['prob.standalone.vis.view', 'prob.standalone.model.view', 'bms.tabs', 'bms.manifest', 'bms.config', 'bms.common', 'bms.session', 'prob.graph', 'bms.directive', 'prob.iframe.editor', 'prob.ui', 'bms.views.user.interactions', 'prob.modal', 'bms.electron', 'bms.nodejs', 'ngRoute', 'ngElectron'])
+    var module = angular.module('prob.standalone', ['bms.observers', 'bms.handlers', 'prob.standalone.vis.view', 'prob.standalone.model.view', 'bms.tabs', 'bms.manifest', 'bms.config', 'bms.common', 'bms.session', 'prob.graph', 'bms.directive', 'prob.iframe.editor', 'prob.ui', 'bms.views.user.interactions', 'prob.modal', 'bms.electron', 'bms.nodejs', 'ngRoute', 'ngElectron'])
       .config(['$routeProvider', '$locationProvider',
         function($routeProvider) {
           $routeProvider
@@ -144,7 +144,7 @@ define(['angular', 'jquery', 'socketio', 'angularAMD', 'bms.func', 'bms.api.exte
                           view.template = 'index.html';
                           view.observers = view.id + '.observers.json';
                           view.events = view.id + '.events.json';
-                          var manifestFile = view.id + '.json';
+                          var manifestFile = 'bmotion.json';
 
                           createJsonFile(folder, view.observers, {
                               observers: []
@@ -314,6 +314,7 @@ define(['angular', 'jquery', 'socketio', 'angularAMD', 'bms.func', 'bms.api.exte
                 return bmsManifestService.normalize(manifestData);
               }, function(errors) {
                 bmsModalService.openErrorDialog(errors);
+                throw errors;
               })
               .then(function(normalizedManifestData) {
 
@@ -525,8 +526,9 @@ define(['angular', 'jquery', 'socketio', 'angularAMD', 'bms.func', 'bms.api.exte
           var self = this;
           self.openFileDialog = function() {
             electronDialog.showOpenDialog({
+                title: 'Open BMotionWeb Visualisation',
                 filters: [{
-                  name: 'BMotion Studio Visualization (*.json)',
+                  name: 'BMotionWeb Manifest (bmotion.json)',
                   extensions: ['json']
                 }, {
                   name: 'Formal Model (*.mch, *.csp, *.bcm, *.bcc)',

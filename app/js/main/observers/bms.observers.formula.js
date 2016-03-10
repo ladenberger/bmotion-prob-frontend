@@ -98,7 +98,7 @@ define(['bms.func', 'jquery', 'angular', 'prob.modal'], function(bms, $, angular
               }
 
             });
-
+            
             // Evaluate formulas and apply observers
             ws.emit("evaluateFormulas", {
               data: {

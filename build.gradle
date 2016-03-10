@@ -2,9 +2,8 @@ import org.apache.tools.ant.taskdefs.condition.Os
 import org.gradle.api.tasks.Exec
 
 def bmotionVersion = '0.2.8'
-def probVersion = 'milestone-28'
 def appVersion = '0.2.8'
-def targets = ["linux-ia32": "linux32", "linux-x64": "linux64", "darwin-x64": "leopard64", "win32-ia32": "win32", "win32-x64": "win64"]
+def targets = ["linux-ia32", "linux-x64", "darwin-x64", "win32-ia32", "win32-x64"]
 
 // ----------------------------------------
 // Helper methods ...
@@ -15,43 +14,6 @@ def download(String address, String target) {
     out << new URL(address).openStream()
     out.close()
 }
-
-/*def download_cspm(String target) {
-    def String downloadFile = target
-    def String postfix = ""
-    if (target == "win32" || target == "win64") {
-        downloadFile = "windows"
-        postfix = ".exe"
-    }
-    def String url = "http://www3.hhu.de/stups/downloads/cspmf/cspmf-" + downloadFile + postfix
-    println "Downloading cspm for " + target + " ..."
-    def String dir = "build/cli/" + target + "_cli/cli/lib/cspmf" + postfix
-    download(url, dir)
-    new File(dir).setExecutable(true)
-    println " done."
-}
-
-def download_cli(target, probVersion) {
-    def downloadFile = target
-    def String dir = "build/cli/" + target + "_cli/cli"
-    def d = new File(dir)
-    delete file(d)
-    d.mkdirs();
-    //def url = "http://nightly.cobra.cs.uni-duesseldorf.de/tmp/" + probVersion + "/probcli_" + downloadFile + ".zip"
-    def url = "https://www3.hhu.de/stups/downloads/prob/cli/nightly/probcli_" + downloadFile + ".zip"
-    //def nwurl = "http://nightly.cobra.cs.uni-duesseldorf.de/cli/probcli_"+downloadFile+".zip"
-    println "Downloading cli for " + target + " ..."
-    def String targetzip = dir + "probcli.zip"
-    download(url, targetzip)
-    println " done."
-    FileTree zip = zipTree(targetzip)
-    println "Unzipping " + zip
-    copy {
-        from zip
-        into dir
-    }
-    delete file(targetzip)
-}*/
 
 apply plugin: 'java'
 apply plugin: 'maven'
@@ -101,16 +63,9 @@ task grunt_standalone_all(dependsOn: [npmDeps], type: GruntTask) {
     gruntArgs = "standalone_all --force"
 }
 
-targets.each() { target, cliTarget ->
+targets.each() { target ->
 
-    /*task "downloadCli_${target}" << {
-        download_cli(cliTarget, probVersion)
-        download_cspm(cliTarget)
-    }*/
-
-    //task "copyResources_${target}"(dependsOn: ["grunt_standalone_${target}", getLibs, "npmProductionDeps", "downloadCli_${target}"], type: Copy) {
     task "copyResources_${target}"(dependsOn: ["grunt_standalone_${target}", getLibs, "npmProductionDeps"], type: Copy) {
-        //from 'build/cli/' + cliTarget + '_cli'
         from 'bmotion.json'
         from('build') {
             include 'node_modules/**'
@@ -123,15 +78,6 @@ targets.each() { target, cliTarget ->
             into 'build/client/bmotion-prob-' + target + '/resources'
         }
     }
-
-    /*task "copyCli_${target}"(dependsOn: ["grunt_standalone_${target}", "downloadCli_${target}"], type: Copy) {
-        from 'build/cli/' + cliTarget + '_cli'
-        if (target == "darwin-x64") {
-            into 'build/client/bmotion-prob-' + target + '/bmotion-prob.app/Contents/Resources'
-        } else {
-            into 'build/client/bmotion-prob-' + target + '/resources'
-        }
-    }*/
 
     task "zip_${target}"(dependsOn: ["copyResources_${target}"], type: Zip) {
         destinationDir = new File('build/dist/' + appVersion)
