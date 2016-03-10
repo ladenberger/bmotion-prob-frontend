@@ -2,9 +2,9 @@
  * BMotion Studio for ProB Graph Module
  *
  */
-define(['angular', 'jquery', 'bms.visualization', 'prob.observers'], function(angular, $) {
+define(['angular', 'jquery', 'bms.visualization', 'bms.observers'], function(angular, $) {
 
-  return angular.module('prob.graph', ['bms.visualization', 'prob.observers'])
+  return angular.module('prob.graph', ['bms.visualization', 'bms.observers'])
     .factory('bmsRenderingService', ['$q', 'ws', '$injector', 'bmsModalService', 'bmsObserverService', 'bmsVisualizationService', '$http', '$templateCache', '$compile', '$rootScope', '$interpolate', '$timeout', function($q, ws, $injector, bmsModalService, bmsObserverService, bmsVisualizationService, $http, $templateCache, $compile, $rootScope, $interpolate, $timeout) {
 
       var supportedSvgElements = ["svg", "g", "rect", "circle", "image", "line", "path", "text", "ellipse"];

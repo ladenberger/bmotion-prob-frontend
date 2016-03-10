@@ -2,10 +2,10 @@
  * BMotion Studio for ProB Standalone Module
  *
  */
-define(['angular', 'jquery', 'socketio', 'angularAMD', 'bms.func', 'bms.tabs', 'bms.common', 'bms.session', 'bms.manifest', 'bms.config', 'prob.graph', 'prob.iframe.template', 'prob.iframe.editor', 'prob.ui', 'prob.modal', 'angular-route', 'prob.standalone.vis.view', 'prob.standalone.model.view', 'bms.electron', 'bms.nodejs', 'ng-electron'],
+define(['angular', 'jquery', 'socketio', 'angularAMD', 'bms.func', 'bms.api.extern', 'bms.tabs', 'bms.common', 'bms.session', 'bms.manifest', 'bms.config', 'prob.graph', 'prob.iframe.editor', 'prob.ui', 'prob.modal', 'bms.views.user.interactions', 'angular-route', 'bms.directive', 'bms.standalone.vis.view', 'bms.standalone.model.view', 'bms.electron', 'bms.nodejs', 'ng-electron'],
   function(angular, $, io, angularAMD, bms) {
 
-    var module = angular.module('prob.standalone', ['prob.standalone.vis.view', 'prob.standalone.model.view', 'bms.tabs', 'bms.manifest', 'bms.config', 'bms.common', 'bms.session', 'prob.graph', 'prob.iframe.template', 'prob.iframe.editor', 'prob.ui', 'prob.modal', 'bms.electron', 'bms.nodejs', 'ngRoute', 'ngElectron'])
+    var module = angular.module('prob.standalone', ['prob.standalone.vis.view', 'prob.standalone.model.view', 'bms.tabs', 'bms.manifest', 'bms.config', 'bms.common', 'bms.session', 'prob.graph', 'bms.directive', 'prob.iframe.editor', 'prob.ui', 'bms.views.user.interactions', 'prob.modal', 'bms.electron', 'bms.nodejs', 'ngRoute', 'ngElectron'])
       .config(['$routeProvider', '$locationProvider',
         function($routeProvider) {
           $routeProvider
@@ -78,8 +78,21 @@ define(['angular', 'jquery', 'socketio', 'angularAMD', 'bms.func', 'bms.tabs', '
 
         }
       ])
-      .factory('createVisualizationService', ['$uibModal', 'electronDialog', 'fs', 'path', 'ncp', 'initVisualizationService',
-        function($uibModal, electronDialog, fs, path, ncp, initVisualizationService) {
+      .factory('createVisualizationService', ['$uibModal', '$q', 'electronDialog', 'fs', 'path', 'ncp', 'initVisualizationService',
+        function($uibModal, $q, electronDialog, fs, path, ncp, initVisualizationService) {
+
+          var createJsonFile = function(folder, file, json) {
+            var defer = $q.defer();
+            fs.writeFile(folder + '/' + file, JSON.stringify(json, null, "    "),
+              function(err) {
+                if (err) {
+                  defer.reject(err);
+                } else {
+                  defer.resolve(file);
+                }
+              });
+            return defer.promise;
+          }
 
           return function() {
 
@@ -111,44 +124,57 @@ define(['angular', 'jquery', 'socketio', 'angularAMD', 'bms.func', 'bms.tabs', '
             });
             modalInstance.result.then(function(view) {
 
-              view.template = 'index.html';
-              view.observers = view.id + '.observers.json';
-              view.events = view.id + '.events.json';
-              var manifest = {
-                views: [
-                  view
-                ]
-              };
+                electronDialog.showOpenDialog({
+                    title: 'Please select a folder where the BMotion Studio visualization should be saved.',
+                    properties: ['openDirectory', 'createDirectory']
+                  },
+                  function(files) {
 
-              electronDialog.showOpenDialog({
-                  title: 'Please select a folder where the BMotion Studio visualization should be saved.',
-                  properties: ['openDirectory', 'createDirectory']
-                },
-                function(files) {
-                  if (files) {
-                    var folder = files[0];
-                    var appPath = path.dirname(__dirname);
-                    var templateFolder = appPath + '/template';
-                    ncp(templateFolder, folder, function(err) {
-                      if (err) {
-                        bmsModalService.openErrorDialog(err);
-                      } else {
-                        var jsonString = JSON.stringify(manifest, null, "    ");
-                        var manifestFile = view.id + '.json';
-                        fs.writeFile(folder + '/' + manifestFile, jsonString,
-                          function(err) {
-                            if (err) {
-                              bmsModalService.openErrorDialog("An error occurred while writing BMotion Studio manifest file " + manifestFile + ": " + err);
-                            } else {
+                    if (files) {
+
+                      var folder = files[0];
+                      var appPath = path.dirname(__dirname);
+                      var templateFolder = appPath + '/template';
+                      ncp(templateFolder, folder, function(err) {
+
+                        if (err) {
+                          bmsModalService.openErrorDialog(err);
+                        } else {
+
+                          view.template = 'index.html';
+                          view.observers = view.id + '.observers.json';
+                          view.events = view.id + '.events.json';
+                          var manifestFile = view.id + '.json';
+
+                          createJsonFile(folder, view.observers, {
+                              observers: []
+                            })
+                            .then(function() {
+                              return createJsonFile(folder, view.events, {
+                                events: []
+                              });
+                            })
+                            .then(function() {
+                              return createJsonFile(folder, manifestFile, {
+                                views: [view]
+                              });
+                            })
+                            .then(function() {
                               initVisualizationService(folder + '/' + manifestFile);
-                            }
-                          });
-                      }
-                    });
-                  }
-                });
+                            }, function(err) {
+                              bmsModalService.openErrorDialog("An error occurred while writing file: " + err);
+                            });
 
-            }, function() {});
+                        }
+
+                      });
+
+                    }
+
+                  });
+
+              },
+              function() {});
 
           }
 
@@ -377,7 +403,8 @@ define(['angular', 'jquery', 'socketio', 'angularAMD', 'bms.func', 'bms.tabs', '
               var exec = require('child_process').exec;
               var isWin = /^win/.test(process.platform);
               var separator = isWin ? ';' : ':';
-              var server = exec('java -Xmx1024m -cp ' + appPath + '/libs/*' + separator + appPath + '/libs/bmotion-prob-0.2.7.jar -Dprob.home=' + probBinary + ' de.bms.prob.Standalone -standalone -local');
+              //var server = exec('java -Xmx1024m -cp ' + appPath + '/libs/*' + separator + appPath + '/libs/bmotion-prob-0.2.8.jar -Dprob.home=' + probBinary + ' de.bms.prob.Standalone -standalone -local');
+              var server = exec('java -Xmx1024m -cp ' + appPath + '/libs/*' + separator + appPath + '/libs/bmotion-prob-0.2.8.jar de.bms.prob.Standalone -standalone -local');
               //electron.send(server.pid);
               server.stdout.on('data', function(data) {
                 try {

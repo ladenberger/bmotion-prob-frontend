@@ -2,7 +2,7 @@
  * BMotion Studio Visualization Module
  *
  */
-define(['angular', 'jquery', 'prob.modal'], function(angular, $) {
+define(['angular', 'jquery', 'bms.func', 'prob.modal'], function(angular, $, bms) {
 
   return angular.module('bms.visualization', ['prob.modal'])
     .factory('bmsVisualizationService', ['bmsModalService', '$injector', '$q', function(bmsModalService, $injector, $q) {
@@ -12,6 +12,34 @@ define(['angular', 'jquery', 'prob.modal'], function(angular, $) {
 
       var visualizationService = {
 
+        getBmsIds: function(visId, selector, container) {
+          var vis = visualizationService.getVisualization(visId);
+          var cache = vis['bmsids'];
+          if (cache[selector] === undefined) {
+            var bmsids = container.find(selector).map(function() {
+              var cbmsid = $(this).attr("data-bms-id");
+              if (!cbmsid) {
+                cbmsid = bms.uuid();
+                $(this).attr("data-bms-id", cbmsid);
+              }
+              return cbmsid;
+            });
+            cache[selector] = bmsids;
+          }
+          return cache[selector];
+        },
+        clearBmsIdCache: function(visId) {
+          var vis = visualizationService.getVisualization(visId);
+          vis['bmsids'] = {};
+        },
+        getBmsIdForElement: function(element) {
+          var bmsid = element.attr("data-bms-id");
+          if (!bmsid) {
+            bmsid = bms.uuid();
+            element.attr("data-bms-id", bmsid);
+          }
+          return bmsid;
+        },
         isBAnimation: function(visId) {
           var vis = bmsVisualizationService.getCurrentVisualization();
           return vis && (vis['tool'] === 'EventBVisualisation' || vis['tool'] === 'ClassicalBVisualisation');
@@ -24,12 +52,6 @@ define(['angular', 'jquery', 'prob.modal'], function(angular, $) {
           disabledTabs[id]['status'] = true;
           disabledTabs[id]['reason'] = reason;
         },
-        addVisualization: function(visId, data) {
-          visualizations[visId] = data;
-        },
-        getVisualizations: function() {
-          return visualizations;
-        },
         getVisualization: function(visId) {
           if (visualizations[visId] === undefined) {
             visualizations[visId] = {
@@ -41,7 +63,8 @@ define(['angular', 'jquery', 'prob.modal'], function(angular, $) {
                 json: [],
                 js: []
               },
-              svg: {}
+              svg: {},
+              bmsids: {}
             };
           }
           return visualizations[visId];
@@ -92,6 +115,7 @@ define(['angular', 'jquery', 'prob.modal'], function(angular, $) {
               if (instance && (typeof instance.getDefaultOptions === "function")) {
                 e.data = instance.getDefaultOptions(e.data);
               }
+              origin = origin ? origin : 'js';
               if (vis[list] === undefined) vis[list] = {};
               if (vis[list][origin] === undefined) vis[list][origin] = [];
               vis[list][origin].push(e);

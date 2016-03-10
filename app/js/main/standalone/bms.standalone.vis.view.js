@@ -10,6 +10,7 @@ define(['bms.electron', 'bms.visualization', 'ng-electron', 'bms.session'], func
         var self = this;
         self.view = $routeParams.view;
         self.sessionId = $routeParams.sessionId;
+        $scope.sessionId = $routeParams.sessionId;
         bmsSessionService.setSessionId(self.sessionId);
         self.file = $routeParams.file;
       }

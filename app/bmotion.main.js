@@ -90,6 +90,12 @@ var buildViewMenu = function(mainMenu) {
         focusedWindow.toggleDevTools();
     }
   }));
+  viewMenu.append(new MenuItem({
+    label: 'User Interactions Log',
+    click: function() {
+      openDialog('UserInteractions');
+    }
+  }));
   mainMenu.append(new MenuItem({
     label: 'View',
     submenu: viewMenu

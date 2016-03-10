@@ -1,8 +1,8 @@
-define(['angular', 'jquery', 'bms.func', 'prob.modal', 'bms.session', 'prob.observers'], function(angular, $, bms) {
+define(['angular', 'jquery', 'bms.func', 'prob.modal', 'bms.session', 'bms.observers', 'bms.handlers'], function(angular, $, bms) {
 
-  angular.module('bms.api', ['prob.modal', 'bms.session', 'prob.observers'])
-    .factory('bmsApiService', ['ws', '$injector', '$q', 'trigger', 'bmsSessionService', 'bmsObserverService', 'bmsVisualizationService', 'bmsModalService',
-      function(ws, $injector, $q, trigger, bmsSessionService, bmsObserverService, bmsVisualizationService, bmsModalService) {
+  angular.module('bms.api', ['prob.modal', 'bms.session', 'bms.observers', 'bms.handlers'])
+    .factory('bmsApiService', ['ws', '$injector', '$q', 'trigger', 'bmsSessionService', 'bmsObserverService', 'bmsHandlerService', 'bmsVisualizationService', 'bmsModalService',
+      function(ws, $injector, $q, trigger, bmsSessionService, bmsObserverService, bmsHandlerService, bmsVisualizationService, bmsModalService) {
 
         var attributeValues = {};
 
@@ -45,7 +45,7 @@ define(['angular', 'jquery', 'bms.func', 'prob.modal', 'bms.session', 'prob.obse
 
         var setupEvent = function(visId, evt) {
           var vis = bmsVisualizationService.getVisualization(visId);
-          bmsObserverService.setupEvent(bmsSessionService.getSessionId(), visId, evt, vis.container.contents(), vis.traceId);
+          bmsHandlerService.setupEvent(bmsSessionService.getSessionId(), visId, evt, vis.container, vis.traceId);
         };
 
         var triggerObserver = function(visId, observer, stateId, cause) {
@@ -86,7 +86,7 @@ define(['angular', 'jquery', 'bms.func', 'prob.modal', 'bms.session', 'prob.obse
         var setupEvents = function(visId, list) {
           var vis = bmsVisualizationService.getVisualization(visId);
           var events = bmsVisualizationService.getEvents(visId, list);
-          bmsObserverService.setupEvents(bmsSessionService.getSessionId(), visId, events, vis.container.contents(), vis.traceId);
+          bmsHandlerService.setupEvents(bmsSessionService.getSessionId(), visId, events, vis.container, vis.traceId);
         };
 
         var addObserver = function(visId, type, data, list) {
@@ -95,9 +95,7 @@ define(['angular', 'jquery', 'bms.func', 'prob.modal', 'bms.session', 'prob.obse
             data: data
           };
           var vis = bmsVisualizationService.getVisualization(visId);
-          // Add observer ..
           bmsVisualizationService.addObserver(visId, observer, list);
-          // ... and trigger observer
           if (vis.stateId !== 'root' && vis.initialised && vis.lastOperation !== '$setup_constants') {
             triggerObserver(visId, observer, vis.stateId, data.cause);
           }
@@ -109,12 +107,10 @@ define(['angular', 'jquery', 'bms.func', 'prob.modal', 'bms.session', 'prob.obse
             data: data
           };
           var vis = bmsVisualizationService.getVisualization(visId);
-          // Add event ...
           bmsVisualizationService.addEvent(visId, ev, list);
-          // ... and setup event
           var instance = $injector.get(type, "");
           if (instance) {
-            instance.setup(bmsSessionService.getSessionId(), visId, ev, vis.container.contents(), vis.traceId);
+            instance.setup(bmsSessionService.getSessionId(), visId, ev, vis.container, vis.traceId);
           }
         };
 

@@ -1,12 +1,13 @@
 /**
- * BMotion Studio for ProB IFrame Module
+ * BMotion Studio for ProB Directive visualisation view module
  *
  */
-define(['angular', 'bms.func', 'jquery', 'bms.api', 'bms.api.extern', 'prob.modal'], function(angular, bms, $) {
+define(['angular', 'bms.func', 'jquery'], function(angular, bms, $) {
 
-  var module = angular.module('prob.iframe.template', ['prob.modal', 'bms.api'])
+  return angular.module('bms.directive.visualisation.view', ['prob.modal', 'bms.api'])
     .directive('bmsVisualisationView', ['$rootScope', 'bmsApiService', 'bmsSessionService', 'bmsVisualizationService', 'ws', 'bmsModalService', 'trigger', '$compile', '$http', '$q',
       function($rootScope, bmsApiService, bmsSessionService, bmsVisualizationService, ws, bmsModalService, trigger, $compile, $http, $q) {
+        'use strict';
         return {
           replace: false,
           scope: {
@@ -69,7 +70,7 @@ define(['angular', 'bms.func', 'jquery', 'bms.api', 'bms.api.extern', 'prob.moda
             };
 
             $scope.applyValues = function() {
-              for (bmsid in $scope.values) {
+              for (var bmsid in $scope.values) {
                 if ($scope.attrs[bmsid] === undefined) {
                   $scope.attrs[bmsid] = [];
                 }
@@ -258,177 +259,6 @@ define(['angular', 'bms.func', 'jquery', 'bms.api', 'bms.api.extern', 'prob.moda
           }
         }
       }
-    ])
-    .directive('bmsSvg', ['$http', '$compile', 'bmsVisualizationService',
-      function($http, $compile, bmsVisualizationService) {
-        return {
-          replace: false,
-          link: function($scope, element, attrs) {
-            var svg = attrs['bmsSvg'];
-            var vis = bmsVisualizationService.getVisualization($scope.id);
-            var svgObj = bmsVisualizationService.addSvg($scope.id, svg);
-            var reloadTemplate = function() {
-              return $http.get(vis['templateFolder'] + '/' + svg)
-                .success(function(svgCode) {
-                  element.html(svgCode);
-                  $compile(element.contents())($scope);
-                  if (svgObj.defer) svgObj.defer.resolve();
-                });
-            };
-            reloadTemplate();
-          }
-        }
-      }
-    ])
-    .directive('bmsWidget', ['bmsVisualizationService', 'bmsApiService',
-      function(bmsVisualizationService, bmsApiService) {
-        return {
-          link: function($scope, element, attr) {
-            var type = attr["bmsWidget"];
-            switch (type) {
-              case "iarea":
-                $(element).css("opacity", 0.1);
-                break;
-              case "iradio":
-
-                var jele = $(element);
-                var offset = jele.offset();
-
-                // Create new radio button
-                var newInput = $('<input type="radio"/>');
-                newInput
-                  .attr("value", jele.attr("data-value"))
-                  .attr("checked", jele.attr("data-checked") === "true" ? true : false)
-                  .attr("class", jele.attr("class"))
-                  .attr("id", jele.attr("id"))
-                  .css("position", "absolute")
-                  .css("left", offset.left - 5 + "px")
-                  .css("top", offset.top - 3 + "px");
-
-                var parent = $(jele.parent());
-                if (parent.prop("tagName") === "g") {
-                  newInput.attr("name", parent.attr("id"));
-                }
-
-                var vis = bmsVisualizationService.getVisualization($scope.id);
-                vis.container.contents().find("body").append(newInput);
-                jele.remove();
-
-                break;
-              case "icheckbox":
-
-                var jele = $(element);
-                var offset = jele.offset();
-                // Create new radio button
-                var newInput = $('<input type="checkbox"/>');
-                newInput
-                  .attr("value", jele.attr("data-value"))
-                  .attr("class", jele.attr("class"))
-                  .attr("id", jele.attr("id"))
-                  .attr("checked", jele.attr("data-checked") === "true" ? true : false)
-                  .css("position", "absolute")
-                  .css("left", offset.left - 5 + "px")
-                  .css("top", offset.top - 2 + "px");
-
-                var parent = $(jele.parent());
-                if (parent.prop("tagName") === "g") {
-                  newInput.attr("name", parent.attr("id"));
-                }
-
-                var vis = bmsVisualizationService.getVisualization($scope.id);
-                vis.container.contents().find("body").append(newInput);
-                jele.remove();
-
-                break;
-              case "ibutton":
-
-                var jele = $(element);
-                var offset = jele.offset();
-
-                var rect = jele.find("rect");
-                // Create new radio button
-                var newInput = $('<button>' + jele.attr('data-text') + '</button>');
-                newInput
-                  .attr("class", jele.attr("class"))
-                  .attr("id", jele.attr("id"))
-                  .css("position", "absolute")
-                  .css("width", parseInt(rect.attr("width")) + "px")
-                  .css("height", parseInt(rect.attr("height")) + "px")
-                  .css("left", offset.left + "px")
-                  .css("top", offset.top + "px");
-                var vis = bmsVisualizationService.getVisualization($scope.id);
-                vis.container.contents().find("body").append(newInput);
-                jele.remove();
-
-                break;
-              case "iinput":
-                var jele = $(element);
-                var rect = jele.find("rect");
-                var offset = jele.offset();
-                var btype = jele.attr("data-btype");
-                var newInput = $('<input type="text"/>');
-                newInput
-                  .attr("class", jele.attr("class"))
-                  .attr("id", jele.attr("id"))
-                  .attr("placeholder", jele.attr("data-placeholder"))
-                  .css("position", "absolute")
-                  .css("left", offset.left + "px")
-                  .css("top", offset.top + "px")
-                  .css("width", parseInt(rect.attr("width")) - 4 + "px")
-                  .css("height", parseInt(rect.attr("height")) - 5 + "px");
-                jele.remove();
-                var vis = bmsVisualizationService.getVisualization($scope.id);
-                vis.container.contents().find("body").append(newInput);
-                newInput.qtip({
-                  content: {
-                    text: ''
-                  },
-                  position: {
-                    my: 'bottom left',
-                    at: 'top right',
-                    effect: false,
-                    viewport: $(window),
-                    adjust: {
-                      y: 45
-                    }
-                  },
-                  show: {
-                    event: false
-                  },
-                  hide: {
-                    fixed: true,
-                    delay: 2000
-                  },
-                  style: {
-                    classes: 'qtip-red'
-                  }
-                });
-                newInput.on('input', function() {
-                  var input = $(this);
-                  //var data = btype === 'STRING' ? "\"" + input.val() + "\"" : input.val();
-                  var data = input.val();
-                  bmsApiService.eval($scope.id, {
-                    formulas: ["bool(" + data + " : " + btype + ")"],
-                    trigger: function(values) {
-                      if (values[0] === 'FALSE') {
-                        input.qtip('option', 'content.text', "Please enter a valid <strong>" + btype + "</strong>").qtip('show');
-                      } else {
-                        input.qtip('hide');
-                      }
-                    },
-                    error: function(errors) {
-                      input.qtip('option', 'content.text', "Please enter a valid <strong>" + btype + "</strong>").qtip('show');
-                    }
-                  });
-                });
-                break;
-            }
-
-          }
-        };
-      }
     ]);
-
-  return module;
 
 });

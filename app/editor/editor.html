@@ -253,10 +253,12 @@
                 <h4 class="clearfix">Data Attributes</h4>
                 <label class="idLabel" title="B type of the the interactive input field">
                   <select id="iinput_data_btype" class="data_attribute_changer" data-attr="btype">
-                    <option value="INTEGER">INTEGER</option>
-                    <option value="NAT">NAT</option>
-                    <option value="NAT1">NAT1</option>
-                    <option value="STRING" ng-show="ctrl.isClassicalBVisualisation">STRING</option>
+                    <option value=""></option>
+                    <option ng-show="ctrl.isClassicalBVisualisation" value="INTEGER">INTEGER</option>
+                    <option ng-show="ctrl.isEventBVisualisation" value="INT">INT</option>
+                    <option ng-show="ctrl.isBVisualisation" value="NAT">NAT</option>
+                    <option ng-show="ctrl.isBVisualisation" value="NAT1">NAT1</option>
+                    <option ng-show="ctrl.isClassicalBVisualisation" value="STRING">STRING</option>
                     <option ng-repeat="set in ctrl.visualization.model.sets track by $index" value="{{set.name}}">{{set.name}}</option>
                   </select>
                   <span>BType</span>
@@ -336,6 +338,22 @@
 
               <div id="image_panel" class="context_panel clearfix">
                 <h4>Image</h4>
+                <label>
+                  <input id="image_x" class="attr_changer" data-title="Change X coordinate" size="3" data-attr="x" pattern="[0-9]*" />
+                  <span>X</span>
+                </label>
+                <label>
+                  <input id="image_y" class="attr_changer" data-title="Change Y coordinate" size="3" data-attr="y" pattern="[0-9]*" />
+                  <span>Y</span>
+                </label>
+                <label id="image_width_tool attr_changer" data-title="Change Width">
+                  <input id="image_width" class="attr_changer" size="3" data-attr="width" type="text" pattern="[0-9]*" />
+                  <span class="icon_label">Width</span>
+                </label>
+                <label id="image_height_tool" data-title="Change Height">
+                  <input id="image_height" class="attr_changer" size="3" data-attr="height" type="text" pattern="[0-9]*" />
+                  <span class="icon_label">Height</span>
+                </label>
                 <div class="clearfix"></div>
                 <label class="idLabel" title="Set Image Path">
                   <input id="image_url" class="path_changer" data-attr="xlink:href" size="10" type="text" />

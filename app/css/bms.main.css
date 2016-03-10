@@ -226,3 +226,29 @@ html, body {
   top: 11px;
   right: 9px;
 }
+
+.userInteractionsView {
+  height: 100%;
+  overflow-y: scroll;
+}
+
+.userInteractionsView .table {
+  font-size: 12px;
+}
+
+.userInteractionsView-item {
+  cursor: pointer;
+}
+
+.userInteractionsView-item-past {
+  font-weight: normal;
+}
+
+.userInteractionsView-item-current {
+  font-weight: bold;
+}
+
+.userInteractionsView-item-future {
+  font-weight: normal;
+  color: lightgray;
+}

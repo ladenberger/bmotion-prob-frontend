@@ -46,7 +46,7 @@ define(['angular'], function(angular) {
           //}, 0);
         },
         executeEvent: function(options) {
-          if (options.selectr) {
+          if (options.selector || options.element) {
             this.registerEvent('executeEvent', options);
           } else {
             var elem = angular.element(document.querySelector('[ng-controller]'));

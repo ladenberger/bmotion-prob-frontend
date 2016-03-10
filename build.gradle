@@ -1,9 +1,9 @@
 import org.apache.tools.ant.taskdefs.condition.Os
 import org.gradle.api.tasks.Exec
 
-def bmotionVersion = '0.2.7'
+def bmotionVersion = '0.2.8'
 def probVersion = 'milestone-28'
-def appVersion = '0.2.7'
+def appVersion = '0.2.8'
 def targets = ["linux-ia32": "linux32", "linux-x64": "linux64", "darwin-x64": "leopard64", "win32-ia32": "win32", "win32-x64": "win64"]
 
 // ----------------------------------------
@@ -16,7 +16,7 @@ def download(String address, String target) {
     out.close()
 }
 
-def download_cspm(String target) {
+/*def download_cspm(String target) {
     def String downloadFile = target
     def String postfix = ""
     if (target == "win32" || target == "win64") {
@@ -51,7 +51,7 @@ def download_cli(target, probVersion) {
         into dir
     }
     delete file(targetzip)
-}
+}*/
 
 apply plugin: 'java'
 apply plugin: 'maven'
@@ -103,13 +103,14 @@ task grunt_standalone_all(dependsOn: [npmDeps], type: GruntTask) {
 
 targets.each() { target, cliTarget ->
 
-    task "downloadCli_${target}" << {
+    /*task "downloadCli_${target}" << {
         download_cli(cliTarget, probVersion)
         download_cspm(cliTarget)
-    }
+    }*/
 
-    task "copyResources_${target}"(dependsOn: ["grunt_standalone_${target}", getLibs, "npmProductionDeps", "downloadCli_${target}"], type: Copy) {
-        from 'build/cli/' + cliTarget + '_cli'
+    //task "copyResources_${target}"(dependsOn: ["grunt_standalone_${target}", getLibs, "npmProductionDeps", "downloadCli_${target}"], type: Copy) {
+    task "copyResources_${target}"(dependsOn: ["grunt_standalone_${target}", getLibs, "npmProductionDeps"], type: Copy) {
+        //from 'build/cli/' + cliTarget + '_cli'
         from 'bmotion.json'
         from('build') {
             include 'node_modules/**'
@@ -123,14 +124,14 @@ targets.each() { target, cliTarget ->
         }
     }
 
-    task "copyCli_${target}"(dependsOn: ["grunt_standalone_${target}", "downloadCli_${target}"], type: Copy) {
+    /*task "copyCli_${target}"(dependsOn: ["grunt_standalone_${target}", "downloadCli_${target}"], type: Copy) {
         from 'build/cli/' + cliTarget + '_cli'
         if (target == "darwin-x64") {
             into 'build/client/bmotion-prob-' + target + '/bmotion-prob.app/Contents/Resources'
         } else {
             into 'build/client/bmotion-prob-' + target + '/resources'
         }
-    }
+    }*/
 
     task "zip_${target}"(dependsOn: ["copyResources_${target}"], type: Zip) {
         destinationDir = new File('build/dist/' + appVersion)

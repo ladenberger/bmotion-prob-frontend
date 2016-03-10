@@ -212,7 +212,7 @@ input[type="checkbox"].editable-input.editable-has-buttons {
   top: 11px;
   right: 22px;
 }
-.csp-event-transformer-header .editable-input {
+.csp-event-transformer-header .editable-input{
   width: 230px;
 }
 .csp-event-transformer-content {}
@@ -221,4 +221,7 @@ input[type="checkbox"].editable-input.editable-has-buttons {
 }
 .cursor-pointer {
   cursor: pointer;
+}
+.editable-controls>select {
+  width: 150px;
 }

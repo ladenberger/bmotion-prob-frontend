@@ -35,6 +35,11 @@ define(['socketio', 'angular', 'bms.config', 'prob.modal'], function(io, angular
       function($rootScope, bmsSocketService, bmsModalService) {
         'use strict';
         return {
+          emiton: function(event, data, callback) {
+            this.removeAllListeners(event);
+            this.emit(event, data, callback);
+            this.on(event, callback);
+          },
           emit: function(event, data, callback) {
             bmsSocketService.socket()
               .then(function(socket) {
