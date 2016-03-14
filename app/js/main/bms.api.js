@@ -14,11 +14,15 @@ define(['angular', 'jquery', 'bms.func', 'prob.modal', 'bms.session', 'bms.obser
         };
 
         var setValues = function(visId, values) {
-          if (!attributeValues[visId]) {
+          /*if (!attributeValues[visId]) {
             attributeValues[visId] = {};
           }
-          attributeValues[visId] = values;
-          //$.extend(true, getValues(visId), values);
+          attributeValues[visId] = values;*/
+          $.extend(true, getValues(visId), values);
+        };
+
+        var clearValues = function(visId) {
+          attributeValues[visId] = {};
         };
 
         var triggerObservers = function(visId, stateId, cause, list) {
@@ -224,6 +228,7 @@ define(['angular', 'jquery', 'bms.func', 'prob.modal', 'bms.session', 'bms.obser
           addEvent: addEvent,
           executeEvent: executeEvent,
           getValues: getValues,
+          clearValues: clearValues,
           triggerObservers: triggerObservers,
           triggerJsonObservers: triggerJsonObservers,
           triggerListeners: triggerListeners,

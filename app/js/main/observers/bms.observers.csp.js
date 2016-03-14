@@ -128,7 +128,7 @@ define(['bms.func', 'jquery', 'angular', 'prob.modal'], function(bms, $, angular
 
                   }
 
-                  keepGoing = !(t['group'] === 'future');
+                  keepGoing = t['group'] === 'past';
 
                 });
 

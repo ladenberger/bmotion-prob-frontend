@@ -36,6 +36,7 @@ define(['angular', 'bms.func', 'jquery'], function(angular, bms, $) {
                 $scope.visualization.setupConstants = true;
               }
               if ($scope.visualization.traceId == s.traceId) {
+                bmsApiService.clearValues($scope.id);
                 bmsApiService.triggerObservers($scope.id, s.stateId, cause);
                 bmsApiService.triggerListeners($scope.id, cause);
               }
@@ -56,8 +57,10 @@ define(['angular', 'bms.func', 'jquery'], function(angular, bms, $) {
             $scope.$watch(function() {
               return bmsApiService.getValues($scope.id);
             }, function(newValue) {
-              $scope.values = newValue;
-              $scope.applyValues();
+              if (!bms.isEmpty(newValue)) {
+                $scope.values = newValue;
+                $scope.applyValues();
+              }
             }, true);
 
             $scope.getValue = function(bmsid, attr, defaultValue) {
